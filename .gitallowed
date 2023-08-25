@@ -1,0 +1,3 @@
+account: '\d{12}'
+account: "\d{12}"
+account=\d{12}

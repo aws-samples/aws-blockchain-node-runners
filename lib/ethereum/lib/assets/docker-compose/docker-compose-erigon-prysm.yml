@@ -1,0 +1,81 @@
+---
+version: "3"
+services:
+  erigon_node:
+    image: thorax/erigon:2.48.1-__IMAGE_ARCH__
+    container_name: execution
+    restart: always
+    command:
+      [
+        "--chain=mainnet",
+        "--torrent.download.rate=1gb",
+        "--datadir=/var/lib/erigon/data",
+        "--authrpc.addr=0.0.0.0",
+        "--authrpc.jwtsecret=/var/lib/erigon/secrets/jwtsecret",
+        "--authrpc.vhosts=*",
+        "--http",
+        "--http.api=eth,debug,net,trace,web3,erigon",
+        "--http.addr=0.0.0.0",
+        "--http.vhosts=*",
+        "--metrics",
+        "--metrics.addr=0.0.0.0",
+        "--ws",
+        "--maxpeers=20"
+      ]
+    user: 1002:1002
+    volumes:
+      - /secrets:/var/lib/erigon/secrets
+      - /data/execution/data:/var/lib/erigon/data
+    stop_signal: SIGTERM
+    stop_grace_period: 5m
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    ports:
+      # Map the p2p port(30303), RPC HTTP port(8545), and engine port (8551)
+      - "6060:6060"
+      - "8545:8545"
+      - "8546:8546"
+      - "8551:8551"
+      - "9093:9093"
+      - "9094:9094"
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+
+  prysm_node:
+    image: rocketpool/prysm:v4.0.6
+    container_name: consensus
+    restart: always
+    command:
+      [
+        "/app/cmd/beacon-chain/beacon-chain",
+        "--mainnet",
+        "--checkpoint-sync-url=https://beaconstate.info",
+        "--genesis-beacon-api-url=https://beaconstate.info",
+        "--execution-endpoint=http://erigon_node:8551",
+        "--jwt-secret=/secrets/jwtsecret",
+        "--datadir=/data",
+        "--p2p-tcp-port=9000",
+        "--p2p-udp-port=9000",
+        "--grpc-gateway-host=0.0.0.0",
+        "--grpc-gateway-port=5052",
+        "--rpc-host=0.0.0.0",
+        "--rpc-port=5051",
+        "--accept-terms-of-use"
+      ]
+    depends_on:
+      - erigon_node
+    user: 1002:1002
+    volumes:
+      - /secrets:/secrets
+      - /data/consensus/data:/data
+    stop_signal: SIGTERM
+    stop_grace_period: 5m
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    ports:
+      - 5051:5051/tcp
+      - 5052:5052/tcp
+      - 9000:9000/tcp
+      - 9000:9000/udp

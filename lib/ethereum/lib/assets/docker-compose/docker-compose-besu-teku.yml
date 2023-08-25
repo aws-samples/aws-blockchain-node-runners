@@ -1,0 +1,74 @@
+---
+version: "3.4"
+services:
+    besu_node:
+        environment:
+            - "JAVA_OPTS=-Xmx8g"
+        image: hyperledger/besu:23.4.5-SNAPSHOT
+        container_name: execution
+        restart: always
+        command:
+            [
+                "--network=mainnet",
+                "--data-path=/var/lib/besu/data",
+                "--sync-mode=X_SNAP",
+                "--data-storage-format=BONSAI",
+                "--host-allowlist=*",
+                "--rpc-http-enabled",
+                "--rpc-http-cors-origins=*",
+                "--rpc-http-api=ETH,NET,CLIQUE,DEBUG,MINER,NET,PERM,ADMIN,EEA,TXPOOL,PRIV,WEB3",
+                "--engine-jwt-secret=/var/lib/besu/secrets/jwtsecret",
+                "--engine-host-allowlist=*",
+                "--engine-rpc-enabled=true",
+                "--Xplugin-rocksdb-high-spec-enabled",
+            ]
+        user: ethereum:ethereum
+        volumes:
+            - /secrets:/var/lib/besu/secrets
+            - /data/execution/data:/var/lib/besu/data
+        # Use SIGINT instead of SIGTERM to prevent SIGSEGV error during shutdown
+        stop_signal: SIGINT
+        stop_grace_period: 5m
+        security_opt:
+            - no-new-privileges:true
+        read_only: true
+        ports:
+            # Map the p2p port(30303), RPC HTTP port(8545), and engine port (8551)
+            - "8545:8545"
+            - "8551:8551"
+            - "30303:30303/tcp"
+            - "30303:30303/udp"
+
+    teku_node:
+        environment:
+            - "JAVA_OPTS=-Xmx4g"
+            - "TEKU_OPTS=-XX:-HeapDumpOnOutOfMemoryError"
+        image: consensys/teku:23.6.1-jdk16
+        container_name: consensus
+        restart: always
+        command:
+            [
+                "--data-base-path=/var/lib/teku/data",
+                "--ee-endpoint=http://besu_node:8551",
+                "--initial-state=https://beaconstate.info/eth/v2/debug/beacon/states/finalized",
+                "--ee-jwt-secret-file=/var/lib/teku/secrets/jwtsecret",
+                "--p2p-port=9000",
+                "--metrics-enabled=true",
+                "--rest-api-enabled=true",
+            ]
+        depends_on:
+            - besu_node
+        user: ethereum:ethereum
+        volumes:
+            - /secrets:/var/lib/teku/secrets
+            - /data/consensus/data:/var/lib/teku/data
+        stop_signal: SIGTERM
+        stop_grace_period: 5m
+        security_opt:
+            - no-new-privileges:true
+        read_only: true
+        ports:
+            # Map the p2p port(9000) and REST API port(5051)
+            - "9000:9000/tcp"
+            - "9000:9000/udp"
+            - "5051:5051"

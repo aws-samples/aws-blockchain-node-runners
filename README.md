@@ -1,17 +1,5 @@
-## My Project
+# AWS Blockchain Node Runners
 
-TODO: Fill this README out!
+This repository contains sample [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) applications that help to set up and run self-service blockchain nodes for different protocols on AWS.
 
-Be sure to:
-
-* Change the title in this README
-* Edit your repository description on GitHub
-
-## Security
-
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
-
-## License
-
-This library is licensed under the MIT-0 License. See the LICENSE file.
-
+- [Setup instructions for Ethereum nodes on AWS](./lib/ethereum/README.md)

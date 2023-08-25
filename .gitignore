@@ -1,0 +1,30 @@
+*.js
+!scripts/*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+dist
+.DS_Store
+spike
+
+output.json
+deploy-output.json
+
+cdk.context.json
+ec2-trust-policy.json
+
+# DrawIO
+*.drawio.bkp
+*.drawio.dtmp
+
+data-volume-snpashot*.json
+sync-node-deploy*.json
+instance-image*.json
+rpc-node-deploy*.json
+
+*.OLD
+.env

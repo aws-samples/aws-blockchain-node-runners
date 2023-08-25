@@ -1,0 +1,80 @@
+---
+version: "3"
+services:
+  erigon_node:
+    image: thorax/erigon:2.48.1-__IMAGE_ARCH__
+    container_name: execution
+    restart: always
+    command:
+      [
+        "--chain=mainnet",
+        "--torrent.download.rate=1gb",
+        "--datadir=/var/lib/erigon/data",
+        "--authrpc.addr=0.0.0.0",
+        "--authrpc.jwtsecret=/var/lib/erigon/secrets/jwtsecret",
+        "--authrpc.vhosts=*",
+        "--http",
+        "--http.api=eth,debug,net,trace,web3,erigon",
+        "--http.addr=0.0.0.0",
+        "--http.vhosts=*",
+        "--metrics",
+        "--metrics.addr=0.0.0.0",
+        "--ws",
+        "--maxpeers=20"
+      ]
+    user: 1002:1002
+    volumes:
+      - /secrets:/var/lib/erigon/secrets
+      - /data/execution/data:/var/lib/erigon/data
+    stop_signal: SIGTERM
+    stop_grace_period: 5m
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    ports:
+      # Map the p2p port(30303), RPC HTTP port(8545), and engine port (8551)
+      - "6060:6060"
+      - "8545:8545"
+      - "8546:8546"
+      - "8551:8551"
+      - "9093:9093"
+      - "9094:9094"
+      - "30303:30303/tcp"
+      - "30303:30303/udp"
+
+  lighthouse_node:
+    image: sigp/lighthouse:v4.3.0
+    container_name: consensus
+    restart: always
+    command:
+      [
+        "lighthouse",
+        "beacon",
+        "--network=mainnet",
+        "--execution-endpoint=http://erigon_node:8551",
+        "--execution-jwt=/var/lib/lighthouse/secrets/jwtsecret",
+        "--checkpoint-sync-url=https://sync-mainnet.beaconcha.in",
+        "--http",
+        "--http-port=5052",
+        "--http-address=0.0.0.0",
+        "--metrics",
+        "--datadir=/var/lib/lighthouse/data",
+        "--disable-deposit-contract-sync"
+      ]
+    depends_on:
+      - erigon_node
+    user: 1002:1002
+    volumes:
+      - /secrets:/var/lib/lighthouse/secrets
+      - /data/consensus/data:/var/lib/lighthouse/data
+    stop_signal: SIGTERM
+    stop_grace_period: 5m
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    ports:
+      - 5052:5052/tcp
+      - 5053:5053/tcp
+      - 5054:5054/tcp # metrics endpoint
+      - 9000:9000/tcp
+      - 9000:9000/udp
