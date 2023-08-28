@@ -184,3 +184,7 @@ Usually restart helps Erigon client to re-connect with other nodes and continue 
    /usr/local/bin/docker-compose -f /home/ethereum/docker-compose.yml down
    /usr/local/bin/docker-compose -f /home/ethereum/docker-compose.yml up -d
 ```
+
+## Well-Architected
+
+![Well-Architected](./doc/assets/Well_Architected.md)
