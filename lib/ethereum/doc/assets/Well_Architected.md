@@ -1,6 +1,6 @@
 # Well-Architected Checklist
 
-This is the Well-Architected checklist for Ethereum nodes implementation of the AWS Blockchain Node Runner app. This card takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+This is the Well-Architected checklist for Ethereum nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
 
 | Pillar                  | Control                           | Question                                                  | Remarks          |
 |:------------------------|:----------------------------------|:----------------------------------------------------------|:-----------------|
