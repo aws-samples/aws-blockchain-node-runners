@@ -187,4 +187,4 @@ Usually restart helps Erigon client to re-connect with other nodes and continue 
 
 ## Well-Architected
 
-![Well-Architected](./doc/assets/Well_Architected.md)
+![Well-Architected Card](./doc/assets/Well_Architected.md)
