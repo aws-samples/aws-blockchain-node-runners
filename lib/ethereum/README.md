@@ -9,6 +9,10 @@
 3.	When new RPC nodes are provisioned, they copy state data from Amazon S3 bucket to speed up the initial sync process.
 4.	Applications and smart contract development tools access highly available RPC nodes behind the Application Load Balancer.
 
+## Well-Architected
+
+Review the ![Well-Architected Checklist](./doc/assets/Well_Architected.md) for pros and cons of this solution.
+
 ## Solution Walkthrough
 
 ### Setup Cloud9
@@ -184,7 +188,3 @@ Usually restart helps Erigon client to re-connect with other nodes and continue 
    /usr/local/bin/docker-compose -f /home/ethereum/docker-compose.yml down
    /usr/local/bin/docker-compose -f /home/ethereum/docker-compose.yml up -d
 ```
-
-## Well-Architected
-
-![Well-Architected Card](./doc/assets/Well_Architected.md)
