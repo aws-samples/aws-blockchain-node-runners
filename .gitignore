@@ -1,5 +1,8 @@
 *.js
 !website/*.js
+!website/*/*.js
+!website/*/*/*.js
+!website/*/*/*/*.js
 !scripts/*.js
 !jest.config.js
 *.d.ts
