@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as configTypes from "./ethConfig.interface";
 import * as constants from "../../../constructs/constants";

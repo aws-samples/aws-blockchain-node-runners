@@ -1,8 +1,8 @@
 #!/usr/bin/env node
+import 'dotenv/config'
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import * as nag from "cdk-nag";
-import * as configTypes from "./lib/config/ethConfig.interface";
 import * as config from "./lib/config/ethConfig";
 
 import { EthSyncNodeStack } from "./lib/sync-node-stack";
@@ -11,8 +11,6 @@ import { EthRpcNodesStack } from "./lib/rpc-nodes-stack";
 
 const app = new cdk.App();
 cdk.Tags.of(app).add("Project", "Ethereum");
-
-const ethClientCombination: configTypes.EthClientCombination = config.baseConfig.clientCombination;
 
 new EthCommonStack(app, "eth-common", {
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
@@ -23,7 +21,7 @@ new EthSyncNodeStack(app, "eth-sync-node", {
     stackName: `eth-sync-node-${config.baseConfig.clientCombination}`,
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    ethClientCombination,
+    ethClientCombination: config.baseConfig.clientCombination,
     instanceType: config.syncNodeConfig.instanceType,
     instanceCpuType: config.syncNodeConfig.instanceCpuType,
     dataVolumes: config.syncNodeConfig.dataVolumes,
@@ -33,7 +31,7 @@ new EthRpcNodesStack(app, "eth-rpc-nodes", {
     stackName: `eth-rpc-nodes-${config.baseConfig.clientCombination}`,
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    ethClientCombination,
+    ethClientCombination: config.baseConfig.clientCombination,
     instanceType: config.rpcNodeConfig.instanceType,
     instanceCpuType: config.rpcNodeConfig.instanceCpuType,
     numberOfNodes: config.rpcNodeConfig.numberOfNodes,

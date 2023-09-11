@@ -4,15 +4,15 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as configTypes from "../config/ethConfig.interface"
 import * as nag from "cdk-nag";
 
-export interface EthNodeSecurityGroupCondtructProps {
+export interface EthNodeSecurityGroupConstructProps {
     vpc: cdk.aws_ec2.IVpc;
     clientCombination: configTypes.EthClientCombination
   }
 
-  export class EthNodeSecurityGroupCondtruct extends cdkContructs.Construct {
+  export class EthNodeSecurityGroupConstruct extends cdkContructs.Construct {
     public securityGroup: cdk.aws_ec2.ISecurityGroup;
 
-    constructor(scope: cdkContructs.Construct, id: string, props: EthNodeSecurityGroupCondtructProps) {
+    constructor(scope: cdkContructs.Construct, id: string, props: EthNodeSecurityGroupConstructProps) {
       super(scope, id);
 
       const { 

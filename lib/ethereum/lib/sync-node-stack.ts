@@ -9,7 +9,7 @@ import * as nodeCwDashboard from "./assets/node-cw-dashboard"
 import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 import { SingleNodeConstruct } from "../../constructs/single-node"
 import * as configTypes from "./config/ethConfig.interface";
-import { EthNodeSecurityGroupCondtruct } from "./constructs/eth-node-security-group"
+import { EthNodeSecurityGroupConstruct } from "./constructs/eth-node-security-group"
 import * as nag from "cdk-nag";
 
 export interface EthSyncNodeStackProps extends cdk.StackProps {
@@ -41,7 +41,7 @@ export class EthSyncNodeStack extends cdk.Stack {
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
 
         // Setting up the security group for the node from Ethereum-specific construct
-        const instanceSG = new EthNodeSecurityGroupCondtruct (this, "security-group", {
+        const instanceSG = new EthNodeSecurityGroupConstruct (this, "security-group", {
             vpc: vpc,
             clientCombination: ethClientCombination,
         })

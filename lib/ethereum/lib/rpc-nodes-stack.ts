@@ -7,7 +7,7 @@ import * as nag from "cdk-nag";
 import * as path from "path";
 import * as fs from "fs";
 import * as config from "./config/ethConfig.interface";
-import { EthNodeSecurityGroupCondtruct } from "./constructs/eth-node-security-group"
+import { EthNodeSecurityGroupConstruct } from "./constructs/eth-node-security-group"
 import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb"
 
 export interface EthRpcNodesStackProps extends cdk.StackProps {
@@ -45,7 +45,7 @@ export class EthRpcNodesStack extends cdk.Stack {
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
 
         // Setting up the security group for the node from Ethereum-specific construct
-        const instanceSG = new EthNodeSecurityGroupCondtruct (this, "security-group", {
+        const instanceSG = new EthNodeSecurityGroupConstruct (this, "security-group", {
             vpc: vpc,
             clientCombination: ethClientCombination,
         })
