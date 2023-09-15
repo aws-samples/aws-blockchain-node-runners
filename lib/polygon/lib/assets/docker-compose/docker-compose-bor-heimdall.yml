@@ -1,0 +1,50 @@
+---
+version: '3.8'
+services:
+  heimdall:
+    container_name: heimdall
+    image: 0xpolygon/heimdall:0.3.4
+    restart: unless-stopped
+    ports:
+      - '26657:26657'
+      - '26656:26656'
+    entrypoint: /usr/bin/heimdalld
+    volumes:
+      - /data/polygon/heimdall:/heimdall-home:rw
+    command: start --home=/heimdall-home
+    networks:
+      - polygon
+
+  heimdallrest:
+    depends_on:
+      - heimdall
+    container_name: heimdallrest
+    image: 0xpolygon/heimdall:0.3.4
+    command: rest-server --home=/heimdall-home --node "tcp://heimdall:26657"
+    ports:
+      - 1317:1317
+    volumes:
+      - /data/polygon/heimdall:/heimdall-home:rw
+    networks:
+      - polygon
+    restart: unless-stopped
+
+  bor:
+    depends_on:
+      - heimdall
+      - heimdallrest
+    image: 0xpolygon/bor:0.4.0
+    container_name: bor
+    ports:
+      - '30303:30303'
+      - '8545:8545'
+    volumes:
+      - /data/polygon/bor:/bor-home:rw
+    networks:
+      - polygon
+    restart: unless-stopped
+    command: server --config /bor-home/config.toml
+
+networks:
+  polygon:
+    driver: bridge
