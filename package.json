@@ -1,16 +1,8 @@
 {
-  "name": "eth-initial-sync-cdk",
+  "name": "aws-blockchain-node-runners",
   "version": "0.1.0",
-  "bin": {
-    "eth-initial-sync-cdk": "bin/eth-initial-sync-cdk.js"
-  },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "test": "jest",
-    "cdk": "cdk",
-    "scan-cdk": "npx cdk synth",
-    "install-git-secrets": "brew install git-secrets",
+    "install-git-secrets-mac": "brew install git-secrets",
     "setup-git-secrets": "git secrets --install & git secrets --register-aws",
     "scan-history-git-secrets": "git secrets --scan-history",
     "scan-repo-git-secrets": "git secrets --scan",
