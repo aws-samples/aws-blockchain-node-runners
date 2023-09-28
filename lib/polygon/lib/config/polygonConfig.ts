@@ -21,8 +21,9 @@ const parseDataVolumeType = (dataVolumeType: string) => {
 export const baseConfig: configTypes.PolygonBaseConfig = {
     accountId: process.env.AWS_ACCOUNT_ID || "xxxxxxxxxxx",          // Set your target AWS Account ID
     region: process.env.AWS_REGION || "us-east-2",               // Set your target AWS Region
+    createVpcEnpointS3: process.env.CREATE_VPC_ENDPOINT_S3 === "true" || false, // Set true to create VPC Endpoint S3
     clientCombination: <configTypes.PolygonClientCombination>process.env.POLYGON_CLIENT_COMBINATION || "bor-heimdall", // Set the pair of clients : "bor-heimdall"
-    network: <configTypes.PolygonNetwork>process.env.POLYGON_NETWORK || "mainnet", // Set the network : "mainnet" or "testnet"
+    network: <configTypes.PolygonNetwork>process.env.POLYGON_NETWORK || "mainnet", // Set the network : "mainnet" or "mumbai"
 };
 
 export const syncNodeConfig: configTypes.PolygonSyncNodeConfig = {

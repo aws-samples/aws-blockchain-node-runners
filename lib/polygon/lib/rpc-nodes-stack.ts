@@ -7,11 +7,13 @@ import * as nag from "cdk-nag";
 import * as path from "path";
 import * as fs from "fs";
 import * as config from "./config/polygonConfig.interface";
+import * as configTypes from "./config/polygonConfig.interface";
 import { PolygonNodeSecurityGroupConstruct } from "./constructs/polygon-rpc-node-security-group"
 import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb"
 
 export interface PolygonRpcNodesStackProps extends cdk.StackProps {
     polygonClientCombination: config.PolygonClientCombination;
+    network: configTypes.PolygonNetwork;
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
     dataVolumes: config.PolygonDataVolumeConfig[],
@@ -34,6 +36,7 @@ export class PolygonRpcNodesStack extends cdk.Stack {
         const {
             instanceType,
             polygonClientCombination,
+            network,
             instanceCpuType,
             dataVolumes,
             albHealthCheckGracePeriodMin,
@@ -56,20 +59,20 @@ export class PolygonRpcNodesStack extends cdk.Stack {
         });
 
         // Getting the snapshot bucket name and IAM role ARN from the common stack
-        const importedInstanceRoleArn = cdk.Fn.importValue("NodeInstanceRoleArn");
-        const snapshotBucketName = cdk.Fn.importValue("NodeSnapshotBucketName");
+        const importedInstanceRoleArn = cdk.Fn.importValue("PolygonNodeInstanceRoleArn");
+        const snapshotBucketName = cdk.Fn.importValue("PolygonNodeSnapshotBucketName");
 
         const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
         // Parsing user data script and injecting necessary variables
-        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "init-node.sh")).toString();
+        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "rpc-node-start.sh")).toString();
 
         const modifiedInitNodeScript = cdk.Fn.sub(nodeScript, {
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
             _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
             _REGION_: REGION,
-            _SNAPSHOT_S3_PATH_: `s3://${snapshotBucketName}/${polygonClientCombination}`,
+            _SNAPSHOT_S3_PATH_: `s3://${snapshotBucketName}/${polygonClientCombination}-${network}`,
             _CLIENT_COMBINATION_: polygonClientCombination,
             _STACK_NAME_: STACK_NAME,
             _FORMAT_DISK_: "true",

@@ -1,4 +1,4 @@
-# Sample AWS Blockchain Node Runner app for polygon Nodes
+# Sample AWS Blockchain Node Runner app for Polygon Nodes
 
 ## Architecture Overview
 
@@ -94,11 +94,11 @@ Note: the snapshot backup process will automatically run ever day at midnight ti
 2. Give the new RPC nodes about 30 minutes (up to 2 hours for Erigon) to initialize and then run the following query against the load balancer behind the RPC node created
 
 ```bash
-    export ETH_RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
-    echo $ETH_RPC_ABL_URL
+    export RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
+    echo $RPC_ABL_URL
     
     # We query token balance of Beacon deposit contract: https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa
-    curl http://$ETH_RPC_ABL_URL:8545 -X POST -H "Content-Type: application/json" \
+    curl http://$RPC_ABL_URL:8545 -X POST -H "Content-Type: application/json" \
     --data '{"method":"eth_getBalance","params":["0x00000000219ab540356cBB839Cbe05303d7705Fa", "latest"],"id":1,"jsonrpc":"2.0"}'
 ```
 

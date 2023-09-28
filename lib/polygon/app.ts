@@ -15,6 +15,7 @@ cdk.Tags.of(app).add("Project", "AWSPolygon");
 new PolygonCommonStack(app, "polygon-common", {
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     stackName: `polygon-nodes-common`,
+    createVpcEnpointS3: config.baseConfig.createVpcEnpointS3,
 });
 
 new PolygonSyncNodeStack(app, "polygon-sync-node", {
@@ -22,6 +23,7 @@ new PolygonSyncNodeStack(app, "polygon-sync-node", {
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     polygonClientCombination: config.baseConfig.clientCombination,
+    network: config.baseConfig.network,
     instanceType: config.syncNodeConfig.instanceType,
     instanceCpuType: config.syncNodeConfig.instanceCpuType,
     dataVolumes: config.syncNodeConfig.dataVolumes,
@@ -32,6 +34,7 @@ new PolygonRpcNodesStack(app, "polygon-rpc-nodes", {
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     polygonClientCombination: config.baseConfig.clientCombination,
+    network: config.baseConfig.network,
     instanceType: config.rpcNodeConfig.instanceType,
     instanceCpuType: config.rpcNodeConfig.instanceCpuType,
     numberOfNodes: config.rpcNodeConfig.numberOfNodes,

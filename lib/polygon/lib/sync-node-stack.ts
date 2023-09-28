@@ -54,8 +54,8 @@ export class PolygonSyncNodeStack extends cdk.Stack {
         });
 
         // Getting the snapshot bucket name and IAM role ARN from the common stack
-        const importedInstanceRoleArn = cdk.Fn.importValue("NodeInstanceRoleArn");
-        const snapshotBucketName = cdk.Fn.importValue("NodeSnapshotBucketName");
+        const importedInstanceRoleArn = cdk.Fn.importValue("PolygonNodeInstanceRoleArn");
+        const snapshotBucketName = cdk.Fn.importValue("PolygonNodeSnapshotBucketName");
 
         const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
@@ -88,7 +88,7 @@ export class PolygonSyncNodeStack extends cdk.Stack {
             _REGION_: REGION,
             _STACK_NAME_: STACK_NAME,
             _RESOURCE_ID_: syncNode.nodeCFLogicalId,
-            _SNAPSHOT_S3_PATH_: `s3://${snapshotBucketName}/${polygonClientCombination}`,
+            _SNAPSHOT_S3_PATH_: `s3://${snapshotBucketName}/${polygonClientCombination}-${network}`,
             _CLIENT_COMBINATION_: polygonClientCombination,
             _NETWORK_: network,
             _DATA_VOLUME_TYPE_:  dataVolumes[0].type,

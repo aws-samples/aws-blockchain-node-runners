@@ -121,7 +121,11 @@ echo "FORMAT_DISK=$FORMAT_DISK" >> /etc/environment
 
 # Check if aria2c is installed
 sudo yum update -y
-sudo yum install -y zstd pv aria2
+sudo amazon-linux-extras install epel -y
+sudo yum install zstd  pv aria2 -y 
+
+echo "Signaling completion to CloudFormation"
+/opt/aws/bin/cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $REGION
 
 # Configure data volume
 if [ "$DATA_VOLUME_TYPE" == "instance-store" ]; then
@@ -136,16 +140,15 @@ else
   /opt/init-data-vol-ebs.sh $FORMAT_DISK
 fi
 
-echo "Signaling completion to CloudFormation"
-/opt/aws/bin/cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $REGION
-
 chmod +x /opt/polygon/download-extract-polygon-snapshot.sh
 
 # Download the snapshot
 case $CLIENT_COMBINATION in
   "bor-heimdall")
-    echo "/opt/polygon/download-extract-polygon-snapshot.sh $NETWORK bor "/data/polygon/bor/bor/chaindata" $SNAPSHOT_S3_PATH" | at now +3 minutes
-    echo "/opt/polygon/download-extract-polygon-snapshot.sh $NETWORK heimdall "/data/polygon/heimdall/data" $SNAPSHOT_S3_PATH" | at now +4 minutes
+    mkdir -p /data/polygon/bor/bor/chaindata
+    mkdir -p /data/polygon/heimdall/data
+    echo "/opt/polygon/download-extract-polygon-snapshot.sh -n $NETWORK -c bor -d /data/polygon/bor/bor/chaindata -v true -s3 $SNAPSHOT_S3_PATH" | at now +3 minutes
+    echo "/opt/polygon/download-extract-polygon-snapshot.sh -n $NETWORK -c heimdall -d /data/polygon/heimdall/data -v true -s3 $SNAPSHOT_S3_PATH" | at now +4 minutes
     ;;
   *)
     echo "Combination is not valid."

@@ -117,11 +117,13 @@ pip3 uninstall -y urllib3
 pip3 install 'urllib3<2.0'
 
 echo "Making sure the user has all necessary permissions"
-chown -R bcuser:bcuser /secrets
 chown -R bcuser:bcuser /data
 chmod -R 755 /data
 chmod -R 755 /home/bcuser
-chmod -R 755 /secrets
+
+echo "Starting docker"
+service docker start
+systemctl enable docker
 
 # RPC node scripts start here
 
