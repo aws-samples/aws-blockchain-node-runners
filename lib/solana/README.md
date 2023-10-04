@@ -16,6 +16,7 @@ Solana nodes on AWS can be deployes in 3 different configurations: Validator, Li
 ### HA setup
 
 ![Highly Available Nodes Deployment](./doc/assets/Architecture-HANodes.drawio.png)
+
 1.	A set of Solana nodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuesly synchronizes with the rest of nodes on [Solana Clusters](https://docs.solana.com/clusters) through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 2.	The Solana nodes are accessed by dApps or development tools internallythrough [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
 3.	The Solanna nodes use all required secrets locally, but store a copy in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) as secure backup.
@@ -102,7 +103,7 @@ Create your own copy of `.env` file and edit it:
 
 ### Deploy the HA Nodes
 
-1. Configure and deploy 2 HA Nodes
+1. Configure and deploy multiple HA Nodes
 
 ```bash
    pwd
@@ -124,8 +125,7 @@ Create your own copy of `.env` file and edit it:
 The result should be like this (the actual balance might change):
 
 ```javascript
-   {"jsonrpc":"2.0","id":1,"result":"14,870,473.061882488SOL
-"}
+   {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.16.2","slot":221433176},"value":12870473061872488},"id":1}
 ```
 
    If the nodes are still starting and catching up with the chain, you will see the following repsonse:
@@ -199,6 +199,18 @@ The result should be like this (the actual balance might change):
    echo "INSTANCE_ID=" $INSTANCE_ID
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
    sudo systemctl status sol
+```
+4. How to upload a secret to AWS Secrets Manager?
+```bash
+    # Create key pair
+    sudo ./solana-keygen new --no-passphrase -o /tmp/keypair.json
+    SOLANA_ADDRESS=$(sudo ./solana-keygen pubkey /tmp/keypair.json)
+    # Upload key pair to AWS Secrets Manager"
+    export AWS_REGION=<your_region>
+    sudo aws secretsmanager create-secret --name "solana/"$SOLANA_ADDRESS --description "Solana secret key pair" --secret-string file:///tmp/keypair.json --region $AWS_REGION
+    #Delete key pair from the local file system
+    rm -rf /tmp/keypair.json
+
 ```
 
 ## Upgrades

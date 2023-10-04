@@ -2,29 +2,53 @@
 set +e
 
 # Set by generic single-node and ha-node CDK components
+echo "AWS_REGION=${_AWS_REGION_}" >> /etc/environment
 echo "ASSETS_S3_PATH=${_ASSETS_S3_PATH_}" >> /etc/environment
-echo "CF_STACK_NAME=${CF_STACK_NAME}" >> /etc/environment
-echo "ACCOUNTS_DISC_TYPE=${ACCOUNTS_DISC_TYPE}" >> /etc/environment
-echo "DATA_DISC_TYPE=${DATA_DISC_TYPE}" >> /etc/environment
-echo "SOLANA_VERSION=${SOLANA_VERSION}" >> /etc/environment
-echo "SOLANA_NODE_TYPE=${SOLANA_NODE_TYPE}" >> /etc/environment
-echo "NODE_IDENTITY_SECRET_ARN=${NODE_IDENTITY_SECRET_ARN}" >> /etc/environment
-echo "VOTE_ACCOUNT_SECRET_ARN=${VOTE_ACCOUNT_SECRET_ARN}" >> /etc/environment
-echo "AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN=${AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN}" >> /etc/environment
-echo "REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN=${REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN}" >> /etc/environment
-echo "SOLANA_CLUSTER_ID=${SOLANA_CLUSTER_ID}" >> /etc/environment
+echo "STACK_NAME=${_STACK_NAME_}" >> /etc/environment
+echo "STACK_ID=${_STACK_ID_}" >> /etc/environment
+echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}" >> /etc/environment
+echo "ACCOUNTS_VOLUME_TYPE=${_ACCOUNTS_VOLUME_TYPE_}" >> /etc/environment
+echo "ACCOUNTS_VOLUME_SIZE=${_ACCOUNTS_VOLUME_SIZE_}" >> /etc/environment
+echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}" >> /etc/environment
+echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}" >> /etc/environment
+echo "SOLANA_VERSION=${_SOLANA_VERSION_}" >> /etc/environment
+echo "SOLANA_NODE_TYPE=${_SOLANA_NODE_TYPE_}" >> /etc/environment
+echo "NODE_IDENTITY_SECRET_ARN=${_NODE_IDENTITY_SECRET_ARN_}" >> /etc/environment
+echo "VOTE_ACCOUNT_SECRET_ARN=${_VOTE_ACCOUNT_SECRET_ARN_}" >> /etc/environment
+echo "AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN=${_AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN_}" >> /etc/environment
+echo "REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN=${_REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_}" >> /etc/environment
+echo "SOLANA_CLUSTER=${_SOLANA_CLUSTER_}" >> /etc/environment
+echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
+echo "AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}" >> /etc/environment
 source /etc/environment
-
-apt-get -yqq update
-apt-get -yqq install awscli jq
 
 # Saving just in case for future use
 arch=$(uname -m)
 
-export AWS_REGION=`curl http://169.254.169.254/latest/dynamic/instance-identity/document|grep region|awk -F\" '{print $4}'`
-export GIT_URL="https://raw.githubusercontent.com/frbrkoala/solana-configs-for-aws/main"
+apt-get -yqq update
+apt-get -yqq install awscli jq unzip python3-pip
+apt install unzip
 
-case $SOLANA_CLUSTER_ID in
+cd /opt
+
+echo "Downloading assets zip file"
+aws s3 cp $ASSETS_S3_PATH ./assets.zip
+unzip -q assets.zip
+
+echo "Install and configure CloudWatch agent"
+wget -q https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+sudo dpkg -i -E amazon-cloudwatch-agent.deb
+
+echo 'Configuring CloudWatch Agent'
+mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
+cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
+
+echo "Starting CloudWatch Agent"
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+-a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
+systemctl status amazon-cloudwatch-agent
+
+case $SOLANA_CLUSTER in
   "mainnet-beta")
     ENTRY_POINTS=" --entrypoint entrypoint.mainnet-beta.solana.com:8001 --entrypoint entrypoint2.mainnet-beta.solana.com:8001 --entrypoint entrypoint3.mainnet-beta.solana.com:8001 --entrypoint entrypoint4.mainnet-beta.solana.com:8001 --entrypoint entrypoint5.mainnet-beta.solana.com:8001"
     KNOWN_VALIDATORS=" --known-validator 7Np41oeYqPefeNQEHSv1UDhYrehxin3NStELsSKCT4K2 --known-validator GdnSyH3YtwcxFvQrVVJMm1JhTS4QVX7MFsX56uJLUfiZ --known-validator DE1bawNcRJB9rVm3buyMVfr8mBEoyyu73NBovf2oXJsJ --known-validator CakcnaRDHka2gXyfbEd2d3xsvkJkqsLw2akB3zsN1D2S"
@@ -44,21 +68,10 @@ case $SOLANA_CLUSTER_ID in
     EXPECTED_GENESIS_HASH="EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG"
     ;;
   *)
-    echo "Solana cluster id is not valid: $SOLANA_CLUSTER_ID"
+    echo "Solana cluster id is not valid: $SOLANA_CLUSTER"
     exit 1
     ;;
 esac
-
-echo "Install and configure CloudWatch agent"
-wget -q https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-sudo dpkg -i -E amazon-cloudwatch-agent.deb
-
-sudo wget -q $GIT_URL/src/configs/cloudwatch-agent-config.json
-sudo cp ./cloudwatch-agent-config.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
-
-sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
--a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
-#sudo systemctl status amazon-cloudwatch-agent
 
 echo "Fine tune sysctl to prepare the system for Solana"
 
@@ -107,12 +120,40 @@ sudo mkdir /var/solana
 sudo mkdir /var/solana/data
 sudo mkdir /var/solana/accounts
 
-if [[ "$DATA_DISC_TYPE" == "instancestore" ]]; then
+if [[ "$STACK_ID" != "none" ]]; then
+  echo "Install and enable CloudFormation helper scripts"
+  mkdir -p /opt/aws/
+  pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
+  sudo ln -s /usr/local/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
+
+  echo "Configuring CloudFormation helper scripts"
+  mkdir -p /etc/cfn/
+  mv /opt/cfn-hup/cfn-hup.conf /etc/cfn/cfn-hup.conf
+  sed -i "s;__AWS_STACK_ID__;\"$STACK_ID\";g" /etc/cfn/cfn-hup.conf
+  sed -i "s;__AWS_REGION__;\"$AWS_REGION\";g" /etc/cfn/cfn-hup.conf
+
+  mkdir -p /etc/cfn/hooks.d/
+  mv /opt/cfn-hup/cfn-auto-reloader.conf /etc/cfn/hooks.d/cfn-auto-reloader.conf
+  sed -i "s;__AWS_STACK_NAME__;\"$STACK_NAME\";g" /etc/cfn/hooks.d/cfn-auto-reloader.conf
+  sed -i "s;__AWS_REGION__;\"$AWS_REGION\";g" /etc/cfn/hooks.d/cfn-auto-reloader.conf
+
+  echo "Starting CloudFormation helper scripts as a service"
+  mv /opt/cfn-hup/cfn-hup.service  /etc/systemd/system/cfn-hup.service
+
+  systemctl daemon-reload
+  systemctl enable --now cfn-hup
+  systemctl start cfn-hup.service
+
+  cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
+fi
+
+echo "Waiting for volumes to be available"
+sleep 60
+
+if [[ "$DATA_VOLUME_TYPE" == "instance-store" ]]; then
   echo "Data volume type is instance store"
 
   cd /opt
-  sudo wget $GIT_URL/src/scripts/setup-instance-store-volumes.sh
-
   sudo chmod +x /opt/setup-instance-store-volumes.sh
 
   (crontab -l; echo "@reboot /opt/setup-instance-store-volumes.sh >/tmp/setup-instance-store-volumes.log 2>&1") | crontab -
@@ -123,25 +164,24 @@ if [[ "$DATA_DISC_TYPE" == "instancestore" ]]; then
 else
   echo "Data volume type is EBS"
 
-  # Our data volume size is 2TB
-  DATA_DISC_ID=/dev/$(lsblk -lnb | awk '{if ($4== 2147483648000) {print $1}}')
-  sudo mkfs -t xfs $DATA_DISC_ID
+  # Our data volume size is over 2TB
+  DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
+  sudo mkfs -t xfs $DATA_VOLUME_ID
   sleep 10
-  DATA_DISC_UUID=$(lsblk -fn -o UUID  $DATA_DISC_ID)
-  DATA_DISC_FSTAB_CONF="UUID=$DATA_DISC_UUID /var/solana/data xfs defaults 0 2"
-  echo "DATA_DISC_ID="$DATA_DISC_ID
-  echo "DATA_DISC_UUID="$DATA_DISC_UUID
-  echo "DATA_DISC_FSTAB_CONF="$DATA_DISC_FSTAB_CONF
-  echo $DATA_DISC_FSTAB_CONF | sudo tee -a /etc/fstab
+  DATA_VOLUME_UUID=$(lsblk -fn -o UUID  $DATA_VOLUME_ID)
+  DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /var/solana/data xfs defaults 0 2"
+  echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
+  echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
+  echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
+  echo $DATA_VOLUME_FSTAB_CONF | sudo tee -a /etc/fstab
   sudo mount -a
 fi
 
-if [[ "$ACCOUNTS_DISC_TYPE" == "instancestore" ]]; then
+if [[ "$ACCOUNTS_VOLUME_TYPE" == "instance-store" ]]; then
   echo "Accounts volume type is instance store"
 
-  if [[ "$DATA_DISC_TYPE" != "instancestore" ]]; then
+  if [[ "$DATA_VOLUME_TYPE" != "instance-store" ]]; then
     cd /opt
-    sudo wget $GIT_URL/src/scripts/setup-instance-store-volumes.sh
 
     sudo chmod +x /opt/setup-instance-store-volumes.sh
 
@@ -156,16 +196,16 @@ if [[ "$ACCOUNTS_DISC_TYPE" == "instancestore" ]]; then
 
 else
   echo "Accounts volume type is EBS"
-  # Our accounts volume size is 500GB
-  ACCOUNTS_DISC_ID=/dev/$(lsblk -lnb | awk '{if ($4== 536870912000) {print $1}}')
-  sudo mkfs -t xfs $ACCOUNTS_DISC_ID
+  # Our accounts volume size is over 500GB
+  ACCOUNTS_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$ACCOUNTS_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
+  sudo mkfs -t xfs $ACCOUNTS_VOLUME_ID
   sleep 10
-  ACCOUNTS_DISC_UUID=$(lsblk -fn -o UUID $ACCOUNTS_DISC_ID)
-  ACCOUNTS_DISC_FSTAB_CONF="UUID=$ACCOUNTS_DISC_UUID /var/solana/accounts xfs defaults 0 2"
-  echo "ACCOUNTS_DISC_ID="$ACCOUNTS_DISC_ID
-  echo "ACCOUNTS_DISC_UUID="$ACCOUNTS_DISC_UUID
-  echo "ACCOUNTS_DISC_FSTAB_CONF="$ACCOUNTS_DISC_FSTAB_CONF
-  echo $ACCOUNTS_DISC_FSTAB_CONF | sudo tee -a /etc/fstab
+  ACCOUNTS_VOLUME_UUID=$(lsblk -fn -o UUID $ACCOUNTS_VOLUME_ID)
+  ACCOUNTS_VOLUME_FSTAB_CONF="UUID=$ACCOUNTS_VOLUME_UUID /var/solana/accounts xfs defaults 0 2"
+  echo "ACCOUNTS_VOLUME_ID="$ACCOUNTS_VOLUME_ID
+  echo "ACCOUNTS_VOLUME_UUID="$ACCOUNTS_VOLUME_UUID
+  echo "ACCOUNTS_VOLUME_FSTAB_CONF="$ACCOUNTS_VOLUME_FSTAB_CONF
+  echo $ACCOUNTS_VOLUME_FSTAB_CONF | sudo tee -a /etc/fstab
 
   sudo mount -a
 fi
@@ -246,18 +286,15 @@ if [[ "$SOLANA_NODE_TYPE" == "validator" ]]; then
         sudo mv ~/vote-account-keypair.json /home/solana/config/vote-account-keypair.json
     fi
 
-sudo wget -q $GIT_URL/src/scripts/node-validator-template.sh
-mv ./node-validator-template.sh /home/solana/bin/validator.sh
+mv /opt/solana/node-validator-template.sh /home/solana/bin/validator.sh
 fi
 
 if [[ "$SOLANA_NODE_TYPE" == "lightrpc" ]]; then
-  sudo wget -q $GIT_URL/src/scripts/node-light-rpc-template.sh
-  mv ./node-light-rpc-template.sh /home/solana/bin/validator.sh
+  mv /opt/solana/node-light-rpc-template.sh /home/solana/bin/validator.sh
 fi
 
 if [[ "$SOLANA_NODE_TYPE" == "heavyrpc" ]]; then
-  sudo wget -q $GIT_URL/src/scripts/node-heavy-rpc-template.sh
-  mv ./node-heavy-rpc-template.sh /home/solana/bin/validator.sh
+  mv /opt/solana/node-heavy-rpc-template.sh /home/solana/bin/validator.sh
 fi
 
 sed -i "s;__SOLANA_METRICS_CONFIG__;\"$SOLANA_METRICS_CONFIG\";g" /home/solana/bin/validator.sh
@@ -310,11 +347,15 @@ sudo systemctl restart logrotate.service
 
 echo "Configuring syncchecker script"
 cd /opt
-sudo wget $GIT_URL/src/scripts/syncchecker-solana.sh
-sudo mv /opt/syncchecker-solana.sh /opt/syncchecker.sh
+sudo mv /opt/sync-checker/syncchecker-solana.sh /opt/syncchecker.sh
 sudo chmod +x /opt/syncchecker.sh
 
 (crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
 crontab -l
+
+# Signaling Autoscaling Gropup's lifecucle hook to complete
+TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
+aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$AUTOSCALING_GROUP_NAME"  --region $AWS_REGION
 
 echo "All Done!!"

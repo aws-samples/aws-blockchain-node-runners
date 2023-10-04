@@ -6,24 +6,27 @@ import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as nag from "cdk-nag";
 import * as path from "path";
 import * as fs from "fs";
-import * as config from "./config/solanaConfig.interface";
 import * as configTypes from "./config/solanaConfig.interface";
-import { PolygonNodeSecurityGroupConstruct } from "./constructs/polygon-rpc-node-security-group"
+import { SolanaNodeSecurityGroupConstruct } from "./constructs/solana-node-security-group"
 import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb"
+import * as constants from "../../constructs/constants";
 
-export interface PolygonRpcNodesStackProps extends cdk.StackProps {
-    polygonClientCombination: config.PolygonClientCombination;
-    network: configTypes.PolygonNetwork;
+export interface SolanaHANodesStackProps extends cdk.StackProps {
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
-    dataVolumes: config.PolygonDataVolumeConfig[],
-    numberOfNodes: number;
+    solanaCluster: configTypes.SolanaCluster;
+    solanaVersion: string;
+    nodeConfiguration: configTypes.SolanaNodeConfiguration;
+    dataVolume: configTypes.SolanaDataVolumeConfig;
+    accountsVolume: configTypes.SolanaAccountsVolumeConfig;
+
     albHealthCheckGracePeriodMin: number;
     heartBeatDelayMin: number;
+    numberOfNodes: number;
 }
 
-export class PolygonRpcNodesStack extends cdk.Stack {
-    constructor(scope: cdkConstructs.Construct, id: string, props: PolygonRpcNodesStackProps) {
+export class SolanaHANodesStack extends cdk.Stack {
+    constructor(scope: cdkConstructs.Construct, id: string, props: SolanaHANodesStackProps) {
         super(scope, id, props);
 
         // Setting up necessary environment variables
@@ -35,10 +38,12 @@ export class PolygonRpcNodesStack extends cdk.Stack {
         // Getting our config from initialization properties
         const {
             instanceType,
-            polygonClientCombination,
-            network,
             instanceCpuType,
-            dataVolumes,
+            solanaCluster,
+            solanaVersion,
+            nodeConfiguration,
+            dataVolume,
+            accountsVolume,
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
             numberOfNodes,
@@ -47,10 +52,9 @@ export class PolygonRpcNodesStack extends cdk.Stack {
         // Using default VPC
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
 
-        // Setting up the security group for the node from Polygon-specific construct
-        const instanceSG = new PolygonNodeSecurityGroupConstruct (this, "security-group", {
+        // Setting up the security group for the node from Solana-specific construct
+        const instanceSG = new SolanaNodeSecurityGroupConstruct (this, "security-group", {
             vpc: vpc,
-            clientCombination: polygonClientCombination,
         })
 
         // Making our scripts and configis from the local "assets" directory available for instance to download
@@ -58,42 +62,66 @@ export class PolygonRpcNodesStack extends cdk.Stack {
             path: path.join(__dirname, "assets"),
         });
 
-        // Getting the snapshot bucket name and IAM role ARN from the common stack
-        const importedInstanceRoleArn = cdk.Fn.importValue("PolygonNodeInstanceRoleArn");
-        const snapshotBucketName = cdk.Fn.importValue("PolygonNodeSnapshotBucketName");
+        // Getting the IAM role ARN from the common stack
+        const importedInstanceRoleArn = cdk.Fn.importValue("SolanaNodeInstanceRoleArn");
 
         const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
+        // Making sure our instance will be able to read the assets
+        asset.bucket.grantRead(instanceRole);
+
+        // Checking configuration
+        if (instanceCpuType === ec2.AmazonLinuxCpuType.ARM_64) {
+            throw new Error("ARM_64 is not yet supported");
+        }
+
+        if (nodeConfiguration === "validator") {
+            throw new Error("Validator node configuration is not yet supported for HA setup");
+        }
+        
+        // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
+        const ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
+
         // Parsing user data script and injecting necessary variables
-        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "rpc-node-start.sh")).toString();
+        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
+        const accountsVolumeSizeBytes = accountsVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
+        const dataVolumeSizeBytes = dataVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
 
         const modifiedInitNodeScript = cdk.Fn.sub(nodeScript, {
+            _AWS_REGION_: REGION,
+            _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
+            _STACK_NAME_: STACK_NAME,
+            _STACK_ID_: constants.NoneValue,
+            _NODE_CF_LOGICAL_ID_: constants.NoneValue,
+            _ACCOUNTS_VOLUME_TYPE_: accountsVolume.type,
+            _ACCOUNTS_VOLUME_SIZE_: accountsVolumeSizeBytes.toString(),
+            _DATA_VOLUME_TYPE_: dataVolume.type,
+            _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
+            _SOLANA_VERSION_: solanaVersion,
+            _SOLANA_NODE_TYPE_: nodeConfiguration,
+            _NODE_IDENTITY_SECRET_ARN_: constants.NoneValue,
+            _VOTE_ACCOUNT_SECRET_ARN_: constants.NoneValue,
+            _AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN_: constants.NoneValue,
+            _REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_: constants.NoneValue,
+            _SOLANA_CLUSTER_: solanaCluster,
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
             _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
-            _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
-            _REGION_: REGION,
-            _SNAPSHOT_S3_PATH_: `s3://${snapshotBucketName}/${polygonClientCombination}-${network}`,
-            _CLIENT_COMBINATION_: polygonClientCombination,
-            _STACK_NAME_: STACK_NAME,
-            _FORMAT_DISK_: "true",
-            _DATA_VOLUME_TYPE_: dataVolumes[0].type,
         });
 
         // Setting up the nodse using generic High Availability (HA) Node constract
+        const healthCheckPath = "/health";
         const rpcNodes = new HANodesConstruct (this, "rpc-nodes", {
             instanceType,
-            dataVolumes,
-            machineImage: new ec2.AmazonLinuxImage({
-                generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-                cpuType: instanceCpuType,
-            }),
+            dataVolumes: [dataVolume, accountsVolume],
+            machineImage: ec2.MachineImage.fromSsmParameter(ubuntu204stableImageSsmName),
             role: instanceRole,
             vpc,
             securityGroup: instanceSG.securityGroup,
             userData: modifiedInitNodeScript,
             numberOfNodes,
-            rpcPortForALB: 8545,
+            rpcPortForALB: 8899,
             albHealthCheckGracePeriodMin,
+            healthCheckPath,
             heartBeatDelayMin,
             lifecycleHookName: lifecycleHookName,
             autoScalingGroupName: autoScalingGroupName,
@@ -119,6 +147,10 @@ export class PolygonRpcNodesStack extends cdk.Stack {
                 {
                     id: "AwsSolutions-EC28",
                     reason: "Using basic monitoring to save costs",
+                },
+                {
+                    id: "AwsSolutions-IAM5",
+                    reason: "Need read access to the S3 bucket with assets",
                 },
             ],
             true

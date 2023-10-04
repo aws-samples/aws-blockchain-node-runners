@@ -4,7 +4,6 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as nag from "cdk-nag";
 
 export interface SolanaCommonStackProps extends cdk.StackProps {
-    createVpcEnpointS3: boolean;
 
 }
 
@@ -20,6 +19,7 @@ export class SolanaCommonStack extends cdk.Stack {
         const instanceRole = new iam.Role(this, `node-role`, {
             assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
             managedPolicies: [
+                iam.ManagedPolicy.fromAwsManagedPolicyName("SecretsManagerReadWrite"),
                 iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore"),
                 iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy"),
             ],

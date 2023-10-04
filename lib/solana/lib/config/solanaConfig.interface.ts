@@ -14,6 +14,7 @@ export interface SolanaBaseConfig extends configTypes.BaseConfig {
 
 export interface SolanaBaseNodeConfig extends configTypes.BaseNodeConfig {
     solanaCluster: SolanaCluster;
+    solanaVersion: string;
     nodeConfiguration: SolanaNodeConfiguration;
     dataVolume: SolanaDataVolumeConfig;
     accountsVolume: SolanaAccountsVolumeConfig;

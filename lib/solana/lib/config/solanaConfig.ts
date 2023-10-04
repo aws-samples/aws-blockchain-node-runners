@@ -19,15 +19,16 @@ const parseDataVolumeType = (dataVolumeType: string) => {
 }
 
 export const baseConfig: configTypes.SolanaBaseConfig = {
-    accountId: process.env.AWS_ACCOUNT_ID || "xxxxxxxxxxx",          // Set your target AWS Account ID
-    region: process.env.AWS_REGION || "us-east-2",               // Set your target AWS Region
+    accountId: process.env.AWS_ACCOUNT_ID || "xxxxxxxxxxx",          
+    region: process.env.AWS_REGION || "us-east-2",               
 }
 
 export const baseNodeConfig: configTypes.SolanaBaseNodeConfig = {
     instanceType: new ec2.InstanceType(process.env.SOLANA_INSTANCE_TYPE ? process.env.SOLANA_INSTANCE_TYPE : "r6a.8xlarge"),
     instanceCpuType: process.env.SOLANA_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64,
-    solanaCluster: <configTypes.SolanaCluster> process.env.SOLANA_CLUSTER || "mainnet-beta",    // Set the Solana cluster to be used
-    nodeConfiguration: <configTypes.SolanaNodeConfiguration> process.env.SOLANA_NODE_CONFIGURATION || "lightrpc",    // Set the Solana node configuration to be used
+    solanaCluster: <configTypes.SolanaCluster> process.env.SOLANA_CLUSTER || "mainnet-beta",    
+    solanaVersion: process.env.SOLANA_VERSION || "1.16.2",                                      
+    nodeConfiguration: <configTypes.SolanaNodeConfiguration> process.env.SOLANA_NODE_CONFIGURATION || "lightrpc",
     dataVolume: {
         sizeGiB: process.env.SOLANA_DATA_VOL_SIZE ? parseInt(process.env.SOLANA_DATA_VOL_SIZE): 2000,
         type: parseDataVolumeType(process.env.SOLANA_DATA_VOL_TYPE?.toLowerCase() ? process.env.SOLANA_DATA_VOL_TYPE?.toLowerCase() : "gp3"),
@@ -48,6 +49,6 @@ export const baseNodeConfig: configTypes.SolanaBaseNodeConfig = {
 
 export const haNodeConfig: configTypes.SolanaHAConfig = {
     albHealthCheckGracePeriodMin: process.env.SOLANA_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN ? parseInt(process.env.SOLANA_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN) : 10,
-    heartBeatDelayMin: process.env.SOLANA_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN ? parseInt(process.env.SOLANA_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN) : 40,
-    numberOfNodes: process.env.SOLANA_HA_NODES_HEARTBEAT_DELAY_MIN ? parseInt(process.env.SOLANA_HA_NODES_HEARTBEAT_DELAY_MIN) : 2,
+    heartBeatDelayMin: process.env.SOLANA_HA_NODES_HEARTBEAT_DELAY_MIN ? parseInt(process.env.SOLANA_HA_NODES_HEARTBEAT_DELAY_MIN) : 40,
+    numberOfNodes: process.env.SOLANA_HA_NUMBER_OF_NODES ? parseInt(process.env.SOLANA_HA_NUMBER_OF_NODES) : 2,
 };

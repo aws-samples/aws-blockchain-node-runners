@@ -1,4 +1,4 @@
-export const SyncNodeCWDashboardJSON = {
+export const SingleNodeCWDashboardJSON = {
     "widgets": [
         {
             "height": 5,
@@ -24,9 +24,9 @@ export const SyncNodeCWDashboardJSON = {
             }
         },
         {
-            "height": 5,
+            "height": 3,
             "width": 6,
-            "y": 5,
+            "y": 8,
             "x": 18,
             "type": "metric",
             "properties": {
@@ -47,9 +47,9 @@ export const SyncNodeCWDashboardJSON = {
             }
         },
         {
-            "height": 5,
+            "height": 4,
             "width": 6,
-            "y": 0,
+            "y": 11,
             "x": 18,
             "type": "metric",
             "properties": {
@@ -127,14 +127,56 @@ export const SyncNodeCWDashboardJSON = {
             }
         },
         {
-            "height": 4,
+            "height": 5,
             "width": 6,
             "y": 0,
             "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "elc_sync_block", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ { "expression": "m7/PERIOD(m7)", "label": "Write", "id": "e7", "region": "${REGION}" } ],
+                    [ "CWAgent", "diskio_writes", "InstanceId", "${INSTANCE_ID}", "name", "nvme2n1", { "id": "m7", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ { "expression": "m8/PERIOD(m8)", "label": "Read", "id": "e8", "region": "${REGION}" } ],
+                    [ "CWAgent", "diskio_reads", "InstanceId", "${INSTANCE_ID}", "name", "nvme2n1", { "id": "m8", "visible": false, "stat": "Sum", "period": 60 } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Average",
+                "period": 300,
+                "title": "nvme2n1 Volume Read/Write (IO/sec)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 10,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "m2/PERIOD(m2)", "label": "Read", "id": "e2", "period": 60, "region": "${REGION}" } ],
+                    [ "CWAgent", "diskio_read_bytes", "InstanceId", "${INSTANCE_ID}", "name", "nvme2n1", { "id": "m2", "stat": "Sum", "visible": false, "period": 60 } ],
+                    [ { "expression": "m3/PERIOD(m3)", "label": "Write", "id": "e3", "period": 60, "region": "${REGION}" } ],
+                    [ "CWAgent", "diskio_write_bytes", "InstanceId", "${INSTANCE_ID}", "name", "nvme2n1", { "id": "m3", "stat": "Sum", "visible": false, "period": 60 } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Average",
+                "period": 60,
+                "title": "nvme2n1 Volume Read/Write throughput (bytes/sec)"
+            }
+        },
+        {
+            "height": 4,
+            "width": 6,
+            "y": 0,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "CWAgent", "solana_block_height", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                 ],
                 "sparkline": true,
                 "view": "timeSeries",
@@ -142,14 +184,14 @@ export const SyncNodeCWDashboardJSON = {
                 "region": "${REGION}",
                 "stat": "Maximum",
                 "period": 60,
-                "title": "Execution Client Block Height"
+                "title": "Solana Block Height"
             }
         },
         {
             "height": 4,
             "width": 6,
             "y": 4,
-            "x": 12,
+            "x": 18,
             "type": "metric",
             "properties": {
                 "sparkline": true,
@@ -159,47 +201,38 @@ export const SyncNodeCWDashboardJSON = {
                 "stat": "Maximum",
                 "period": 60,
                 "metrics": [
-                    [ "CWAgent", "elc_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "solana_slots_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                 ],
-                "title": "Execution Client Blocks Behind"
+                "title": "Solana Slots Behind"
             }
         },
         {
-            "height": 3,
+            "height": 5,
             "width": 6,
-            "y": 8,
+            "y": 5,
             "x": 12,
             "type": "metric",
             "properties": {
-                "metrics": [
-                    [ "CWAgent", "clc_head_slot", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
-                ],
-                "sparkline": true,
                 "view": "timeSeries",
-                "stacked": false,
-                "region": "${REGION}",
-                "stat": "Maximum",
+                "stat": "Sum",
                 "period": 60,
-                "title": "Consensus Client Head Slot"
-            }
-        },
-        {
-            "height": 4,
-            "width": 6,
-            "y": 11,
-            "x": 12,
-            "type": "metric",
-            "properties": {
+                "stacked": false,
                 "sparkline": true,
-                "view": "timeSeries",
-                "stacked": false,
+                "yAxis": {
+                    "left": {
+                        "min": 0
+                    }
+                },
                 "region": "${REGION}",
-                "stat": "Maximum",
-                "period": 60,
                 "metrics": [
-                    [ "CWAgent", "clc_sync_distance", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ { "expression": "IF(m7_2 !=0, (m7_1 / m7_2), 0)", "label": "Read", "id": "e7" } ],
+                    [ "CWAgent", "diskio_read_time", "InstanceId", "${INSTANCE_ID}", "name", "nvme2n1", { "id": "m7_1", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ "CWAgent", "diskio_reads", "InstanceId", "${INSTANCE_ID}", "name", "nvme2n1", { "id": "m7_2", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ { "expression": "IF(m7_4 !=0, (m7_3 / m7_4), 0)", "label": "Write", "id": "e8" } ],
+                    [ "CWAgent", "diskio_write_time", "InstanceId", "${INSTANCE_ID}", "name", "nvme2n1", { "id": "m7_3", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ "CWAgent", "diskio_writes", "InstanceId", "${INSTANCE_ID}", "name", "nvme2n1", { "id": "m7_4", "visible": false, "stat": "Sum", "period": 60 } ]
                 ],
-                "title": "Consensus Client Sync Distance"
+                "title": "nvme2n1 Volume Read/Write latency (ms/op)"
             }
         },
         {
@@ -238,9 +271,9 @@ export const SyncNodeCWDashboardJSON = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ { "expression": "(m2/1048576)/PERIOD(m2)", "label": "Read", "id": "e2", "period": 60, "region": "${REGION}" } ],
+                    [ { "expression": "m2/PERIOD(m2)", "label": "Read", "id": "e2", "period": 60, "region": "${REGION}" } ],
                     [ "CWAgent", "diskio_read_bytes", "InstanceId", "${INSTANCE_ID}", "name", "nvme1n1", { "id": "m2", "stat": "Sum", "visible": false, "period": 60 } ],
-                    [ { "expression": "(m3/1048576)/PERIOD(m3)", "label": "Write", "id": "e3", "period": 60, "region": "${REGION}" } ],
+                    [ { "expression": "m3/PERIOD(m3)", "label": "Write", "id": "e3", "period": 60, "region": "${REGION}" } ],
                     [ "CWAgent", "diskio_write_bytes", "InstanceId", "${INSTANCE_ID}", "name", "nvme1n1", { "id": "m3", "stat": "Sum", "visible": false, "period": 60 } ]
                 ],
                 "view": "timeSeries",
@@ -248,25 +281,7 @@ export const SyncNodeCWDashboardJSON = {
                 "region": "${REGION}",
                 "stat": "Average",
                 "period": 60,
-                "title": "nvme1n1 Volume Read/Write throughput (MiB/sec)"
-            }
-        },
-        {
-            "height": 3,
-            "width": 6,
-            "y": 15,
-            "x": 6,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "CWAgent", "disk_used_percent", "path", "/data", "InstanceId", "${INSTANCE_ID}", "device", "nvme1n1", "fstype", "ext4", { "region": "${REGION}", "label": "/data" } ]
-                ],
-                "sparkline": true,
-                "view": "singleValue",
-                "region": "${REGION}",
-                "title": "nvme1n1 Disk Used (%)",
-                "period": 60,
-                "stat": "Average"
+                "title": "nvme1n1 Volume Read/Write throughput (bytes/sec)"
             }
         }
     ]

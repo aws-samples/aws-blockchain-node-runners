@@ -5,42 +5,50 @@ import * as cdk from "aws-cdk-lib";
 import * as nag from "cdk-nag";
 import * as config from "./lib/config/solanaConfig";
 
-import { PolygonSyncNodeStack } from "./lib/single-node-stack";
-import { PolygonCommonStack } from "./lib/common-stack";
-import { PolygonRpcNodesStack } from "./lib/ha-nodes-stack";
+import { SolanaSingleNodeStack } from "./lib/single-node-stack";
+import { SolanaCommonStack } from "./lib/common-stack";
+import { SolanaHANodesStack } from "./lib/ha-nodes-stack";
 
 const app = new cdk.App();
-cdk.Tags.of(app).add("Project", "AWSPolygon");
+cdk.Tags.of(app).add("Project", "AWSSolana");
 
-new PolygonCommonStack(app, "polygon-common", {
+new SolanaCommonStack(app, "solana-common", {
+    stackName: `solana-nodes-common`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    stackName: `polygon-nodes-common`,
-    createVpcEnpointS3: config.baseConfig.createVpcEnpointS3,
 });
 
-new PolygonSyncNodeStack(app, "polygon-sync-node", {
-    stackName: `polygon-sync-node-${config.baseConfig.clientCombination}`,
-
+new SolanaSingleNodeStack(app, "solana-single-node", {
+    stackName: `solana-single-node-${config.baseNodeConfig.nodeConfiguration}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    polygonClientCombination: config.baseConfig.clientCombination,
-    network: config.baseConfig.network,
-    instanceType: config.syncNodeConfig.instanceType,
-    instanceCpuType: config.syncNodeConfig.instanceCpuType,
-    dataVolumes: config.syncNodeConfig.dataVolumes,
+
+    instanceType: config.baseNodeConfig.instanceType,
+    instanceCpuType: config.baseNodeConfig.instanceCpuType,
+    solanaCluster: config.baseNodeConfig.solanaCluster,
+    solanaVersion: config.baseNodeConfig.solanaVersion,
+    nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+    dataVolume: config.baseNodeConfig.dataVolume,
+    accountsVolume: config.baseNodeConfig.accountsVolume,
+    solanaNodeIdentitySecretARN: config.baseNodeConfig.solanaNodeIdentitySecretARN,
+    voteAccountSecretARN: config.baseNodeConfig.voteAccountSecretARN,
+    authorizedWithdrawerAccountSecretARN: config.baseNodeConfig.authorizedWithdrawerAccountSecretARN,
+    registrationTransactionFundingAccountSecretARN: config.baseNodeConfig.registrationTransactionFundingAccountSecretARN,
 });
 
-new PolygonRpcNodesStack(app, "polygon-rpc-nodes", {
-    stackName: `polygon-rpc-nodes-${config.baseConfig.clientCombination}`,
-
+new SolanaHANodesStack(app, "solana-ha-nodes", {
+    stackName: `solana-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    polygonClientCombination: config.baseConfig.clientCombination,
-    network: config.baseConfig.network,
-    instanceType: config.rpcNodeConfig.instanceType,
-    instanceCpuType: config.rpcNodeConfig.instanceCpuType,
-    numberOfNodes: config.rpcNodeConfig.numberOfNodes,
-    albHealthCheckGracePeriodMin: config.rpcNodeConfig.albHealthCheckGracePeriodMin,
-    heartBeatDelayMin: config.rpcNodeConfig.heartBeatDelayMin,
-    dataVolumes: config.syncNodeConfig.dataVolumes,
+
+    instanceType: config.baseNodeConfig.instanceType,
+    instanceCpuType: config.baseNodeConfig.instanceCpuType,
+    solanaCluster: config.baseNodeConfig.solanaCluster,
+    solanaVersion: config.baseNodeConfig.solanaVersion,
+    nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+    dataVolume: config.baseNodeConfig.dataVolume,
+    accountsVolume: config.baseNodeConfig.accountsVolume,
+
+    albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
+    heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
+    numberOfNodes: config.haNodeConfig.numberOfNodes,
 });
 
 
