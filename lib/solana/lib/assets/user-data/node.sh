@@ -19,11 +19,8 @@ echo "AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN=${_AUTHORIZED_WITHDRAWER_ACCOUNT_
 echo "REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN=${_REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_}" >> /etc/environment
 echo "SOLANA_CLUSTER=${_SOLANA_CLUSTER_}" >> /etc/environment
 echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
-echo "AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}" >> /etc/environment
+echo "ASG_NAME=${_ASG_NAME_}" >> /etc/environment
 source /etc/environment
-
-# Saving just in case for future use
-arch=$(uname -m)
 
 apt-get -yqq update
 apt-get -yqq install awscli jq unzip python3-pip
@@ -243,7 +240,7 @@ else
     sudo mv ~/validator-keypair.json /home/solana/config/validator-keypair.json
 fi
 
-if [[ "$SOLANA_NODE_TYPE" == "validator" ]]; then
+if [[ "$SOLANA_NODE_TYPE" == "consensus" ]]; then
     if [[ $VOTE_ACCOUNT_SECRET_ARN == "none" ]]; then
         echo "Create Vote Account Secret"
         sudo ./solana-keygen new --no-passphrase -o /home/solana/config/vote-account-keypair.json
@@ -286,7 +283,7 @@ if [[ "$SOLANA_NODE_TYPE" == "validator" ]]; then
         sudo mv ~/vote-account-keypair.json /home/solana/config/vote-account-keypair.json
     fi
 
-mv /opt/solana/node-validator-template.sh /home/solana/bin/validator.sh
+mv /opt/solana/node-consensus-template.sh /home/solana/bin/validator.sh
 fi
 
 if [[ "$SOLANA_NODE_TYPE" == "lightrpc" ]]; then
@@ -353,9 +350,9 @@ sudo chmod +x /opt/syncchecker.sh
 (crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
 crontab -l
 
-# Signaling Autoscaling Gropup's lifecucle hook to complete
+# Signaling Autoscaling Gropup's lifecycle hook to complete
 TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
-aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$AUTOSCALING_GROUP_NAME"  --region $AWS_REGION
+aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$ASG_NAME"  --region $AWS_REGION
 
 echo "All Done!!"

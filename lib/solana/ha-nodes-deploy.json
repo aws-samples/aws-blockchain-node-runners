@@ -1,5 +1,5 @@
 {
-  "solana-ha-nodes-lightrpc": {
-    "alburl": "internal-solan-rpcno-1KV8RF4TNOORQ-203724879.us-east-2.elb.amazonaws.com"
+  "solana-ha-nodes-heavyrpc": {
+    "alburl": "internal-solan-rpcno-977ERI6F61ZW-1849543495.us-east-2.elb.amazonaws.com"
   }
 }

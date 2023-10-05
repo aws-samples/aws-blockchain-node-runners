@@ -120,6 +120,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
             _REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_: registrationTransactionFundingAccountSecretARN,
             _SOLANA_CLUSTER_: solanaCluster,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
+            _ASG_NAME_: constants.NoneValue,
         });
         node.instance.addUserData(modifiedInitNodeScript);
 

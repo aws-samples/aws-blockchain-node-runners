@@ -75,8 +75,8 @@ export class SolanaHANodesStack extends cdk.Stack {
             throw new Error("ARM_64 is not yet supported");
         }
 
-        if (nodeConfiguration === "validator") {
-            throw new Error("Validator node configuration is not yet supported for HA setup");
+        if (nodeConfiguration === "consensus") {
+            throw new Error("Consensus node configuration is not yet supported for HA setup");
         }
         
         // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
@@ -105,7 +105,7 @@ export class SolanaHANodesStack extends cdk.Stack {
             _REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_: constants.NoneValue,
             _SOLANA_CLUSTER_: solanaCluster,
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
-            _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
+            _ASG_NAME_: autoScalingGroupName,
         });
 
         // Setting up the nodse using generic High Availability (HA) Node constract

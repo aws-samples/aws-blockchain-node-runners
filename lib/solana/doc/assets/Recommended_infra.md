@@ -1,0 +1,7 @@
+# Recommended configurations for running Solana nodes on AWS
+
+| Usage pattern  | Ideal configuration  | Primary option on AWS  | Data Transfer Estimates | Config reference |
+|---|---|---|---|---|
+| 1/ Consensus node | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 10K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput, Data volume: EBS gp3 10K IOPS, 700 MB/s throughput | Proportional to the amount at stake. Between 200TB to 400TB/month  | [.env-sample-consensus](../../sample-configs/.env-sample-consensus) |
+| 2/ Light RPC node (no secondary indexes) | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 12K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput Data volume: EBS gp3 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-lightrpc](../../sample-configs/.env-sample-lightrpc) |
+| 3/ Full RPC node (with all secondary indexes) | 64 vCPU, 1 TB RAM, Accounts volume: 1TB, 7K IOPS, 700 MB/s throughput, Data volume: 3TB, 16K IOPS, 700 MB/s throughput    | x2idn.16xlarge, Accounts: instance storage (ephemeral NVMe volumes) 1.9 TB, Data volume: 3TB, 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-heavyrpc](../../sample-configs/.env-sample-heavyrpc) |
