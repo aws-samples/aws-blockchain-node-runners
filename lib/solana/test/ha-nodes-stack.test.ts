@@ -3,28 +3,32 @@ import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
 import * as config from "../lib/config/solanaConfig";
-import { EthRpcNodesStack } from "../lib/ha-nodes-stack";
+import { SolanaHANodesStack } from "../lib/ha-nodes-stack";
 
-describe("EthRpcNodesStack", () => {
+describe("SolanaHANodesStack", () => {
   test("synthesizes the way we expect", () => {
     const app = new cdk.App();
 
-    // Create the EthRpcNodesStack.
-    const ethRpcNodesStack = new EthRpcNodesStack(app, "eth-sync-node", {
-      stackName: `eth-rpc-nodes-${config.baseConfig.clientCombination}`,
+    // Create the SolanaHANodesStack.
+    const solanaHANodesStack = new SolanaHANodesStack(app, "solana-sync-node", {
+    stackName: `solana-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
+    env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
-      env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-      PolygonClientCombination: config.baseConfig.clientCombination,
-      instanceType: config.rpcNodeConfig.instanceType,
-      instanceCpuType: config.rpcNodeConfig.instanceCpuType,
-      numberOfNodes: config.rpcNodeConfig.numberOfNodes,
-      albHealthCheckGracePeriodMin: config.rpcNodeConfig.albHealthCheckGracePeriodMin,
-      heartBeatDelayMin: config.rpcNodeConfig.heartBeatDelayMin,
-      dataVolumes: config.syncNodeConfig.dataVolumes,
+    instanceType: config.baseNodeConfig.instanceType,
+    instanceCpuType: config.baseNodeConfig.instanceCpuType,
+    solanaCluster: config.baseNodeConfig.solanaCluster,
+    solanaVersion: config.baseNodeConfig.solanaVersion,
+    nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+    dataVolume: config.baseNodeConfig.dataVolume,
+    accountsVolume: config.baseNodeConfig.accountsVolume,
+
+    albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
+    heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
+    numberOfNodes: config.haNodeConfig.numberOfNodes,
   });
 
     // Prepare the stack for assertions.
-    const template = Template.fromStack(ethRpcNodesStack);
+    const template = Template.fromStack(solanaHANodesStack);
 
     // Has EC2 instance security group.
     template.hasResourceProperties("AWS::EC2::SecurityGroup", {
@@ -32,100 +36,58 @@ describe("EthRpcNodesStack", () => {
       VpcId: Match.anyValue(),
       SecurityGroupEgress: [
         {
-        "CidrIp": "0.0.0.0/0",
-        "Description": "Allow all outbound traffic by default",
-        "IpProtocol": "-1"
-       }
-      ],
-      SecurityGroupIngress: [
-        {
          "CidrIp": "0.0.0.0/0",
-         "Description": "P2P",
-         "FromPort": 30303,
-         "IpProtocol": "tcp",
-         "ToPort": 30303
-        },
-        {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "P2P",
-         "FromPort": 30303,
-         "IpProtocol": "udp",
-         "ToPort": 30303
-        },
-        {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "P2P",
-         "FromPort": 30304,
-         "IpProtocol": "tcp",
-         "ToPort": 30304
-        },
-        {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "P2P",
-         "FromPort": 30304,
-         "IpProtocol": "udp",
-         "ToPort": 30304
-        },
-        {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "CL Client P2P",
-         "FromPort": 9000,
-         "IpProtocol": "tcp",
-         "ToPort": 9000
-        },
-        {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "CL Client P2P",
-         "FromPort": 9000,
-         "IpProtocol": "udp",
-         "ToPort": 9000
-        },
-        {
-         "CidrIp": "1.2.3.4/5",
-         "Description": "CL Client API",
-         "FromPort": 5051,
-         "IpProtocol": "tcp",
-         "ToPort": 5051
-        },
-        {
-         "CidrIp": "1.2.3.4/5",
-         "Description": "CL Client API",
-         "FromPort": 5052,
-         "IpProtocol": "tcp",
-         "ToPort": 5052
-        },
-        {
-         "CidrIp": "1.2.3.4/5",
-         "Description": "EL Client RPC (Auth)",
-         "FromPort": 8551,
-         "IpProtocol": "tcp",
-         "ToPort": 8551
-        },
-        {
-         "CidrIp": "1.2.3.4/5",
-         "Description": "EL Client RPC",
-         "FromPort": 8545,
-         "IpProtocol": "tcp",
-         "ToPort": 8545
-        },
-        {
-         "Description": Match.anyValue(),
-         "FromPort": 0,
-         "IpProtocol": "tcp",
-         "SourceSecurityGroupId": Match.anyValue(),
-         "ToPort": 65535
+         "Description": "Allow all outbound traffic by default",
+         "IpProtocol": "-1"
         }
+       ],
+       SecurityGroupIngress: [
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "P2P protocols (gossip, turbine, repair, etc)",
+          "FromPort": 8801,
+          "IpProtocol": "tcp",
+          "ToPort": 8812
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "P2P protocols (gossip, turbine, repair, etc)",
+          "FromPort": 8801,
+          "IpProtocol": "udp",
+          "ToPort": 8812
+         },
+         {
+          "CidrIp": "1.2.3.4/5",
+          "Description": "RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)",
+          "FromPort": 8899,
+          "IpProtocol": "tcp",
+          "ToPort": 8899
+         },
+         {
+          "CidrIp": "1.2.3.4/5",
+          "Description": "RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)",
+          "FromPort": 8900,
+          "IpProtocol": "tcp",
+          "ToPort": 8900
+         },
+         {
+          "Description": "Allow access from ALB to Blockchain Node",
+          "FromPort": 0,
+          "IpProtocol": "tcp",
+          "SourceSecurityGroupId": Match.anyValue(),
+          "ToPort": 65535
+         },
        ]
     })
 
     // Has security group from ALB to EC2.
     template.hasResourceProperties("AWS::EC2::SecurityGroupIngress", {
       Description: Match.anyValue(),
-      FromPort: 8545,
+      FromPort: 8899,
       GroupId: Match.anyValue(),
       IpProtocol: "tcp",
       SourceSecurityGroupId: Match.anyValue(),
-      ToPort: 8545,
+      ToPort: 8899,
     })
 
     // Has launch template profile for EC2 instances.
@@ -138,7 +100,7 @@ describe("EthRpcNodesStack", () => {
       LaunchTemplateData: {
         BlockDeviceMappings: [
           {
-           "DeviceName": "/dev/xvda",
+           "DeviceName": "/dev/sda1",
            "Ebs": {
             "DeleteOnTermination": true,
             "Encrypted": true,
@@ -153,31 +115,43 @@ describe("EthRpcNodesStack", () => {
            "Ebs": {
             "DeleteOnTermination": true,
             "Encrypted": true,
-            "Iops": 6000,
-            "Throughput": 400,
-            "VolumeSize": 3072,
+            "Iops": 12000,
+            "Throughput": 700,
+            "VolumeSize": 2000,
             "VolumeType": "gp3"
            }
-          }
+          },
+          {
+           "DeviceName": "/dev/sdg",
+           "Ebs": {
+            "DeleteOnTermination": true,
+            "Encrypted": true,
+            "Iops": 6000,
+            "Throughput": 700,
+            "VolumeSize": 500,
+            "VolumeType": "gp3"
+           }
+          },
          ],
          EbsOptimized: true,
          IamInstanceProfile: Match.anyValue(),
          ImageId: Match.anyValue(),
-         InstanceType:"m7g.2xlarge",
+         InstanceType:"r6a.8xlarge",
          SecurityGroupIds: [Match.anyValue()],
-         UserData: Match.anyValue()
+         UserData: Match.anyValue(),
+         TagSpecifications: Match.anyValue(),
       }
     })
 
     // Has Auto Scaling Group.
     template.hasResourceProperties("AWS::AutoScaling::AutoScalingGroup", {
-      AutoScalingGroupName: `eth-rpc-nodes-${config.baseConfig.clientCombination}`,
-      HealthCheckGracePeriod: config.rpcNodeConfig.albHealthCheckGracePeriodMin * 60,
+      AutoScalingGroupName: `solana-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
+      HealthCheckGracePeriod: config.haNodeConfig.albHealthCheckGracePeriodMin * 60,
       HealthCheckType: "ELB",
       DefaultInstanceWarmup: 60,
       MinSize: "0",
       MaxSize: "4",
-      DesiredCapacity: config.rpcNodeConfig.numberOfNodes.toString(),
+      DesiredCapacity: config.haNodeConfig.numberOfNodes.toString(),
       VPCZoneIdentifier: Match.anyValue(),
       TargetGroupARNs: Match.anyValue(),
     });
@@ -185,8 +159,8 @@ describe("EthRpcNodesStack", () => {
     // Has Auto Scaling Lifecycle Hook.
     template.hasResourceProperties("AWS::AutoScaling::LifecycleHook", {
       DefaultResult: "ABANDON",
-      HeartbeatTimeout: config.rpcNodeConfig.heartBeatDelayMin * 60,
-      LifecycleHookName: `eth-rpc-nodes-${config.baseConfig.clientCombination}`,
+      HeartbeatTimeout: config.haNodeConfig.heartBeatDelayMin * 60,
+      LifecycleHookName: `solana-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
       LifecycleTransition: "autoscaling:EC2_INSTANCE_LAUNCHING",
     });
 
@@ -204,9 +178,9 @@ describe("EthRpcNodesStack", () => {
       {
         "CidrIp": "1.2.3.4/5",
         "Description": "Blockchain Node RPC",
-        "FromPort": 8545,
+        "FromPort": 8899,
         "IpProtocol": "tcp",
-        "ToPort": 8545
+        "ToPort": 8899
       }
       ],
       VpcId: Match.anyValue(),
@@ -229,7 +203,7 @@ describe("EthRpcNodesStack", () => {
         },
         {
          Key: "access_logs.s3.prefix",
-         Value: `eth-rpc-nodes-${config.baseConfig.clientCombination}`
+         Value: `solana-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`
         }
        ],
        Scheme: "internal",
@@ -252,7 +226,7 @@ describe("EthRpcNodesStack", () => {
         }
        ],
        LoadBalancerArn: Match.anyValue(),
-       Port: 8545,
+       Port: 8899,
        Protocol: "HTTP"
     })
 
@@ -260,13 +234,13 @@ describe("EthRpcNodesStack", () => {
     template.hasResourceProperties("AWS::ElasticLoadBalancingV2::TargetGroup", {
       HealthCheckEnabled: true,
       HealthCheckIntervalSeconds: 30,
-      HealthCheckPath: "/",
-      HealthCheckPort: "8545",
+      HealthCheckPath: "/health",
+      HealthCheckPort: "8899",
       HealthyThresholdCount: 3,
       Matcher: {
       HttpCode: "200-299"
       },
-      Port: 8545,
+      Port: 8899,
       Protocol: "HTTP",
       TargetGroupAttributes: [
       {

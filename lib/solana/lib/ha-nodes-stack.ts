@@ -113,6 +113,7 @@ export class SolanaHANodesStack extends cdk.Stack {
         const rpcNodes = new HANodesConstruct (this, "rpc-nodes", {
             instanceType,
             dataVolumes: [dataVolume, accountsVolume],
+            rootDataVolumeDeviceName: "/dev/sda1",
             machineImage: ec2.MachineImage.fromSsmParameter(ubuntu204stableImageSsmName),
             role: instanceRole,
             vpc,
