@@ -1,7 +1,6 @@
 #!/bin/bash
 set +e
 
-# Set by generic single-node and ha-node CDK components
 echo "AWS_REGION=${_AWS_REGION_}" >> /etc/environment
 echo "ASSETS_S3_PATH=${_ASSETS_S3_PATH_}" >> /etc/environment
 echo "STACK_NAME=${_STACK_NAME_}" >> /etc/environment
@@ -71,7 +70,6 @@ case $SOLANA_CLUSTER in
 esac
 
 echo "Fine tune sysctl to prepare the system for Solana"
-
 sudo bash -c "cat >/etc/sysctl.d/20-solana-additionals.conf <<EOF
 kernel.hung_task_timeout_secs=600
 vm.stat_interval=10
@@ -161,7 +159,6 @@ if [[ "$DATA_VOLUME_TYPE" == "instance-store" ]]; then
 else
   echo "Data volume type is EBS"
 
-  # Our data volume size is over 2TB
   DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
   sudo mkfs -t xfs $DATA_VOLUME_ID
   sleep 10
@@ -193,7 +190,6 @@ if [[ "$ACCOUNTS_VOLUME_TYPE" == "instance-store" ]]; then
 
 else
   echo "Accounts volume type is EBS"
-  # Our accounts volume size is over 500GB
   ACCOUNTS_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$ACCOUNTS_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
   sudo mkfs -t xfs $ACCOUNTS_VOLUME_ID
   sleep 10
@@ -350,7 +346,7 @@ sudo chmod +x /opt/syncchecker.sh
 (crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
 crontab -l
 
-# Signaling Autoscaling Gropup's lifecycle hook to complete
+echo "Signaling ASG lifecycle hook to complete"
 TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
 aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$ASG_NAME"  --region $AWS_REGION

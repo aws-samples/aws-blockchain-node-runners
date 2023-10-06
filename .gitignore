@@ -29,6 +29,8 @@ data-volume-snpashot*.json
 sync-node-deploy*.json
 instance-image*.json
 rpc-node-deploy*.json
+single-node-deploy*.json
+hs-node-deploy*.json
 
 *.OLD
 .env

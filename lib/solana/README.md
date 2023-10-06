@@ -121,7 +121,7 @@ Create your own copy of `.env` file and edit it:
 The result should be like this (the actual balance might change):
 
 ```javascript
-   {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.16.2","slot":221433176},"value":12870473061872488},"id":1}
+   {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.16.15","slot":221433176},"value":12870473061872488},"id":1}
 ```
 
    If the nodes are still starting and catching up with the chain, you will see the following response:

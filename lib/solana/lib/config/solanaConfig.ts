@@ -27,7 +27,7 @@ export const baseNodeConfig: configTypes.SolanaBaseNodeConfig = {
     instanceType: new ec2.InstanceType(process.env.SOLANA_INSTANCE_TYPE ? process.env.SOLANA_INSTANCE_TYPE : "r6a.8xlarge"),
     instanceCpuType: process.env.SOLANA_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64,
     solanaCluster: <configTypes.SolanaCluster> process.env.SOLANA_CLUSTER || "mainnet-beta",    
-    solanaVersion: process.env.SOLANA_VERSION || "1.16.2",                                      
+    solanaVersion: process.env.SOLANA_VERSION || "1.16.15",                                      
     nodeConfiguration: <configTypes.SolanaNodeConfiguration> process.env.SOLANA_NODE_CONFIGURATION || "lightrpc",
     dataVolume: {
         sizeGiB: process.env.SOLANA_DATA_VOL_SIZE ? parseInt(process.env.SOLANA_DATA_VOL_SIZE): 2000,
