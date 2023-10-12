@@ -1,7 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as cdkConstructs from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
-import * as iam from 'aws-cdk-lib/aws-iam';
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as nag from "cdk-nag";
 import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as path from "path";
@@ -24,11 +24,11 @@ export class EthCommonStack extends cdk.Stack {
 
         const snapshotsBucket = new SnapshotsS3BucketConstruct(this, `snapshots-s3-bucket`, {
             bucketName: `eth-snapshots-${this.AWS_ACCOUNT_ID}-${this.AWS_STACKNAME}`,
-           });
+        });
 
-        const s3VPCEndpoint = vpc.addGatewayEndpoint('s3-vpc-endpoint', {
+        const s3VPCEndpoint = vpc.addGatewayEndpoint("s3-vpc-endpoint", {
             service: ec2.GatewayVpcEndpointAwsService.S3,
-        })
+        });
 
         const instanceRole = new iam.Role(this, `node-role`, {
             assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
@@ -38,35 +38,54 @@ export class EthCommonStack extends cdk.Stack {
             ],
         });
 
-        instanceRole.addToPolicy(new iam.PolicyStatement({
-             // Can't target specific stack: https://github.com/aws/aws-cdk/issues/22657
-            resources: ["*"],
-            actions: ["cloudformation:SignalResource"],
-           }));
-        
-        instanceRole.addToPolicy(new iam.PolicyStatement({
-           resources: [`arn:aws:autoscaling:${region}:${this.AWS_ACCOUNT_ID}:autoScalingGroup:*:autoScalingGroupName/eth-*`],
-           actions: ["autoscaling:CompleteLifecycleAction"],
-          }));
-        
-        instanceRole.addToPolicy(new iam.PolicyStatement({
-           resources: [snapshotsBucket.bucketArn, snapshotsBucket.arnForObjects("*")],
-           actions: ["s3:ListBucket", "s3:*Object"],
-          }));
+        instanceRole.addToPolicy(
+            new iam.PolicyStatement({
+                // Can't target specific stack: https://github.com/aws/aws-cdk/issues/22657
+                resources: ["*"],
+                actions: ["cloudformation:SignalResource"],
+            })
+        );
+
+        instanceRole.addToPolicy(
+            new iam.PolicyStatement({
+                resources: [
+                    `arn:aws:autoscaling:${region}:${this.AWS_ACCOUNT_ID}:autoScalingGroup:*:autoScalingGroupName/eth-*`,
+                ],
+                actions: ["autoscaling:CompleteLifecycleAction"],
+            })
+        );
+
+        instanceRole.addToPolicy(
+            new iam.PolicyStatement({
+                resources: [snapshotsBucket.bucketArn, snapshotsBucket.arnForObjects("*")],
+                actions: ["s3:ListBucket", "s3:*Object"],
+            })
+        );
 
         // Limiting access through this VPC endpoint only to our sync bucket and Amazon linux repo bucket
-        s3VPCEndpoint.addToPolicy(new iam.PolicyStatement({
-            principals: [new iam.AnyPrincipal()],
-            resources: [
-                snapshotsBucket.bucketArn, 
-                snapshotsBucket.arnForObjects("*"),
-                `arn:aws:s3:::amazonlinux-2-repos-${region}`,
-                `arn:aws:s3:::amazonlinux-2-repos-${region}/*`,
-                `arn:aws:s3:::${asset.s3BucketName}`,
-                `arn:aws:s3:::${asset.s3BucketName}/*`,
-            ],
-            actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
-          }));
+        s3VPCEndpoint.addToPolicy(
+            new iam.PolicyStatement({
+                principals: [new iam.AnyPrincipal()],
+                resources: [
+                    snapshotsBucket.bucketArn,
+                    snapshotsBucket.arnForObjects("*"),
+                    `arn:aws:s3:::amazonlinux-2-repos-${region}`,
+                    `arn:aws:s3:::amazonlinux-2-repos-${region}/*`,
+                    `arn:aws:s3:::${asset.s3BucketName}`,
+                    `arn:aws:s3:::${asset.s3BucketName}/*`,
+                ],
+                actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
+            })
+        );
+
+        s3VPCEndpoint.addToPolicy(
+            new iam.PolicyStatement({
+                principals: [new iam.AnyPrincipal()],
+                resources: ["arn:aws:s3:::docker-images-prod", "arn:aws:s3:::docker-images-prod/*"],
+                actions: ["*"],
+                sid: "Allow access to docker images",
+            })
+        );
 
         new cdk.CfnOutput(this, "Instance Role ARN", {
             value: instanceRole.roleArn,
