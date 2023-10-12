@@ -30,10 +30,10 @@ export class EthSyncNodeStack extends cdk.Stack {
         const chosenAvailabilityZone = availabilityZones.slice(0, 1)[0];
 
         // Getting our config from initialization properties
-        const {
+        const { 
             instanceType,
-            ethClientCombination,
-            instanceCpuType,
+            ethClientCombination, 
+            instanceCpuType, 
             dataVolumes,
         } = props;
 
@@ -104,7 +104,7 @@ export class EthSyncNodeStack extends cdk.Stack {
             INSTANCE_NAME: STACK_NAME,
             REGION: REGION,
         })
-
+                
         new cw.CfnDashboard(this, 'sync-cw-dashboard', {
             dashboardName: STACK_NAME,
             dashboardBody: dashboardString,
