@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'AWS Blockchain Node Runners',
-  tagline: 'We run blockchain nodes on cloud',
+  tagline: 'Run blockchain nodes on cloud',
   //favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -57,13 +57,19 @@ const config = {
       // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
-        title: '🔰 Node Runners',
+        title: '▣-▣-▣ Node Runners',
         items: [
           {
             type: 'doc',
-            docId: 'intro/intro',
+            docId: 'Intro/intro',
             position: 'left',
             label: 'Introduction',
+          },
+          {
+            type: 'doc',
+            docId: 'Blueprints/intro',
+            position: 'left',
+            label: 'Blueprints',
           },
           {
             href: 'https://github.com/aws-samples/aws-blockchain-node-runners',
