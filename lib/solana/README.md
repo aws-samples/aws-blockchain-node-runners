@@ -1,6 +1,6 @@
 # Sample AWS Blockchain Node Runner app for Solana Nodes
 
-Solana nodes on AWS can be deployed in 3 different configurations: Consensus, Light RPC and Heavy RPC. In addition, you can choose to deploy those configurations as a single node or a highly available (HA) nodes setup. Learn more about configurations on [Solana on AWS documentation page](https://docs.solana.com/TBA) and below are the details on single node and HA deployment setups.
+Solana nodes on AWS can be deployed in 3 different configurations: Consensus, RPC and RPC with secondary indexes. In addition, you can choose to deploy those configurations as a single node or a highly available (HA) nodes setup. Learn more about configurations on [Solana on AWS documentation page](https://docs.solana.com/TBA) and below are the details on single node and HA deployment setups.
 
 ## Overview of Deployment Architectures for Single and HA setups
 
@@ -25,7 +25,7 @@ Solana nodes on AWS can be deployed in 3 different configurations: Consensus, Li
 ## Managing Secrets
 During the startup, if a node can't find the necessary identity file on the attached Root EBS volume, it generates a new one and stores it in AWS Secrets Manager. For a single-node deployment, the ARN of a secret can be provided within the `.env` configuration file with configuration and the node will pick it up.
 
-Light RPC or Heavy RPC nodes use only 1 secret: 
+RPC and RPC nodes with secondary indexes use only 1 secret: 
 
 - **Solana Node Identity Secret**: The identity key pair for a Solana node.
 
@@ -70,7 +70,7 @@ Create your own copy of `.env` file and edit it:
    # Make sure you are in aws-blockchain-node-runners/lib/solana
    cd lib/solana
    pwd
-   cp ./sample-configs/.env-sample-lightrpc .env
+   cp ./sample-configs/.env-sample-baserpc .env
    nano .env
 ```
    **NOTE:** Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.

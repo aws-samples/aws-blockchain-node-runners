@@ -19,27 +19,27 @@ Based on amount you have at stake, you can estimate with [community-developed ca
 
 - To run a single Consensus node on AWS, use the [Solana Node Runner CDK application](https://github.com/aws-samples/aws-blockchain-node-runners/tree/solana/lib/solana) in [AWS Blockchain Node Runners](https://aws-samples.github.io/aws-blockchain-node-runners/) and use [sample config for Consensus node](https://github.com/aws-samples/aws-blockchain-node-runners/blob/solana/lib/solana/sample-configs/.env-sample-validator).
 
-### Light RPC nodes
+### Base RPC nodes
 
-Light RPC nodes can be used by your application to perform all RPC calls, except those that trigger scan operation to the entire account set, like [getProgramAccounts](https://docs.solana.com/api/http#getprogramaccounts) and [SPL-token-specific requests](https://docs.solana.com/api/http#gettokenaccountsbydelegate): `getTokenAccountsByDelegate`, `getTokenAccountBalance`, `getTokenAccountsByOwner`, `getTokenLargestAccounts`, and `getTokenSupply`. These node types can use the same infrastructure as the consensus nodes, but instead of validating transactions, it will expose HTTP and WebSocket endpoints for your application to interact with the node trough JSON RPC API and RPC PubSub respectively. On AWS you can use the same as with consensus node `r6a.8xlarge` EC2 instance type the same three EBS gp3 volumes:
+Base RPC nodes (or just "RPC nodes") can be used by your application to perform all RPC calls, except those that trigger scan operation to the entire account set, like [getProgramAccounts](https://docs.solana.com/api/http#getprogramaccounts) and [SPL-token-specific requests](https://docs.solana.com/api/http#gettokenaccountsbydelegate): `getTokenAccountsByDelegate`, `getTokenAccountBalance`, `getTokenAccountsByOwner`, `getTokenLargestAccounts`, and `getTokenSupply`. These node types can use the same infrastructure as the consensus nodes, but instead of validating transactions, it will expose HTTP and WebSocket endpoints for your application to interact with the node trough JSON RPC API and RPC PubSub respectively. On AWS you can use the same as with consensus node `r6a.8xlarge` EC2 instance type the same three EBS gp3 volumes:
 - Root volume: EBS gp3 500 GB, 3K IOPS, 250 MB/s throughput,
 - Accounts volume: EBS gp3 500GB, 5K IOPS, 700 MB/s throughput,
 - Data volume: EBS gp3 2TB, 10K IOPS, 700 MB/s throughput.
 
 Data transfer costs for this node can vary depending on whether you expose the RPC endpoints to the Internet (generates more traffic to the Internet) or consume it with the same AWS Availability Zone (will cost you nothing). If you are not exposing the RPC interface for external consumption, then your node will generate about 13-15 TB of outgoing data per month per node. It is less than Consensus nodes, but can still be sufficient and better be discussed with your AWS account manager.
 
-- To run Light RPC node on AWS, use the [Solana Node Runner CDK application](https://github.com/aws-samples/aws-blockchain-node-runners/tree/solana/lib/solana) in [AWS Blockchain Node Runners](https://aws-samples.github.io/aws-blockchain-node-runners/) and use [sample config for Light RPC node](https://github.com/aws-samples/aws-blockchain-node-runners/blob/solana/lib/solana/sample-configs/.env-sample-lightrpc). You can use both Single-node and Highly Available-node setup.
+- To run RPC node on AWS, use the [Solana Node Runner CDK application](https://github.com/aws-samples/aws-blockchain-node-runners/tree/solana/lib/solana) in [AWS Blockchain Node Runners](https://aws-samples.github.io/aws-blockchain-node-runners/) and use [sample config for RPC node](https://github.com/aws-samples/aws-blockchain-node-runners/blob/solana/lib/solana/sample-configs/.env-sample-baserpc). You can use both Single-node and Highly Available-node setup.
  
-### Heavy RPC nodes
+### Extended RPC nodes with secondary indexes
  
-Heavy RPC nodes allow you to call "heavier" RPC functions like mentioned above. To use them you need to enable extra indexes on your RPC node, which requires more hardware. At the time of writing (September 2023) it is recommended to use at least 1 TB or RAM with NVMe discs, or, on AWS an instance like `x2idn.16xlarge` which is also equipped with a physically-attached NVMe SSD [Instance Store volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html). The storage configurations looks like this:
+RPC nodes with secondary indexes allow you to call "extended" RPC functions like mentioned above. To use them you need to enable extra indexes on your RPC node, which requires more hardware. At the time of writing (September 2023) it is recommended to use at least 1 TB or RAM with NVMe discs, or, on AWS an instance like `x2idn.16xlarge` which is also equipped with a physically-attached NVMe SSD [Instance Store volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html). The storage configurations looks like this:
 - Root volume: EBS gp3 500 GB, 3K IOPS, 250 MB/s throughput,
 - Accounts volume: Instance store (comes with the `x2idn.16xlarge` instance) 1.9TB,
 - Data volume: EBS gp3 2TB, 10K IOPS, 700 MB/s throughput.
  
-As with the Light RPC nodes, data transfer amount may vary and the estimated amount is 15 TB of outgoing data per month per node.
+As with the RPC nodes, data transfer amount may vary and the estimated amount is 15 TB of outgoing data per month per node.
 
-- To run Heavy RPC node on AWS, use the [Solana Node Runner CDK application](https://github.com/aws-samples/aws-blockchain-node-runners/tree/solana/lib/solana) in [AWS Blockchain Node Runners](https://aws-samples.github.io/aws-blockchain-node-runners/) and use [sample config for Heavy RPC node](https://github.com/aws-samples/aws-blockchain-node-runners/blob/solana/lib/solana/sample-configs/.env-sample-heavyrpc). You can use both Single-node and Highly Available-node setup.
+- To run RPC node with secondary indexes on AWS, use the [Solana Node Runner CDK application](https://github.com/aws-samples/aws-blockchain-node-runners/tree/solana/lib/solana) in [AWS Blockchain Node Runners](https://aws-samples.github.io/aws-blockchain-node-runners/) and use [sample config for RPC with secondary indexes node](https://github.com/aws-samples/aws-blockchain-node-runners/blob/solana/lib/solana/sample-configs/.env-sample-extendedrpc). You can use both Single-node and Highly Available-node setup.
  
 ### History nodes
  

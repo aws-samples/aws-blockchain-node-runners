@@ -282,11 +282,11 @@ if [[ "$SOLANA_NODE_TYPE" == "consensus" ]]; then
 mv /opt/solana/node-consensus-template.sh /home/solana/bin/validator.sh
 fi
 
-if [[ "$SOLANA_NODE_TYPE" == "lightrpc" ]]; then
+if [[ "$SOLANA_NODE_TYPE" == "baserpc" ]]; then
   mv /opt/solana/node-light-rpc-template.sh /home/solana/bin/validator.sh
 fi
 
-if [[ "$SOLANA_NODE_TYPE" == "heavyrpc" ]]; then
+if [[ "$SOLANA_NODE_TYPE" == "extendedrpc" ]]; then
   mv /opt/solana/node-heavy-rpc-template.sh /home/solana/bin/validator.sh
 fi
 

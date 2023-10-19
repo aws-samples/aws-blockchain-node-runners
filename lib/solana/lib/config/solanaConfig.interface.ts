@@ -1,7 +1,7 @@
 import * as configTypes from "../../../constructs/config.interface";
 
 export type SolanaCluster = "mainnet-beta" | "testnet" | "devnet";
-export type SolanaNodeConfiguration = "consensus" | "lightrpc" | "heavyrpc";
+export type SolanaNodeConfiguration = "consensus" | "baserpc" | "extendedrpc";
 
 export interface SolanaDataVolumeConfig extends configTypes.DataVolumeConfig {
 }
