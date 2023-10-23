@@ -1,6 +1,6 @@
 # Sample AWS Blockchain Node Runner app for Solana Nodes
 
-Solana nodes on AWS can be deployed in 3 different configurations: Consensus, base RPC and extended RPC with secondary indexes. In addition, you can choose to deploy those configurations as a single node or a highly available (HA) nodes setup. Learn more about configurations on [Solana on AWS documentation page](https://docs.solana.com/TBA) and below are the details on single node and HA deployment setups.
+Solana nodes on AWS can be deployed in 3 different configurations: Consensus, base RPC and extended RPC with secondary indexes. In addition, you can choose to deploy those configurations as a single node or a highly available (HA) nodes setup. Learn more about configurations on [Solana on AWS documentation page](https://solana.com/developers/guides/rpc/configure-solana-rpc-on-aws) and below are the details on single node and HA deployment setups.
 
 ## Overview of Deployment Architectures for Single and HA setups
 
@@ -22,7 +22,12 @@ Solana nodes on AWS can be deployed in 3 different configurations: Consensus, ba
 3.	The Solana nodes use all required secrets locally, but store a copy in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) as secure backup.
 4.	The Solana nodes send various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch.
 
-## Managing Secrets
+## Additional materials
+
+<details>
+
+<summary>Managing Secrets</summary>
+
 During the startup, if a node can't find the necessary identity file on the attached Root EBS volume, it generates a new one and stores it in AWS Secrets Manager. For a single-node deployment, the ARN of a secret can be provided within the `.env` configuration file with configuration and the node will pick it up.
 
 Base RPC and Extended RPC nodes use only 1 secret: 
@@ -37,11 +42,54 @@ Consensus node uses up to 3 more identity secrets:
 
 - **Registration Transaction Funding Account Secret**: An account that has sufficient SOL to pay for on-chain validator creation transaction. If not present, the node provisioning script assumes the on-chain validator creation transaction was issued elsewhere and will skip it.
 
+</details>
+
+<details>
+
+<summary>Well-Architected Checklist</summary>
+
+This is the Well-Architected checklist for Solana nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+
+| Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
+|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that ports 8801 to 8812 (TCP/UDP) for Solana are open to public to support P2P protocols. We have to rely on the protection mechanisms built into the Solana validators software to protect those ports.  |
+|                         |                                   | Traffic inspection                                                               | Traffic protection is not used in the solution. AWS Web Applications Firewall (WAF) could be implemented for traffic inspection. Additional charges will apply.  |
+|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Ubuntu 20.04 AMI. You may choose to run hardening scripts on it.  |
+|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
+|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes.  |
+|                         |                                   | Use encrypted Amazon Simple Storage Service (Amazon S3) buckets                  | This solution uses Amazon S3 managed keys (SSE-S3) encryption.  |
+|                         | Data protection in transit        | Use TLS                                                                          | The AWS Application Load balancer currently uses HTTP listener. Create HTTPS listener with self signed certificate if TLS is desired.  |
+|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
+|                         |                                   | Following principle of least privilege access                                    | In all node types, root user is not used (using special user "solana" instead).  |
+|                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions.  |
+| Cost optimization       | Service selection                 | Use cost effective resources                                                     | 1/ AMD-based instances are used for Consensus and RPC node to save the costs. Consider compiling Graviton-based binaries to improve costs for compute. 2/ Cost-effective EBS gp3 are preferred instead of io2. 3/ Solana nodes generate a substantial amount of outgoing data traffic, which deeds to be addressed with non-technical means like getting private agreements with AWS.  |
+|                         | Cost awareness                    | Estimate costs                                                                   | Single RPC node with `r6a.8xlarge` EBS gp3 volumes about 2549 GB with On-Demand pricing will cost around US$1,596.43 per month in the US East (N. Virginia) region. More cost-optimal option with 3 year Compute Savings plan the cost goes down to $962.84 USD. Additionally, the data transfer costs can be about $1,356.80 USD per month for 15TB of outgoing traffic. |
+| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution uses AWS Application Load Balancer with RPC nodes for high availability. Newly provisioned Solana nodes triggered by Auto Scaling get up and running in about 30-50 minutes. |
+|                         | Data backup                       | How is data backed up?                                                           | Considering blockchain data is replicated by nodes automatically and Solana nodes sync from start within an hour, we don't use any additional mechanisms to backup the data.  |
+|                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
+| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance, i.e. AWS AMD-based Amazon EC2 instances.  |
+|                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. gp3 Amazon EBS volumes with optimal IOPS and throughput.  |
+|                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the Solana community and our own testing.  |
+| Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health of workload is determined via AWS Application Load Balancer Target Group Health Checks, on port 8899.  |
+| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses AMD-powered instances. There is a potential to use AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2.  |
+</details>
+
+<details>
+
+<summary>Recommended Infrastructure</summary>
+
+| Usage pattern  | Ideal configuration  | Primary option on AWS  | Data Transfer Estimates | Config reference |
+|---|---|---|---|---|
+| 1/ Consensus node | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 10K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput, Data volume: EBS gp3 10K IOPS, 700 MB/s throughput | Proportional to the amount at stake. Between 200TB to 400TB/month  | [.env-sample-consensus](../../sample-configs/.env-sample-consensus) |
+| 2/ Base RPC node (no secondary indexes) | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 12K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput Data volume: EBS gp3 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-baserpc](../../sample-configs/.env-sample-baserpc) |
+| 3/ Extended RPC node (with all secondary indexes) | 64 vCPU, 1 TB RAM, Accounts volume: 1TB, 7K IOPS, 700 MB/s throughput, Data volume: 3TB, 16K IOPS, 700 MB/s throughput    | x2idn.16xlarge, Accounts: instance storage (ephemeral NVMe volumes) 1.9 TB, Data volume: 3TB, 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-extendedrpc](../../sample-configs/.env-sample-extendedrpc) |
+</details>
+
 ## Setup Instructions
 
 ### Setup Cloud9
 
-We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../doc/setup-cloud9.md)
+We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../docs/setup-cloud9.md)
 
 ### Clone this repository and install dependencies
 
@@ -208,14 +256,6 @@ The result should be like this (the actual balance might change):
     rm -rf /tmp/keypair.json
 
 ```
-
-## Well-Architected
-
-Review the [Well-Architected Checklist](./doc/assets/Well_Architected.md) for pros and cons of this solution.
-
-## Recommended infrastructure
-
-Review the [Recommended Infrastructure](./doc/assets/Recommended_infra.md) document for details.
 
 ## Upgrades
 
