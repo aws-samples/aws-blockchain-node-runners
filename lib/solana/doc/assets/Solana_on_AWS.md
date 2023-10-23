@@ -4,7 +4,7 @@ Running Solana nodes on AWS can help to reduce operational costs and improve rel
 
 ## Solana node configurations on AWS
 
-There are four major use cases for running Solana nodes: consensus, “light” RPC node, “heavy” RPC node, and history node. Depending on the use case, you start your ‘solana-validator’ process with different set of parameters and might use different infrastructure configurations. Let’s review them.
+There are four major use cases for running Solana nodes: Consensus, "Base” RPC node, “Extended” RPC node, and history node. Depending on the use case, you start your ‘solana-validator’ process with different set of parameters and might use different infrastructure configurations. Let’s review them.
 
 ### Consensus node
 

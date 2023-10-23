@@ -17,7 +17,7 @@ Solana nodes on AWS can be deployed in 3 different configurations: Consensus, ba
 
 ![Highly Available Nodes Deployment](./doc/assets/Architecture-HANodes.drawio.png)
 
-1.	A set of Solana nodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on [Solana Clusters](https://docs.solana.com/clusters) through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+1.	A set of Base or Extended RPC Solana nodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on [Solana Clusters](https://docs.solana.com/clusters) through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html). **Note that HA setup is not suitable for Consensus nodes.**
 2.	The Solana nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
 3.	The Solana nodes use all required secrets locally, but store a copy in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) as secure backup.
 4.	The Solana nodes send various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch.
@@ -25,7 +25,7 @@ Solana nodes on AWS can be deployed in 3 different configurations: Consensus, ba
 ## Managing Secrets
 During the startup, if a node can't find the necessary identity file on the attached Root EBS volume, it generates a new one and stores it in AWS Secrets Manager. For a single-node deployment, the ARN of a secret can be provided within the `.env` configuration file with configuration and the node will pick it up.
 
-RPC and RPC nodes with secondary indexes use only 1 secret: 
+Base RPC and Extended RPC nodes use only 1 secret: 
 
 - **Solana Node Identity Secret**: The identity key pair for a Solana node.
 
