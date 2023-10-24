@@ -113,7 +113,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 3. Configure  your setup
 
-Create your own copy of `.env` file and edit it:
+Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
 ```bash
    # Make sure you are in aws-blockchain-node-runners/lib/solana
    cd lib/solana
@@ -236,7 +236,7 @@ The result should be like this (the actual balance might change):
    sudo cat /var/log/cloud-init-output.log
 ```
 
-3. How can I restart the Solana serice?
+3. How can I restart the Solana service?
 
 ``` bash
    export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
