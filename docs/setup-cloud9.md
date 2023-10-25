@@ -90,9 +90,9 @@ aws configure set default.region us-east-2
 Install NodeJS v18 and set as the default version
 
 ```bash
-nvm install 18
-nvm use 18
-nvm alias default 18
+nvm install v16
+nvm use v16
+nvm alias default v16
 ```
 
 The AWS CDK includes the CDK Toolkit (also called the CLI), a command line tool for working with your AWS CDK apps and stacks. Install the CDK toolkit
