@@ -12,7 +12,7 @@ export interface DataVolumeConfig {
     throughput: number;
 }
 
-interface BaseNodeConfig {
+export interface BaseNodeConfig {
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
 }

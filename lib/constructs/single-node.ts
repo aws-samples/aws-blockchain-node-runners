@@ -9,6 +9,7 @@ export interface SingleNodeConstructCustomProps {
   instanceName: string,
   instanceType: ec2.InstanceType,
   dataVolumes: configTypes.DataVolumeConfig[],
+  rootDataVolumeDeviceName?: string,
   machineImage: cdk.aws_ec2.IMachineImage,
   role: cdk.aws_iam.IRole,
   vpc: cdk.aws_ec2.IVpc,
@@ -28,6 +29,7 @@ export class SingleNodeConstruct extends cdkContructs.Construct {
       instanceName,
       instanceType,
       dataVolumes,
+      rootDataVolumeDeviceName,
       machineImage,
       role,
       vpc,
@@ -45,7 +47,7 @@ export class SingleNodeConstruct extends cdkContructs.Construct {
       blockDevices: [
           {
             // ROOT VOLUME
-            deviceName: "/dev/xvda",
+            deviceName: rootDataVolumeDeviceName ? rootDataVolumeDeviceName :"/dev/xvda",
             volume: ec2.BlockDeviceVolume.ebs(46, {
                 deleteOnTermination: true,
                 encrypted: true,

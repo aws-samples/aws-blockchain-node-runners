@@ -1,6 +1,6 @@
 # AWS Cloud9 Setup
 
-Most steps in this repository will need to be performed from a Linux command prompt. An especially convenient way of doing this is to use AWS Cloud9, a cloud-based Integrated Development Environment (IDE). Cloud9 allows you to edit source files and execute commands from an easy-to-use web interface. It comes preconfigured with many of the tools needed for software development, and because it runs in the AWS Cloud, it can be an especially easy way to access other cloud services. One other handy feature is that your Cloud9 instances automatically stop running after a configurable period of inactivity, which helps reduce costs.
+Most steps in this repository will need to be performed from a Linux command prompt. An especially convenient way of doing this is to use AWS Cloud9, a cloud-based Integrated Development Environment (IDE). Cloud9 allows you to edit source files and execute commands from an easy-to-use web interface. It comes pre-configured with many of the tools needed for software development, and because it runs in the AWS Cloud, it can be an especially easy way to access other cloud services. One other handy feature is that your Cloud9 instances automatically stop running after a configurable period of inactivity, which helps reduce costs.
 
 ## Create a Cloud9 environment
 
@@ -14,10 +14,10 @@ Create an instance profile called **Cloud9-Developer-Access**
 
 1. Create role policy definition file
 
-    ```bash
-    cat <<EOF > ec2-trust-policy.json
+```bash
+cat > ec2-trust-policy.json <<EOF
     {
-        "Version": "2012-10-17",
+    "Version": "2012-10-17",
         "Statement": [
             {
             "Effect": "Allow",
@@ -28,38 +28,38 @@ Create an instance profile called **Cloud9-Developer-Access**
             }
         ]
     }
-    EOF
-    ```
+EOF
+```
 
 2. Create new IAM role called "Cloud9-Developer-Access" and assign the new role policy
 
-    ```bash
-    aws iam create-role \
-    --role-name Cloud9-Developer-Access \
-    --assume-role-policy-document file://ec2-trust-policy.json
-    ```
+```bash
+aws iam create-role \
+--role-name Cloud9-Developer-Access \
+--assume-role-policy-document file://ec2-trust-policy.json
+```
 
 3. Attach AWS Managed policy with AdministratorAccess to the new role
 
-    ```bash
-    aws iam attach-role-policy \
-        --role-name Cloud9-Developer-Access \
-        --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
-    ```
+```bash
+aws iam attach-role-policy \
+    --role-name Cloud9-Developer-Access \
+    --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
+```
 
 4. Create EC2 instance profile
 
-    ```bash
-    aws iam create-instance-profile --instance-profile-name Cloud9-Developer-Access
-    ```
+```bash
+aws iam create-instance-profile --instance-profile-name Cloud9-Developer-Access
+```
 
 5. Add the new role to the instance profile
 
-    ```bash
-    aws iam add-role-to-instance-profile \
-        --instance-profile-name Cloud9-Developer-Access \
-        --role-name Cloud9-Developer-Access
-    ```
+```bash
+aws iam add-role-to-instance-profile \
+    --instance-profile-name Cloud9-Developer-Access \
+    --role-name Cloud9-Developer-Access
+```
 
 ## Modify Cloud9 IAM role
 
@@ -90,15 +90,14 @@ aws configure set default.region us-east-2
 Install NodeJS v18 and set as the default version
 
 ```bash
-nvm install 18
-nvm use 18
-nvm alias default 18
+nvm install 16
+nvm use 16
+nvm alias default 16
 ```
 
 The AWS CDK includes the CDK Toolkit (also called the CLI), a command line tool for working with your AWS CDK apps and stacks. Install the CDK toolkit
 
 ```bash
-
 npm install -g aws-cdk
 cdk --version
 ```
@@ -125,7 +124,7 @@ cdk bootstrap aws://<INSERT_YOUR_AWS_ACCOUNT_NUMBER>/<INSERT_YOUR_AWS_REGION>
 
 2. Delete the instance profile and IAM role
 
-    ```bash
-    aws iam delete-instance-profile --instance-profile-name Cloud9-Developer-Access
-    aws iam delete-role --role-name Cloud9-Developer-Access
-    ```
+```bash
+aws iam delete-instance-profile --instance-profile-name Cloud9-Developer-Access
+aws iam delete-role --role-name Cloud9-Developer-Access
+```
