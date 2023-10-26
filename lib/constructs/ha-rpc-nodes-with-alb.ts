@@ -101,6 +101,12 @@ export class HANodesConstruct extends cdkContructs.Construct {
       role: role,
     });
 
+  const vpcSubnets= {
+      subnetType: ec2.SubnetType.PUBLIC,
+      onePerAz: true,
+      availabilityZones: availabilityZones,
+  };
+
   const rpcNodesAsg = new autoscaling.AutoScalingGroup(this, "auto-scaling-group", {
       launchTemplate: launchTemplate,
       vpc: vpc,
@@ -108,10 +114,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
       minCapacity: 0,
       desiredCapacity: numberOfNodes,
       maxCapacity: 4,
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PUBLIC,
-        availabilityZones: availabilityZones.slice(0, 2),
-    },
+      vpcSubnets: vpcSubnets,
       defaultInstanceWarmup: cdk.Duration.minutes(1),
       healthCheck: autoscaling.HealthCheck.elb({
           // Should give enough time for the node to catch up
@@ -155,10 +158,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
       vpc,
       internetFacing: false,
       securityGroup: albSg,
-      vpcSubnets: {
-          subnetType: ec2.SubnetType.PUBLIC,
-          availabilityZones: availabilityZones.slice(0, 2),
-      },
+      vpcSubnets: vpcSubnets,
   });
 
   alb.logAccessLogs(albLogBucket, STACK_NAME);

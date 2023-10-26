@@ -103,7 +103,7 @@ Create your own copy of `.env` file and edit it:
    # Make sure you are in aws-blockchain-node-runners/lib/ethereum
    npx cdk deploy eth-sync-node --json --outputs-file sync-node-deploy.json
 ```
-   **NOTE:** The default VPC must have public subnet, and public subnet must set `Auto-assign public IPv4 address` to `YES`
+   **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`
 
 6. After starting the node you need to wait for the inital syncronization process to finish. It may take from half a day to about 6-10 days depending on the client combination and the state of the network. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
 
