@@ -127,7 +127,7 @@ Note: the snapshot backup process will automatically run ever day at midnight ti
 2. Give the new RPC nodes about 30 minutes (up to 2 hours for Erigon) to initialize and then run the following query against the load balancer behind the RPC node created
 
 ```bash
-    export ETH_RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
+    export ETH_RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.alburl? | select(. != null)')
     echo $ETH_RPC_ABL_URL
     
     # We query token balance of Beacon deposit contract: https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa
@@ -166,13 +166,14 @@ The result should be like this (the actual balance might change):
    # Make sure you are in aws-blockchain-node-runners/lib/ethereum
    
    # Undeploy RPC Nodes
-    cdk destroy rpc-nodes-stack
+    cdk destroy eth-rpc-nodes
 
     # Undeploy Sync Node
-    cdk destroy sync-node-stack
+    cdk destroy eth-sync-node
 
+    # You need to manually delete an s3 bucket with a name similar to 'eth-snapshots-$accountid-eth-nodes-common' on the console,firstly empty the bucket,secondly delete the bucket,and then execute
     # Delete all common components like IAM role and Security Group
-    cdk destroy common-stack
+    cdk destroy eth-common
 ```
 
 2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
