@@ -12,7 +12,7 @@ describe("EthSyncNodeStack", () => {
     // Create the EthSyncNodeStack.
     const ethSyncNodeStack = new EthSyncNodeStack(app, "eth-sync-node", {
       stackName: `eth-sync-node-${config.baseConfig.clientCombination}`,
-  
+
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
       ethClientCombination: config.baseConfig.clientCombination,
       instanceType: config.syncNodeConfig.instanceType,

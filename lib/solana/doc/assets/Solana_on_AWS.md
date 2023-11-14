@@ -12,7 +12,7 @@ Consensus nodes on both Mainnet Beta and testnets [support proof-of-stake consen
 - Root volume: EBS gp3 500 GB, 3K IOPS, 250 MB/s throughput,
 - Accounts volume: EBS gp3 500GB, 5K IOPS, 700 MB/s throughput,
 - Data volume: EBS gp3 2TB, 10K IOPS, 700 MB/s throughput.
- 
+
 To set up new validator node, you first need to generate cryptographic keys that will be used in the process. After the keys are generated with the standard `solana-keygen` tool on the EC2 instance you can keep a backup copy of the key pair in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html).
 
 Based on amount you have at stake, you can estimate with [community-developed calculators](https://www.stakingrewards.com/asset/solana) the amount of profit your validator node can generate and then calculate the cost of the configuration with [AWS calculator](https://calculator.aws/#/). Also note that, depending on the amount at stake, your validator node will generate between 150 TB to 300 TB of data transfer out to the Internet per month, so talk to your AWS account manager about potential cost optimization.
@@ -29,20 +29,20 @@ Base RPC nodes (or just "RPC nodes") can be used by your application to perform 
 Data transfer costs for this node can vary depending on whether you expose the RPC endpoints to the Internet (generates more traffic to the Internet) or consume it with the same AWS Availability Zone (will cost you nothing). If you are not exposing the RPC interface for external consumption, then your node will generate about 13-15 TB of outgoing data per month per node. It is less than Consensus nodes, but can still be sufficient and better be discussed with your AWS account manager.
 
 - To run RPC node on AWS, use the [Solana Node Runner CDK application](https://github.com/aws-samples/aws-blockchain-node-runners/tree/solana/lib/solana) in [AWS Blockchain Node Runners](https://aws-samples.github.io/aws-blockchain-node-runners/) and use [sample config for RPC node](https://github.com/aws-samples/aws-blockchain-node-runners/blob/solana/lib/solana/sample-configs/.env-sample-baserpc). You can use both Single-node and Highly Available-node setup.
- 
+
 ### Extended RPC nodes with secondary indexes
- 
+
 RPC nodes with secondary indexes allow you to call "extended" RPC functions like mentioned above. To use them you need to enable extra indexes on your RPC node, which requires more hardware. At the time of writing (September 2023) it is recommended to use at least 1 TB or RAM with NVMe discs, or, on AWS an instance like `x2idn.16xlarge` which is also equipped with a physically-attached NVMe SSD [Instance Store volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html). The storage configurations looks like this:
 - Root volume: EBS gp3 500 GB, 3K IOPS, 250 MB/s throughput,
 - Accounts volume: Instance store (comes with the `x2idn.16xlarge` instance) 1.9TB,
 - Data volume: EBS gp3 2TB, 10K IOPS, 700 MB/s throughput.
- 
+
 As with the RPC nodes, data transfer amount may vary and the estimated amount is 15 TB of outgoing data per month per node.
 
 - To run RPC node with secondary indexes on AWS, use the [Solana Node Runner CDK application](https://github.com/aws-samples/aws-blockchain-node-runners/tree/solana/lib/solana) in [AWS Blockchain Node Runners](https://aws-samples.github.io/aws-blockchain-node-runners/) and use [sample config for RPC with secondary indexes node](https://github.com/aws-samples/aws-blockchain-node-runners/blob/solana/lib/solana/sample-configs/.env-sample-extendedrpc). You can use both Single-node and Highly Available-node setup.
- 
+
 ### History nodes
- 
+
 History nodes are not yet available on AWS because or dependency on the GCP's BigTable. But there is some awesome work that Solana community is doing to make this data available in cloud-agnostic way, so stay tuned.
 
 ## Cost Optimization

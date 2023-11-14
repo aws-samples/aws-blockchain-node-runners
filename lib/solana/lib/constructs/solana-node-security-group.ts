@@ -13,10 +13,10 @@ export interface SolanaNodeSecurityGroupConstructProps {
     constructor(scope: cdkContructs.Construct, id: string, props: SolanaNodeSecurityGroupConstructProps) {
       super(scope, id);
 
-      const { 
+      const {
         vpc,
       } = props;
-  
+
       const sg = new ec2.SecurityGroup(this, `rpc-node-security-group`, {
         vpc,
         description: "Security Group for Blockchain nodes",

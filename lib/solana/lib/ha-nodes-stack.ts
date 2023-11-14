@@ -78,7 +78,7 @@ export class SolanaHANodesStack extends cdk.Stack {
         if (nodeConfiguration === "consensus") {
             throw new Error("Consensus node configuration is not yet supported for HA setup");
         }
-        
+
         // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
         const ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
 

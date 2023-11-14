@@ -224,7 +224,7 @@ if $(lsblk | grep -q nvme1n1); then
 
   # Write the line to fstab
   echo $line | sudo tee -a /etc/fstab
-  
+
   mount -a
 
 else

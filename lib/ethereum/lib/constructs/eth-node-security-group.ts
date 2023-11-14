@@ -15,11 +15,11 @@ export interface EthNodeSecurityGroupConstructProps {
     constructor(scope: cdkContructs.Construct, id: string, props: EthNodeSecurityGroupConstructProps) {
       super(scope, id);
 
-      const { 
+      const {
         vpc,
         clientCombination,
       } = props;
-  
+
       const sg = new ec2.SecurityGroup(this, `node-security-group`, {
         vpc,
         description: "Security Group for Blockchain nodes",

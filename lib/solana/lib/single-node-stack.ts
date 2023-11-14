@@ -130,7 +130,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
             INSTANCE_NAME: STACK_NAME,
             REGION: REGION,
         })
-                
+
         new cw.CfnDashboard(this, 'solana-cw-dashboard', {
             dashboardName: STACK_NAME,
             dashboardBody: dashboardString,

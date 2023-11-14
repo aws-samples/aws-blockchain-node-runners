@@ -35,7 +35,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
 
     const availabilityZones = cdk.Stack.of(this).availabilityZones;
 
-    const { 
+    const {
       instanceType,
       dataVolumes,
       rootDataVolumeDeviceName,
@@ -202,7 +202,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
           {
               id: "AwsSolutions-EC29",
               reason: "Its Ok to terminate this instance as long as we have the data in the snapshot",
-          
+
           },
       ],
       true

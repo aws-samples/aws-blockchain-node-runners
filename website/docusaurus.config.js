@@ -86,7 +86,7 @@ const config = {
             items: [
               {
                 label: 'Docs',
-                to: '/docs/intro/intro',
+                to: '/docs/intro',
               },
             ],
           },
@@ -96,6 +96,10 @@ const config = {
               {
                 label: 'Github',
                 href: 'https://github.com/aws-samples/aws-blockchain-node-runners',
+              },
+              {
+                label: 'Contribution guide',
+                href: 'https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md',
               }
             ],
           },
