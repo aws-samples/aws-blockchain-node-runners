@@ -12,7 +12,7 @@ export class SnapshotsS3BucketConstruct extends cdkContructs.Construct {
 
   constructor(scope: cdkContructs.Construct, id: string, props: SnapshotsS3BucketConstructProps) {
     super(scope, id);
-    const { 
+    const {
         bucketName
     } = props;
 
@@ -28,7 +28,7 @@ export class SnapshotsS3BucketConstruct extends cdkContructs.Construct {
         encryption: s3.BucketEncryption.S3_MANAGED,
         enforceSSL: true,
       });
-    
+
       this.bucketName = snapshotsBucket.bucketName;
       this.bucketArn = snapshotsBucket.bucketArn;
       this.arnForObjects = snapshotsBucket.arnForObjects;

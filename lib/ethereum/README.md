@@ -129,7 +129,7 @@ Note: the snapshot backup process will automatically run ever day at midnight ti
 ```bash
     export ETH_RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.alburl? | select(. != null)')
     echo $ETH_RPC_ABL_URL
-    
+
     # We query token balance of Beacon deposit contract: https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa
     curl http://$ETH_RPC_ABL_URL:8545 -X POST -H "Content-Type: application/json" \
     --data '{"method":"eth_getBalance","params":["0x00000000219ab540356cBB839Cbe05303d7705Fa", "latest"],"id":1,"jsonrpc":"2.0"}'
@@ -151,7 +151,7 @@ The result should be like this (the actual balance might change):
    </body>
 ```
 
-**NOTE:** By default and for security reasons the load balancer is available only from wihtin the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs. 
+**NOTE:** By default and for security reasons the load balancer is available only from wihtin the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
 
 ### Clearing up and undeploying everything
 
@@ -161,10 +161,10 @@ The result should be like this (the actual balance might change):
    # Setting the AWS account id and region in case local .env file is lost
     export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
     export AWS_REGION=<your_target_AWS_region>
-   
+
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/ethereum
-   
+
    # Undeploy RPC Nodes
     cdk destroy eth-rpc-nodes
 

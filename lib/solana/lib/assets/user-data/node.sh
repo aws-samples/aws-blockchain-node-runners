@@ -264,7 +264,7 @@ if [[ "$SOLANA_NODE_TYPE" == "consensus" ]]; then
           sudo mv ~/id.json /root/.config/solana/id.json
           echo "Creating Vote Account on-chain"
           sudo ./solana create-vote-account /home/solana/config/vote-account-keypair.json /home/solana/config/validator-keypair.json /home/solana/config/authorized-withdrawer-keypair.json
-          
+
           echo "Deleting Transaction Funding Account Secret from the local disc"
           sudo rm  /root/.config/solana/id.json
         else
