@@ -1,15 +1,4 @@
----
-sidebar_position: 1
-sidebar_label: About blueprints
----
-
-# Node Runners Blueprints
-
-Node Runner Blueprints are TypeScrypt applications built with [AWS Cloud Development Kit](https://aws.amazon.com/cdk/). They are infrastructure as code apps that you can use to deploy to AWS blockchain nodes in different configurations be it solo nodes or highly available setups. Most of the apps will look into `.env` file in its root directory for input params to know which compute, storage and node setup options to use during deployment.
-
-👈 Use navigation bar on the left for the setup guides for different protocols.
-
-## Adding new Node Runner Blueprints
+# Adding Node Runner Blueprints
 
 First of all, THANK YOU! The easier it is to run a blockchain node on AWS the simpler it is for the ecosystem to build with it. Here are the major steps to contribute a Node Runner Blueprint:
 
@@ -17,7 +6,7 @@ First of all, THANK YOU! The easier it is to run a blockchain node on AWS the si
 2. Create a new issue to propose a new node type to let everyone know that you are going ot work on it. Use `Feature request` template for that.
 3. [Fork this repository](https://help.github.com/articles/fork-a-repo/).
 4. Use one of the existing blueprints as a baseline. Choose the one that has architecture closest to the one you want to create.
-5. Once you are happy with how your blueprint works, follow our [Contribution Guide](https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md) to create a [pull request](https://help.github.com/articles/creating-a-pull-request/) for our team to review it.
+5. Once you are happy with how your blueprint works, follow our [CONTRIBUTION GUIDE](../CONTRIBUTING.md) to create a [pull request](https://help.github.com/articles/creating-a-pull-request/) for our team to review it.
 6. Once merged, let your community know that the new Node Runner Blueprint is ready for them to use!
 
 ### Recommended directory and file structure for a Node Runner Blueprint
