@@ -10,7 +10,7 @@ Our journey began with research projects and testing conducted within AWS. As we
 
 The AWS Solutions Architects involved in this project pour their hearts into it, all while juggling their primary job responsibilities. Their passion for blockchain technology drives them to provide the best possible support for this initiative. We're excited to have you on board and look forward to making the blockchain world more accessible together! 😊
 
-We welcome contributions from both enthusiasts like us or established blockchain organizations, which many of our customers are. You can report bugs, create pull requests, add support for new nodes or new infrastructure configurations for existing ones. Please have a look at our [Contribution Guide](https://github.com/aws-samples/aws-blockchain-node-runners/blob/solana/CONTRIBUTING.md).
+We welcome contributions from both enthusiasts like us or established blockchain organizations, which many of our customers are. You can report bugs, create pull requests, add support for new nodes or new infrastructure configurations for existing ones. Please have a look at our [Contribution Guide](https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md).
 
 ## Code of Conduct
 This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct).
