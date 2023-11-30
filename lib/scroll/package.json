@@ -1,0 +1,20 @@
+{
+  "name": "aws-blockchain-node-runners-scroll",
+  "version": "0.1.0",
+  "bin": {
+    "scroll": "bin/scroll.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk",
+    "cdk_deploy_common": "cdk deploy scroll-common",
+    "cdk_synth_single_node": "cdk synth scroll-single-node",
+    "cdk_deploy_single_node": "cdk deploy scroll-single-node",
+    "cdk_destroy_single_node": "cdk destroy scroll-single-node"
+  },
+  "dependencies": {
+    "@types/node": "^20.10.0"
+  }
+}
