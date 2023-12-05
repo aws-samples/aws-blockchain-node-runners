@@ -77,6 +77,7 @@ export class PolygonRpcNodesStack extends cdk.Stack {
             _STACK_NAME_: STACK_NAME,
             _FORMAT_DISK_: "true",
             _DATA_VOLUME_TYPE_: dataVolumes[0].type,
+            _NETWORK_: network
         });
 
         // Setting up the nodse using generic High Availability (HA) Node constract
