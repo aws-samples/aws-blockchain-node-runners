@@ -99,19 +99,24 @@ git checkout scroll-v5.0.0
 echo "Install Go 1.18 Version"
 sudo snap info go
 sudo snap install go --channel=1.18/stable --classic
+whereis go
+export GOPATH=/snap/bin/go
+go env|grep CACHE
+sudo sudo - ubuntu
 
 echo "Install Build Tools"
 sudo apt install build-essential
 cd /home/ubuntu/l2geth-source
-echo "Build now"
-make nccc_geth
+echo "Build: running..."
+sudo make nccc_geth
 alias l2geth=./build/bin/geth
 sudo chown ubuntu:ubuntu -R ../l2geth-source
+echo "Build: done"
 
 # Copy startup script to correct location
 if [[ "$SCROLL_NODE_TYPE" == "baserpc" ]]; then
-  mkdir "/home/ubuntu/bin/"
-  mv /opt/scroll/rpc-template.sh /home/ubuntu/bin/validator.sh
+  sudo mkdir "/home/ubuntu/bin/"
+  sudo mv /opt/scroll/rpc-template.sh /home/ubuntu/bin/validator.sh
 fi
 
 sudo sed -i "s#__L2GETH_L1_ENDPOINT__#$L2GETH_L1_ENDPOINT#g" /home/ubuntu/bin/validator.sh
