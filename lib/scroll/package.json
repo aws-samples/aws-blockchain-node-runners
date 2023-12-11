@@ -10,9 +10,9 @@
     "test": "jest",
     "cdk": "cdk",
     "cdk_deploy_common": "cdk deploy scroll-common",
-    "cdk_synth_single_node": "cdk synth scroll-single-node",
-    "cdk_deploy_single_node": "cdk deploy scroll-single-node",
-    "cdk_destroy_single_node": "cdk destroy scroll-single-node"
+    "cdk_synth_single_node": "cdk synth scroll-single-node-2",
+    "cdk_deploy_single_node": "cdk deploy scroll-single-node-2",
+    "cdk_destroy_single_node": "cdk destroy scroll-single-node-2"
   },
   "dependencies": {
     "@types/node": "^20.10.0"

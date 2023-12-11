@@ -61,7 +61,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 ### Clone this repository and install dependencies
 
 ```bash
-   git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
+   git clone https://github.com/alickwong/aws-blockchain-node-runners
    cd aws-blockchain-node-runners
    npm install
 ```
@@ -78,17 +78,22 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 **NOTE:** You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
 
-3. Configure  your setup
+3. Configure your setup
 
 Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
 ```bash
    # Make sure you are in aws-blockchain-node-runners/lib/scroll
    cd lib/scroll
+   npm install
    pwd
    cp ./sample-configs/.env-sample-baserpc .env
    nano .env
 ```
-**NOTE:** Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
+> [!NOTE]
+> Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
+
+> [!NOTE]
+> You will need access to a fully-synced Ethereum Mainnet RPC endpoint before running l2geth. Please be reminded to update `L2GETH_L1_ENDPOINT` in `.env` file.
 
 
 4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
@@ -98,6 +103,12 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
    # Make sure you are in aws-blockchain-node-runners/lib/scroll
    npx cdk deploy scroll-common
 ```
+
+> [!IMPORTANT]
+> All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
+> ```angular2html 
+> cdk bootstrap aws://ACCOUNT-NUMBER/REGION
+> ```
 
 5. Deploy Sync Node
 
@@ -112,7 +123,23 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
     - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
     - Open `Dashboards` and select `scroll-single-node` from the list of dashboards.
 
-### Clearing up and undeploy everything
+## Accessing the RPC Node
+Since SSM agent is installed and configured in the EC2. You may reference "[Connect to your Linux instance with AWS Systems Manager Session Manager](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager-to-linux.html)".
+
+### l2geth Agent
+The agent direct is located in `/home/ubuntu/l2geth-source`. You may use the following cmd for start/ stop the service.
+```bash
+sudo systemctl restart scroll.service
+sudo systemctl status scroll.service
+sudo systemctl stop scroll.service
+```
+The data director of l2geth agent is under:
+```bash
+/home/ubuntu/l2geth-source/l2geth-datadir
+```
+
+
+## Clearing up and undeploy everything
 
 1. Undeploy HA Nodes, Single Nodes and Common stacks
 
@@ -124,19 +151,16 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/scroll
 
-   # Undeploy HA Nodes
-    cdk destroy scroll-ha-nodes
+   # Undeploy Single Node
+   cdk destroy scroll-single-node
 
-    # Undeploy Single Node
-    cdk destroy sync-single-node
-
-    # Delete all common components like IAM role and Security Group
-    cdk destroy scroll-common
+   # Delete all common components like IAM role and Security Group
+   cdk destroy scroll-common
 ```
 
 2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
 
-### FAQ
+## FAQ
 
 1. How to check the logs of the clients running on my sync node?
 
