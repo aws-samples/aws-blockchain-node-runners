@@ -6,7 +6,7 @@ This is RPC Scroll nodes setup on AWS guide. In addition, you can choose to depl
 
 ### Single node setup
 
-![Single Node Deployment](./doc/assets/Architecture-SingleNode.jpg)
+![Single Node Deployment](./doc/assets/Architecture-SingleNode_v2.jpg)
 
 1.	A Scroll node deployed in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on [Scroll Clusters](https://docs.scroll.com/clusters) through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 2.	The Scroll node is used by dApps or development tools internally from within the Default VPC. JSON RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
