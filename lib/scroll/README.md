@@ -6,13 +6,14 @@ This is RPC Scroll nodes setup on AWS guide. In addition, you can choose to depl
 
 ### Single node setup
 
-![Single Node Deployment](./doc/assets/Architecture-SingleNode.drawio.jpg)
+![Single Node Deployment](./doc/assets/Architecture-SingleNode.jpg)
 
 1.	A Scroll node deployed in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on [Scroll Clusters](https://docs.scroll.com/clusters) through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 2.	The Scroll node is used by dApps or development tools internally from within the Default VPC. JSON RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
 3.	The Scroll node uses all required secrets locally, but stores a copy in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) as secure backup.
-4.	The Scroll node sends various monitoring metrics for both EC2 and Scroll nodes to Amazon CloudWatch.
-5.  You will need access to a fully-synced Ethereum Mainnet RPC endpoint before running l2geth. 
+4.  You will need access to a fully-synced Ethereum Mainnet RPC endpoint before running l2geth.
+5.  The Scroll node sends various monitoring metrics for both EC2 and Scroll nodes to Amazon CloudWatch.
+
 
 ## Additional materials
 
