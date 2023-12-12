@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INIT_COMPLETED_FILE=/var/solana/data/init-completed
+INIT_COMPLETED_FILE=/var/scroll/data/init-completed
 INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq .region -r)
 TIMESTAMP=$(date +"%Y-%m-%dT%H:%M:%S%:z")
@@ -25,8 +25,8 @@ TIMESTAMP=$(date +"%Y-%m-%dT%H:%M:%S%:z")
 #        SCROLL_BLOCK_HEIGHT=0
 #    fi
 #
-#    aws cloudwatch put-metric-data --metric-name solana_block_height --namespace CWAgent --value $SCROLL_BLOCK_HEIGHT --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
-#    aws cloudwatch put-metric-data --metric-name solana_slots_behind --namespace CWAgent --value $SCROLL_SLOTS_BEHIND --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
+#    aws cloudwatch put-metric-data --metric-name scroll_block_height --namespace CWAgent --value $SCROLL_BLOCK_HEIGHT --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
+#    aws cloudwatch put-metric-data --metric-name scroll_slots_behind --namespace CWAgent --value $SCROLL_SLOTS_BEHIND --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
 #else
-#    aws cloudwatch put-metric-data --metric-name solana_block_height --namespace CWAgent --value 0 --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
+#    aws cloudwatch put-metric-data --metric-name scroll_block_height --namespace CWAgent --value 0 --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
 #fi
