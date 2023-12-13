@@ -58,7 +58,8 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
     aws ec2 create-default-vpc
     ```
 
-   **NOTE:** You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
+   > NOTE:
+   > You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
 
 3. Configure your setup
 
@@ -71,10 +72,10 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    cp ./sample-configs/.env-sample-baserpc .env
    nano .env
     ```
-   > [!NOTE]
+   > NOTE:
    > Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
 
-   > [!NOTE]
+   > NOTE:
    > You will need access to a fully-synced Ethereum Mainnet RPC endpoint before running l2geth. Please be reminded to update `L2GETH_L1_ENDPOINT` in `.env` file.
 
 
@@ -86,7 +87,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    npx cdk deploy scroll-common
    ```
 
-   > [!IMPORTANT]
+   > IMPORTANT:
    > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
    > ```angular2html 
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
