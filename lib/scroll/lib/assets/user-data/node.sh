@@ -74,6 +74,14 @@ fi
 echo "Waiting for volumes to be available"
 sleep 60
 
+echo "Install Scroll L2Geth agent"
+pwd
+whoami
+cd /home/ubuntu
+pwd
+git clone https://github.com/scroll-tech/go-ethereum l2geth-source
+cd /home/ubuntu/l2geth-source
+git checkout scroll-v5.0.0
 
 echo "Preparing EBS Volume"
 DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
@@ -85,16 +93,8 @@ echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
 echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
 echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
 echo $DATA_VOLUME_FSTAB_CONF | sudo tee -a /etc/fstab
+sudo mkdir "l2geth-datadir"
 sudo mount -a
-
-echo "Install Scroll L2Geth agent"
-pwd
-whoami
-cd /home/ubuntu
-pwd
-git clone https://github.com/scroll-tech/go-ethereum l2geth-source
-cd /home/ubuntu/l2geth-source
-git checkout scroll-v5.0.0
 
 echo "Install Go 1.18 Version"
 sudo snap info go
@@ -102,7 +102,7 @@ sudo snap install go --channel=1.18/stable --classic
 whereis go
 export GOPATH=/snap/bin/go
 go env|grep CACHE
-sudo sudo - ubuntu
+sudo su - ubuntu
 
 echo "Install Build Tools"
 sudo apt install build-essential

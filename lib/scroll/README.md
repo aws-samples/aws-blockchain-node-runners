@@ -137,9 +137,26 @@ sudo systemctl stop scroll.service
 ```
 The data director of l2geth agent is under:
 ```bash
-/home/ubuntu/l2geth-source/l2geth-datadir
+cd /home/ubuntu/l2geth-source/l2geth-datadir
+du -sch ./*
+```
+### Agent Loggings
+Your may find the loggings in:
+```bash
+tail -f /var/log/scroll/error.log
 ```
 
+### Connecgting to Geth IPC
+In a separate shell, you can now attach to l2geth.
+```bash
+l2geth attach "./l2geth-datadir/geth.ipc"
+
+> admin.peers.length
+5
+
+> eth.blockNumber
+10000
+```
 
 ## Clearing up and undeploy everything
 
