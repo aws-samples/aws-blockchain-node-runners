@@ -1,6 +1,6 @@
 # Sample AWS Blockchain Node Runner app for Scroll Nodes
 
-This is RPC Scroll nodes setup on AWS guide. In addition, you can choose to deploy those configurations as a single node setup. 
+This is RPC Scroll nodes (L2Geth) setup on AWS guide. 
 
 ## Overview of Deployment Architectures for Single Node setups
 
@@ -100,43 +100,61 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    npx cdk deploy scroll-single-node --json --outputs-file single-node-deploy.json
    ```
 
-6. After starting the node you need to wait for the initial synchronization process to finish. It may take about 30 minutes and you can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `current block` and `slots behind` metrics. When the node is fully synced the `slots behind` metric should go to 0. To see them:
-
-    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
-    - Open `Dashboards` and select `scroll-single-node` from the list of dashboards.
+    
 
 ## Accessing the RPC Node
-Since SSM agent is installed and configured in the EC2. You may reference "[Connect to your Linux instance with AWS Systems Manager Session Manager](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager-to-linux.html)".
+After starting the node you will need to wait for the initial synchronization process to finish.To see the progress, you may use SSM to connect into EC2 first. Here is a guide: "[Connect to your Linux instance with AWS Systems Manager Session Manager](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager-to-linux.html)".
 
-### l2geth Agent
+After connecting to the EC2, you may use the following commend to trace the init synchronization process:
+```bash
+tail -f /var/log/scroll/error.log
+```
+When the process complete, you will see `L1 message initial sync completed` in the log:
+```bash
+INFO [12-13|08:25:46.095] Syncing L1 messages                      processed=18,683,700 confirmed=18,775,938 collected=77348 progress(%)=99.509
+INFO [12-13|08:25:56.165] Syncing L1 messages                      processed=18,699,700 confirmed=18,775,938 collected=78100 progress(%)=99.594
+INFO [12-13|08:26:06.122] Syncing L1 messages                      processed=18,709,300 confirmed=18,775,938 collected=79042 progress(%)=99.645
+INFO [12-13|08:26:16.107] Syncing L1 messages                      processed=18,729,400 confirmed=18,775,938 collected=79585 progress(%)=99.752
+INFO [12-13|08:26:26.127] Syncing L1 messages                      processed=18,741,900 confirmed=18,775,938 collected=80688 progress(%)=99.819
+INFO [12-13|08:26:36.208] Syncing L1 messages                      processed=18,750,200 confirmed=18,775,938 collected=82535 progress(%)=99.863
+INFO [12-13|08:26:46.124] Syncing L1 messages                      processed=18,755,400 confirmed=18,775,938 collected=84176 progress(%)=99.891
+INFO [12-13|08:26:56.120] Syncing L1 messages                      processed=18,768,200 confirmed=18,775,938 collected=85240 progress(%)=99.959
+INFO [12-13|08:27:00.524] L1 message initial sync completed        latestProcessedBlock=18,775,938
+```
+
+### Connecgting to Geth IPC
+Once the synchronization process is completed. You can now attach to l2geth.
+```bash
+sudo su - ubuntu
+cd /home/ubuntu/l2geth-source/
+alias l2geth=./build/bin/geth
+l2geth attach "./l2geth-datadir/geth.ipc"
+
+> admin.peers.length
+14
+
+> eth.blockNumber
+10000
+```
+
+### l2geth directory
 The agent direct is located in `/home/ubuntu/l2geth-source`. You may use the following cmd for start/ stop the service.
 ```bash
 sudo systemctl restart scroll.service
 sudo systemctl status scroll.service
 sudo systemctl stop scroll.service
 ```
-The data director of l2geth agent is under:
+The data directory of l2geth agent is under:
 ```bash
 cd /home/ubuntu/l2geth-source/l2geth-datadir
 du -sch ./*
 ```
-### Agent Loggings
-Your may find the loggings in:
-```bash
-tail -f /var/log/scroll/error.log
-```
 
-### Connecgting to Geth IPC
-In a separate shell, you can now attach to l2geth.
-```bash
-l2geth attach "./l2geth-datadir/geth.ipc"
+### Monitoring
+ It may take about 30 minutes and you can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch current block and slots behind metrics. When the node is fully synced the slots behind metric should go to 0. To see them:
 
-> admin.peers.length
-5
-
-> eth.blockNumber
-10000
-```
+Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
+Open Dashboards and select scroll-single-node from the list of dashboards.
 
 ## Clearing up and undeploy everything
 
@@ -190,23 +208,12 @@ l2geth attach "./l2geth-datadir/geth.ipc"
 3. How can I restart the Scroll service?
 
    ``` bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
+   $INSTANCE_ID=i-xxxxxxxxxxxxx
+   $AWS_REGION=us-east-1
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo systemctl status sol
-   ```
-4. How to upload a secret to AWS Secrets Manager?
-   ```bash
-    # Create key pair
-    sudo ./scroll-keygen new --no-passphrase -o /tmp/keypair.json
-    SCROLL_ADDRESS=$(sudo ./scroll-keygen pubkey /tmp/keypair.json)
-    # Upload key pair to AWS Secrets Manager"
-    export AWS_REGION=<your_region>
-    sudo aws secretsmanager create-secret --name "scroll/"$SCROLL_ADDRESS --description "Scroll secret key pair" --secret-string file:///tmp/keypair.json --region $AWS_REGION
-    #Delete key pair from the local file system
-    rm -rf /tmp/keypair.json
+   sudo systemctl status scroll.service
+   sudo systemctl restart scroll.service
    ```
 
 ## Upgrades
-
 When nodes need to be upgraded or downgraded, [use blue/green pattern to do it](https://aws.amazon.com/blogs/devops/performing-bluegreen-deployments-with-aws-codedeploy-and-auto-scaling-groups/). This is not yet automated and contributions are welcome!
