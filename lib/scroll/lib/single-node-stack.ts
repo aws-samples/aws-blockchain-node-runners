@@ -5,7 +5,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as path from "path";
 import * as fs from "fs";
-// import * as nodeCwDashboard from "./assets/node-cw-dashboard"
+import * as nodeCwDashboard from "./assets/node-cw-dashboard"
 import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 import * as nag from "cdk-nag";
 import { SingleNodeConstruct } from "../../constructs/single-node"
@@ -124,16 +124,16 @@ export class ScrollSingleNodeStack extends cdk.Stack {
         node.instance.addUserData(modifiedInitNodeScript);
 
         // Adding CloudWatch dashboard to the node
-        // const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SingleNodeCWDashboardJSON), {
-        //     INSTANCE_ID:node.instanceId,
-        //     INSTANCE_NAME: STACK_NAME,
-        //     REGION: REGION,
-        // })
-        //
-        // new cw.CfnDashboard(this, 'scroll-cw-dashboard', {
-        //     dashboardName: STACK_NAME,
-        //     dashboardBody: dashboardString,
-        // });
+        const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SyncNodeCWDashboardJSON), {
+            INSTANCE_ID:node.instanceId,
+            INSTANCE_NAME: STACK_NAME,
+            REGION: REGION,
+        })
+
+        new cw.CfnDashboard(this, 'scroll-cw-dashboard', {
+            dashboardName: STACK_NAME,
+            dashboardBody: dashboardString,
+        });
 
         new cdk.CfnOutput(this, "node-instance-id", {
             value: node.instanceId,
