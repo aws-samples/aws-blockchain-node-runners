@@ -1,6 +1,6 @@
 # Sample AWS Blockchain Node Runner app for Scroll Nodes
 
-This is RPC Scroll nodes (L2Geth) setup on AWS guide. 
+This is RPC Scroll nodes (L2Geth) setup on AWS guide.
 
 ## Overview of Deployment Architectures for Single Node setups
 
@@ -88,7 +88,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
    > IMPORTANT:
    > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
-   > ```angular2html 
+   > ```angular2html
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
    > ```
 
@@ -100,7 +100,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    npx cdk deploy scroll-single-node --json --outputs-file single-node-deploy.json
    ```
 
-    
+
 
 ## Accessing the RPC Node
 After starting the node you will need to wait for the initial synchronization process to finish.To see the progress, you may use SSM to connect into EC2 first. Here is a guide: "[Connect to your Linux instance with AWS Systems Manager Session Manager](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager-to-linux.html)".
@@ -143,7 +143,7 @@ curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","me
 ```
 
 ### l2geth directory
-The agent direct is located in `/home/ubuntu/l2geth-source`. You may use the following cmd for start/ stop the service.
+The agent directory is located in `/home/ubuntu/l2geth-source`. You may use the following cmd for start/ stop the service.
 ```bash
 sudo systemctl restart scroll.service
 sudo systemctl status scroll.service
