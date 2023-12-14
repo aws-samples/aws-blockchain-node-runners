@@ -137,6 +137,11 @@ l2geth attach "./l2geth-datadir/geth.ipc"
 10000
 ```
 
+Or you can use curl:
+```bash
+curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545
+```
+
 ### l2geth directory
 The agent direct is located in `/home/ubuntu/l2geth-source`. You may use the following cmd for start/ stop the service.
 ```bash

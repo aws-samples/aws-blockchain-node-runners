@@ -42,8 +42,3 @@ export const baseNodeConfig: configTypes.ScrollBaseNodeConfig = {
     l1Endpoint: process.env.L2GETH_L1_ENDPOINT || "http://xxx",
 };
 
-export const haNodeConfig: configTypes.ScrollHAConfig = {
-    albHealthCheckGracePeriodMin: process.env.SCROLL_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN ? parseInt(process.env.SCROLL_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN) : 10,
-    heartBeatDelayMin: process.env.SCROLL_HA_NODES_HEARTBEAT_DELAY_MIN ? parseInt(process.env.SCROLL_HA_NODES_HEARTBEAT_DELAY_MIN) : 40,
-    numberOfNodes: process.env.SCROLL_HA_NUMBER_OF_NODES ? parseInt(process.env.SCROLL_HA_NUMBER_OF_NODES) : 2,
-};

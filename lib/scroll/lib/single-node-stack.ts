@@ -12,7 +12,6 @@ import { SingleNodeConstruct } from "../../constructs/single-node"
 import * as configTypes from "./config/scrollConfig.interface";
 import * as constants from "../../constructs/constants";
 import { ScrollNodeSecurityGroupConstruct } from "./constructs/scroll-node-security-group"
-import * as config from "./config/scrollConfig";
 
 export interface ScrollSingleNodeStackProps extends cdk.StackProps {
     instanceType: ec2.InstanceType;
