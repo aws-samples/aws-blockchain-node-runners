@@ -20,15 +20,10 @@ describe("ScrollSingleNodeStack", () => {
 
       instanceType: config.baseNodeConfig.instanceType,
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
-      scrollCluster: config.baseNodeConfig.scrollCluster,
       scrollVersion: config.baseNodeConfig.scrollVersion,
       nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
       dataVolume: config.baseNodeConfig.dataVolume,
-      scrollNodeIdentitySecretARN: config.baseNodeConfig.scrollNodeIdentitySecretARN,
-      voteAccountSecretARN: config.baseNodeConfig.voteAccountSecretARN,
-      authorizedWithdrawerAccountSecretARN: config.baseNodeConfig.authorizedWithdrawerAccountSecretARN,
-      registrationTransactionFundingAccountSecretARN: config.baseNodeConfig.registrationTransactionFundingAccountSecretARN,
-      l1Endpoint: config.baseNodeConfig.l1Endpoint
+      scrollNetworkId: config.baseNodeConfig.scrollNetworkId
     });
 
     template = Template.fromStack(scrollSingleNodeStack);
@@ -49,17 +44,17 @@ describe("ScrollSingleNodeStack", () => {
       SecurityGroupIngress: [
         {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols",
-          "FromPort": 8545,
+          "Description": "P2P",
+          "FromPort": 30303,
           "IpProtocol": "tcp",
-          "ToPort": 8545
+          "ToPort": 30303
         },
         {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols",
-          "FromPort": 8545,
+          "Description": "P2P",
+          "FromPort": 30303,
           "IpProtocol": "udp",
-          "ToPort": 8545
+          "ToPort": 30303
         }
       ]
     })
