@@ -10,11 +10,7 @@ echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}" >> /etc/environment
 echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}" >> /etc/environment
 echo "SCROLL_VERSION=${_SCROLL_VERSION_}" >> /etc/environment
 echo "SCROLL_NODE_TYPE=${_SCROLL_NODE_TYPE_}" >> /etc/environment
-echo "NODE_IDENTITY_SECRET_ARN=${_NODE_IDENTITY_SECRET_ARN_}" >> /etc/environment
-echo "VOTE_ACCOUNT_SECRET_ARN=${_VOTE_ACCOUNT_SECRET_ARN_}" >> /etc/environment
-echo "AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN=${_AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN_}" >> /etc/environment
-echo "REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN=${_REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_}" >> /etc/environment
-echo "SCROLL_CLUSTER=${_SCROLL_CLUSTER_}" >> /etc/environment
+echo "SCROLL_NETWORK_ID=${_SCROLL_NETWORK_ID_}" >> /etc/environment
 echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
 echo "ASG_NAME=${_ASG_NAME_}" >> /etc/environment
 echo "L2GETH_L1_ENDPOINT=${_L2GETH_L1_ENDPOINT_}" >> /etc/environment
@@ -114,13 +110,13 @@ sudo chown ubuntu:ubuntu -R ../l2geth-source
 echo "Build: done"
 
 # Copy startup script to correct location
-if [[ "$SCROLL_NODE_TYPE" == "baserpc" ]]; then
+if [[ "$SCROLL_NODE_TYPE" == "full" ]]; then
   sudo mkdir "/home/ubuntu/bin/"
-  sudo mv /opt/scroll/rpc-template.sh /home/ubuntu/bin/validator.sh
+  sudo mv /opt/scroll/rpc-template.sh /home/ubuntu/bin/node.sh
 fi
 
-sudo sed -i "s#__L2GETH_L1_ENDPOINT__#$L2GETH_L1_ENDPOINT#g" /home/ubuntu/bin/validator.sh
-sudo chmod +x /home/ubuntu/bin/validator.sh
+sudo sed -i "s#__L2GETH_L1_ENDPOINT__#$L2GETH_L1_ENDPOINT#g" /home/ubuntu/bin/node.sh
+sudo chmod +x /home/ubuntu/bin/node.sh
 
 sudo mkdir /var/log/scroll
 sudo chown ubuntu:ubuntu /var/log/scroll
@@ -129,7 +125,7 @@ sudo chown ubuntu:ubuntu /var/log/scroll
 echo "Starting scroll as a service"
 sudo bash -c 'cat > /etc/systemd/system/scroll.service <<EOF
 [Unit]
-Description=Scroll Validator
+Description=Scroll Node
 After=network.target
 StartLimitIntervalSec=0
 [Service]
@@ -140,7 +136,7 @@ User=ubuntu
 LimitNOFILE=1000000
 LogRateLimitIntervalSec=0
 Environment="PATH=/bin:/usr/bin:/home/ubuntu/bin"
-ExecStart=/home/ubuntu/bin/validator.sh
+ExecStart=/home/ubuntu/bin/node.sh
 StandardOutput=file:/var/log/scroll/std.log
 StandardError=file:/var/log/scroll/error.log
 [Install]

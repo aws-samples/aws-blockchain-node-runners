@@ -19,7 +19,6 @@ export class ScrollCommonStack extends cdk.Stack {
     const instanceRole = new iam.Role(this, `node-role`, {
       assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName("SecretsManagerReadWrite"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy"),
       ],

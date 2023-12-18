@@ -11,20 +11,15 @@ import * as nag from "cdk-nag";
 import { SingleNodeConstruct } from "../../constructs/single-node"
 import * as configTypes from "./config/scrollConfig.interface";
 import * as constants from "../../constructs/constants";
-import { ScrollNodeSecurityGroupConstruct } from "./constructs/scroll-node-security-group"
+import { ScrollNodeSecurityGroupConstruct } from "./constructs/scroll-node-security-group";
 
 export interface ScrollSingleNodeStackProps extends cdk.StackProps {
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
-    scrollCluster: configTypes.ScrollCluster;
+    scrollNetworkId: configTypes.ScrollNetworkId;
     scrollVersion: string;
     nodeConfiguration: configTypes.ScrollNodeConfiguration;
     dataVolume: configTypes.ScrollDataVolumeConfig;
-    scrollNodeIdentitySecretARN: string;
-    voteAccountSecretARN: string;
-    authorizedWithdrawerAccountSecretARN: string;
-    registrationTransactionFundingAccountSecretARN: string;
-    l1Endpoint: string
 }
 
 export class ScrollSingleNodeStack extends cdk.Stack {
@@ -42,15 +37,10 @@ export class ScrollSingleNodeStack extends cdk.Stack {
         const {
             instanceType,
             instanceCpuType,
-            scrollCluster,
+            scrollNetworkId,
             scrollVersion,
             nodeConfiguration,
             dataVolume,
-            scrollNodeIdentitySecretARN,
-            voteAccountSecretARN,
-            authorizedWithdrawerAccountSecretARN,
-            registrationTransactionFundingAccountSecretARN,
-            l1Endpoint,
         } = props;
 
         // Using default VPC
@@ -68,6 +58,7 @@ export class ScrollSingleNodeStack extends cdk.Stack {
 
         // Getting the IAM role ARN from the common stack
         const importedInstanceRoleArn = cdk.Fn.importValue("ScrollNodeInstanceRoleArn");
+        const ambEthereumNodeRpcUrlWithBillingToken = cdk.Fn.importValue("AmbEthereumNodeRpcUrlWithBillingToken");
 
         const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
@@ -111,14 +102,10 @@ export class ScrollSingleNodeStack extends cdk.Stack {
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
             _SCROLL_VERSION_: scrollVersion,
             _SCROLL_NODE_TYPE_: nodeConfiguration,
-            _NODE_IDENTITY_SECRET_ARN_: scrollNodeIdentitySecretARN,
-            _VOTE_ACCOUNT_SECRET_ARN_: voteAccountSecretARN,
-            _AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN_: authorizedWithdrawerAccountSecretARN,
-            _REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_: registrationTransactionFundingAccountSecretARN,
-            _SCROLL_CLUSTER_: scrollCluster,
+            _SCROLL_NETWORK_ID_: scrollNetworkId,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
             _ASG_NAME_: constants.NoneValue,
-            _L2GETH_L1_ENDPOINT_:l1Endpoint
+            _L2GETH_L1_ENDPOINT_: ambEthereumNodeRpcUrlWithBillingToken,
         });
         node.instance.addUserData(modifiedInitNodeScript);
 

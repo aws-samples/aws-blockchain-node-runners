@@ -24,21 +24,18 @@ export const baseConfig: configTypes.ScrollBaseConfig = {
 }
 
 export const baseNodeConfig: configTypes.ScrollBaseNodeConfig = {
-    instanceType: new ec2.InstanceType(process.env.SCROLL_INSTANCE_TYPE ? process.env.SCROLL_INSTANCE_TYPE : "t3.2xlarge"),
+    ambEntereumNodeNetworkId: <configTypes.AMBEthereumNodeNetworkId> process.env.AMB_ENTEREUM_NODE_NETWORK_ID || "mainnet",
+    ambEntereumNodeInstanceType: process.env.AMB_ETHEREUM_NODE_INSTANCE_TYPE || "bc.m5.xlarge",
+    instanceType: new ec2.InstanceType(process.env.SCROLL_INSTANCE_TYPE ? process.env.SCROLL_INSTANCE_TYPE : "m6a.2xlarge"),
     instanceCpuType: process.env.SCROLL_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64,
-    scrollCluster: <configTypes.ScrollCluster> process.env.SCROLL_CLUSTER || "mainnet",
-    scrollVersion: process.env.SCROLL_VERSION || "1.16.15",
-    nodeConfiguration: <configTypes.ScrollNodeConfiguration> process.env.SCROLL_NODE_CONFIGURATION || "baserpc",
+    scrollNetworkId: <configTypes.ScrollNetworkId> process.env.SCROLL_NETWORK_ID || "mainnet",
+    scrollVersion: process.env.SCROLL_VERSION || "scroll-v5.0.0",
+    nodeConfiguration: <configTypes.ScrollNodeConfiguration> process.env.SCROLL_NODE_CONFIGURATION || "full",
     dataVolume: {
         sizeGiB: process.env.SCROLL_DATA_VOL_SIZE ? parseInt(process.env.SCROLL_DATA_VOL_SIZE): 2000,
         type: parseDataVolumeType(process.env.SCROLL_DATA_VOL_TYPE?.toLowerCase() ? process.env.SCROLL_DATA_VOL_TYPE?.toLowerCase() : "gp3"),
         iops: process.env.SCROLL_DATA_VOL_IOPS ? parseInt(process.env.SCROLL_DATA_VOL_IOPS): 12000,
         throughput: process.env.SCROLL_DATA_VOL_THROUGHPUT ? parseInt(process.env.SCROLL_DATA_VOL_THROUGHPUT): 700,
     },
-    scrollNodeIdentitySecretARN: process.env.SCROLL_NODE_IDENTITY_SECRET_ARN || "none",
-    voteAccountSecretARN: process.env.SCROLL_VOTE_ACCOUNT_SECRET_ARN || "none",
-    authorizedWithdrawerAccountSecretARN: process.env.SCROLL_AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN || "none",
-    registrationTransactionFundingAccountSecretARN: process.env.SCROLL_REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN || "none",
-    l1Endpoint: process.env.L2GETH_L1_ENDPOINT || "http://xxx",
 };
 

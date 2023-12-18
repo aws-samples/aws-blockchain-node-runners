@@ -68,7 +68,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    cd lib/scroll
    npm install
    pwd
-   cp ./sample-configs/.env-sample-baserpc .env
+   cp ./sample-configs/.env-sample-full .env
    nano .env
     ```
    > NOTE:
@@ -78,7 +78,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    > You will need access to a fully-synced Ethereum Mainnet RPC endpoint before running l2geth. Please be reminded to update `L2GETH_L1_ENDPOINT` in `.env` file.
 
 
-4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
+4. Deploy common components such as IAM role
 
    ```bash
    pwd
@@ -88,42 +88,61 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
    > IMPORTANT:
    > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
-   > ```angular2html
+   > ```bash
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
    > ```
 
-5. Deploy Sync Node
+5. Deploy Amazon Managed Blockchain (AMB) Access Ethereum node and wait about 35-70 minutes for the node to sync
+
+   ```bash
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/scroll
+   npx cdk deploy scroll-ethereum-l1-node --json --outputs-file scroll-ethereum-l1-node.json
+   ```
+   To watch the progress, open the [AMB Web UI](https://console.aws.amazon.com/managedblockchain/home), click the name of your target network from the list (Mainnet, Goerly, etc.) and watch the status of the node to change from `Creating` to `Available`. 
+
+6. Deploy Scroll Full Node and wait for another 10-20 minutes for it to sync
 
    ```bash
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/scroll
    npx cdk deploy scroll-single-node --json --outputs-file single-node-deploy.json
    ```
+   After starting the node you will need to wait for the initial synchronization process to finish.To see the progress, you may use SSM to connect into EC2 first and watch the log like this:
 
+   ```bash
+   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+   echo "INSTANCE_ID=" $INSTANCE_ID
+   export AWS_REGION=us-east-1
+   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+   tail -f /var/log/scroll/error.log
+   ```
 
+   When the process complete, you will see `L1 message initial sync completed` in the log:
+   ```
+   INFO [12-13|08:25:46.095] Syncing L1 messages                      processed=18,683,700 confirmed=18,775,938 collected=77348 progress(%)=99.509
+   INFO [12-13|08:25:56.165] Syncing L1 messages                      processed=18,699,700 confirmed=18,775,938 collected=78100 progress(%)=99.594
+   INFO [12-13|08:26:06.122] Syncing L1 messages                      processed=18,709,300 confirmed=18,775,938 collected=79042 progress(%)=99.645
+   INFO [12-13|08:26:16.107] Syncing L1 messages                      processed=18,729,400 confirmed=18,775,938 collected=79585 progress(%)=99.752
+   INFO [12-13|08:26:26.127] Syncing L1 messages                      processed=18,741,900 confirmed=18,775,938 collected=80688 progress(%)=99.819
+   INFO [12-13|08:26:36.208] Syncing L1 messages                      processed=18,750,200 confirmed=18,775,938 collected=82535 progress(%)=99.863
+   INFO [12-13|08:26:46.124] Syncing L1 messages                      processed=18,755,400 confirmed=18,775,938 collected=84176 progress(%)=99.891
+   INFO [12-13|08:26:56.120] Syncing L1 messages                      processed=18,768,200 confirmed=18,775,938 collected=85240 progress(%)=99.959
+   INFO [12-13|08:27:00.524] L1 message initial sync completed        latestProcessedBlock=18,775,938
+   ```
 
-## Accessing the RPC Node
-After starting the node you will need to wait for the initial synchronization process to finish.To see the progress, you may use SSM to connect into EC2 first. Here is a guide: "[Connect to your Linux instance with AWS Systems Manager Session Manager](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/session-manager-to-linux.html)".
+7. Test Scroll RPC API
+   Use curl to query from within the node instance:
+   ```bash
+   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+   echo "INSTANCE_ID=" $INSTANCE_ID
+   export AWS_REGION=us-east-1
+   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+   
+   curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545
+   ```
 
-After connecting to the EC2, you may use the following commend to trace the init synchronization process:
-```bash
-tail -f /var/log/scroll/error.log
-```
-When the process complete, you will see `L1 message initial sync completed` in the log:
-```bash
-INFO [12-13|08:25:46.095] Syncing L1 messages                      processed=18,683,700 confirmed=18,775,938 collected=77348 progress(%)=99.509
-INFO [12-13|08:25:56.165] Syncing L1 messages                      processed=18,699,700 confirmed=18,775,938 collected=78100 progress(%)=99.594
-INFO [12-13|08:26:06.122] Syncing L1 messages                      processed=18,709,300 confirmed=18,775,938 collected=79042 progress(%)=99.645
-INFO [12-13|08:26:16.107] Syncing L1 messages                      processed=18,729,400 confirmed=18,775,938 collected=79585 progress(%)=99.752
-INFO [12-13|08:26:26.127] Syncing L1 messages                      processed=18,741,900 confirmed=18,775,938 collected=80688 progress(%)=99.819
-INFO [12-13|08:26:36.208] Syncing L1 messages                      processed=18,750,200 confirmed=18,775,938 collected=82535 progress(%)=99.863
-INFO [12-13|08:26:46.124] Syncing L1 messages                      processed=18,755,400 confirmed=18,775,938 collected=84176 progress(%)=99.891
-INFO [12-13|08:26:56.120] Syncing L1 messages                      processed=18,768,200 confirmed=18,775,938 collected=85240 progress(%)=99.959
-INFO [12-13|08:27:00.524] L1 message initial sync completed        latestProcessedBlock=18,775,938
-```
-
-### Connecgting to Geth IPC
-Once the synchronization process is completed. You can now attach to l2geth.
+You can now attach to l2geth.
 ```bash
 sudo su - ubuntu
 cd /home/ubuntu/l2geth-source/
@@ -137,13 +156,8 @@ l2geth attach "./l2geth-datadir/geth.ipc"
 10000
 ```
 
-Or you can use curl:
-```bash
-curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545
-```
-
 ### l2geth directory
-The agent directory is located in `/home/ubuntu/l2geth-source`. You may use the following cmd for start/ stop the service.
+The agent directory is in `/home/ubuntu/l2geth-source`. Use the following cmd control the service.
 ```bash
 sudo systemctl restart scroll.service
 sudo systemctl status scroll.service
@@ -163,7 +177,7 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
 
 ## Clearing up and undeploy everything
 
-1. Undeploy HA Nodes, Single Nodes and Common stacks
+1. Undeploy all Nodes and Common stacks
 
    ```bash
    # Setting the AWS account id and region in case local .env file is lost
@@ -174,10 +188,13 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
    # Make sure you are in aws-blockchain-node-runners/lib/scroll
 
    # Undeploy Single Node
-   cdk destroy scroll-single-node
+   npx cdk destroy scroll-single-node
+
+   # Undeploy AMB Etheruem node
+   npx cdk destroy scroll-ethereum-l1-node
 
    # Delete all common components like IAM role and Security Group
-   cdk destroy scroll-common
+   npx cdk destroy scroll-common
    ```
 
 2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
@@ -194,8 +211,9 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
 
    export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
    echo "INSTANCE_ID=" $INSTANCE_ID
+   export AWS_REGION=us-east-1
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo su bcuser
+   sudo bash
    sudo journalctl -o cat -fu sol
    ```
 2. How to check the logs from the EC2 user-data script?
@@ -206,6 +224,7 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
 
    export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
    echo "INSTANCE_ID=" $INSTANCE_ID
+   export AWS_REGION=us-east-1
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
    sudo cat /var/log/cloud-init-output.log
    ```
@@ -213,8 +232,9 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
 3. How can I restart the Scroll service?
 
    ``` bash
-   $INSTANCE_ID=i-xxxxxxxxxxxxx
-   $AWS_REGION=us-east-1
+   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+   echo "INSTANCE_ID=" $INSTANCE_ID
+   export AWS_REGION=us-east-1
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
    sudo systemctl status scroll.service
    sudo systemctl restart scroll.service
