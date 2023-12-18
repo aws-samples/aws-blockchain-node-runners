@@ -2,15 +2,15 @@ import * as cdk from "aws-cdk-lib";
 import * as cdkConstructs from "constructs";
 import * as nag from "cdk-nag";
 import * as configTypes from "./config/scrollConfig.interface";
-import { SingleNodeAMBEtheruemConstruct } from "../../constructs/amb-ethereum-single-node";
+import { SingleNodeAMBEthereumConstruct } from "../../constructs/amb-ethereum-single-node";
 
-export interface ScrollAMBEtheruemSingleNodeStackProps extends cdk.StackProps {
-    ambEntereumNodeNetworkId: configTypes.AMBEthereumNodeNetworkId,
-    ambEntereumNodeInstanceType: string,
+export interface ScrollAMBEthereumSingleNodeStackProps extends cdk.StackProps {
+    ambEthereumNodeNetworkId: configTypes.AMBEthereumNodeNetworkId,
+    ambEthereumNodeInstanceType: string,
 }
 
 export class ScrollAMBEthereumSingleNodeStack extends cdk.Stack {
-    constructor(scope: cdkConstructs.Construct, id: string, props: ScrollAMBEtheruemSingleNodeStackProps) {
+    constructor(scope: cdkConstructs.Construct, id: string, props: ScrollAMBEthereumSingleNodeStackProps) {
         super(scope, id, props);
 
         // Setting up necessary environment variables
@@ -19,16 +19,16 @@ export class ScrollAMBEthereumSingleNodeStack extends cdk.Stack {
 
         // Getting our config from initialization properties
         const {
-            ambEntereumNodeNetworkId,
-            ambEntereumNodeInstanceType,
+            ambEthereumNodeNetworkId,
+            ambEthereumNodeInstanceType,
         } = props;
 
         // Setting up L1 Ethereum node with AMB Ethereum node construct
 
-        const ambEthereumNode = new SingleNodeAMBEtheruemConstruct(this, "amb-ethereum-l1-single-node", {
-            instanceType: ambEntereumNodeInstanceType,
+        const ambEthereumNode = new SingleNodeAMBEthereumConstruct(this, "amb-ethereum-l1-single-node", {
+            instanceType: ambEthereumNodeInstanceType,
             availabilityZone: chosenAvailabilityZone,
-            ethNetworkId: ambEntereumNodeNetworkId,
+            ethNetworkId: ambEthereumNodeNetworkId,
         })
 
         new cdk.CfnOutput(this, "amb-eth-node-id", {

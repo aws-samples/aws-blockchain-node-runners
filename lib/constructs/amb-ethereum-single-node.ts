@@ -5,20 +5,20 @@ import * as cr from 'aws-cdk-lib/custom-resources';
 import * as configTypes from "./config.interface";
 import * as nag from "cdk-nag";
 
-export interface SingleNodeAMBEtheruemConstructCustomProps {
+export interface SingleNodeAMBEthereumConstructCustomProps {
     instanceType: string,
     availabilityZone: string,
     ethNetworkId: configTypes.AMBEthereumNodeNetworkId,
   }
 
-export class SingleNodeAMBEtheruemConstruct extends cdkContructs.Construct {
+export class SingleNodeAMBEthereumConstruct extends cdkContructs.Construct {
     public nodeId: string;
     public rpcUrl: string;
     public billingToken: string;
     public rpcUrlWithBillingToken: string;
 
 
-    constructor(scope: cdkContructs.Construct, id: string, props: SingleNodeAMBEtheruemConstructCustomProps) {
+    constructor(scope: cdkContructs.Construct, id: string, props: SingleNodeAMBEthereumConstructCustomProps) {
       super(scope, id);
   
       const REGION = cdk.Stack.of(this).region;

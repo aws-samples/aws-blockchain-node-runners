@@ -23,7 +23,8 @@ export interface ScrollNodeSecurityGroupConstructProps {
       });
 
       // Public ports
-      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8545), "RPC API");
+      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(30303), "RPC API");
+      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.udp(30303), "RPC API");
 
       this.securityGroup = sg
     }
