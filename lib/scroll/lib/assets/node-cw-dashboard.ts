@@ -127,9 +127,9 @@ export const SyncNodeCWDashboardJSON = {
             }
         },
         {
-            "height": 4,
+            "height": 5,
             "width": 6,
-            "y": 0,
+            "y": 5,
             "x": 12,
             "type": "metric",
             "properties": {
@@ -142,13 +142,13 @@ export const SyncNodeCWDashboardJSON = {
                 "region": "${REGION}",
                 "stat": "Maximum",
                 "period": 60,
-                "title": "Execution Client Block Height"
+                "title": "Scroll Client Block Height"
             }
         },
         {
-            "height": 4,
+            "height": 5,
             "width": 6,
-            "y": 4,
+            "y": 10,
             "x": 12,
             "type": "metric",
             "properties": {
@@ -161,45 +161,7 @@ export const SyncNodeCWDashboardJSON = {
                 "metrics": [
                     [ "CWAgent", "elc_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                 ],
-                "title": "Execution Client Blocks Behind"
-            }
-        },
-        {
-            "height": 3,
-            "width": 6,
-            "y": 8,
-            "x": 12,
-            "type": "metric",
-            "properties": {
-                "metrics": [
-                    [ "CWAgent", "clc_head_slot", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
-                ],
-                "sparkline": true,
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${REGION}",
-                "stat": "Maximum",
-                "period": 60,
-                "title": "Consensus Client Head Slot"
-            }
-        },
-        {
-            "height": 4,
-            "width": 6,
-            "y": 11,
-            "x": 12,
-            "type": "metric",
-            "properties": {
-                "sparkline": true,
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${REGION}",
-                "stat": "Maximum",
-                "period": 60,
-                "metrics": [
-                    [ "CWAgent", "clc_sync_distance", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
-                ],
-                "title": "Consensus Client Sync Distance"
+                "title": "Scroll Client Blocks Behind"
             }
         },
         {
@@ -252,14 +214,14 @@ export const SyncNodeCWDashboardJSON = {
             }
         },
         {
-            "height": 3,
+            "height": 5,
             "width": 6,
-            "y": 15,
-            "x": 6,
+            "y": 0,
+            "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "disk_used_percent", "path", "/data", "InstanceId", "${INSTANCE_ID}", "device", "nvme1n1", "fstype", "ext4", { "region": "${REGION}", "label": "/data" } ]
+                    [ "CWAgent", "disk_used_percent", "path", "/home/ubuntu/l2geth-source/l2geth-datadir", "InstanceId", "${INSTANCE_ID}", "device", "nvme1n1", "fstype", "xfs", { "region": "${REGION}", "label": "/home/ubuntu/l2geth-source/l2geth-datadir" } ]
                 ],
                 "sparkline": true,
                 "view": "singleValue",

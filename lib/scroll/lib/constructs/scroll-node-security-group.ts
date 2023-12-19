@@ -26,6 +26,9 @@ export interface ScrollNodeSecurityGroupConstructProps {
       sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(30303), "P2P");
       sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(30303), "P2P");
 
+      // Private port
+      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8545), "Scroll Client RPC");
+
       this.securityGroup = sg
     }
   }

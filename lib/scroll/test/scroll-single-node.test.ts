@@ -14,8 +14,8 @@ describe("ScrollSingleNodeStack", () => {
     app = new cdk.App();
 
     // Create the ScrollSingleNodeStack.
-    scrollSingleNodeStack = new ScrollSingleNodeStack(app, "eth-sync-node", {
-      stackName: `eth-sync-node-${config.baseConfig.accountId}`,
+    scrollSingleNodeStack = new ScrollSingleNodeStack(app, "scroll-single-node", {
+      stackName: `scroll-single-node-${config.baseConfig.accountId}`,
       env: {account: config.baseConfig.accountId, region: config.baseConfig.region},
 
       instanceType: config.baseNodeConfig.instanceType,
@@ -55,6 +55,13 @@ describe("ScrollSingleNodeStack", () => {
           "FromPort": 30303,
           "IpProtocol": "udp",
           "ToPort": 30303
+        },
+        {
+          "CidrIp": "1.2.3.4/5",
+          "Description": "Scroll Client RPC",
+          "FromPort": 8545,
+          "IpProtocol": "tcp",
+          "ToPort": 8545
         }
       ]
     })
@@ -80,7 +87,7 @@ describe("ScrollSingleNodeStack", () => {
       ],
       IamInstanceProfile: Match.anyValue(),
       ImageId: Match.anyValue(),
-      InstanceType: "t3.2xlarge",
+      InstanceType: "m6a.2xlarge",
       Monitoring: true,
       PropagateTagsToVolumeOnCreation: true,
       SecurityGroupIds: Match.anyValue(),
@@ -110,7 +117,7 @@ describe("ScrollSingleNodeStack", () => {
     // Has CloudWatch dashboard.
     template.hasResourceProperties("AWS::CloudWatch::Dashboard", {
       DashboardBody: Match.anyValue(),
-      DashboardName: `eth-sync-node-${config.baseConfig.accountId}`
+      DashboardName: `scroll-single-node-${config.baseConfig.accountId}`
     })
   });
 });
