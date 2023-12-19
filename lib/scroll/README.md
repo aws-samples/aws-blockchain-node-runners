@@ -130,7 +130,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    # Make sure you are in aws-blockchain-node-runners/lib/scroll
    npx cdk deploy scroll-ethereum-l1-node --json --outputs-file scroll-ethereum-l1-node.json
    ```
-   To watch the progress, open the [AMB Web UI](https://console.aws.amazon.com/managedblockchain/home), click the name of your target network from the list (Mainnet, Goerly, etc.) and watch the status of the node to change from `Creating` to `Available`. 
+   To watch the progress, open the [AMB Web UI](https://console.aws.amazon.com/managedblockchain/home), click the name of your target network from the list (Mainnet, Goerly, etc.) and watch the status of the node to change from `Creating` to `Available`.
 
 6. Deploy Scroll Full Node and wait for another 10-20 minutes for it to sync
 
@@ -169,7 +169,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    echo "INSTANCE_ID=" $INSTANCE_ID
    export AWS_REGION=us-east-1
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   
+
    curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545
    ```
 
@@ -244,7 +244,7 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
    ```
 4. Where to find the key l2geth directories?
 
-   - The directory with binaries is `/home/ubuntu/l2geth-source`. 
+   - The directory with binaries is `/home/ubuntu/l2geth-source`.
    - The data directory of l2geth agent is `/home/ubuntu/l2geth-source/l2geth-datadir`
 
 5. You can now attach to l2geth?

@@ -38,4 +38,3 @@ export const baseNodeConfig: configTypes.ScrollBaseNodeConfig = {
         throughput: process.env.SCROLL_DATA_VOL_THROUGHPUT ? parseInt(process.env.SCROLL_DATA_VOL_THROUGHPUT): 700,
     },
 };
-

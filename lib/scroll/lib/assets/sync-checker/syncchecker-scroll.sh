@@ -22,4 +22,3 @@ TIMESTAMP=$(date +"%Y-%m-%dT%H:%M:%S%:z")
 
 aws cloudwatch put-metric-data --metric-name elc_sync_block --namespace CWAgent --value $SCROLL_SYNC_BLOCK --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
 aws cloudwatch put-metric-data --metric-name elc_blocks_behind --namespace CWAgent --value $SCROLL_BLOCKS_BEHIND --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
-

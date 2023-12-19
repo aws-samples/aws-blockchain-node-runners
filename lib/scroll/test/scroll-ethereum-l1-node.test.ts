@@ -18,7 +18,7 @@ describe("ScrollAMBEthereumSingleNodeStack", () => {
     scrollAMBEthereumSingleNode = new ScrollAMBEthereumSingleNodeStack(app, "scroll-ethereum-l1-node", {
       stackName: `scroll-amb-ethereum-single-node-${config.baseNodeConfig.nodeConfiguration}`,
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    
+
       ambEthereumNodeNetworkId: config.baseNodeConfig.ambEntereumNodeNetworkId,
       ambEthereumNodeInstanceType: config.baseNodeConfig.ambEntereumNodeInstanceType,
     });

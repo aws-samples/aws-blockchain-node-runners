@@ -19,14 +19,14 @@ export class SingleNodeAMBEthereumConstruct extends cdkContructs.Construct {
 
     constructor(scope: cdkContructs.Construct, id: string, props: SingleNodeAMBEthereumConstructCustomProps) {
       super(scope, id);
-  
+
       const REGION = cdk.Stack.of(this).region;
       const {
         instanceType,
         availabilityZone,
         ethNetworkId,
       } = props;
-  
+
       const createNode = new cr.AwsCustomResource(this, 'createNode', {
         onCreate: { // will be called for a CREATE event
           service: 'ManagedBlockchain',
@@ -45,7 +45,7 @@ export class SingleNodeAMBEthereumConstruct extends cdkContructs.Construct {
           resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
         }),
       });
-  
+
       const createAccessor = new cr.AwsCustomResource(this, 'createAccessor', {
         onCreate: { // will be called for a CREATE event
           service: 'ManagedBlockchain',
@@ -60,14 +60,14 @@ export class SingleNodeAMBEthereumConstruct extends cdkContructs.Construct {
           resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
         }),
       });
-  
+
       this.nodeId = createNode.getResponseField('NodeId');
       this.rpcUrl = `https://${this.nodeId}.t.ethereum.managedblockchain.${REGION}.amazonaws.com`;
       this.billingToken=createAccessor.getResponseField('BillingToken');
       this.rpcUrlWithBillingToken = `${this.rpcUrl}?billingtoken=${this.billingToken}`;
 
       const deleteAccessor = new cr.AwsCustomResource(this, 'deleteAccessor', {
-        onDelete: { 
+        onDelete: {
           service: 'ManagedBlockchain',
           action: 'deleteAccessor',
           parameters: {
@@ -79,9 +79,9 @@ export class SingleNodeAMBEthereumConstruct extends cdkContructs.Construct {
           resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
         }),
       });
-  
+
       const deleteNode = new cr.AwsCustomResource(this, 'deleteNode', {
-        onDelete: { 
+        onDelete: {
           service: 'ManagedBlockchain',
           action: 'deleteNode',
           parameters: {
@@ -94,18 +94,17 @@ export class SingleNodeAMBEthereumConstruct extends cdkContructs.Construct {
           resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
         }),
       });
-  
+
     //   nag.NagSuppressions.addResourceSuppressions(
     //     this,
     //     [
     //         {
     //             id: "AwsSolutions-EC29",
     //             reason: "Its Ok to terminate this instance as long as we have the data in the snapshot",
-  
+
     //         },
     //     ],
     //     true
     // );
     }
   }
-  
