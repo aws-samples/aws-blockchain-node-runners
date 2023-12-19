@@ -133,7 +133,12 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    To watch the progress, open the [AMB Web UI](https://console.aws.amazon.com/managedblockchain/home), click the name of your target network from the list (Mainnet, Goerly, etc.) and watch the status of the node to change from `Creating` to `Available`.
 
 6. Deploy Scroll Full Node and wait for another 10-20 minutes for it to sync
+   You will need access to a fully-synced Ethereum Mainnet RPC endpoint before running l2geth. Please be reminded to update L2GETH_L1_ENDPOINT in .env file.
+   ```bash
+   nano .env
+   ```
 
+   Once you have updated .env file, you may deploy the node now:
    ```bash
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/scroll
