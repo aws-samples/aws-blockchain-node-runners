@@ -18,19 +18,54 @@ This is RPC Scroll nodes (L2Geth) setup on AWS guide.
 
 <details>
 
+<summary>Review the for pros and cons of this solution.</summary>
+
+### Well-Architected Checklist
+
+This is the Well-Architected checklist for Ethereum nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+
+| Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
+|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that ports 30303 (TCP/UDP) for Scroll are open to public to support P2P protocols. We have to rely on the protection mechanisms built into the Scroll software to protect those ports.   |
+|                         |                                   | Traffic inspection                                                               | AWS WAF could be implemented for traffic inspection. Additional charges will apply.  |
+|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Ubuntu 20.04 LTS AMI. You may choose to run hardening scripts on it.  |
+|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
+|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes.  |
+|                         | Data protection in transit        | Use TLS                                                                          | By design TLS is not used in Scroll RPC and P2P protocols because the data is considered public. To protect RPC traffic we expose the port only for internal use. |
+|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
+|                         |                                   | Following principle of least privilege access                                    | In the node, root user is not used (using special user "ubuntu" instead).  |
+|                         | Application security              | Security focused development practices                                           | cdk-nag is being used with documented suppressions.  |
+| Cost optimization       | Service selection                 | Use cost effective resources                                                     | Scroll nodes currently doesn't provide binaries for ARM architecture, so AMD-powered EC2 instance type for better cost effectiveness.  |
+|                         | Cost awareness                    | Estimate costs                                                                   | One Scroll node on m6a.2xlarge and 1T EBS gp3 volume will cost around US$367.21 per month in the US East (N. Virginia) region. Additionally the AMB Access Ethereum on bc.m5.xlarge will cost additional ~US$202 per month in the US East (N. Virginia) region. Approximately the total cost will be US$367.21 + US$202 = US$569.21 per month. |
+| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution currently does not have high availability and is deployed to a single availability zone.  |
+|                         | Data backup                       | How is data backed up?                                                           | The data is not specially backed up. The node will have to re-sync its state from other nodes in the Scroll network to recover.  |
+|                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
+| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on the recommendations the from Scroll community to provide stable and cost-effective operations.  |
+|                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on the recommendations the from Scroll community to provide stable and cost-effective operations.  |
+|                         | Architecture selection            | How is the best performance architecture selected?                               | In this solution we try to balance price and performance to achieve better cost efficiency, but not necessarily the best performance.  |
+| Operational excellence  | Workload health                   | How is health of workload determined?                                            | We rely on the standard EC2 instance monitoring tool to detect stalled instances.  |
+| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | Scroll nodes currently doesn't provide binaries for ARM architecture, so AMD-powered EC2 instance type for better cost effectiveness.  |
+</details>
+<details>
 <summary>Recommended Infrastructure</summary>
 
 ## Hardware Requirements
 
-**Minimum**
+**Minimum for Scroll node**
 
-- Machine comparable to AWS `t3.large` [instance](https://aws.amazon.com/ec2/instance-types/t3/).
-- 500GB SSD storage.
+- Instance type [m6a.large](https://aws.amazon.com/ec2/instance-types/m6a/).
+- 500GB EBS gp3 storage with at least 3000 IOPS.
 
-**Recommended**
+**Recommended for Scroll node**
 
-- Machine comparable to AWS `t3.2xlarge` [instance](https://aws.amazon.com/ec2/instance-types/t3/).
-- 1TB SSD storage.`
+- Instance type [m6a.2xlarge](https://aws.amazon.com/ec2/instance-types/m6a/).
+- 1TB EBS gp3 storage with at least 3000 IOPS.`
+
+**Amazon Managed Blockchain Ethereum L1**
+
+- Minimum instance type: [bc.m5.xlarge](https://aws.amazon.com/managed-blockchain/instance-types/)
+- Recommended instance type: [bc.m5.2xlarge](https://aws.amazon.com/managed-blockchain/instance-types/)
+
 </details>
 
 ## Setup Instructions
@@ -73,10 +108,6 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
     ```
    > NOTE:
    > Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
-
-   > NOTE:
-   > You will need access to a fully-synced Ethereum Mainnet RPC endpoint before running l2geth. Please be reminded to update `L2GETH_L1_ENDPOINT` in `.env` file.
-
 
 4. Deploy common components such as IAM role
 
@@ -142,40 +173,13 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545
    ```
 
-You can now attach to l2geth.
-```bash
-sudo su - ubuntu
-cd /home/ubuntu/l2geth-source/
-alias l2geth=./build/bin/geth
-l2geth attach "./l2geth-datadir/geth.ipc"
-
-> admin.peers.length
-14
-
-> eth.blockNumber
-10000
-```
-
-### l2geth directory
-The agent directory is in `/home/ubuntu/l2geth-source`. Use the following cmd control the service.
-```bash
-sudo systemctl restart scroll.service
-sudo systemctl status scroll.service
-sudo systemctl stop scroll.service
-```
-The data directory of l2geth agent is under:
-```bash
-cd /home/ubuntu/l2geth-source/l2geth-datadir
-du -sch ./*
-```
-
 ### Monitoring
  It may take about 30 minutes and you can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch current block and slots behind metrics. When the node is fully synced the slots behind metric should go to 0. To see them:
 
 Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
 Open Dashboards and select scroll-single-node from the list of dashboards.
 
-## Clearing up and undeploy everything
+## Clear up and undeploy everything
 
 1. Undeploy all Nodes and Common stacks
 
@@ -201,7 +205,7 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
 
 ## FAQ
 
-1. How to check the logs of the clients running on my sync node?
+1. How to check the logs of the clients running on my Scroll node?
 
    **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 
@@ -213,7 +217,6 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
    echo "INSTANCE_ID=" $INSTANCE_ID
    export AWS_REGION=us-east-1
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo bash
    sudo journalctl -o cat -fu sol
    ```
 2. How to check the logs from the EC2 user-data script?
@@ -239,6 +242,22 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
    sudo systemctl status scroll.service
    sudo systemctl restart scroll.service
    ```
+4. Where to find the key l2geth directories?
 
-## Upgrades
-When nodes need to be upgraded or downgraded, [use blue/green pattern to do it](https://aws.amazon.com/blogs/devops/performing-bluegreen-deployments-with-aws-codedeploy-and-auto-scaling-groups/). This is not yet automated and contributions are welcome!
+   - The directory with binaries is `/home/ubuntu/l2geth-source`. 
+   - The data directory of l2geth agent is `/home/ubuntu/l2geth-source/l2geth-datadir`
+
+5. You can now attach to l2geth?
+
+   ```bash
+   sudo - ubuntu
+   cd /home/ubuntu/l2geth-source/
+   alias l2geth=./build/bin/geth
+   l2geth attach "./l2geth-datadir/geth.ipc"
+
+   > admin.peers.length
+   14
+
+   > eth.blockNumber
+   10000
+   ```
