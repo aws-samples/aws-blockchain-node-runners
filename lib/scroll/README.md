@@ -1,6 +1,6 @@
 # Sample AWS Blockchain Node Runner app for Scroll Nodes
 
-This is RPC Scroll nodes (L2Geth) setup on AWS guide.
+[Scroll](https://docs.scroll.io/en/getting-started/overview/) is a "Layer 2" scaling solution for Ethereum leveraging zero knowledge proofs. This blueprint helps to deploy Scroll nodes (L2Geth) on AWS as RPC nodes and use [Amazon Managed Blockchain Access Ethereum](https://docs.aws.amazon.com/managed-blockchain/latest/ethereum-dev/ethereum-concepts.html) node for "Layer 1". It is meant to be used for development, testing or Proof of Concept purposes.
 
 ## Overview of Deployment Architectures for Single Node setups
 
@@ -59,7 +59,7 @@ This is the Well-Architected checklist for Ethereum nodes implementation of the 
 **Recommended for Scroll node**
 
 - Instance type [m6a.2xlarge](https://aws.amazon.com/ec2/instance-types/m6a/).
-- 1TB EBS gp3 storage with at least 3000 IOPS.`
+- 500GB EBS gp3 storage with at least 3000 IOPS.`
 
 **Amazon Managed Blockchain Ethereum L1**
 
@@ -174,10 +174,10 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    ```
 
 ### Monitoring
- It may take about 30 minutes and you can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch current block and slots behind metrics. When the node is fully synced the slots behind metric should go to 0. To see them:
+A script on the Scroll node publishes current block and blocks behind metrics to CloudWatch metrics every 5 minutes. When the node is fully synced the blocks behind metric should get to 0, which might take about 1.5 days. To see the metrics:
 
-Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
-Open Dashboards and select scroll-single-node from the list of dashboards.
+- Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
+- Open Dashboards and select `scroll-single-node` from the list of dashboards.
 
 ## Clear up and undeploy everything
 
@@ -217,7 +217,7 @@ Open Dashboards and select scroll-single-node from the list of dashboards.
    echo "INSTANCE_ID=" $INSTANCE_ID
    export AWS_REGION=us-east-1
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo journalctl -o cat -fu sol
+   sudo journalctl -o cat -fu scroll
    ```
 2. How to check the logs from the EC2 user-data script?
 
