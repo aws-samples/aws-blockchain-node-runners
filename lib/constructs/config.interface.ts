@@ -28,3 +28,5 @@ export interface HaNodesConfig extends BaseNodeConfig {
     numberOfNodes: number;
     dataVolumes: DataVolumeConfig[];
 }
+
+export type AMBEthereumNodeNetworkId = "mainnet" | "goerli";

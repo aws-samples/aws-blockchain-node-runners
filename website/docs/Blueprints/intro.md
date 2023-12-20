@@ -43,3 +43,4 @@ First of all, THANK YOU! The easier it is to run a blockchain node on AWS the si
 - `lib/constructs/ha-rpc-nodes-with-alb.ts` - Provisions up to 4 identical EC2 instances to run nodes managed by an Auto Scaling Group and behind an Application Load Balancer.
 - `lib/constructs/single-node.ts` - Creates a single EC2 instance to run a blockchain node.
 - `lib/constructs/snapshots-bucket.ts` - Creates an S3 bucket to store a copy of blockchain node state to speed up syncing process.
+- `lib/constructs/amb-ethereum-single-node.ts` - Creates a single Ethereum node with [Amazon Managed Blockchain Access](https://docs.aws.amazon.com/managed-blockchain/latest/ethereum-dev/ethereum-concepts.html).
