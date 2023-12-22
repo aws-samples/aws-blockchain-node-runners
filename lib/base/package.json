@@ -1,0 +1,20 @@
+{
+  "name": "aws-blockchain-node-runners-base",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk",
+    "cdk_deploy_common": "cdk deploy base-common",
+    "cdk_synth_single_node": "cdk synth base-single-node",
+    "cdk_deploy_single_node": "cdk deploy base-single-node",
+    "cdk_destroy_single_node": "cdk destroy base-single-node"
+  },
+  "dependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11"
+  }
+}
