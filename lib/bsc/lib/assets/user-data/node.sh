@@ -181,6 +181,7 @@ if [[ "$BSC_NODE_TYPE" == "full" ]]; then
 fi
 
 sudo chmod +x /home/ec2-user/bin/node.sh
+sudo chown ec2-user:ec2-user -R /home/ec2-user/bsc/
 
 echo "Starting BSC as a service"
 sudo bash -c 'cat > /etc/systemd/system/bsc.service <<EOF
