@@ -51,9 +51,10 @@ This is the Well-Architected checklist for BSC nodes implementation of the AWS B
 
 <summary>Recommended Infrastructure</summary>
 
-| Usage pattern                                     | Ideal configuration                                                                                                      | Primary option on AWS                                                 | Config reference                                                    |
-|---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|---------------------------------------------------------------------|
-| 1/ Fullnode                                       | 16 vCPU, 64 GB RAM, Accounts volume: 4TB, 10K IOPS, 700 MB/s throughput, Data volume: 3TB, 10K IOPS, 700 MB/s throughput | `m7g.4xlarge`, Data volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput | [.env-sample-consensus](../../sample-configs/.env-sample-consensus) |
+
+| Usage pattern                                     | Ideal configuration                                                                                                      | Primary option on AWS                                                  | Config reference                                      |
+|---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|-------------------------------------------------------|
+| 1/ Fullnode                                       | 16 vCPU, 64 GB RAM, Accounts volume: 4TB, 10K IOPS, 700 MB/s throughput, Data volume: 3TB, 10K IOPS, 700 MB/s throughput | `m7g.4xlarge`, Data volume: EBS gp3 4TB, 10K IOPS, 700 MB/s throughput | [.env-sample-full](./sample-configs/.env-sample-full) |
 </details>
 
 ## Setup Instructions
