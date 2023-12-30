@@ -114,7 +114,7 @@ npm install
    > ```bash
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
 
-5. Deploy a BSC Fullnode node typically takes about 4-5 hours. The Fullnode uses snapshots data, and downloading and decompressing the data can take a considerable amount of time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BSC Blockchain Network.
+5. Deploy a BSC Fullnode node typically takes about 2-3 hours. The Fullnode uses snapshots data, and downloading and decompressing the data can take a considerable amount of time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BSC Blockchain Network.
 
    ```bash
    pwd

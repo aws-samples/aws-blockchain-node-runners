@@ -1,5 +1,5 @@
 {
-  "name": "aws-blockchain-node-runners-scroll",
+  "name": "aws-blockchain-node-runners-bsc",
   "version": "0.1.0",
   "bin": {
     "scroll": "bin/bsc.js"
@@ -9,10 +9,10 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "cdk_deploy_common": "cdk deploy scroll-common",
-    "cdk_synth_single_node": "cdk synth scroll-single-node",
-    "cdk_deploy_single_node": "cdk deploy scroll-single-node",
-    "cdk_destroy_single_node": "cdk destroy scroll-single-node"
+    "cdk_deploy_common": "cdk deploy bsc-common",
+    "cdk_deploy_ha_nodes": "cdk deploy bsc-ha-nodes",
+    "cdk_destroy_common": "cdk destroy bsc-common",
+    "cdk_destroy_ha_nodes": "cdk destroy bsc-ha-nodes"
   },
   "dependencies": {
     "@types/node": "^20.10.0",
