@@ -9,13 +9,13 @@ echo "Sync started at " $(date)
 SECONDS=0
 
 s5cmd --log error cp s3://base-snapshots-$NETWORK_ID-archive/$LATEST_SNAPSHOT_FILE_NAME /data && \
-tar -I zstd -xf /data/$LATEST_SNAPSHOT_FILE_NAME -C /data && \
+tar -I zstdmt -xf /data/$LATEST_SNAPSHOT_FILE_NAME -C /data && \
 mv /data/snapshots/$NETWORK_ID/download/* /data && \
 rm -rf /data/snapshots && \
 rm -rf /data/$LATEST_SNAPSHOT_FILE_NAME
 
-chown -R bdcuser:bdcuser /data && \
+chown -R bcuser:bcuser /data && \
 echo "Sync finished at " $(date) && \
 echo "$(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds elapsed." && \
-sudo su bdcuser && \
+sudo su bcuser && \
 /usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml up -d

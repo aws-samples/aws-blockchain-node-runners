@@ -74,7 +74,7 @@ s5cmd version
 # Set by Base-specic CDK components and stacks
 REGION=${_REGION_}
 STACK_NAME=${_STACK_NAME_}
-AUTOSTART_CONTAINER=${_AUTOSTART_CONTAINER_}
+RESTORE_FROM_SNAPSHOT=${_RESTORE_FROM_SNAPSHOT_}
 FORMAT_DISK=${_FORMAT_DISK_}
 NETWORK_ID=${_NETWORK_ID_}
 L1_ENDPOINT=${_L1_ENDPOINT_}
@@ -165,7 +165,7 @@ case $NETWORK_ID in
     ;;
 esac
 
-yq -i '.services.geth.volumes[0] = "/data:/data"' /home/bcuser/node/docker-compose.yml
+sed -i "s#GETH_HOST_DATA_DIR=./geth-data#GETH_HOST_DATA_DIR=/data/geth#g" /home/bcuser/node/.env
 
 chown -R bcuser:bcuser /home/bcuser/node
 
@@ -212,17 +212,14 @@ lsblk -d
 chown -R bcuser:bcuser /data
 chmod -R 755 /data
 
-if [ "$AUTOSTART_CONTAINER" == "false" ]; then
-  echo "Sync node. Autostart disabled. Start docker-compose manually!"
-else
-  echo "Sync node. Autostart enabled. Starting docker-compose in 3 min."
+if [ "$RESTORE_FROM_SNAPSHOT" == "false" ]; then
+  echo "Skipping restoration from snapshot. Starting docker-compose in 3 min."
   cd /home/bcuser/node
   echo "sudo su bcuser && /usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml up -d" | at now +3 minutes
+else
+  echo "Restoring data from snapshot"
+  chmod 766 /opt/restore-from-snapshot.sh
+  echo "/opt/restore-from-snapshot.sh" | at now +3 minutes
 fi
-
-# TODO: Add copy data from S3 script
-# echo "Restoring data from snapshot"
-# chmod 766 /opt/restore-from-snapshot.sh
-# echo "/opt/restore-from-snapshot.sh" | at now +3 minutes
 
 echo "All Done!!"

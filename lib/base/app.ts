@@ -30,5 +30,6 @@ new BaseSingleNodeStack(app, "base-single-node", {
   instanceType: config.baseNodeConfig.instanceType,
   instanceCpuType: config.baseNodeConfig.instanceCpuType,
   baseNetworkId: config.baseNodeConfig.baseNetworkId,
+  restoreFromSnapshot: config.baseNodeConfig.restoreFromSnapshot,
   dataVolume: config.baseNodeConfig.dataVolume,
 });

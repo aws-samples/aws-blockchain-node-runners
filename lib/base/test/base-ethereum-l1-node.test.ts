@@ -16,7 +16,7 @@ describe("BaseAMBEthereumSingleNodeStack", () => {
     // Create the BaseAMBEthereumSingleNodeStack.
 
     baseAMBEthereumSingleNode = new BaseAMBEthereumSingleNodeStack(app, "base-ethereum-l1-node", {
-      stackName: `base-amb-ethereum-single-node-${config.baseNodeConfig.nodeConfiguration}`,
+      stackName: `base-amb-ethereum-single-node-${config.baseNodeConfig.baseNetworkId}`,
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
       ambEthereumNodeNetworkId: config.baseNodeConfig.ambEntereumNodeNetworkId,
@@ -50,7 +50,7 @@ describe("BaseAMBEthereumSingleNodeStack", () => {
        ]
       },
       "Export": {
-       "Name": "AmbEthereumNodeRpcUrlWithBillingToken"
+       "Name": "BaseAmbEthereumNodeRpcUrlWithBillingToken"
       }
      })
   });
