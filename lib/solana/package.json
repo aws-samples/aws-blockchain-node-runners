@@ -1,11 +1,17 @@
 {
-  "name": "aws-blockchain-node-runners-ethereum",
-  "version": "0.1.0",
+  "name": "aws-blockchain-node-runners-solana",
+  "version": "0.2.0",
   "scripts": {
     "build": "npx tsc",
     "watch": "npx tsc -w",
     "test": "npx jest",
     "cdk": "npx cdk",
     "scan-cdk": "npx cdk synth"
+  },
+  "dependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11"
   }
 }

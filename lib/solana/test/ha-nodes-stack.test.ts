@@ -45,16 +45,16 @@ describe("SolanaHANodesStack", () => {
          {
           "CidrIp": "0.0.0.0/0",
           "Description": "P2P protocols (gossip, turbine, repair, etc)",
-          "FromPort": 8801,
+          "FromPort": 8800,
           "IpProtocol": "tcp",
-          "ToPort": 8812
+          "ToPort": 8814
          },
          {
           "CidrIp": "0.0.0.0/0",
           "Description": "P2P protocols (gossip, turbine, repair, etc)",
-          "FromPort": 8801,
+          "FromPort": 8800,
           "IpProtocol": "udp",
-          "ToPort": 8812
+          "ToPort": 8814
          },
          {
           "CidrIp": "1.2.3.4/5",

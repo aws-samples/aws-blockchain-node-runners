@@ -145,6 +145,16 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
     - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
     - Open `Dashboards` and select `solana-single-node` from the list of dashboards.
 
+7. Connect with the RPC API exposed by the node:
+
+```bash
+   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
+    # We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
+    curl http://$NODE_INTERNAL_IP:8899 -X POST -H "Content-Type: application/json" \
+    --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
+```
+
 ### Deploy the HA Nodes
 
 1. Configure and deploy multiple HA Nodes
