@@ -15,15 +15,13 @@ describe("BaseSingleNodeStack", () => {
 
     // Create the BaseSingleNodeStack.
     baseSingleNodeStack = new BaseSingleNodeStack(app, "base-single-node", {
-      stackName: `base-single-node-${config.baseConfig.accountId}`,
+      stackName: `base-single-node-${config.baseNodeConfig.baseNetworkId}`,
       env: {account: config.baseConfig.accountId, region: config.baseConfig.region},
 
       instanceType: config.baseNodeConfig.instanceType,
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
-      baseVersion: config.baseNodeConfig.baseVersion,
-      nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+      baseNetworkId: config.baseNodeConfig.baseNetworkId,
       dataVolume: config.baseNodeConfig.dataVolume,
-      baseNetworkId: config.baseNodeConfig.baseNetworkId
     });
 
     template = Template.fromStack(baseSingleNodeStack);
@@ -75,7 +73,7 @@ describe("BaseSingleNodeStack", () => {
       UserData: Match.anyValue(),
       BlockDeviceMappings: [
         {
-          DeviceName: "/dev/sda1",
+          DeviceName: "/dev/xvda",
           Ebs: {
             DeleteOnTermination: true,
             Encrypted: true,
@@ -117,7 +115,7 @@ describe("BaseSingleNodeStack", () => {
     // Has CloudWatch dashboard.
     template.hasResourceProperties("AWS::CloudWatch::Dashboard", {
       DashboardBody: Match.anyValue(),
-      DashboardName: `base-single-node-${config.baseConfig.accountId}`
+      DashboardName: `base-single-node-${config.baseNodeConfig.baseNetworkId}`
     })
   });
 });

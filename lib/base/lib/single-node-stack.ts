@@ -17,6 +17,7 @@ export interface BaseSingleNodeStackProps extends cdk.StackProps {
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
     baseNetworkId: configTypes.BaseNetworkId;
+    restoreFromSnapshot: boolean;
     dataVolume: configTypes.BaseDataVolumeConfig;
 }
 
@@ -36,6 +37,7 @@ export class BaseSingleNodeStack extends cdk.Stack {
             instanceType,
             instanceCpuType,
             baseNetworkId,
+            restoreFromSnapshot,
             dataVolume,
         } = props;
 
@@ -98,7 +100,7 @@ export class BaseSingleNodeStack extends cdk.Stack {
             _NETWORK_ID_: baseNetworkId,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
             _AUTOSCALING_GROUP_NAME_: constants.NoneValue,
-            _AUTOSTART_CONTAINER_: "true",
+            _RESTORE_FROM_SNAPSHOT_: restoreFromSnapshot.toString(),
             _FORMAT_DISK_: "true",
             _L1_ENDPOINT_: ambEthereumNodeRpcUrlWithBillingToken,
         });
