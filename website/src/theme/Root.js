@@ -18,9 +18,6 @@ export default function Root({children}) {
     }, [location]);
 
   return <>
-
-        <script src="/js/googleTagManager.js"></script>
-
         {/* Cookie consent tracking */}
         <CookieConsent
             buttonText="I understand"
