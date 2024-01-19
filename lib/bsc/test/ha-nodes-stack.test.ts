@@ -52,28 +52,28 @@ describe("BscHANodesStack", () => {
           "Description": "P2P protocols (gossip, turbine, repair, etc)",
           "FromPort": 30303,
           "IpProtocol": "udp",
-          "ToPort": 8812
+          "ToPort": 30303
          },
          {
           "CidrIp": "1.2.3.4/5",
           "Description": "RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)",
-          "FromPort": 8845,
+          "FromPort": 8545,
           "IpProtocol": "tcp",
-          "ToPort": 8845
+          "ToPort": 8545
          },
          {
           "CidrIp": "1.2.3.4/5",
           "Description": "RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)",
-          "FromPort": 8846,
+          "FromPort": 8546,
           "IpProtocol": "tcp",
-          "ToPort": 8846
+          "ToPort": 8546
          },
          {
           "Description": "Allow access from ALB to Blockchain Node",
           "FromPort": 0,
           "IpProtocol": "tcp",
           "SourceSecurityGroupId": Match.anyValue(),
-          "ToPort": 8845
+          "ToPort": 65535
          },
        ]
     })
