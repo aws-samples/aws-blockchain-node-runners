@@ -52,6 +52,22 @@ const config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-google-gtag',
+      {
+        trackingID: 'G-KEK2TQ67TP',
+        anonymizeIP: true,
+      },
+    ],
+    [
+      '@docusaurus/plugin-google-tag-manager',
+      {
+        containerId: 'GTM-WQ97QTTR',
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
