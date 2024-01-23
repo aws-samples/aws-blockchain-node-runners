@@ -11,12 +11,12 @@ describe("EthSyncNodeStack", () => {
     const app = new cdk.App();
 
     // Create the EthSingleNodeStack.
-    const ethSyncNodeStack = new EthSingleNodeStack(app, "eth-sync-node", {
-      stackName: `eth-sync-node-${config.baseConfig.clientCombination}`,
+    const ethSyncNodeStack = new EthSingleNodeStack(app, "eth-single-node", {
+      stackName: `eth-single-node-${config.baseConfig.clientCombination}`,
 
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
       ethClientCombination: config.baseConfig.clientCombination,
-      nodeRole: <EthNodeRole> "sync-node",
+      nodeRole: <EthNodeRole> "single-node",
       instanceType: config.syncNodeConfig.instanceType,
       instanceCpuType: config.syncNodeConfig.instanceCpuType,
       dataVolumes: config.syncNodeConfig.dataVolumes,
@@ -156,7 +156,7 @@ describe("EthSyncNodeStack", () => {
     // Has CloudWatch dashboard.
     template.hasResourceProperties("AWS::CloudWatch::Dashboard", {
       DashboardBody: Match.anyValue(),
-      DashboardName: `eth-sync-node-${config.baseConfig.clientCombination}`
+      DashboardName: `eth-single-node-${config.baseConfig.clientCombination}`
     })
 
  });
