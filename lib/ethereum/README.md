@@ -2,6 +2,14 @@
 
 ## Architecture Overview
 
+This blueprint has two options for running nodes. You can set up a single JSON RPC node or multiple nodes in highly-available setup. The details are below.
+
+### Single RPC node setup
+![SingleNodeSetup](./doc/assets/Architecture-PoC.png)
+
+This setup is for small scale PoC or development environments. It deploys a single EC2 instance with both consensus and execution clients. The RPC port is exposed only to internal IP range of the VPC, while P2P ports allow external access to keep the clients synced.
+
+### Highly available setup
 ![Architecture](./doc/assets/Architecture.png)
 
 1.	An ongoing data synchronization process is configured with nodes in the Ethereum network with a sync node and RPC nodes.
@@ -131,7 +139,7 @@ The result should be like this (the actual balance might change):
    {"jsonrpc":"2.0","id":1,"result":"0xe791d050f91d9949d344d"}
 ```
 
-### Option 2: Deploy the Highly Available RPC Nodes
+### Option 2: Highly Available RPC Nodes
 
 1. Deploy Sync Node
 
