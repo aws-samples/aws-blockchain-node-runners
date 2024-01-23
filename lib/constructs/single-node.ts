@@ -74,15 +74,29 @@ export class SingleNodeConstruct extends cdkContructs.Construct {
         throw new Error(`Number of data volumes can't be more than 6, current number: ${dataVolumeIndex}`);
         }
       if (dataVolume.type !== constants.InstanceStoreageDeviceVolumeType) {
-        const newDataVolume = new ec2.Volume(this, `data-volume-${dataVolumeIndex}`, {
-          availabilityZone: availabilityZone,
-          size: cdk.Size.gibibytes(dataVolume.sizeGiB),
-          volumeType: ec2.EbsDeviceVolumeType[dataVolume.type.toUpperCase() as keyof typeof ec2.EbsDeviceVolumeType],
-          encrypted: true,
-          iops: dataVolume.iops,
-          throughput: dataVolume.throughput,
-          removalPolicy: cdk.RemovalPolicy.DESTROY,
-        });
+        let newDataVolume: ec2.Volume;
+
+        if (dataVolume.type === ec2.EbsDeviceVolumeType.GP3) {
+          newDataVolume = new ec2.Volume(this, `data-volume-${dataVolumeIndex}`, {
+            availabilityZone: availabilityZone,
+            size: cdk.Size.gibibytes(dataVolume.sizeGiB),
+            volumeType: ec2.EbsDeviceVolumeType[dataVolume.type.toUpperCase() as keyof typeof ec2.EbsDeviceVolumeType],
+            encrypted: true,
+            iops: dataVolume.iops,
+            throughput: dataVolume.throughput,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+          });
+        } else {
+          newDataVolume = new ec2.Volume(this, `data-volume-${dataVolumeIndex}`, {
+            availabilityZone: availabilityZone,
+            size: cdk.Size.gibibytes(dataVolume.sizeGiB),
+            volumeType: ec2.EbsDeviceVolumeType[dataVolume.type.toUpperCase() as keyof typeof ec2.EbsDeviceVolumeType],
+            encrypted: true,
+            iops: dataVolume.iops,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+          });
+        }
+        
 
       new ec2.CfnVolumeAttachment(this, `data-volume${dataVolumeIndex}-attachment`, {
           // Device naming according to https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html

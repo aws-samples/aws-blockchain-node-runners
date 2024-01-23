@@ -63,7 +63,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 **NOTE:** In this tutorial we will set all major configuration through environment variables, but you also can modify parameters in `config/config.ts`.
 
-### Deploy Sync Node
+### Prepare to deploy nodes
 
 1. Make sure you are in the root directory of the cloned repository
 
@@ -74,6 +74,8 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    ```
 
    **NOTE:** You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
+
+   **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`
 
 3. Configure  your setup
 
@@ -96,7 +98,42 @@ Create your own copy of `.env` file and edit it:
    npx cdk deploy eth-common
 ```
 
-5. Deploy Sync Node
+### Option 1: Single RPC Node
+
+1. Deploy Single RPC Node
+
+```bash
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/ethereum
+   npx cdk deploy eth-single-node --json --outputs-file single-node-deploy.json
+```
+   **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`
+
+2. After starting the node you need to wait for the inital syncronization process to finish. It may take from half a day to about 6-10 days depending on the client combination and the state of the network. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
+
+    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
+    - Open `Dashboards` and select `eth-sync-node-<your-eth-client-combination>` from the list of dashboards.
+
+4. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Tun the following query against the private IP of the single RPC node you deployed:
+
+```bash
+   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+
+    # We query token balance of Beacon deposit contract: https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa
+    curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
+    --data '{"method":"eth_getBalance","params":["0x00000000219ab540356cBB839Cbe05303d7705Fa", "latest"],"id":1,"jsonrpc":"2.0"}'
+```
+
+The result should be like this (the actual balance might change):
+
+```javascript
+   {"jsonrpc":"2.0","id":1,"result":"0xe791d050f91d9949d344d"}
+```
+
+### Option 2: Deploy the Highly Available RPC Nodes
+
+1. Deploy Sync Node
 
 ```bash
    pwd
@@ -105,7 +142,7 @@ Create your own copy of `.env` file and edit it:
 ```
    **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`
 
-6. After starting the node you need to wait for the inital syncronization process to finish. It may take from half a day to about 6-10 days depending on the client combination and the state of the network. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
+2. After starting the node you need to wait for the inital syncronization process to finish. It may take from half a day to about 6-10 days depending on the client combination and the state of the network. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
 
     - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
     - Open `Dashboards` and select `eth-sync-node-<your-eth-client-combination>` from the list of dashboards.
@@ -114,9 +151,7 @@ Once synchronization process is over, the script will automatically stop both cl
 
 Note: the snapshot backup process will automatically run ever day at midnight time of the time zone were the sync node runs. To change the schedule, modify `crontab` of the root user on the node's EC2 instance.
 
-### Deploy the RPC Nodes
-
-1. Configure and deploy 2 RPC Nodes
+3. Configure and deploy 2 RPC Nodes
 
 ```bash
    pwd
@@ -124,7 +159,7 @@ Note: the snapshot backup process will automatically run ever day at midnight ti
    npx cdk deploy eth-rpc-nodes --json --outputs-file rpc-node-deploy.json
 ```
 
-2. Give the new RPC nodes about 30 minutes (up to 2 hours for Erigon) to initialize and then run the following query against the load balancer behind the RPC node created
+4. Give the new RPC nodes about 30 minutes (up to 2 hours for Erigon) to initialize and then run the following query against the load balancer behind the RPC node created
 
 ```bash
     export ETH_RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.alburl? | select(. != null)')
@@ -151,7 +186,7 @@ The result should be like this (the actual balance might change):
    </body>
 ```
 
-**NOTE:** By default and for security reasons the load balancer is available only from wihtin the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
+**NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
 
 ### Clearing up and undeploying everything
 
@@ -164,6 +199,9 @@ The result should be like this (the actual balance might change):
 
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/ethereum
+
+    # Undeploy Single RPC Node
+    cdk destroy eth-single-node
 
    # Undeploy RPC Nodes
     cdk destroy eth-rpc-nodes
