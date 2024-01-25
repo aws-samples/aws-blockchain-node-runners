@@ -127,14 +127,14 @@ export const SyncNodeCWDashboardJSON = {
             }
         },
         {
-            "height": 5,
+            "height": 4,
             "width": 6,
-            "y": 5,
+            "y": 0,
             "x": 12,
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "elc_sync_block", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "l2_current_block", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                 ],
                 "sparkline": true,
                 "view": "timeSeries",
@@ -142,13 +142,13 @@ export const SyncNodeCWDashboardJSON = {
                 "region": "${REGION}",
                 "stat": "Maximum",
                 "period": 60,
-                "title": "Base Client Block Height"
+                "title": "L2 Current Block"
             }
         },
         {
-            "height": 5,
+            "height": 4,
             "width": 6,
-            "y": 10,
+            "y": 4,
             "x": 12,
             "type": "metric",
             "properties": {
@@ -159,9 +159,47 @@ export const SyncNodeCWDashboardJSON = {
                 "stat": "Maximum",
                 "period": 60,
                 "metrics": [
-                    [ "CWAgent", "elc_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "l2_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                 ],
-                "title": "Base Client Blocks Behind"
+                "title": "L2 Blocks Behind"
+            }
+        },
+        {
+            "height": 3,
+            "width": 6,
+            "y": 8,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "CWAgent", "l1_current_block", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                ],
+                "sparkline": true,
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Maximum",
+                "period": 60,
+                "title": "L1 Current Block"
+            }
+        },
+        {
+            "height": 4,
+            "width": 6,
+            "y": 11,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "sparkline": true,
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Maximum",
+                "period": 60,
+                "metrics": [
+                    [ "CWAgent", "l1_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                ],
+                "title": "L1 Blocks Behind"
             }
         },
         {
@@ -214,10 +252,10 @@ export const SyncNodeCWDashboardJSON = {
             }
         },
         {
-            "height": 5,
+            "height": 3,
             "width": 6,
-            "y": 0,
-            "x": 12,
+            "y": 15,
+            "x": 6,
             "type": "metric",
             "properties": {
                 "metrics": [

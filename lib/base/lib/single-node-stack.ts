@@ -18,6 +18,7 @@ export interface BaseSingleNodeStackProps extends cdk.StackProps {
     instanceCpuType: ec2.AmazonLinuxCpuType;
     baseNetworkId: configTypes.BaseNetworkId;
     restoreFromSnapshot: boolean;
+    l1Endpoint: string;
     dataVolume: configTypes.BaseDataVolumeConfig;
 }
 
@@ -38,6 +39,7 @@ export class BaseSingleNodeStack extends cdk.Stack {
             instanceCpuType,
             baseNetworkId,
             restoreFromSnapshot,
+            l1Endpoint,
             dataVolume,
         } = props;
 
@@ -56,8 +58,12 @@ export class BaseSingleNodeStack extends cdk.Stack {
 
         // Getting the IAM role ARN from the common stack
         const importedInstanceRoleArn = cdk.Fn.importValue("BaseNodeInstanceRoleArn");
-        const ambEthereumNodeRpcUrlWithBillingToken = cdk.Fn.importValue("BaseAmbEthereumNodeRpcUrlWithBillingToken");
 
+        // If user has not supplied the URL for L1, attempting to use AMB node URL
+        let l1EndpointURL = l1Endpoint;
+        if (l1EndpointURL === constants.NoneValue){
+            l1EndpointURL = cdk.Fn.importValue("BaseAmbEthereumNodeRpcUrlWithBillingToken");
+        }
         const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
         // Making sure our instance will be able to read the assets
@@ -102,7 +108,7 @@ export class BaseSingleNodeStack extends cdk.Stack {
             _AUTOSCALING_GROUP_NAME_: constants.NoneValue,
             _RESTORE_FROM_SNAPSHOT_: restoreFromSnapshot.toString(),
             _FORMAT_DISK_: "true",
-            _L1_ENDPOINT_: ambEthereumNodeRpcUrlWithBillingToken,
+            _L1_ENDPOINT_: l1EndpointURL,
         });
 
         node.instance.addUserData(modifiedInitNodeScript);

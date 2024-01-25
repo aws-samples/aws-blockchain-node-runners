@@ -30,6 +30,7 @@ export const baseNodeConfig: configTypes.BaseBaseNodeConfig = {
     instanceCpuType: process.env.BASE_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64,
     baseNetworkId: <configTypes.BaseNetworkId> process.env.BASE_NETWORK_ID || "mainnet",
     restoreFromSnapshot: process.env.BASE_RESTORE_FROM_SNAPSHOT?.toLowerCase() == "true" ? true : false,
+    l1Endpoint: process.env.BASE_L1_ENDPOINT || constants.NoneValue,
     dataVolume: {
         sizeGiB: process.env.BASE_DATA_VOL_SIZE ? parseInt(process.env.BASE_DATA_VOL_SIZE): 1000,
         type: parseDataVolumeType(process.env.BASE_DATA_VOL_TYPE?.toLowerCase() ? process.env.BASE_DATA_VOL_TYPE?.toLowerCase() : "gp3"),
