@@ -123,7 +123,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
    > ```
 
-5. Deploy Amazon Managed Blockchain (AMB) Access Ethereum node and wait about 35-70 minutes for the node to sync
+5. (Optional) For L1 node you you can set your own URL in `BASE_L1_ENDPOINT` property of `.env` file or use the command below to deploy Amazon Managed Blockchain (AMB) Access Ethereum node. It takes about 35-70 minutes for the AMB Access node to sync.
 
    ```bash
    pwd
