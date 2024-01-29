@@ -69,11 +69,6 @@ export class BaseSingleNodeStack extends cdk.Stack {
         // Making sure our instance will be able to read the assets
         asset.bucket.grantRead(instanceRole);
 
-        // Setting up the node using generic Single Node constract
-        if (instanceCpuType === ec2.AmazonLinuxCpuType.ARM_64) {
-            throw new Error("ARM_64 is not yet supported");
-        }
-
         const node = new SingleNodeConstruct(this, "rpc-node", {
             instanceName: STACK_NAME,
             instanceType,

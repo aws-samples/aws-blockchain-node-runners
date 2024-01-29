@@ -17,36 +17,6 @@
 ## Additional materials
 
 <details>
-
-<summary>Review the for pros and cons of this solution.</summary>
-
-### Well-Architected Checklist
-
-This is the Well-Architected checklist for AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
-
-| Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
-|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
-| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that ports 9222 (TCP/UDP) for Base are open to public to support P2P protocols. We have to rely on the protection mechanisms built into the Base software to protect those ports.   |
-|                         |                                   | Traffic inspection                                                               | AWS WAF could be implemented for traffic inspection. Additional charges will apply.  |
-|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Amazon Linux AMI. You may choose to run hardening scripts on it.  |
-|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
-|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes.  |
-|                         | Data protection in transit        | Use TLS                                                                          | By design TLS is not used in Base RPC and P2P protocols because the data is considered public. To protect RPC traffic we expose the port only for internal use. |
-|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
-|                         |                                   | Following principle of least privilege access                                    | In the node, root user is not used (using special user "ubuntu" instead).  |
-|                         | Application security              | Security focused development practices                                           | cdk-nag is being used with documented suppressions.  |
-| Cost optimization       | Service selection                 | Use cost effective resources                                                     | Base nodes currently doesn't provide binaries for ARM architecture, so AMD-powered EC2 instance type for better cost effectiveness.  |
-|                         | Cost awareness                    | Estimate costs                                                                   | One Base node on m6a.2xlarge and 1T EBS gp3 volume will cost around US$367.21 per month in the US East (N. Virginia) region. Additionally the AMB Access Ethereum on bc.m5.xlarge will cost additional ~US$202 per month in the US East (N. Virginia) region. Approximately the total cost will be US$367.21 + US$202 = US$569.21 per month. |
-| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution currently does not have high availability and is deployed to a single availability zone.  |
-|                         | Data backup                       | How is data backed up?                                                           | The data is not specially backed up. The node will have to re-sync its state from other nodes in the Base network to recover.  |
-|                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
-| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on the recommendations the from Base community to provide stable and cost-effective operations.  |
-|                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on the recommendations the from Base community to provide stable and cost-effective operations.  |
-|                         | Architecture selection            | How is the best performance architecture selected?                               | In this solution we try to balance price and performance to achieve better cost efficiency, but not necessarily the best performance.  |
-| Operational excellence  | Workload health                   | How is health of workload determined?                                            | We rely on the standard EC2 instance monitoring tool to detect stalled instances.  |
-| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | Base nodes currently doesn't provide binaries for ARM architecture, so AMD-powered EC2 instance type for better cost effectiveness.  |
-</details>
-<details>
 <summary>Recommended Infrastructure</summary>
 
 ## Hardware Requirements
@@ -60,11 +30,6 @@ This is the Well-Architected checklist for AWS Blockchain Node Runner app. This 
 
 - Instance type [m6a.2xlarge](https://aws.amazon.com/ec2/instance-types/m6a/).
 - 2500GB EBS gp3 storage with at least 6000 IOPS.`
-
-**Amazon Managed Blockchain Ethereum L1**
-
-- Minimum instance type: [bc.m5.xlarge](https://aws.amazon.com/managed-blockchain/instance-types/)
-- Recommended instance type: [bc.m5.2xlarge](https://aws.amazon.com/managed-blockchain/instance-types/)
 
 </details>
 
@@ -123,14 +88,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
    > ```
 
-5. (Optional) For L1 node you you can set your own URL in `BASE_L1_ENDPOINT` property of `.env` file or use the command below to deploy Amazon Managed Blockchain (AMB) Access Ethereum node. It takes about 35-70 minutes for the AMB Access node to sync.
-
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/base
-   npx cdk deploy base-ethereum-l1-node --json --outputs-file base-ethereum-l1-node.json
-   ```
-   To watch the progress, open the [AMB Web UI](https://console.aws.amazon.com/managedblockchain/home), click the name of your target network from the list (Mainnet, Goerly, etc.) and watch the status of the node to change from `Creating` to `Available`.
+5. For L1 node you you can set your own URL in `BASE_L1_ENDPOINT` property of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or run your own Ethereum node [with Node Runner blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum).
 
 6. Deploy Base RPC Node and wait for another 10-20 minutes for it to sync
 
@@ -183,9 +141,6 @@ A script on the Base node publishes current block and blocks behind metrics to C
 
    # Undeploy Single Node
    npx cdk destroy base-single-node
-
-   # Undeploy AMB Etheruem node
-   npx cdk destroy base-ethereum-l1-node
 
    # Delete all common components like IAM role and Security Group
    npx cdk destroy base-common
