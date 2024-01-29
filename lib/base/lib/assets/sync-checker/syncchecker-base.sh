@@ -6,7 +6,12 @@ OPTIMISM_SYNC_STATUS=$(curl -s -X POST -H "Content-Type: application/json" --dat
 # L1 client stats
 L1_CLIENT_HEAD=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".head_l1.number")
 L1_CLIENT_CURRENT=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".current_l1.number")
-L1_CLIENT_BLOCKS_BEHIND="$((L1_CLIENT_HEAD-L1_CLIENT_CURRENT))"
+
+if [ $L1_CLIENT_HEAD -eq 0 ]; then 
+    L1_CLIENT_BLOCKS_BEHIND=0
+else
+    L1_CLIENT_BLOCKS_BEHIND="$((L1_CLIENT_HEAD-L1_CLIENT_CURRENT))"
+fi
 
 # L2 client stats
 L2_CLIENT_HEAD=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".queued_unsafe_l2.number")
