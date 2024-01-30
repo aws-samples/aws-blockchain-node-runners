@@ -4,8 +4,9 @@ import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import * as nag from "cdk-nag";
 import * as config from "./lib/config/ethConfig";
+import { EthNodeRole } from "./lib/config/ethConfig.interface";
 
-import { EthSyncNodeStack } from "./lib/sync-node-stack";
+import { EthSingleNodeStack } from "./lib/single-node-stack";
 import { EthCommonStack } from "./lib/common-stack";
 import { EthRpcNodesStack } from "./lib/rpc-nodes-stack";
 
@@ -17,11 +18,23 @@ new EthCommonStack(app, "eth-common", {
     stackName: `eth-nodes-common`,
 });
 
-new EthSyncNodeStack(app, "eth-sync-node", {
+new EthSingleNodeStack(app, "eth-sync-node", {
     stackName: `eth-sync-node-${config.baseConfig.clientCombination}`,
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     ethClientCombination: config.baseConfig.clientCombination,
+    nodeRole: <EthNodeRole> "sync-node",
+    instanceType: config.syncNodeConfig.instanceType,
+    instanceCpuType: config.syncNodeConfig.instanceCpuType,
+    dataVolumes: config.syncNodeConfig.dataVolumes,
+});
+
+new EthSingleNodeStack(app, "eth-single-node", {
+    stackName: `eth-single-node-${config.baseConfig.clientCombination}`,
+
+    env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+    ethClientCombination: config.baseConfig.clientCombination,
+    nodeRole: <EthNodeRole> "single-node",
     instanceType: config.syncNodeConfig.instanceType,
     instanceCpuType: config.syncNodeConfig.instanceCpuType,
     dataVolumes: config.syncNodeConfig.dataVolumes,
@@ -32,6 +45,7 @@ new EthRpcNodesStack(app, "eth-rpc-nodes", {
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     ethClientCombination: config.baseConfig.clientCombination,
+    nodeRole: <EthNodeRole> "rpc-node",
     instanceType: config.rpcNodeConfig.instanceType,
     instanceCpuType: config.rpcNodeConfig.instanceCpuType,
     numberOfNodes: config.rpcNodeConfig.numberOfNodes,
