@@ -12,6 +12,7 @@ export interface EthCommonStackProps extends cdk.StackProps {}
 export class EthCommonStack extends cdk.Stack {
     AWS_STACKNAME = cdk.Stack.of(this).stackName;
     AWS_ACCOUNT_ID = cdk.Stack.of(this).account;
+    AWS_REGION = cdk.Stack.of(this).region
 
     constructor(scope: cdkConstructs.Construct, id: string, props: EthCommonStackProps) {
         super(scope, id, props);
@@ -23,7 +24,7 @@ export class EthCommonStack extends cdk.Stack {
         });
 
         const snapshotsBucket = new SnapshotsS3BucketConstruct(this, `snapshots-s3-bucket`, {
-            bucketName: `eth-snapshots-${this.AWS_ACCOUNT_ID}-${this.AWS_STACKNAME}`,
+            bucketName: `eth-snapshots-${this.AWS_STACKNAME}-${this.AWS_ACCOUNT_ID}-${this.AWS_REGION}`,
         });
 
         const s3VPCEndpoint = vpc.addGatewayEndpoint("s3-vpc-endpoint", {

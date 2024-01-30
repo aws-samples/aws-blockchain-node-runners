@@ -13,7 +13,7 @@ describe("SolanaSingleNodeStack", () => {
     const solanaSingleNodeStack = new SolanaSingleNodeStack(app, "solana-sync-node", {
       stackName: `solana-single-node-${config.baseNodeConfig.nodeConfiguration}`,
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-  
+
       instanceType: config.baseNodeConfig.instanceType,
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
       solanaCluster: config.baseNodeConfig.solanaCluster,
@@ -45,16 +45,16 @@ describe("SolanaSingleNodeStack", () => {
         {
           "CidrIp": "0.0.0.0/0",
           "Description": "P2P protocols (gossip, turbine, repair, etc)",
-          "FromPort": 8801,
+          "FromPort": 8800,
           "IpProtocol": "tcp",
-          "ToPort": 8812
+          "ToPort": 8814
          },
          {
           "CidrIp": "0.0.0.0/0",
           "Description": "P2P protocols (gossip, turbine, repair, etc)",
-          "FromPort": 8801,
+          "FromPort": 8800,
           "IpProtocol": "udp",
-          "ToPort": 8812
+          "ToPort": 8814
          },
          {
           "CidrIp": "1.2.3.4/5",
@@ -126,7 +126,7 @@ describe("SolanaSingleNodeStack", () => {
       Throughput: 700,
       VolumeType: "gp3"
     })
-    
+
     // Has EBS accounts volume attachment.
     template.hasResourceProperties("AWS::EC2::VolumeAttachment", {
       Device: "/dev/sdg",

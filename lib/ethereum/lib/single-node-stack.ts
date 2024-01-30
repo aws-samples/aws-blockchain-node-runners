@@ -12,15 +12,16 @@ import * as configTypes from "./config/ethConfig.interface";
 import { EthNodeSecurityGroupConstruct } from "./constructs/eth-node-security-group"
 import * as nag from "cdk-nag";
 
-export interface EthSyncNodeStackProps extends cdk.StackProps {
+export interface EthSingleNodeStackProps extends cdk.StackProps {
     ethClientCombination: configTypes.EthClientCombination;
+    nodeRole: configTypes.EthNodeRole;
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
     dataVolumes: configTypes.EthDataVolumeConfig[];
 }
 
-export class EthSyncNodeStack extends cdk.Stack {
-    constructor(scope: cdkConstructs.Construct, id: string, props: EthSyncNodeStackProps) {
+export class EthSingleNodeStack extends cdk.Stack {
+    constructor(scope: cdkConstructs.Construct, id: string, props: EthSingleNodeStackProps) {
         super(scope, id, props);
 
         // Setting up necessary environment variables
@@ -30,10 +31,11 @@ export class EthSyncNodeStack extends cdk.Stack {
         const chosenAvailabilityZone = availabilityZones.slice(0, 1)[0];
 
         // Getting our config from initialization properties
-        const { 
+        const {
             instanceType,
-            ethClientCombination, 
-            instanceCpuType, 
+            ethClientCombination,
+            nodeRole,
+            instanceCpuType,
             dataVolumes,
         } = props;
 
@@ -61,7 +63,7 @@ export class EthSyncNodeStack extends cdk.Stack {
         asset.bucket.grantRead(instanceRole);
 
         // Setting up the node using generic Single Node constract
-        const syncNode = new SingleNodeConstruct(this, "sync-node", {
+        const syncNode = new SingleNodeConstruct(this, "single-node", {
             instanceName: STACK_NAME,
             instanceType,
             dataVolumes,
@@ -89,7 +91,7 @@ export class EthSyncNodeStack extends cdk.Stack {
             _STACK_NAME_: STACK_NAME,
             _AUTOSTART_CONTAINER_: "true",
             _FORMAT_DISK_: "true",
-            _NODE_ROLE_:"sync-node",
+            _NODE_ROLE_:nodeRole,
             _NODE_CF_LOGICAL_ID_: syncNode.nodeCFLogicalId,
             _LIFECYCLE_HOOK_NAME_: "",
             _AUTOSCALING_GROUP_NAME_: "",
@@ -104,13 +106,13 @@ export class EthSyncNodeStack extends cdk.Stack {
             INSTANCE_NAME: STACK_NAME,
             REGION: REGION,
         })
-                
-        new cw.CfnDashboard(this, 'sync-cw-dashboard', {
+
+        new cw.CfnDashboard(this, 'single-cw-dashboard', {
             dashboardName: STACK_NAME,
             dashboardBody: dashboardString,
         });
 
-        new cdk.CfnOutput(this, "sync-instance-id", {
+        new cdk.CfnOutput(this, "single-instance-id", {
             value: syncNode.instanceId,
         });
 

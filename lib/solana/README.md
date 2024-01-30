@@ -30,7 +30,7 @@ Solana nodes on AWS can be deployed in 3 different configurations: Consensus, ba
 
 During the startup, if a node can't find the necessary identity file on the attached Root EBS volume, it generates a new one and stores it in AWS Secrets Manager. For a single-node deployment, the ARN of a secret can be provided within the `.env` configuration file with configuration and the node will pick it up.
 
-Base RPC and Extended RPC nodes use only 1 secret: 
+Base RPC and Extended RPC nodes use only 1 secret:
 
 - **Solana Node Identity Secret**: The identity key pair for a Solana node.
 
@@ -145,6 +145,16 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
     - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
     - Open `Dashboards` and select `solana-single-node` from the list of dashboards.
 
+7. Connect with the RPC API exposed by the node:
+
+```bash
+   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
+    # We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
+    curl http://$NODE_INTERNAL_IP:8899 -X POST -H "Content-Type: application/json" \
+    --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
+```
+
 ### Deploy the HA Nodes
 
 1. Configure and deploy multiple HA Nodes
@@ -160,7 +170,7 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 ```bash
     export RPC_ABL_URL=$(cat ha-nodes-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
     echo $RPC_ABL_URL
-    
+
     # We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
     curl http://$RPC_ABL_URL:8899 -X POST -H "Content-Type: application/json" \
     --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
@@ -182,7 +192,7 @@ The result should be like this (the actual balance might change):
    </body>
 ```
 
-**NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs. 
+**NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
 
 ### Clearing up and undeploy everything
 
@@ -192,10 +202,10 @@ The result should be like this (the actual balance might change):
    # Setting the AWS account id and region in case local .env file is lost
     export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
     export AWS_REGION=<your_target_AWS_region>
-   
+
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/solana
-   
+
    # Undeploy HA Nodes
     cdk destroy solana-ha-nodes
 
