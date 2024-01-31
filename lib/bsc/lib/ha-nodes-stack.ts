@@ -13,6 +13,7 @@ import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb";
 import * as nag from "cdk-nag";
 
 export interface BscHANodesStackProps extends cdk.StackProps {
+    nodeRole: configTypes.BscNodeRole;
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
     bscNetwork: configTypes.BscNetwork;
@@ -33,6 +34,7 @@ export class BscHANodesStack extends cdk.Stack {
         const autoScalingGroupName = STACK_NAME;
 
         const {
+            nodeRole,
             instanceType,
             instanceCpuType,
             bscNetwork,
@@ -75,10 +77,11 @@ export class BscHANodesStack extends cdk.Stack {
             _BSC_NODE_TYPE_: nodeConfiguration,
             _DATA_VOLUME_TYPE_: dataVolume.type,
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
+            _NODE_ROLE_: nodeRole,
 
             _BSC_NETWORK_: bscNetwork,
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
-            _ASG_NAME_: autoScalingGroupName
+            _AUTOSCALING_GROUP_NAME_: autoScalingGroupName
         });
 
 

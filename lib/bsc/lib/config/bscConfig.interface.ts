@@ -3,6 +3,8 @@ import * as configTypes from "../../../constructs/config.interface";
 export type BscNetwork = "mainnet" | "testnet";
 export type BscNodeConfiguration = "full" ;
 
+export type BscNodeRole = "sync-node" | "rpc-node" | "single-node";
+
 export interface BscDataVolumeConfig extends configTypes.DataVolumeConfig {
 
 }

@@ -2,7 +2,9 @@ import 'dotenv/config'
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import * as config from "./lib/config/bscConfig";
+import * as configTypes from "./lib/config/bscConfig.interface";
 import { BscCommonStack } from "./lib/common-stack";
+import { BscSingleNodeStack } from "./lib/single-node-stack";
 import { BscHANodesStack } from "./lib/ha-nodes-stack";
 import * as nag from "cdk-nag";
 
@@ -14,9 +16,22 @@ new BscCommonStack(app, "bsc-common", {
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region }
 });
 
+new BscSingleNodeStack(app, "bsc-single-node", {
+    stackName: `bsc-single-node`,
+
+    env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+    nodeRole: <configTypes.BscNodeRole> "single-node",
+    instanceType: config.baseNodeConfig.instanceType,
+    instanceCpuType: config.baseNodeConfig.instanceCpuType,
+    bscNetwork: config.baseNodeConfig.bscNetwork,
+    nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+    dataVolume: config.baseNodeConfig.dataVolume,
+});
+
 new BscHANodesStack(app, "bsc-ha-nodes", {
     stackName: `bsc-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+    nodeRole: <configTypes.BscNodeRole> "rpc-node",
     instanceType: config.baseNodeConfig.instanceType,
     instanceCpuType: config.baseNodeConfig.instanceCpuType,
     bscNetwork: config.baseNodeConfig.bscNetwork,

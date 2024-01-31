@@ -12,7 +12,8 @@ echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}" >> /etc/environment
 echo "BSC_NODE_TYPE=${_BSC_NODE_TYPE_}" >> /etc/environment
 echo "BSC_NETWORK=${_BSC_NETWORK_}" >> /etc/environment
 echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
-echo "ASG_NAME=${_ASG_NAME_}" >> /etc/environment
+echo "AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}" >> /etc/environment
+echo "NODE_ROLE=${_NODE_ROLE_}" >> /etc/environment
 source /etc/environment
 
 arch=$(uname -m)
@@ -45,7 +46,7 @@ rm /usr/bin/aws
 ln /usr/local/bin/aws /usr/bin/aws
 
 echo "Downloading assets zip file"
-aws s3 cp $ASSETS_S3_PATH ./assets.zip
+aws s3 cp $ASSETS_S3_PATH ./assets.zip --region $AWS_REGION
 unzip -q assets.zip
 
 echo 'Configuring CloudWatch Agent'
@@ -70,32 +71,17 @@ chmod +x s5cmd
 mv s5cmd /usr/bin
 s5cmd version
 
-echo "Waiting for volumes to be available"
-sleep 60
+echo 'Adding bcuser user and group'
+sudo groupadd -g 1002 bcuser
+sudo useradd -u 1002 -g 1002 -m -s /bin/bash bcuser
+sudo usermod -aG sudo bcuser
 
-cd /home/ec2-user
-mkdir -p bsc
-
-echo "Preparing EBS Volume"
-DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
-
-sudo mkfs -t xfs $DATA_VOLUME_ID
-sleep 10
-DATA_VOLUME_UUID=$(blkid -s UUID -o value $DATA_VOLUME_ID)
-DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /home/ec2-user/bsc/bsc-datadir xfs defaults 0 2"
-echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
-echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
-echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
-echo $DATA_VOLUME_FSTAB_CONF | sudo tee -a /etc/fstab
-sudo mkdir "bsc/bsc-datadir"
-sudo mount -a
-
-sudo su - ec2-user
-# mount nvme to /data folder
 echo "Install BSC geth client"
 
 # download bsc client and configuration
-cd bsc
+mkdir -p /home/bcuser/bsc
+cd /home/bcuser/bsc
+
 if [ "$arch" == "x86_64" ]; then
   wget -O geth  $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep geth_linux |cut -d\" -f4)
   chmod -v u+x geth
@@ -122,12 +108,85 @@ else
   make install
 fi
 
+# finish download and archive
+sudo yum install zstd -y
+sudo yum install pv -y
+zstd --version
+pv --version
+
+echo 'Configuring BSC Node service as a system service'
+# Copy startup script to correct location
+if [[ "$BSC_NODE_TYPE" == "full" ]]; then
+  sudo mkdir /home/bcuser/bin
+  sudo mv /opt/bsc/rpc-template.sh /home/bcuser/bin/node.sh
+fi
+
+sudo chmod +x /home/bcuser/bin/node.sh
+sudo chown bcuser:bcuser -R /home/bcuser/
+
+echo "Starting BSC as a service"
+sudo bash -c 'cat > /etc/systemd/system/bsc.service <<EOF
+[Unit]
+Description=BSC Node
+After=network-online.target
+[Service]
+Type=simple
+Restart=always
+RestartSec=30
+User=bcuser
+Environment="PATH=/bin:/usr/bin:/home/bcuser/bin"
+ExecStart=/home/bcuser/bin/node.sh
+[Install]
+WantedBy=multi-user.target
+EOF'
+
+echo "Configuring syncchecker script"
+cd /opt
+mv /opt/bsc-checker/syncchecker-bsc.sh /opt/syncchecker.sh
+chmod +x /opt/syncchecker.sh
+
+
+(crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
+crontab -l
+
+if [ "$NODE_ROLE" == "single-node"  ]; then
+  echo "Single node. Signaling completion to CloudFormation"
+  /opt/aws/bin/cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
+fi
+
+echo "Waiting for volumes to be available"
+sleep 60
+
+mkdir -p /data
+
+echo "Preparing EBS Volume"
+if $(lsblk | grep -q nvme1n1); then
+  echo "nvme1n1 is found. Configuring attached storage"
+
+  mkfs -t ext4 /dev/nvme1n1
+
+  sleep 10
+  # Define the line to add to fstab
+  uuid=$(lsblk -n -o UUID /dev/nvme1n1)
+  line="UUID=$uuid /data ext4 defaults 0 2"
+
+  # Write the line to fstab
+  echo $line | sudo tee -a /etc/fstab
+
+  mount -a
+
+else
+  echo "nvme1n1 is not found. Not doing anything"
+fi
+
+lsblk -d
+
 echo "Downloading BSC snapshots from 46Club."
 
-cd ../bsc-datadir/
+cd /data
 
 BSC_SNAPSHOTS_FILE_NAME=geth.tar.zst
-BSC_SNAPSHOTS_DIR=/home/ec2-user/bsc/bsc-datadir/
+BSC_SNAPSHOTS_DIR=/data/
 BSC_SNAPSHOTS_DOWNLOAD_STATUS=-1
 
 # take about 1 hour to download the bsc snapshot
@@ -160,62 +219,26 @@ echo "Downloading BSC snapshots from 46Club succeed"
 sleep 60
 # take about 2 hours to decompression the bsc snapshot
 echo "Decompression BSC snapshots start ..."
-# finish download and archive
-sudo yum install zstd -y
-sudo yum install pv -y
-zstd --version
-pv --version
+
 zstd -cd geth.tar.zst | pv | tar xvf - 2>&1 | tee unzip.log && echo "decompression success..." || echo "decompression failed..." >> bsc-snapshots-decompression.log
 echo "Decompression BSC snapshots success ..."
 
-mv /home/ec2-user/bsc/bsc-datadir/geth.full/geth /home/ec2-user/bsc/bsc-datadir/
-sudo rm -rf /home/ec2-user/bsc/bsc-datadir/geth.full
+mv /data/geth.full/geth /data/
+sudo rm -rf /data/geth.full
+sudo rm -rf /data/geth.tar.zst
 
 echo "BSC snapshots is ready !!!"
 
-echo 'Configuring BSC Node service as a system service'
-# Copy startup script to correct location
-if [[ "$BSC_NODE_TYPE" == "full" ]]; then
-  sudo mkdir "/home/ec2-user/bin/"
-  sudo mv /opt/bsc/rpc-template.sh /home/ec2-user/bin/node.sh
-fi
-
-sudo chmod +x /home/ec2-user/bin/node.sh
-sudo chown ec2-user:ec2-user -R /home/ec2-user/bsc/
-
-echo "Starting BSC as a service"
-sudo bash -c 'cat > /etc/systemd/system/bsc.service <<EOF
-[Unit]
-Description=BSC Node
-After=network-online.target
-[Service]
-Type=simple
-Restart=always
-RestartSec=30
-User=ec2-user
-Environment="PATH=/bin:/usr/bin:/home/ec2-user/bin"
-ExecStart=/home/ec2-user/bin/node.sh
-[Install]
-WantedBy=multi-user.target
-EOF'
+chown bcuser:bcuser -R /data
 
 sudo systemctl daemon-reload
 sudo systemctl enable --now bsc
-
-echo "Configuring syncchecker script"
-cd /opt
-sudo mv /opt/bsc-checker/syncchecker-bsc.sh /opt/syncchecker.sh
-sudo chmod +x /opt/syncchecker.sh
-
-
-(crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
-crontab -l
 
 if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
   echo "Signaling ASG lifecycle hook to complete"
   TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
   INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
-  aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$ASG_NAME"  --region $AWS_REGION
+  aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$AUTOSCALING_GROUP_NAME"  --region $AWS_REGION
 fi
 
 echo "All Done!!"

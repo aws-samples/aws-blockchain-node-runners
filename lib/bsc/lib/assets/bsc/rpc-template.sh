@@ -2,8 +2,8 @@
 set -e
 echo "Script is starting..."
 # Start rpc node
-/home/ec2-user/bsc/geth --config /home/ec2-user/bsc/config.toml \
-    --datadir /home/ec2-user/bsc/bsc-datadir --cache 8000 \
+/home/bcuser/bsc/geth --config /home/bcuser/bsc/config.toml \
+    --datadir /data --cache 8000 \
     --rpc.allow-unprotected-txs \
     --history.transactions=0 \
     --syncmode=full \

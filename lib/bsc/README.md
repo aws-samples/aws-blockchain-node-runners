@@ -33,7 +33,7 @@ This is the Well-Architected checklist for BSC nodes implementation of the AWS B
 |                         |                                   | Use encrypted Amazon Simple Storage Service (Amazon S3) buckets                  | This solution uses Amazon S3 managed keys (SSE-S3) encryption.                                                                                                                                                                                                                                                                                                                                |
 |                         | Data protection in transit        | Use TLS                                                                          | The AWS Application Load balancer currently uses HTTP listener. Create HTTPS listener with self signed certificate if TLS is desired.                                                                                                                                                                                                                                                         |
 |                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.                                                                                                                                                                                                                                                                                                     |
-|                         |                                   | Following principle of least privilege access                                    | In all node types, root user is not used (using special user "ec2-user" instead).                                                                                                                                                                                                                                                                                                             |
+|                         |                                   | Following principle of least privilege access                                    | In all node types, root user is not used (using special user "bcuser" instead).                                                                                                                                                                                                                                                                                                             |
 |                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions.                                                                                                                                                                                                                                                                                                                                          |
 | Cost optimization       | Service selection                 | Use cost effective resources                                                     | 1/ The Geth client supports the ARM architecture, consider compiling Graviton-based binaries to improve costs for compute. We recommend using the `m7g.4xlarge` EC2 instance type to optimize computational costs.  2/ Cost-effective EBS gp3 are preferred instead of io2.                                                                                                                   |
 |                         | Cost awareness                    | Estimate costs                                                                   | Single RPC node with `m7g.4xlarge` EBS gp3 volumes about 4000 GB(1000 IOPS, 700 MBps/s throughput) with On-Demand pricing will cost around US$854.54 per month in the US East (N. Virginia) region. More cost-optimal option with 3 year EC2 Instance Savings plan the cost goes down to 594.15 USD.                                                                                          |
@@ -114,7 +114,60 @@ npm install
    > ```bash
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
 
-5. Deploy a BSC Fullnode node typically takes about 2-3 hours. The Fullnode uses snapshots data, and downloading and decompressing the data can take a considerable amount of time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BSC Blockchain Network.
+### Option 1: Single RPC Node
+
+1. Deploying a BSC Fullnode node typically takes about 2-3 hours. The Fullnode uses snapshots data, and downloading and decompressing the data can take a considerable amount of time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BSC Blockchain Network.
+
+   ```bash
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/bsc
+   npx cdk deploy bsc-single-node --json --outputs-file single-node.json
+   ```
+
+2. Give the new RPC nodes about few hours to initialize and then run the following query against the load balancer behind the RPC node created
+
+   ```bash
+   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+
+   ```
+   
+   Check [Geth Syncing](https://geth.ethereum.org/docs/fundamentals/logs#syncing) Status:
+
+   ```bash
+   curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
+   --data '{ "jsonrpc": "2.0", "id": 1, "method": "eth_syncing", "params": []}'
+   ```
+
+   It will return `false` if the node is in sync. If `eth_syncing` returns anything other than false it has not finished syncing. Generally, if syncing is still ongoing, `eth_syncing` will return block info that looks as follows:
+   
+   ```javascript
+   {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+                 "currentBlock": "0x211f0d8",
+                 "healedBytecodeBytes": "0x0",
+                 "healedBytecodes": "0x0",
+                 "healedTrienodeBytes": "0x0",
+                 "healedTrienodes": "0x0",
+                 "healingBytecode": "0x0",
+                 "healingTrienodes": "0x0",
+                 "highestBlock": "0x2123bff",
+                 "startingBlock": "0x20910d7",
+                 "syncedAccountBytes": "0x0",
+                 "syncedAccounts": "0x0",
+                 "syncedBytecodeBytes": "0x0",
+                 "syncedBytecodes": "0x0",
+                 "syncedStorage": "0x0",
+                 "syncedStorageBytes": "0x0"
+        }
+   }
+   ```
+
+### Option 2: Highly Available RPC Nodes
+
+1. Deploy a BSC Fullnode node typically takes about 2-3 hours. The Fullnode uses snapshots data, and downloading and decompressing the data can take a considerable amount of time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BSC Blockchain Network.
 
    ```bash
    pwd
@@ -122,7 +175,7 @@ npm install
    npx cdk deploy bsc-ha-nodes --json --outputs-file ha-nodes-deploy.json
    ```
 
-6. Give the new RPC nodes about few hours to initialize and then run the following query against the load balancer behind the RPC node created
+2. Give the new RPC nodes about few hours to initialize and then run the following query against the load balancer behind the RPC node created
 
    ```bash
    export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '.["bsc-ha-nodes-full"].alburl? | select(. != null)')
@@ -161,19 +214,6 @@ npm install
         }
    }
    ```
-
-   Please refer to more [JSON-RPC API METHODS](https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods). The following are some commonly used API methods:
-   - eth_blockNumber
-   - eth_getBalance
-   - eth_accounts
-   - eth_call
-   - eth_estimateGas
-   - eth_signTransaction
-   - eth_sendTransaction
-   - eth_getBlockByHash
-   - eth_getBlockByNumber
-   - eth_getTransactionByHash
-
 
 **NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
 
@@ -236,7 +276,7 @@ export INSTANCE_ID="i-**************"
 echo "INSTANCE_ID=" $INSTANCE_ID
 
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-cd /home/ec2-user/bsc/bsc-datadir
+cd /data
 cat bsc.log
 ```
 
@@ -257,6 +297,20 @@ sudo systemctl status bsc
   - `sudo systemctl status bsc`
 - View BSC service configuration
   - `cat /etc/systemd/system/bsc.service`
+
+5. Where can I find more infromation about BSC RPC API?
+
+Please refer to more [JSON-RPC API METHODS](https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods). The following are some commonly used API methods:
+   - eth_blockNumber
+   - eth_getBalance
+   - eth_accounts
+   - eth_call
+   - eth_estimateGas
+   - eth_signTransaction
+   - eth_sendTransaction
+   - eth_getBlockByHash
+   - eth_getBlockByNumber
+   - eth_getTransactionByHash
 
 ## Upgrades
 
