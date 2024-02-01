@@ -154,8 +154,10 @@ if [ "$NODE_ROLE" == "single-node"  ]; then
   /opt/aws/bin/cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
 fi
 
-echo "Waiting for volumes to be available"
-sleep 60
+if [ "$NODE_ROLE" == "single-node"  ]; then
+  echo "Single node. Wait for one minute for the volume to be available"
+  sleep 60
+fi
 
 mkdir -p /data
 

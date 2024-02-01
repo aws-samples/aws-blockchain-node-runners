@@ -84,13 +84,9 @@ export class BscHANodesStack extends cdk.Stack {
             _AUTOSCALING_GROUP_NAME_: autoScalingGroupName
         });
 
-
-        const healthCheckPath = "/";
-
         const rpcNodes = new HANodesConstruct(this, "rpc-nodes", {
             instanceType,
             dataVolumes: [dataVolume],
-            rootDataVolumeDeviceName: "/dev/sda1",
             machineImage: new ec2.AmazonLinuxImage({
                 generation: AmazonLinuxGeneration.AMAZON_LINUX_2,
                 kernel:ec2.AmazonLinuxKernel.KERNEL5_X,
@@ -103,7 +99,6 @@ export class BscHANodesStack extends cdk.Stack {
             numberOfNodes,
             rpcPortForALB: 8545,
             albHealthCheckGracePeriodMin,
-            healthCheckPath,
             heartBeatDelayMin,
             lifecycleHookName: lifecycleHookName,
             autoScalingGroupName: autoScalingGroupName
