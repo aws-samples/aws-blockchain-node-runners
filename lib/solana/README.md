@@ -266,6 +266,31 @@ The result should be like this (the actual balance might change):
     rm -rf /tmp/keypair.json
 
 ```
+5. How can I add swap space to the instance if my Solana node runs out of RAM during the initial sync?
+
+   There are two ways. Using the existing volume or using a new one. If your instance has Instance Store volume attached, it is better to keep your swap on it.
+
+   - Option 1: Dedicated Instance Store volume
+   
+```bash
+   sudo mkswap /dev/nvme3n1
+   sudo swapon /dev/nvme3n1
+   # Check the memory space is updated
+   free -g
+```
+
+   - Option 2: Existing volume (using Data directory as example):
+
+```bash
+   sudo mkdir /var/solana/data/swapfile
+   sudo dd if=/dev/zero of=/var/solana/data/swapfile bs=1MiB count=250KiB
+   sudo chmod 0600 /var/solana/data/swapfile
+   sudo mkswap /var/solana/data/swapfile
+   sudo swapon /var/solana/data/swapfile
+   free -g
+   sudo sysctl vm.swappiness=10
+
+```
 
 ## Upgrades
 

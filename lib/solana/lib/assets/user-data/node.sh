@@ -28,7 +28,7 @@ apt install unzip
 cd /opt
 
 echo "Downloading assets zip file"
-aws s3 cp $ASSETS_S3_PATH ./assets.zip
+aws s3 cp $ASSETS_S3_PATH ./assets.zip --region $AWS_REGION
 unzip -q assets.zip
 
 echo "Install and configure CloudWatch agent"
