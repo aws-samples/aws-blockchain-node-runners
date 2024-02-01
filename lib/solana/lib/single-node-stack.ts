@@ -132,7 +132,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         })
 
         new cw.CfnDashboard(this, 'solana-cw-dashboard', {
-            dashboardName: STACK_NAME,
+            dashboardName: `${STACK_NAME}-${node.instanceId}`,
             dashboardBody: dashboardString,
         });
 
