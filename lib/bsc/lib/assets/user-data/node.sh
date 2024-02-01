@@ -90,9 +90,9 @@ else
   chmod -v u+x geth
 fi
 
-# download mainnet configuration
-wget $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep mainnet |cut -d\" -f4)
-unzip mainnet.zip
+# download network configuration
+wget $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep $BSC_NETWORK |cut -d\" -f4)
+unzip $BSC_NETWORK.zip
 
 # install aria2 a p2p downloader
 
@@ -181,7 +181,7 @@ fi
 
 lsblk -d
 
-echo "Downloading BSC snapshots from 46Club."
+echo "Downloading BSC snapshot from 46Club."
 
 cd /data
 
@@ -214,20 +214,20 @@ do
                         ;;
         esac
 done
-echo "Downloading BSC snapshots from 46Club succeed"
+echo "Downloading BSC snapshot from 46Club succeed"
 
 sleep 60
 # take about 2 hours to decompression the bsc snapshot
-echo "Decompression BSC snapshots start ..."
+echo "Decompression BSC snapshot start ..."
 
 zstd -cd geth.tar.zst | pv | tar xvf - 2>&1 | tee unzip.log && echo "decompression success..." || echo "decompression failed..." >> bsc-snapshots-decompression.log
-echo "Decompression BSC snapshots success ..."
+echo "Decompression BSC snapshot success ..."
 
 mv /data/geth.full/geth /data/
 sudo rm -rf /data/geth.full
 sudo rm -rf /data/geth.tar.zst
 
-echo "BSC snapshots is ready !!!"
+echo "BSC snapshot is ready !!!"
 
 chown bcuser:bcuser -R /data
 

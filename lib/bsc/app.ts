@@ -17,7 +17,7 @@ new BscCommonStack(app, "bsc-common", {
 });
 
 new BscSingleNodeStack(app, "bsc-single-node", {
-    stackName: `bsc-single-node`,
+    stackName: `bsc-single-node-${config.baseNodeConfig.nodeConfiguration}-${config.baseNodeConfig.bscNetwork}`,
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     nodeRole: <configTypes.BscNodeRole> "single-node",
@@ -29,7 +29,7 @@ new BscSingleNodeStack(app, "bsc-single-node", {
 });
 
 new BscHANodesStack(app, "bsc-ha-nodes", {
-    stackName: `bsc-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
+    stackName: `bsc-ha-nodes-${config.baseNodeConfig.nodeConfiguration}-${config.baseNodeConfig.bscNetwork}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     nodeRole: <configTypes.BscNodeRole> "rpc-node",
     instanceType: config.baseNodeConfig.instanceType,

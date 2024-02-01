@@ -1,8 +1,8 @@
 # Sample AWS Blockchain Node Runner app for BNB Smart Chain(BSC) Nodes
 
-BNB Smart Chain, BSC for shot, is a blockchain that supports EVM-compatible smart contracts and protocols. It utilizes the [Proof of Stake Authority(PoSA)](https://docs.bnbchain.org/docs/learn/intro#proof-of-staked-authority) consensus mechanism, which is a hybrid consensus mechanism based on a combination of [Proof of Authority (PoA)](https://en.wikipedia.org/wiki/Proof_of_authority) and [Delegated Proof of Stake (DPoS)](https://bitcoinwiki.org/wiki/DPoS).
+BNB Smart Chain (BSC), is a blockchain that supports EVM-compatible smart contracts and protocols. It utilizes the [Proof of Stake Authority(PoSA)](https://docs.bnbchain.org/docs/learn/intro#proof-of-staked-authority) consensus mechanism, which is a hybrid consensus mechanism based on a combination of [Proof of Authority (PoA)](https://en.wikipedia.org/wiki/Proof_of_authority) and [Delegated Proof of Stake (DPoS)](https://bitcoinwiki.org/wiki/DPoS).
 
-This blueprint is designed to assist in deploying a High Availability (HA) BNB Smart Chain (BSC) Fullnode on AWS. It is intended for use in development, testing, or Proof of Concept purposes. Learn more information about configuring the [Run A Fullnode on BNB Smart Chain](https://docs.bnbchain.org/docs/validator/fullnode), the following provides detailed information on High Availability deployment settings.
+This blueprint is designed to assist in deploying a single node or a Highly Available (HA) [BNB Smart Chain (BSC) Fullnode](https://docs.bnbchain.org/docs/validator/fullnode/) on AWS. It is intended for use in development, testing, or Proof of Concept purposes.
 
 ## Overview of Deployment Architectures for HA setups
 
@@ -116,27 +116,27 @@ npm install
 
 ### Option 1: Single RPC Node
 
-1. Deploying a BSC Fullnode node typically takes about 2-3 hours. The Fullnode uses snapshots data, and downloading and decompressing the data can take a considerable amount of time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BSC Blockchain Network.
+1. The inital deployment a BSC full node and dwonloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BSC Blockchain Network (next step).
 
    ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/bsc
-   npx cdk deploy bsc-single-node --json --outputs-file single-node.json
+      pwd
+      # Make sure you are in aws-blockchain-node-runners/lib/bsc
+      npx cdk deploy bsc-single-node --json --outputs-file single-node.json
    ```
 
-2. Give the new RPC nodes about few hours to initialize and then run the following query against the load balancer behind the RPC node created
+2. After the node is initialised from the snapshot you need to wait from another half a day to a day for the inital syncronization process to finish. The time depends on how fresh the snapshot was. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
+
+    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
+    - Open `Dashboards` and select `bsc-single-node-<node_configuration>-<your_bsc_network>-<ec2_instance_id>` from the list of dashboards.
+
+Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the single RPC node you deployed:
 
    ```bash
-   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
-
-   ```
-   
-   Check [Geth Syncing](https://geth.ethereum.org/docs/fundamentals/logs#syncing) Status:
-
-   ```bash
-   curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
-   --data '{ "jsonrpc": "2.0", "id": 1, "method": "eth_syncing", "params": []}'
+      INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+      NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+      
+      curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
+      --data '{ "jsonrpc": "2.0", "id": 1, "method": "eth_syncing", "params": []}'
    ```
 
    It will return `false` if the node is in sync. If `eth_syncing` returns anything other than false it has not finished syncing. Generally, if syncing is still ongoing, `eth_syncing` will return block info that looks as follows:
@@ -165,24 +165,40 @@ npm install
    }
    ```
 
-### Option 2: Highly Available RPC Nodes
-
-1. Deploy a BSC Fullnode node typically takes about 2-3 hours. The Fullnode uses snapshots data, and downloading and decompressing the data can take a considerable amount of time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BSC Blockchain Network.
+3. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Run the following query against the private IP of the single RPC node you deployed:
 
    ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/bsc
-   npx cdk deploy bsc-ha-nodes --json --outputs-file ha-nodes-deploy.json
+      INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+      NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+
+      # We query token balance of one of the system contracts: https://bscscan.com/address/0x0000000000000000000000000000000000001006
+      curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
+      --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
+   ```
+   You will get a response similar to this:
+
+   ```json
+      {"jsonrpc":"2.0","id":1,"result":"0x3635c9adc5dea00000"}
+   ```
+
+### Option 2: Highly Available RPC Nodes
+
+1. The inital deployment a BSC full node and dwonloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for your another half a day to a day for your nodes to synchronize with the BSC Blockchain Network, depending on how fresh the snapshot was.
+
+   ```bash
+      pwd
+      # Make sure you are in aws-blockchain-node-runners/lib/bsc
+      npx cdk deploy bsc-ha-nodes --json --outputs-file ha-nodes-deploy.json
    ```
 
 2. Give the new RPC nodes about few hours to initialize and then run the following query against the load balancer behind the RPC node created
 
    ```bash
-   export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '.["bsc-ha-nodes-full"].alburl? | select(. != null)')
-   echo $RPC_ALB_URL
+      export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '.["bsc-ha-nodes-full"].alburl? | select(. != null)')
+      echo $RPC_ALB_URL
    ```
    
-   Check [Geth Syncing](https://geth.ethereum.org/docs/fundamentals/logs#syncing) Status:
+   Periodically check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the load balancer fronting your nodes:
 
    ```bash
    curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
@@ -216,6 +232,22 @@ npm install
    ```
 
 **NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
+
+3. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Run the following query against the private IP of the single RPC node you deployed:
+
+   ```bash
+      export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '.["bsc-ha-nodes-full"].alburl? | select(. != null)')
+      echo $RPC_ALB_URL
+
+      # We query token balance of one of the system contracts: https://bscscan.com/address/0x0000000000000000000000000000000000001006
+      curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
+      --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
+   ```
+   You will get a response similar to this:
+
+   ```json
+      {"jsonrpc":"2.0","id":1,"result":"0x3635c9adc5dea00000"}
+   ```
 
 ### Clearing up and undeploy everything
 

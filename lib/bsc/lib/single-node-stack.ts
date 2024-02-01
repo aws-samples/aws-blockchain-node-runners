@@ -115,7 +115,7 @@ export class BscSingleNodeStack extends cdk.Stack {
         })
 
         new cw.CfnDashboard(this, 'single-cw-dashboard', {
-            dashboardName: STACK_NAME,
+            dashboardName: `${STACK_NAME}-${node.instanceId}`,
             dashboardBody: dashboardString,
         });
 

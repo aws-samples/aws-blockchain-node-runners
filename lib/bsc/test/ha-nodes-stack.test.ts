@@ -3,6 +3,7 @@ import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
 import * as config from "../lib/config/bscConfig";
+import * as configTypes from "../lib/config/bscConfig.interface";
 import { BscHANodesStack } from "../lib/ha-nodes-stack";
 
 describe("BscHANodesStack", () => {
@@ -13,6 +14,7 @@ describe("BscHANodesStack", () => {
     const bscHANodesStack = new BscHANodesStack(app, "bsc-sync-node", {
     stackName: `bsc-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+    nodeRole: <configTypes.BscNodeRole> "rpc-node",
 
     instanceType: config.baseNodeConfig.instanceType,
     instanceCpuType: config.baseNodeConfig.instanceCpuType,
@@ -40,30 +42,30 @@ describe("BscHANodesStack", () => {
         }
        ],
        SecurityGroupIngress: [
-         {
+        {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols (gossip, turbine, repair, etc)",
+          "Description": "P2P",
           "FromPort": 30303,
           "IpProtocol": "tcp",
           "ToPort": 30303
          },
          {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols (gossip, turbine, repair, etc)",
+          "Description": "P2P",
           "FromPort": 30303,
           "IpProtocol": "udp",
           "ToPort": 30303
          },
          {
           "CidrIp": "1.2.3.4/5",
-          "Description": "RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)",
+          "Description": "BSC RPC Port",
           "FromPort": 8545,
           "IpProtocol": "tcp",
           "ToPort": 8545
          },
          {
           "CidrIp": "1.2.3.4/5",
-          "Description": "RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)",
+          "Description": "BSC WebSocket Port",
           "FromPort": 8546,
           "IpProtocol": "tcp",
           "ToPort": 8546
@@ -72,7 +74,12 @@ describe("BscHANodesStack", () => {
           "Description": "Allow access from ALB to Blockchain Node",
           "FromPort": 0,
           "IpProtocol": "tcp",
-          "SourceSecurityGroupId": Match.anyValue(),
+          "SourceSecurityGroupId": {
+           "Fn::GetAtt": [
+            Match.anyValue(),
+            "GroupId"
+           ]
+          },
           "ToPort": 65535
          },
        ]
@@ -80,12 +87,12 @@ describe("BscHANodesStack", () => {
 
     // Has security group from ALB to EC2.
     template.hasResourceProperties("AWS::EC2::SecurityGroupIngress", {
-      Description: Match.anyValue(),
-      FromPort: 8845,
+      Description: "Load balancer to target",
+      FromPort: 8545,
       GroupId: Match.anyValue(),
       IpProtocol: "tcp",
       SourceSecurityGroupId: Match.anyValue(),
-      ToPort: 8845,
+      ToPort: 8545,
     })
 
     // Has launch template profile for EC2 instances.
@@ -123,7 +130,7 @@ describe("BscHANodesStack", () => {
          EbsOptimized: true,
          IamInstanceProfile: Match.anyValue(),
          ImageId: Match.anyValue(),
-         InstanceType:"m7i.4xlarge",
+         InstanceType:"m7g.4xlarge",
          SecurityGroupIds: [Match.anyValue()],
          UserData: Match.anyValue(),
          TagSpecifications: Match.anyValue(),
@@ -165,9 +172,9 @@ describe("BscHANodesStack", () => {
       {
         "CidrIp": "1.2.3.4/5",
         "Description": "Blockchain Node RPC",
-        "FromPort": 8845,
+        "FromPort": 8545,
         "IpProtocol": "tcp",
-        "ToPort": 8845
+        "ToPort": 8545
       }
       ],
       VpcId: Match.anyValue(),
@@ -213,7 +220,7 @@ describe("BscHANodesStack", () => {
         }
        ],
        LoadBalancerArn: Match.anyValue(),
-       Port: 8899,
+       Port: 8545,
        Protocol: "HTTP"
     })
 
@@ -221,13 +228,13 @@ describe("BscHANodesStack", () => {
     template.hasResourceProperties("AWS::ElasticLoadBalancingV2::TargetGroup", {
       HealthCheckEnabled: true,
       HealthCheckIntervalSeconds: 30,
-      HealthCheckPath: "/health",
-      HealthCheckPort: "8845",
+      HealthCheckPath: "/",
+      HealthCheckPort: "8545",
       HealthyThresholdCount: 3,
       Matcher: {
       HttpCode: "200-299"
       },
-      Port: 8845,
+      Port: 8545,
       Protocol: "HTTP",
       TargetGroupAttributes: [
       {
