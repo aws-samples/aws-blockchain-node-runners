@@ -136,7 +136,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
       NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
       
       curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
-      --data '{ "jsonrpc": "2.0", "id": 1, "method": "eth_syncing", "params": []}'
+      --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}'
    ```
 
    It will return `false` if the node is in sync. If `eth_syncing` returns anything other than false it has not finished syncing. Generally, if syncing is still ongoing, `eth_syncing` will return block info that looks as follows:
@@ -202,7 +202,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
 
    ```bash
    curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
-   --data '{ "jsonrpc": "2.0", "id": 1, "method": "eth_syncing", "params": []}'
+   --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}'
    ```
 
    It will return `false` if the node is in sync. If `eth_syncing` returns anything other than false it has not finished syncing. Generally, if syncing is still ongoing, `eth_syncing` will return block info that looks as follows:
