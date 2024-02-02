@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2023-12-22T05:06:51.252Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.11 Chrome/114.0.5735.289 Electron/25.9.8 Safari/537.36" etag="N5efmICgCYRA6qlkuFmA" version="22.1.11" type="device">
+<mxfile host="Electron" modified="2024-02-02T05:56:36.735Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.0.2 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="WUE6WH_nkYInBex8zenJ" version="23.0.2" type="device">
   <diagram name="Single node" id="x4TNpdqoHl5asDUS4WaB">
     <mxGraphModel dx="1120" dy="854" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -7,7 +7,7 @@
         <mxCell id="OX_zlI_0chY2JoXTOn6b-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="OX_zlI_0chY2JoXTOn6b-1" target="OX_zlI_0chY2JoXTOn6b-6" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="OX_zlI_0chY2JoXTOn6b-1" value="Scroll&lt;br&gt;Blockchain&lt;br&gt;Network" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="OX_zlI_0chY2JoXTOn6b-1" value="Base&lt;br&gt;Blockchain&lt;br&gt;Network" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="60" y="420" width="120" height="80" as="geometry" />
         </mxCell>
         <mxCell id="OX_zlI_0chY2JoXTOn6b-2" value="AWS Account" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud_alt;strokeColor=#232F3E;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#232F3E;dashed=0;" parent="1" vertex="1">
@@ -55,7 +55,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="OX_zlI_0chY2JoXTOn6b-10" value="Managed Blockchain /&amp;nbsp;&lt;br&gt;ETH RPC Node" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.managed_blockchain;" parent="OX_zlI_0chY2JoXTOn6b-2" vertex="1">
+        <mxCell id="OX_zlI_0chY2JoXTOn6b-10" value="Ethereum Layer1 RPC Node" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.managed_blockchain;" parent="OX_zlI_0chY2JoXTOn6b-2" vertex="1">
           <mxGeometry x="720" y="33" width="78" height="78" as="geometry" />
         </mxCell>
         <mxCell id="tnVEzlvcGCnVM9QI6DYc-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="OX_zlI_0chY2JoXTOn6b-2" target="OX_zlI_0chY2JoXTOn6b-10" edge="1">

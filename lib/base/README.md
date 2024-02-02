@@ -10,9 +10,8 @@
 
 1.	A Base node deployed in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on Base blockchain network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 2.	The Base node is used by dApps or development tools internally from within the Default VPC. JSON RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
-3. You will need access to a fully-synced Ethereum Mainnet RPC endpoint before running.
+3. Your Base node needs access to a fully-synced [Ethereum Mainnet or Sepolia RPC endpoint](https://docs.base.org/tools/node-providers) . 
 4. The Base node sends various monitoring metrics for both EC2 and Base nodes to Amazon CloudWatch.
-
 
 ## Additional materials
 
@@ -23,12 +22,12 @@
 
 **Minimum for Base node**
 
-- Instance type [m6a.xlarge](https://aws.amazon.com/ec2/instance-types/m6a/).
+- Instance type [m7g.2xlarge](https://aws.amazon.com/ec2/instance-types/m6a/).
 - 2500GB EBS gp3 storage with at least 6000 IOPS.
 
 **Recommended for Base node**
 
-- Instance type [m6a.2xlarge](https://aws.amazon.com/ec2/instance-types/m6a/).
+- Instance type [m7g.2xlarge](https://aws.amazon.com/ec2/instance-types/m6a/).
 - 2500GB EBS gp3 storage with at least 6000 IOPS.`
 
 </details>
@@ -39,7 +38,11 @@
 
 We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../docs/setup-cloud9.md)
 
-### Clone this repository and install dependencies
+### Make sure you have access to Ethereum L1 node
+
+Base node needs a URL to a Full Ethereum Node to validate blocks it receives. You can run your own with [Ethereum node blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum) or use [one of Base partners](https://docs.base.org/tools/node-providers).
+
+### On your Cloud9: Clone this repository and install dependencies
 
 ```bash
    git clone https://github.com/alickwong/aws-blockchain-node-runners
@@ -47,15 +50,15 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    npm install
 ```
 
-### Deploy Single Node
+### From your Cloud9: Deploy required dependencies
 
 1. Make sure you are in the root directory of the cloned repository
 
 2. If you have deleted or don't have the default VPC, create default VPC
 
-    ```bash
-    aws ec2 create-default-vpc
-    ```
+ ```bash
+ aws ec2 create-default-vpc
+ ```
 
    > NOTE:
    > You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
@@ -63,24 +66,24 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 3. Configure your setup
 
     Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
-    ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/base
-   cd lib/base
-   npm install
-   pwd
-   cp ./sample-configs/.env-sample-rpc .env
-   nano .env
-    ```
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/base
+cd lib/base
+npm install
+pwd
+cp ./sample-configs/.env-sample-rpc .env
+nano .env
+```
    > NOTE:
    > Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
 
 4. Deploy common components such as IAM role
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/base
-   npx cdk deploy base-common
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/base
+npx cdk deploy base-common
+```
 
    > IMPORTANT:
    > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
@@ -88,63 +91,73 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
    > ```
 
-5. For L1 node you you can set your own URL in `BASE_L1_ENDPOINT` property of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or run your own Ethereum node [with Node Runner blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum).
+### From your Cloud9: Deploy Single Node
 
-6. Deploy Base RPC Node and wait for another 10-20 minutes for it to sync
+1. For L1 node you you can set your own URL in `BASE_L1_ENDPOINT` property of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or run your own Ethereum node [with Node Runner blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum). For example:
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/base
-   npx cdk deploy base-single-node --json --outputs-file single-node-deploy.json
-   ```
-   After starting the node you will need to wait for the initial synchronization process to finish.To see the progress, you may use SSM to connect into EC2 first and watch the log like this:
+```bash
+#For Mainnet: 
+BASE_L1_ENDPOINT=https://1rpc.io/eth
 
-   ```bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   echo Latest synced block behind by: $((($(date +%s)-$( \
-   curl -d '{"id":0,"jsonrpc":"2.0","method":"optimism_syncStatus"}' \
-   -H "Content-Type: application/json" http://localhost:7545 | \
-   jq -r .result.unsafe_l2.timestamp))/60)) minutes
-   ```
+#For Sepolia:
+BASE_L1_ENDPOINT=https://rpc.sepolia.org
+```
 
-7. Test Base RPC API
+2. Deploy Base RPC Node and wait for it to sync. For Mainnet it might take less than an hour when using snapshots (default) or multiple days if syncing from block 0.
+
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/base
+npx cdk deploy base-single-node --json --outputs-file single-node-deploy.json
+```
+After starting the node you will need to wait for the initial synchronization process to finish.To see the progress, you may use SSM to connect into EC2 first and watch the log like this:
+
+```bash
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+echo Latest synced block behind by: $((($(date +%s)-$( \
+curl -d '{"id":0,"jsonrpc":"2.0","method":"optimism_syncStatus"}' \
+-H "Content-Type: application/json" http://localhost:7545 | \
+jq -r .result.unsafe_l2.timestamp))/60)) minutes
+```
+
+3. Test Base RPC API [TODO: Is there an address we can query balance from?]
    Use curl to query from within the node instance:
-   ```bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+```bash
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 
-   curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545
-   ```
+curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545
+```
 
 ### Monitoring
 A script on the Base node publishes current block and blocks behind metrics to CloudWatch metrics every 5 minutes. When the node is fully synced the blocks behind metric should get to 0, which might take about 1.5 days. To see the metrics:
 
 - Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
-- Open Dashboards and select `base-single-node` from the list of dashboards.
+- Open Dashboards and select `base-single-node-<your_ec2_instance_id>` from the list of dashboards.
 
-## Clear up and undeploy everything
+## From your Cloud9: Clear up and undeploy everything
 
 1. Undeploy all Nodes and Common stacks
 
-   ```bash
-   # Setting the AWS account id and region in case local .env file is lost
-   export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
-   export AWS_REGION=<your_target_AWS_region>
+```bash
+# Setting the AWS account id and region in case local .env file is lost
+export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+export AWS_REGION=<your_target_AWS_region>
 
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/base
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/base
 
-   # Undeploy Single Node
-   npx cdk destroy base-single-node
+# Undeploy Single Node
+npx cdk destroy base-single-node
 
-   # Delete all common components like IAM role and Security Group
-   npx cdk destroy base-common
-   ```
+# Delete all common components like IAM role and Security Group
+npx cdk destroy base-common
+```
 
 2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
 
@@ -154,44 +167,44 @@ A script on the Base node publishes current block and blocks behind metrics to C
 
    **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/base
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/base
 
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo su bcuser
-   # Geth logs:
-   docker logs --tail 50 node_geth_1 -f
-   # Base logs:
-   docker logs --tail 50 node_node_1 -f
-   ```
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo su bcuser
+# Geth logs:
+docker logs --tail 50 node_geth_1 -f
+# Base logs:
+docker logs --tail 50 node_node_1 -f
+```
 2. How to check the logs from the EC2 user-data script?
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/base
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/base
 
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo cat /var/log/cloud-init-output.log
-   ```
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo cat /var/log/cloud-init-output.log
+```
 
 3. How can I restart the Base node?
 
-   ``` bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo su bcuser
-   /usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml down && \
-   /usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml up -d
-   ```
+``` bash
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo su bcuser
+/usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml down && \
+/usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml up -d
+```
 4. Where to find the key Base client directories?
 
    - The data directory is `/data`
