@@ -6,7 +6,7 @@
 
 ### Single node setup
 
-![Single Node Deployment](./doc/assets/Architecture-SingleNode-v3.jpg)
+![Single Node Deployment](./doc/assets/Architecture-SingleNode-v3.png)
 
 1.	A Base node deployed in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on Base blockchain network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 2.	The Base node is used by dApps or development tools internally from within the Default VPC. JSON RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
