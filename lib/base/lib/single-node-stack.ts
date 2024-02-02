@@ -116,7 +116,7 @@ export class BaseSingleNodeStack extends cdk.Stack {
         })
 
         new cw.CfnDashboard(this, 'base-cw-dashboard', {
-            dashboardName: STACK_NAME,
+            dashboardName: `${STACK_NAME}-${node.instanceId}`,
             dashboardBody: dashboardString,
         });
 
