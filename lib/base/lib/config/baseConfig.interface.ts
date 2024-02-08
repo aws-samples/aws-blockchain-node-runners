@@ -15,8 +15,6 @@ export interface BaseBaseConfig extends configTypes.BaseConfig {
 }
 
 export interface BaseBaseNodeConfig extends configTypes.BaseNodeConfig {
-    ambEntereumNodeNetworkId: configTypes.AMBEthereumNodeNetworkId;
-    ambEntereumNodeInstanceType: string;
     baseNetworkId: BaseNetworkId;
     dataVolume: BaseDataVolumeConfig;
     restoreFromSnapshot: boolean;

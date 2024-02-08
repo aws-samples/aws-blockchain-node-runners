@@ -16,11 +16,13 @@ describe("BaseSingleNodeStack", () => {
     // Create the BaseSingleNodeStack.
     baseSingleNodeStack = new BaseSingleNodeStack(app, "base-single-node", {
       stackName: `base-single-node-${config.baseNodeConfig.baseNetworkId}`,
-      env: {account: config.baseConfig.accountId, region: config.baseConfig.region},
+      env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
       instanceType: config.baseNodeConfig.instanceType,
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
       baseNetworkId: config.baseNodeConfig.baseNetworkId,
+      restoreFromSnapshot: config.baseNodeConfig.restoreFromSnapshot,
+      l1Endpoint: config.baseNodeConfig.l1Endpoint,
       dataVolume: config.baseNodeConfig.dataVolume,
     });
 
@@ -115,7 +117,17 @@ describe("BaseSingleNodeStack", () => {
     // Has CloudWatch dashboard.
     template.hasResourceProperties("AWS::CloudWatch::Dashboard", {
       DashboardBody: Match.anyValue(),
-      DashboardName: `base-single-node-${config.baseNodeConfig.baseNetworkId}`
+      DashboardName: {
+        "Fn::Join": [
+          "",
+          [
+           "base-single-node-mainnet-",
+           {
+            "Ref": Match.anyValue()
+           }
+          ]
+         ]
+      }
     })
   });
 });

@@ -24,8 +24,6 @@ export const baseConfig: configTypes.BaseBaseConfig = {
 }
 
 export const baseNodeConfig: configTypes.BaseBaseNodeConfig = {
-    ambEntereumNodeNetworkId: <configTypes.AMBEthereumNodeNetworkId> process.env.AMB_ENTEREUM_NODE_NETWORK_ID || "mainnet",
-    ambEntereumNodeInstanceType: process.env.AMB_ETHEREUM_NODE_INSTANCE_TYPE || "bc.m5.xlarge",
     instanceType: new ec2.InstanceType(process.env.BASE_INSTANCE_TYPE ? process.env.BASE_INSTANCE_TYPE : "m6a.2xlarge"),
     instanceCpuType: process.env.BASE_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64,
     baseNetworkId: <configTypes.BaseNetworkId> process.env.BASE_NETWORK_ID || "mainnet",
