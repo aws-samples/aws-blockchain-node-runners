@@ -6,12 +6,14 @@
     "setup-git-secrets": "git secrets --install & git secrets --register-aws",
     "scan-history-git-secrets": "git secrets --scan-history",
     "scan-repo-git-secrets": "git secrets --scan",
-    "install-semgrep": "brew install semgrep",
-    "scan-semgrep": "semgrep scan --config auto"
+    "install-semgrep-mac": "brew install semgrep",
+    "scan-semgrep": "semgrep scan --config auto",
+    "install-pre-commit-mac": "brew install pre-commit",
+    "run-pre-commit": "pre-commit run --all-files"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.0",
-    "@types/node": "^20.5.0",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.0",
     "aws-cdk": "^2.84.0",
     "cdk-nag": "^2.27.43",
     "jest": "^29.5.0",

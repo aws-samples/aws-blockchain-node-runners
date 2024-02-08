@@ -193,18 +193,18 @@ if [ "$NODE_ROLE" == "sync-node" ]; then
   chmod 766 /opt/copy-data-to-s3.sh
 fi
 
-if [ "$NODE_ROLE" == "sync-node" ]; then
-  echo "Sync node. Signaling completion to CloudFormation"
+if [ "$NODE_ROLE" == "sync-node" ] || [ "$NODE_ROLE" == "single-node"  ]; then
+  echo "Single node. Signaling completion to CloudFormation"
   /opt/aws/bin/cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $REGION
 fi
 
 echo "Preparing data volume"
 
-if [ "$NODE_ROLE" == "sync-node" ]; then
+if [ "$NODE_ROLE" == "sync-node" ] || [ "$NODE_ROLE" == "single-node"  ]; then
   # echo "Sync node. Wait for the volume to be attached"
   # aws ec2 wait volume-available --volume-ids $DATA_VOLUME_ID --region $REGION
 
-  echo "Sync node. Wait for one minute for the volume to be available"
+  echo "Single node. Wait for one minute for the volume to be available"
   sleep 60
 fi
 
@@ -224,7 +224,7 @@ if $(lsblk | grep -q nvme1n1); then
 
   # Write the line to fstab
   echo $line | sudo tee -a /etc/fstab
-  
+
   mount -a
 
 else
@@ -242,11 +242,11 @@ mkdir -p /data/consensus/data
 chown -R ethereum:ethereum /data
 chmod -R 755 /data
 
-if [ "$NODE_ROLE" == "sync-node" ]; then
+if [ "$NODE_ROLE" == "sync-node" ] || [ "$NODE_ROLE" == "single-node"  ]; then
   if [ "$AUTOSTART_CONTAINER" == "false" ]; then
-    echo "Sync node. Autostart disabled. Start docker-compose manually!"
+    echo "Single node. Autostart disabled. Start docker-compose manually!"
   else
-    echo "Sync node. Autostart enabled. Starting docker-compose in 3 min."
+    echo "Single node. Autostart enabled. Starting docker-compose in 3 min."
     echo "sudo su ethereum && /usr/local/bin/docker-compose -f /home/ethereum/docker-compose.yml up -d" | at now +3 minutes
   fi
 fi

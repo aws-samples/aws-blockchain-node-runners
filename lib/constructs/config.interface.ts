@@ -12,7 +12,7 @@ export interface DataVolumeConfig {
     throughput: number;
 }
 
-interface BaseNodeConfig {
+export interface BaseNodeConfig {
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
 }
@@ -28,3 +28,5 @@ export interface HaNodesConfig extends BaseNodeConfig {
     numberOfNodes: number;
     dataVolumes: DataVolumeConfig[];
 }
+
+export type AMBEthereumNodeNetworkId = "mainnet" | "goerli";

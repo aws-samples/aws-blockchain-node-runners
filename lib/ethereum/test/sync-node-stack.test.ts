@@ -3,18 +3,20 @@ import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
 import * as config from "../lib/config/ethConfig";
-import { EthSyncNodeStack } from "../lib/sync-node-stack";
+import { EthSingleNodeStack } from "../lib/single-node-stack";
+import { EthNodeRole } from "../lib/config/ethConfig.interface";
 
 describe("EthSyncNodeStack", () => {
   test("synthesizes the way we expect", () => {
     const app = new cdk.App();
 
-    // Create the EthSyncNodeStack.
-    const ethSyncNodeStack = new EthSyncNodeStack(app, "eth-sync-node", {
+    // Create the EthSingleNodeStack.
+    const ethSyncNodeStack = new EthSingleNodeStack(app, "eth-sync-node", {
       stackName: `eth-sync-node-${config.baseConfig.clientCombination}`,
-  
+
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
       ethClientCombination: config.baseConfig.clientCombination,
+      nodeRole: <EthNodeRole> "sync-node",
       instanceType: config.syncNodeConfig.instanceType,
       instanceCpuType: config.syncNodeConfig.instanceCpuType,
       dataVolumes: config.syncNodeConfig.dataVolumes,

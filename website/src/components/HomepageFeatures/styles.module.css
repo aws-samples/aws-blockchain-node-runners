@@ -5,7 +5,7 @@
     width: 100%;
     /*background: whitesmoke;*/
   }
-  
+
   .featureSvg {
     color: var(--ifm-color-primary);
     height: 250px;
@@ -17,11 +17,11 @@
     color: var(--ifm-color-primary);
     font-size: 3em;
   }
-  
+
   .featureSvg:hover {
     transform: scale(1.5); /* Zoom in slightly on hover */
   }
-  
+
   /* Adding animation to feature items */
   @keyframes fadeInUp {
     from {
@@ -33,13 +33,13 @@
       transform: translateY(0);
     }
   }
-  
+
   /* Apply animation to each feature item */
   .row .col {
     animation: fadeInUp 0.5s ease forwards;
     animation-delay: 0.3s;
   }
-  
+
   .heading {
     font-weight: bold;
   }

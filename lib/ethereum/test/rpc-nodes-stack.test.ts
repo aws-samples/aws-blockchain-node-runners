@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
 import * as config from "../lib/config/ethConfig";
 import { EthRpcNodesStack } from "../lib/rpc-nodes-stack";
+import { EthNodeRole } from "../lib/config/ethConfig.interface";
 
 describe("EthRpcNodesStack", () => {
   test("synthesizes the way we expect", () => {
@@ -15,6 +16,7 @@ describe("EthRpcNodesStack", () => {
 
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
       ethClientCombination: config.baseConfig.clientCombination,
+      nodeRole: <EthNodeRole> "single-node",
       instanceType: config.rpcNodeConfig.instanceType,
       instanceCpuType: config.rpcNodeConfig.instanceCpuType,
       numberOfNodes: config.rpcNodeConfig.numberOfNodes,

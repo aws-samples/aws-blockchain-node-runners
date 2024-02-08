@@ -52,7 +52,7 @@ aws cloudwatch put-metric-data --metric-name elc_sync_block --namespace CWAgent 
 aws cloudwatch put-metric-data --metric-name elc_blocks_behind --namespace CWAgent --value $EXECUTION_CLIENT_BLOCKS_BEHIND --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
 
 # If the node is a sync node, check if the snapshot is already taken. If the snapshot is not taken, then take it and restart the node.
-if [[ "$NODE_ROLE" == "sync-node" ]]; then 
+if [[ "$NODE_ROLE" == "sync-node" ]]; then
     if [ ! -f "/data/snapshotted" ]; then
         if [ "$EXECUTION_CLIENT_SYNC_STATS" == "false"  ] && [ "$CONSENSUS_CLIENT_IS_SYNCING" == "false" ] && [ "$CONSENSUS_CLIENT_IS_OPTIMISTIC" == "false"  ]; then
                 sudo /opt/copy-data-to-s3.sh
@@ -60,6 +60,6 @@ if [[ "$NODE_ROLE" == "sync-node" ]]; then
                 # Take a snapshot once a day at midnight
                 (sudo crontab -u root -l; echo '0 0 * * * /opt/copy-data-to-s3.sh' ) | sudo crontab -u root -
                 sudo crontab -l
-        fi 
+        fi
     fi
 fi

@@ -7,27 +7,27 @@ const FeatureList = [
     title: 'Open Source',
     Icon: "⚀",
     description: (
-      <>
-          Deployment code is fully open source and available on GitHub. You can see what you are going to deploy before deploying it.
-      </>
+       <span>
+        Deployment code is fully open source and available on GitHub. You can see what you are going to deploy before deploying it.
+       </span>
     ),
   },
   {
     title: 'Scalable',
     Icon: "⚁",
     description: (
-      <div>
+      <span>
           Best Practice Blockchain Nodes Deployment Templates and Examples to run across Regions.
-      </div>
+      </span>
     ),
   },
   {
     title: 'Highly Available',
     Icon: "⚂",
     description: (
-        <div>
+        <span>
             Multi-Node Highly Available deployment options to run across Availability Zones.
-        </div>
+        </span>
     ),
   },
 ];

@@ -32,10 +32,11 @@ To send us a pull request, please:
 1. Fork the repository.
 2. Modify the source; please focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
 3. Ensure local tests pass.
-4. If you contribute a new CDK app, make sure you use [cdk-nag](https://aws.amazon.com/blogs/devops/manage-application-security-and-compliance-with-the-aws-cloud-development-kit-and-cdk-nag/) in your applicaiton.
-4. Commit to your fork using clear commit messages.
-5. Send us a pull request, answering any default questions in the pull request interface.
-6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
+4. If you contribute a new CDK app, make sure you use [cdk-nag](https://aws.amazon.com/blogs/devops/manage-application-security-and-compliance-with-the-aws-cloud-development-kit-and-cdk-nag/) in your application.
+4. Set up and run [pre-merge quality control tools](./docs/pre-merge-tools.md) on your local machine.
+5. Commit to your fork using clear commit messages.
+6. Send us a pull request, answering any default questions in the pull request interface.
+7. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
 [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).

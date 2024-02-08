@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
+    "moduleResolution": "node",
     "lib": [
       "es2020"
     ],
@@ -22,6 +23,7 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
+    "types": ["node"],
     "outDir": "dist"
   },
   "exclude": [

@@ -6,15 +6,16 @@ import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as nag from "cdk-nag";
 import * as path from "path";
 import * as fs from "fs";
-import * as config from "./config/ethConfig.interface";
+import * as configTypes from "./config/ethConfig.interface";
 import { EthNodeSecurityGroupConstruct } from "./constructs/eth-node-security-group"
 import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb"
 
 export interface EthRpcNodesStackProps extends cdk.StackProps {
-    ethClientCombination: config.EthClientCombination;
+    ethClientCombination: configTypes.EthClientCombination;
+    nodeRole: configTypes.EthNodeRole;
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
-    dataVolumes: config.EthDataVolumeConfig[],
+    dataVolumes: configTypes.EthDataVolumeConfig[],
     numberOfNodes: number;
     albHealthCheckGracePeriodMin: number;
     heartBeatDelayMin: number;
@@ -34,6 +35,7 @@ export class EthRpcNodesStack extends cdk.Stack {
         const {
             instanceType,
             ethClientCombination,
+            nodeRole,
             instanceCpuType,
             dataVolumes,
             albHealthCheckGracePeriodMin,
@@ -71,7 +73,7 @@ export class EthRpcNodesStack extends cdk.Stack {
             _ETH_CLIENT_COMBINATION_: ethClientCombination,
             _STACK_NAME_: STACK_NAME,
             _FORMAT_DISK_: "true",
-            _NODE_ROLE_:"rpc-node",
+            _NODE_ROLE_: nodeRole,
             _AUTOSTART_CONTAINER_: "true",
             _NODE_CF_LOGICAL_ID_: "",
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,

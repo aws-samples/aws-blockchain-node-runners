@@ -7,10 +7,12 @@ import * as albv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as configTypes from "./config.interface";
 import * as constants from "./constants";
 import * as nag from "cdk-nag";
+import { HealthCheck } from "aws-cdk-lib/aws-appmesh";
 
 export interface HANodesConstructCustomProps {
   instanceType: ec2.InstanceType,
   dataVolumes: configTypes.DataVolumeConfig[],
+  rootDataVolumeDeviceName?: string,
   machineImage: cdk.aws_ec2.IMachineImage,
   role: cdk.aws_iam.IRole,
   vpc: cdk.aws_ec2.IVpc,
@@ -19,6 +21,7 @@ export interface HANodesConstructCustomProps {
   numberOfNodes: number;
   rpcPortForALB: number,
   albHealthCheckGracePeriodMin: number;
+  healthCheckPath? : string;
   heartBeatDelayMin: number;
   lifecycleHookName: string;
   autoScalingGroupName: string;
@@ -32,9 +35,10 @@ export class HANodesConstruct extends cdkContructs.Construct {
 
     const availabilityZones = cdk.Stack.of(this).availabilityZones;
 
-    const { 
+    const {
       instanceType,
       dataVolumes,
+      rootDataVolumeDeviceName,
       machineImage,
       role,
       vpc,
@@ -43,6 +47,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
       numberOfNodes,
       rpcPortForALB,
       albHealthCheckGracePeriodMin,
+      healthCheckPath,
       heartBeatDelayMin,
       lifecycleHookName,
       autoScalingGroupName,
@@ -51,7 +56,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
     let blockDevices: ec2.BlockDevice[] = [
       {
           // ROOT VOLUME
-          deviceName: "/dev/xvda",
+          deviceName: rootDataVolumeDeviceName ? rootDataVolumeDeviceName : "/dev/xvda",
           volume: autoscaling.BlockDeviceVolume.ebs(46, {
               deleteOnTermination: true,
               throughput: 125,
@@ -96,6 +101,12 @@ export class HANodesConstruct extends cdkContructs.Construct {
       role: role,
     });
 
+  const vpcSubnets= {
+      subnetType: ec2.SubnetType.PUBLIC,
+      onePerAz: true,
+      availabilityZones: availabilityZones,
+  };
+
   const rpcNodesAsg = new autoscaling.AutoScalingGroup(this, "auto-scaling-group", {
       launchTemplate: launchTemplate,
       vpc: vpc,
@@ -103,10 +114,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
       minCapacity: 0,
       desiredCapacity: numberOfNodes,
       maxCapacity: 4,
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PUBLIC,
-        availabilityZones: availabilityZones.slice(0, 2),
-    },
+      vpcSubnets: vpcSubnets,
       defaultInstanceWarmup: cdk.Duration.minutes(1),
       healthCheck: autoscaling.HealthCheck.elb({
           // Should give enough time for the node to catch up
@@ -150,10 +158,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
       vpc,
       internetFacing: false,
       securityGroup: albSg,
-      vpcSubnets: {
-          subnetType: ec2.SubnetType.PUBLIC,
-          availabilityZones: availabilityZones.slice(0, 2),
-      },
+      vpcSubnets: vpcSubnets,
   });
 
   alb.logAccessLogs(albLogBucket, STACK_NAME);
@@ -172,7 +177,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
       healthCheck: {
           enabled: true,
           healthyHttpCodes: "200-299",
-          path: "/",
+          path: healthCheckPath ? healthCheckPath : "/",
           // In the future, can create a separate service to have a more reliable health check
           port: rpcPortForALB.toString(),
           unhealthyThresholdCount: 2,
@@ -197,7 +202,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
           {
               id: "AwsSolutions-EC29",
               reason: "Its Ok to terminate this instance as long as we have the data in the snapshot",
-          
+
           },
       ],
       true

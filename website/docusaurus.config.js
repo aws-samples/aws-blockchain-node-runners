@@ -1,8 +1,9 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const {themes} = require('prism-react-renderer');
+const lightCodeTheme = themes.github;
+const darkCodeTheme = themes.dracula;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -51,6 +52,22 @@ const config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-google-gtag',
+      {
+        trackingID: 'G-KEK2TQ67TP',
+        anonymizeIP: true,
+      },
+    ],
+    [
+      '@docusaurus/plugin-google-tag-manager',
+      {
+        containerId: 'GTM-WQ97QTTR',
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -86,7 +103,7 @@ const config = {
             items: [
               {
                 label: 'Docs',
-                to: '/docs/intro/intro',
+                to: '/docs/intro',
               },
             ],
           },
@@ -96,6 +113,10 @@ const config = {
               {
                 label: 'Github',
                 href: 'https://github.com/aws-samples/aws-blockchain-node-runners',
+              },
+              {
+                label: 'Contribution guide',
+                href: 'https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md',
               }
             ],
           },
@@ -105,6 +126,7 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
+        additionalLanguages: ['bash', 'diff', 'json'],
       },
     }),
 };
