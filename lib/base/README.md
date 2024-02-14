@@ -74,7 +74,7 @@ Base node needs a URL to a Full Ethereum Node to validate blocks it receives. Yo
 ### On your Cloud9: Clone this repository and install dependencies
 
 ```bash
-   git clone https://github.com/alickwong/aws-blockchain-node-runners
+   git clone https://github.com/aws-samples/aws-blockchain-node-runners
    cd aws-blockchain-node-runners
    npm install
 ```
