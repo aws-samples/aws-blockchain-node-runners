@@ -151,10 +151,6 @@ case $NETWORK_ID in
     sed -i "s#OP_NODE_L1_ETH_RPC=https://1rpc.io/eth#OP_NODE_L1_ETH_RPC=$L1_ENDPOINT#g" /home/bcuser/node/.env.mainnet
     sed -i '/.env.mainnet/s/^#//g' /home/bcuser/node/docker-compose.yml
     ;;
-  "goerli")
-    sed -i "s#OP_NODE_L1_ETH_RPC=https://Base-goerli-rpc.allthatnode.com#OP_NODE_L1_ETH_RPC=$L1_ENDPOINT#g" /home/bcuser/node/.env.goerli
-    sed -i "s/.env.goerli/s/^#//g" /home/bcuser/node/docker-compose.yml
-    ;;
   "sepolia")
     sed -i "s#OP_NODE_L1_ETH_RPC=https://rpc.sepolia.org#OP_NODE_L1_ETH_RPC=$L1_ENDPOINT#g" /home/bcuser/node/.env.sepolia
     sed -i "s/.env.sepolia/s/^#//g" /home/bcuser/node/docker-compose.yml
