@@ -84,15 +84,15 @@ After arranging your environment windows, you'll want to install and update some
 ```bash
 sudo pip install awscli --upgrade
 sudo yum install -y jq
-aws configure set default.region us-east-2
+aws configure set default.region us-east-1
 ```
 
 Install NodeJS v18 and set as the default version
 
 ```bash
-nvm install 16
-nvm use 16
-nvm alias default 16
+nvm install 18
+nvm use 18
+nvm alias default 18
 ```
 
 The AWS CDK includes the CDK Toolkit (also called the CLI), a command line tool for working with your AWS CDK apps and stacks. Install the CDK toolkit

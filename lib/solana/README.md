@@ -148,7 +148,7 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 7. Connect with the RPC API exposed by the node:
 
 ```bash
-   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
    NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
     # We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
     curl http://$NODE_INTERNAL_IP:8899 -X POST -H "Content-Type: application/json" \
