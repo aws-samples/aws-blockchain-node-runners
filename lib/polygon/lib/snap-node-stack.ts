@@ -81,7 +81,7 @@ export class PolygonSyncNodeStack extends cdk.Stack {
         });
 
         // Parsing user data script and injecting necessary variables
-        const syncNodeStartScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "sync-node-start.sh")).toString();
+        const syncNodeStartScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "snap-node-start.sh")).toString();
 
         const modifiedInitNodeScript = cdk.Fn.sub(syncNodeStartScript, {
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
@@ -97,19 +97,7 @@ export class PolygonSyncNodeStack extends cdk.Stack {
         });
         syncNode.instance.addUserData(modifiedInitNodeScript);
 
-        // Adding CloudWatch dashboard to the node
-        // const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SyncNodeCWDashboardJSON), {
-        //     INSTANCE_ID:syncNode.instanceId,
-        //     INSTANCE_NAME: STACK_NAME,
-        //     REGION: REGION,
-        // })
-                
-        // new cw.CfnDashboard(this, 'sync-cw-dashboard', {
-        //     dashboardName: STACK_NAME,
-        //     dashboardBody: dashboardString,
-        // });
-
-        new cdk.CfnOutput(this, "sync-instance-id", {
+        new cdk.CfnOutput(this, "snap-instance-id", {
             value: syncNode.instanceId,
         });
 

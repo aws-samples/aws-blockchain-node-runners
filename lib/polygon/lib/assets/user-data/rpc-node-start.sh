@@ -153,12 +153,30 @@ else
 fi
 
 # Select the right docker-compose based on client combination
+# Select the right docker-compose based on client combination
 case $CLIENT_COMBINATION in
   "bor-heimdall")
     # Copy docker-compose file
     cp /opt/docker-compose/docker-compose-bor-heimdall.yml /home/bcuser/docker-compose.yml
     # Configure clients
-    /opt/polygon/configure-bor-heimdall.sh $NETWORK
+    /opt/polygon/configure-bor.sh $NETWORK
+    /opt/polygon/configure-heimdall.sh $NETWORK
+    ;;
+  "erigon-heimdall")
+    # Copy docker-compose file\
+    cp /opt/docker-compose/docker-compose-erigon-heimdall.yml /home/bcuser/docker-compose.yml
+
+    echo "Configuring correct image architecture for Erigon"
+    if [ "$arch" = "x86_64" ]; then
+        sed -i 's/__IMAGE_ARCH__/amd64/g' /home/bcuser/docker-compose.yml
+    else
+        sed -i 's/__IMAGE_ARCH__/arm64/g' /home/bcuser/docker-compose.yml
+    fi
+    echo "Configuring chain for Erigon"
+    sed -i "s/__CHAIN__/$NETWORK/g" /home/bcuser/docker-compose.yml
+
+    # Configure clients
+    /opt/polygon/configure-heimdall.sh $NETWORK
     ;;
   *)
     echo "Combination is not valid."
@@ -169,4 +187,4 @@ esac
 # Copy data from S3 and start clients
   echo "RPC node. Starting copy data script"
   chmod +x /opt/copy-data-from-s3.sh
-  echo "/opt/copy-data-from-s3.sh $SNAPSHOT_S3_PATH" | at now +3 minutes
+  echo "/opt/copy-data-from-s3.sh" | at now +3 minutes

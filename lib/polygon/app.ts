@@ -5,7 +5,7 @@ import * as cdk from "aws-cdk-lib";
 import * as nag from "cdk-nag";
 import * as config from "./lib/config/polygonConfig";
 
-import { PolygonSyncNodeStack } from "./lib/sync-node-stack";
+import { PolygonSyncNodeStack } from "./lib/snap-node-stack";
 import { PolygonCommonStack } from "./lib/common-stack";
 import { PolygonRpcNodesStack } from "./lib/rpc-nodes-stack";
 
@@ -29,7 +29,7 @@ new PolygonSyncNodeStack(app, "polygon-sync-node", {
     dataVolumes: config.syncNodeConfig.dataVolumes,
 });
 
-new PolygonRpcNodesStack(app, "polygon-rpc-nodes", {
+new PolygonRpcNodesStack(app, "polygon-ha-rpc-nodes", {
     stackName: `polygon-rpc-nodes-${config.baseConfig.clientCombination}`,
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },

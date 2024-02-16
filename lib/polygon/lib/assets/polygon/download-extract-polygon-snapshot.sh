@@ -67,16 +67,7 @@
   extract_dir=${extract_dir:-"${client}_extract"}
   checksum=${checksum:-false}
 
-
-  # temporary as we transition erigon mainnet snapshots to new incremental model, ETA Aug 2023
-  if [[ "$client" == "erigon" && "$network" == "mainnet" ]]; then
-    echo "Erigon bor-mainnet archive snapshots currently unavailable as we transition to incremental snapshot model. ETA Aug 2023."
-    exit 1
-  fi
-
   # install dependencies and cursor to extract directory
-  sudo apt-get update -y
-  sudo apt-get install -y zstd pv aria2
   mkdir -p "$extract_dir"
   cd "$extract_dir"
 
@@ -91,8 +82,25 @@
   # download all incremental files, includes automatic checksum verification per increment
   aria2c -x10 -s10 --max-tries=100 --auto-file-renaming=false --max-concurrent-downloads=10 --max-connection-per-server=10 --retry-wait=3 --check-integrity=$checksum -i $client-$network-parts.txt --log=/tmp/aria2c-$client-$network.log --log-level=info
 
-  # Don't extract if download failed
-  if [ $? -ne 0 ]; then
+  max_retries=5
+  retry_count=0
+
+  while [ $retry_count -lt $max_retries ]; do
+      echo "Retrying failed parts, attempt $((retry_count + 1))..."
+      aria2c -x6 -s6 --max-tries=0 --save-session-interval=60 --save-session=$client-$network-failures.txt --max-connection-per-server=4 --retry-wait=3 --check-integrity=$checksum -i $client-$network-failures.txt
+      
+      # Check the exit status of the aria2c command
+      if [ $? -eq 0 ]; then
+          echo "Command succeeded."
+          break  # Exit the loop since the command succeeded
+      else
+          echo "Command failed. Retrying..."
+          retry_count=$((retry_count + 1))
+      fi
+  done
+
+  # Don't extract if download/retries failed.
+  if [ $retry_count -eq $max_retries ]; then
       echo "Download failed. Restart the script to resume downloading."
       exit 1
   fi
@@ -110,7 +118,7 @@
           echo "Join parts for ${date_stamp} then extract"
           cat $client-$network-snapshot-${date_stamp}-part* > "$output_tar"
           rm $client-$network-snapshot-${date_stamp}-part*
-          pv $output_tar | tar -I zstd -xf - -C . && rm $output_tar
+          pv $output_tar | tar -I zstd -xf - -C . 1>/tmp/tar-$client-$network-snapshot-${date_stamp}.log 2>&1 && rm $output_tar
       fi
   done
 
@@ -125,12 +133,12 @@
           echo "Join parts for ${date_stamp} then extract"
           cat $client-$network-snapshot-${date_stamp}-part* > "$output_tar"
           rm $client-$network-snapshot-${date_stamp}-part*
-          pv $output_tar | tar -I zstd -xf - -C . --strip-components=3 && rm $output_tar      
+          pv $output_tar | tar -I zstd -xf - -C . --strip-components=3 1>/tmp/tar-$client-$network-snapshot-${date_stamp}.log 2>&1 && rm $output_tar      
       fi
   done
 
-  # Make sure access rights are correct
-  chown -R bcuser:bcuser $extract_dir
+  # # Make sure access rights are correct
+  # chown -R bcuser:bcuser $extract_dir
 
-  # Upload to S3
-  s5cmd --log error cp $extract_dir $snapshot_s3_path/$extract_dir/
+  # # Upload to S3
+  # s5cmd --log error cp $extract_dir/ $snapshot_s3_path$extract_dir/

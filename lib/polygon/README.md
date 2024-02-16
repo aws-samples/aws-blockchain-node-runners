@@ -83,18 +83,26 @@ Note: the snapshot backup process will automatically run ever day at midnight ti
 
 ### Deploy the RPC Nodes
 
-1. Configure and deploy 2 RPC Nodes
+1. Configure and deploy a single RPC Node
 
 ```bash
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/polygon
-   npx cdk deploy polygon-rpc-nodes --json --outputs-file rpc-node-deploy.json
+   npx cdk deploy polygon-single-rpc-node --json --outputs-file single-rpc-node-deploy.json
 ```
 
-2. Give the new RPC nodes about 30 minutes (up to 2 hours for Erigon) to initialize and then run the following query against the load balancer behind the RPC node created
+1. Configure and deploy Highly Available RPC Nodes
 
 ```bash
-    export RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/polygon
+   npx cdk deploy polygon-ha-rpc-nodes --json --outputs-file ha-rpc-nodes-deploy.json
+```
+
+2. Give the new RPC nodes about 30 minutes to initialize and then run the following query against the load balancer behind the RPC node created
+
+```bash
+    export RPC_ABL_URL=$(cat ha-rpc-nodes-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
     echo $RPC_ABL_URL
     
     # We query token balance of Beacon deposit contract: https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa

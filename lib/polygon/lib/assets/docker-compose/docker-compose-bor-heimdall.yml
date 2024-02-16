@@ -3,7 +3,7 @@ version: '3.8'
 services:
   heimdall:
     container_name: heimdall
-    image: 0xpolygon/heimdall:0.3.4
+    image: 0xpolygon/heimdall:1.0.3
     restart: unless-stopped
     ports:
       - '26657:26657'
@@ -19,7 +19,7 @@ services:
     depends_on:
       - heimdall
     container_name: heimdallrest
-    image: 0xpolygon/heimdall:0.3.4
+    image: 0xpolygon/heimdall:1.0.3
     command: rest-server --home=/heimdall-home --node "tcp://heimdall:26657"
     ports:
       - 1317:1317
@@ -33,8 +33,8 @@ services:
     depends_on:
       - heimdall
       - heimdallrest
-    image: 0xpolygon/bor:0.4.0
-    container_name: bor
+    image: 0xpolygon/bor:1.1.0
+    container_name: execution
     ports:
       - '30303:30303'
       - '8545:8545'

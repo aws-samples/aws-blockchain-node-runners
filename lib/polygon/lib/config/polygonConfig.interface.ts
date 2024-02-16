@@ -1,6 +1,6 @@
 import * as configTypes from "../../../constructs/config.interface";
 
-export type PolygonClientCombination = "bor-heimdall";
+export type PolygonClientCombination = "bor-heimdall" | "erigon-heimdall";
 export type PolygonNetwork = "mainnet" | "mumbai";
 
 export interface PolygonDataVolumeConfig extends configTypes.DataVolumeConfig {

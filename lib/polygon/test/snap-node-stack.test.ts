@@ -3,7 +3,7 @@ import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
 import * as config from "../lib/config/polygonConfig";
-import { EthSyncNodeStack } from "../lib/sync-node-stack";
+import { EthSyncNodeStack } from "../lib/snap-node-stack";
 
 describe("EthSyncNodeStack", () => {
   test("synthesizes the way we expect", () => {

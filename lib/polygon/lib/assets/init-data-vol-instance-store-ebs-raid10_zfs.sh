@@ -4,7 +4,7 @@ set +e
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/raid-config.html 
 
 # 1.	 Use MADM to create a RAID 0 array with the two instance store volumes, resulting in a single 15000 GiB hybrid volume.
-# a.	sudo mdadm --create –verbose --assume-clean /dev/md0 --level=0 --name=DATA_RAID --raid-devices=2 /dev/nvme1n1 2 /dev/nvme2n1
+# a.	sudo mdadm --create –verbose --assume-clean /dev/md0 --level=0 --name=DATARAID0 --raid-devices=2 /dev/nvme1n1 2 /dev/nvme2n1
 
 # 2.	Allow time for the RAID array to initialize and synchronize. You can track the progress of these operations with the following command:
 # a.	sudo cat /proc/mdstat
@@ -13,7 +13,7 @@ set +e
 # a.	sudo mdadm --detail /dev/md0
 
 # 5.	Use MADM to configure RAID 1 mirror between the newly created hybrid storage volume with the EBS gp3 volume and used a “write mostly” flag for the latter. 
-# a.	sudo mdadm --create –verbose --assume-clean /dev/md0 --level=1 --name=DATA_RAID --raid-devices=2 /dev/md0 --write-mostly /dev/nvme3n1
+# a.	sudo mdadm --create –verbose --assume-clean /dev/md0 --level=1 --name=DATARAID10 --raid-devices=2 /dev/md0 --write-mostly /dev/nvme3n1
 
 # 6.	Install and configure OpenZFS file system to further optimise the use of storage using it transparent compression feature….
 # a.	Install

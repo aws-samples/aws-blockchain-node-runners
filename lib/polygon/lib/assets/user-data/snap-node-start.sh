@@ -150,6 +150,12 @@ case $CLIENT_COMBINATION in
     echo "/opt/polygon/download-extract-polygon-snapshot.sh -n $NETWORK -c bor -d /data/polygon/bor/bor/chaindata -v true -s3 $SNAPSHOT_S3_PATH" | at now +3 minutes
     echo "/opt/polygon/download-extract-polygon-snapshot.sh -n $NETWORK -c heimdall -d /data/polygon/heimdall/data -v true -s3 $SNAPSHOT_S3_PATH" | at now +4 minutes
     ;;
+  "erigon-heimdall")
+    mkdir -p /data/polygon/erigon
+    mkdir -p /data/polygon/heimdall/data
+    echo "/opt/polygon/download-extract-polygon-snapshot.sh -n $NETWORK -c erigon -d /data/polygon/erigon -v true -s3 $SNAPSHOT_S3_PATH" | at now +3 minutes
+    echo "/opt/polygon/download-extract-polygon-snapshot.sh -n $NETWORK -c heimdall -d /data/polygon/heimdall/data -v true -s3 $SNAPSHOT_S3_PATH" | at now +4 minutes
+    ;;
   *)
     echo "Combination is not valid."
     exit 1
