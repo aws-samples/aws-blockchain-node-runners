@@ -271,7 +271,7 @@ The result should be like this (the actual balance might change):
    There are two ways. Using the existing volume or using a new one. If your instance has Instance Store volume attached, it is better to keep your swap on it.
 
    - Option 1: Dedicated Instance Store volume
-   
+
 ```bash
    sudo mkswap /dev/nvme3n1
    sudo swapon /dev/nvme3n1

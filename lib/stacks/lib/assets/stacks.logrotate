@@ -1,0 +1,11 @@
+/var/log/stacks/stacks.log {
+  rotate 4
+  daily
+  compress
+  delaycompress
+  missingok
+  notifempty
+  extension .log
+  dateext
+  dateformat -%Y-%m-%d
+}
