@@ -28,6 +28,8 @@ export interface StacksBaseNodeConfig extends StacksNetworkConfig, configTypes.B
     stacksSignerSecretArn: string;
     stacksMinerSecretArn: string;
     dataVolume: StacksVolumeConfig;
+    // Ssh access for debugging. TODO: delete before merge to upstream repo.
+    debugKeyName?: string;
 }
 
 export interface StacksHAConfig {

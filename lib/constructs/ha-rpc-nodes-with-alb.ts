@@ -25,6 +25,8 @@ export interface HANodesConstructCustomProps {
   heartBeatDelayMin: number;
   lifecycleHookName: string;
   autoScalingGroupName: string;
+  // Ssh access for debugging. TODO: delete before merge to upstream repo.
+  debugKeyName?: string;
 }
 export class HANodesConstruct extends cdkContructs.Construct {
     public loadBalancerDnsName: string;
@@ -51,6 +53,8 @@ export class HANodesConstruct extends cdkContructs.Construct {
       heartBeatDelayMin,
       lifecycleHookName,
       autoScalingGroupName,
+      // Ssh access for debugging. TODO: delete before merge to upstream repo.
+      debugKeyName,
     } = props;
 
     let blockDevices: ec2.BlockDevice[] = [
@@ -99,6 +103,8 @@ export class HANodesConstruct extends cdkContructs.Construct {
       instanceType: instanceType,
       blockDevices: blockDevices,
       role: role,
+      // Ssh access for debugging. TODO: delete before merge to upstream repo.
+      keyName: debugKeyName,
     });
 
   const vpcSubnets= {
