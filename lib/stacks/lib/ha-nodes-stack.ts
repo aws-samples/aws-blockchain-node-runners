@@ -50,8 +50,6 @@ export class StacksHANodesStack extends cdk.Stack {
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
             numberOfNodes,
-            // Ssh access for debugging. TODO: delete before merge to upstream repo.
-            debugKeyName,
         } = props;
 
         // Using default VPC
@@ -62,7 +60,6 @@ export class StacksHANodesStack extends cdk.Stack {
             vpc: vpc,
             stacksRpcPort: stacksRpcPort,
             stacksP2pPort: stacksP2pPort,
-            isAllowSshAccess: !!(debugKeyName),
         })
 
         // Making our scripts and configis from the local "assets" directory available for instance to download
@@ -135,8 +132,6 @@ export class StacksHANodesStack extends cdk.Stack {
             heartBeatDelayMin,
             lifecycleHookName: lifecycleHookName,
             autoScalingGroupName: autoScalingGroupName,
-            // Ssh access for debugging. TODO: delete before merge to upstream repo.
-            debugKeyName: debugKeyName
         });
 
         // Making sure we output the URL of our Applicaiton Load Balancer

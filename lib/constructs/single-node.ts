@@ -16,8 +16,6 @@ export interface SingleNodeConstructCustomProps {
   securityGroup: cdk.aws_ec2.ISecurityGroup,
   availabilityZone: string,
   vpcSubnets: cdk.aws_ec2.SubnetSelection,
-  // Ssh access for debugging. TODO: delete before merge to upstream repo.
-  debugKeyName?: string,
 }
 export class SingleNodeConstruct extends cdkContructs.Construct {
     public instanceId: string;
@@ -38,8 +36,6 @@ export class SingleNodeConstruct extends cdkContructs.Construct {
       securityGroup,
       availabilityZone,
       vpcSubnets,
-      // Ssh access for debugging. TODO: delete before merge to upstream repo.
-      debugKeyName,
     } = props;
 
     const singleNode = new ec2.Instance(this, "single-node", {
@@ -65,8 +61,6 @@ export class SingleNodeConstruct extends cdkContructs.Construct {
       role: role,
       securityGroup: securityGroup,
       vpcSubnets: vpcSubnets,
-      // Ssh access for debugging. Delete before merge.
-      keyName: debugKeyName
     });
 
     this.instance = singleNode;

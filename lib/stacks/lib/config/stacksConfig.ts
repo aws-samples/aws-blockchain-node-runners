@@ -57,8 +57,6 @@ export const baseNodeConfig: configTypes.StacksBaseNodeConfig = {
         iops: process.env.STACKS_DATA_VOL_IOPS ? parseInt(process.env.STACKS_DATA_VOL_IOPS) : defaults.dataVolume.iops,
         throughput: process.env.STACKS_DATA_VOL_THROUGHPUT ? parseInt(process.env.STACKS_DATA_VOL_THROUGHPUT) : defaults.dataVolume.throughput,
     },
-    // Ssh access for debugging. TODO: delete before merge to upstream repo.
-    debugKeyName: process.env.DEBUG_KEY_NAME,
 };
 
 export const haNodeConfig: configTypes.StacksHAConfig = {

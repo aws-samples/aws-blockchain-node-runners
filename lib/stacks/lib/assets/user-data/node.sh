@@ -6,38 +6,40 @@ DATA_VOLUME_PATH=/var/lib/stacks
 CLOUD_ASSETS_DOWNLOAD_PATH=/tmp/assets.zip
 CLOUD_ASSETS_PATH=/var/tmp/assets
 
-# Setup environment variables provided by from CDK template on local machine.
-echo "AWS_REGION=${_AWS_REGION_}" >> /etc/environment
-echo "CLOUD_ASSETS_S3_PATH=${_ASSETS_S3_PATH_}" >> /etc/environment
-echo "STACK_NAME=${_STACK_NAME_}" >> /etc/environment
-echo "STACK_ID=${_STACK_ID_}" >> /etc/environment
-echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}" >> /etc/environment
-echo "STACKS_VERSION=${_STACKS_VERSION_}" >> /etc/environment
-echo "STACKS_NODE_CONFIGURATION=${_STACKS_NODE_CONFIGURATION_}" >> /etc/environment
-# Stacks network config
-echo "STACKS_NETWORK=${_STACKS_NETWORK_}" >> /etc/environment
-echo "STACKS_BOOTSTRAP_NODE=${_STACKS_BOOTSTRAP_NODE_}" >> /etc/environment
-echo "STACKS_CHAINSTATE_ARCHIVE=${_STACKS_CHAINSTATE_ARCHIVE_}" >> /etc/environment
-echo "STACKS_P2P_PORT=${_STACKS_P2P_PORT_}" >> /etc/environment
-echo "STACKS_RPC_PORT=${_STACKS_RPC_PORT_}" >> /etc/environment
-# Bitcoin network config
-echo "BITCOIN_PEER_HOST=${_BITCOIN_PEER_HOST_}" >> /etc/environment
-echo "BITCOIN_RPC_USERNAME=${_BITCOIN_RPC_USERNAME_}" >> /etc/environment
-echo "BITCOIN_RPC_PASSWORD=${_BITCOIN_RPC_PASSWORD_}" >> /etc/environment
-echo "BITCOIN_P2P_PORT=${_BITCOIN_P2P_PORT_}" >> /etc/environment
-echo "BITCOIN_RPC_PORT=${_BITCOIN_RPC_PORT_}" >> /etc/environment
-# Cloud resource config
-echo "STACKS_MINER_SECRET_ARN=${_STACKS_MINER_SECRET_ARN_}" >> /etc/environment
-echo "STACKS_SIGNER_SECRET_ARN=${_STACKS_SIGNER_SECRET_ARN_}" >> /etc/environment
-echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}" >> /etc/environment
-echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}" >> /etc/environment
-# TODO: Irrelevant until the high availability option with the autoscaling group is implemented.
-echo "ASG_NAME=${_ASG_NAME_}" >> /etc/environment
-echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
-# Place shared environment variables here.
-echo "DATA_VOLUME_PATH=$DATA_VOLUME_PATH" >> /etc/environment
-echo "CLOUD_ASSETS_PATH=$CLOUD_ASSETS_PATH" >> /etc/environment
+{
+  # Setup environment variables provided by from CDK template on local machine.
+  echo "AWS_REGION=${_AWS_REGION_}"
+  echo "CLOUD_ASSETS_S3_PATH=${_ASSETS_S3_PATH_}"
+  echo "STACK_NAME=${_STACK_NAME_}"
+  echo "STACK_ID=${_STACK_ID_}"
+  echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}"
+  echo "STACKS_VERSION=${_STACKS_VERSION_}"
+  echo "STACKS_NODE_CONFIGURATION=${_STACKS_NODE_CONFIGURATION_}"
+  # Stacks network config
+  echo "STACKS_NETWORK=${_STACKS_NETWORK_}"
+  echo "STACKS_BOOTSTRAP_NODE=${_STACKS_BOOTSTRAP_NODE_}"
+  echo "STACKS_CHAINSTATE_ARCHIVE=${_STACKS_CHAINSTATE_ARCHIVE_}"
+  echo "STACKS_P2P_PORT=${_STACKS_P2P_PORT_}"
+  echo "STACKS_RPC_PORT=${_STACKS_RPC_PORT_}"
+  # Bitcoin network config
+  echo "BITCOIN_PEER_HOST=${_BITCOIN_PEER_HOST_}"
+  echo "BITCOIN_RPC_USERNAME=${_BITCOIN_RPC_USERNAME_}"
+  echo "BITCOIN_RPC_PASSWORD=${_BITCOIN_RPC_PASSWORD_}"
+  echo "BITCOIN_P2P_PORT=${_BITCOIN_P2P_PORT_}"
+  echo "BITCOIN_RPC_PORT=${_BITCOIN_RPC_PORT_}"
+  # Cloud resource config
+  echo "STACKS_MINER_SECRET_ARN=${_STACKS_MINER_SECRET_ARN_}"
+  echo "STACKS_SIGNER_SECRET_ARN=${_STACKS_SIGNER_SECRET_ARN_}"
+  echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}"
+  echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}"
+  echo "ASG_NAME=${_ASG_NAME_}"
+  echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}"
+  # Place shared environment variables here.
+  echo "DATA_VOLUME_PATH=$DATA_VOLUME_PATH"
+  echo "CLOUD_ASSETS_PATH=$CLOUD_ASSETS_PATH"
+} >> /etc/environment
 
+# shellcheck source=/dev/null
 source /etc/environment
 
 # Show environment file in the logs.
@@ -52,8 +54,8 @@ sudo yum -y install time
 
 # Download cloud assets.
 echo "Downloading assets zip file"
-aws s3 cp $CLOUD_ASSETS_S3_PATH $CLOUD_ASSETS_DOWNLOAD_PATH --region $AWS_REGION
-unzip -qo $CLOUD_ASSETS_DOWNLOAD_PATH -d $CLOUD_ASSETS_PATH
+aws s3 cp "$CLOUD_ASSETS_S3_PATH" "$CLOUD_ASSETS_DOWNLOAD_PATH" --region "$AWS_REGION"
+unzip -qo "$CLOUD_ASSETS_DOWNLOAD_PATH" -d "$CLOUD_ASSETS_PATH"
 
 # TODO:
 # The "signer" and "miner" configurations will both need access to secret keys that should either be
@@ -69,14 +71,14 @@ unzip -qo $CLOUD_ASSETS_DOWNLOAD_PATH -d $CLOUD_ASSETS_PATH
 
 sudo mkdir -p /etc/stacks/
 CONFIG_DIR=$CLOUD_ASSETS_PATH/stacks/config/$STACKS_NODE_CONFIGURATION
-sudo envsubst < $CONFIG_DIR/stacks.toml > /etc/stacks/stacks.toml
+envsubst < "$CONFIG_DIR"/stacks.toml > /etc/stacks/stacks.toml
 
 echo "Install CloudWatch Agent"
 sudo yum -y install amazon-cloudwatch-agent
 
 echo "Configure Cloudwatch Agent"
 sudo mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
-cp $CONFIG_DIR/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
+cp "$CONFIG_DIR"/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
 # TODO: Publish prometheus metrics as well. We should update the dashboard template in tandem.
 
 echo "Starting CloudWatch Agent"
@@ -95,8 +97,8 @@ sudo passwd -d stacks # No password.
 sudo mkdir -p /etc/cfn/hooks.d/
 if [[ "$STACK_ID" != "none" ]]; then
   echo "Configuring CloudFormation helper scripts"
-  sudo envsubst < $CLOUD_ASSETS_PATH/cfn-hup/cfn-hup.conf > /etc/cfn/cfn-hup.conf
-  sudo envsubst < $CLOUD_ASSETS_PATH/cfn-hup/cfn-auto-reloader.conf > /etc/cfn/hooks.d/cfn-auto-reloader.conf
+  envsubst < $CLOUD_ASSETS_PATH/cfn-hup/cfn-hup.conf > /etc/cfn/cfn-hup.conf
+  envsubst < $CLOUD_ASSETS_PATH/cfn-hup/cfn-auto-reloader.conf > /etc/cfn/hooks.d/cfn-auto-reloader.conf
 
   echo "Starting CloudFormation helper scripts as a service"
   cp $CLOUD_ASSETS_PATH/cfn-hup/cfn-hup.service  /etc/systemd/system/cfn-hup.service
@@ -105,7 +107,7 @@ if [[ "$STACK_ID" != "none" ]]; then
   systemctl enable --now cfn-hup
   systemctl start cfn-hup.service
 
-  cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
+  cfn-signal --stack "$STACK_NAME" --resource "$RESOURCE_ID" --region "$AWS_REGION"
 fi
 
 # Set up volumes -----------------------------------------------------------------
@@ -128,14 +130,14 @@ else
   echo "Data volume type is EBS"
 
   DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
-  sudo mkfs -t xfs $DATA_VOLUME_ID
+  sudo mkfs -t xfs "$DATA_VOLUME_ID"
   sleep 10
-  DATA_VOLUME_UUID=$(lsblk -fn -o UUID  $DATA_VOLUME_ID)
+  DATA_VOLUME_UUID=$(lsblk -fn -o UUID  "$DATA_VOLUME_ID")
   DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID $DATA_VOLUME_PATH xfs defaults 0 2"
-  echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
-  echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
-  echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
-  echo $DATA_VOLUME_FSTAB_CONF | sudo tee -a /etc/fstab
+  echo "DATA_VOLUME_ID=$DATA_VOLUME_ID"
+  echo "DATA_VOLUME_UUID=$DATA_VOLUME_UUID"
+  echo "DATA_VOLUME_FSTAB_CONF=$DATA_VOLUME_FSTAB_CONF"
+  echo "$DATA_VOLUME_FSTAB_CONF" | sudo tee -a /etc/fstab
   sudo mount -a
 fi
 
@@ -151,19 +153,19 @@ lsblk
   # Impropperly using the data volume path temporarily because it will have the
   # space required to store the compressed chainstate.
   sudo mkdir -p $DATA_VOLUME_PATH/tmp
-  wget -q $STACKS_CHAINSTATE_ARCHIVE \
-    -O $DATA_VOLUME_PATH/tmp/chainstate.tar.gz
-  tar -vxf $DATA_VOLUME_PATH/tmp/chainstate.tar.gz \
-    -C $DATA_VOLUME_PATH
-  rm -rf $DATA_VOLUME_PATH/tmp
+  wget -q "$STACKS_CHAINSTATE_ARCHIVE" \
+    -O "$DATA_VOLUME_PATH/tmp/chainstate.tar.gz"
+  tar -vxf "$DATA_VOLUME_PATH/tmp/chainstate.tar.gz" \
+    -C "$DATA_VOLUME_PATH"
+  rm -rf "$DATA_VOLUME_PATH/tmp"
 ) &
 
 (
   # build-binaries.sh will ensure that the working directory the script is called from
   # has a ./src and a ./bin directory and will populate the ./src with the source code
   # and the ./bin with the compiled binaries.
-  cd /usr/local
-  $CLOUD_ASSETS_PATH/build-binaries.sh
+  cd /usr/local || return
+  "$CLOUD_ASSETS_PATH"/build-binaries.sh
 ) &
 
 wait # Wait for both background processes to finish
@@ -203,7 +205,7 @@ if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
   echo "Signaling ASG lifecycle hook to complete"
   TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
   INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
-  aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$ASG_NAME" --region $AWS_REGION
+  aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id "$INSTANCE_ID" --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$ASG_NAME" --region "$AWS_REGION"
 fi
 
 echo "All Done!!"

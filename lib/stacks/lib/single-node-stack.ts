@@ -49,8 +49,6 @@ export class StacksSingleNodeStack extends cdk.Stack {
             stacksSignerSecretArn,
             stacksMinerSecretArn,
             dataVolume,
-            // Ssh access for debugging. TODO: delete before merge to upstream repo.
-            debugKeyName,
         } = props;
 
         // Using default VPC
@@ -61,7 +59,6 @@ export class StacksSingleNodeStack extends cdk.Stack {
             vpc: vpc,
             stacksRpcPort: stacksRpcPort,
             stacksP2pPort: stacksP2pPort,
-            isAllowSshAccess: !!(debugKeyName),
         })
 
         // Making our scripts and configis from the local "assets" directory available for instance to download
@@ -94,8 +91,6 @@ export class StacksSingleNodeStack extends cdk.Stack {
             vpcSubnets: {
                 subnetType: ec2.SubnetType.PUBLIC,
             },
-            // Ssh access for debugging. TODO: delete before merge to upstream repo.
-            debugKeyName: debugKeyName
         });
 
         // Parsing user data script and injecting necessary variables

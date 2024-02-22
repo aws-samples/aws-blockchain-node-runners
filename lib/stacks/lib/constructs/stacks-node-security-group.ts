@@ -7,7 +7,6 @@ export interface StacksNodeSecurityGroupConstructProps {
   vpc: cdk.aws_ec2.IVpc;
   stacksRpcPort: number;
   stacksP2pPort: number;
-  isAllowSshAccess?: boolean;
 }
 
 export class StacksNodeSecurityGroupConstruct extends cdkContructs.Construct {
@@ -20,7 +19,6 @@ export class StacksNodeSecurityGroupConstruct extends cdkContructs.Construct {
       vpc,
       stacksRpcPort,
       stacksP2pPort,
-      isAllowSshAccess,
     } = props;
 
     const sg = new ec2.SecurityGroup(this, `rpc-node-security-group`, {
@@ -32,11 +30,6 @@ export class StacksNodeSecurityGroupConstruct extends cdkContructs.Construct {
     // Public ports
     sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(stacksP2pPort), "P2P");
     sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(stacksP2pPort), "P2P");
-
-    // Allow ssh access when enabled.
-    if (isAllowSshAccess ?? false) {
-      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), "SSH access");
-    }
 
     // Private ports restricted only to the VPC IP range
     sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(stacksRpcPort), "RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)");
