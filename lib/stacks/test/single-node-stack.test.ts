@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
 import * as config from "../lib/config/stacksConfig";
 import { StacksSingleNodeStack } from "../lib/single-node-stack";
+import { TEST_STACKS_DATA_VOL_IOPS, TEST_STACKS_DATA_VOL_SIZE, TEST_STACKS_DATA_VOL_THROUGHPUT, TEST_STACKS_DATA_VOL_TYPE, TEST_STACKS_P2P_PORT, TEST_STACKS_RPC_PORT } from "./test-constants";
 
 describe("StacksSingleNodeStack", () => {
   test("synthesizes the way we expect", () => {
@@ -14,7 +15,7 @@ describe("StacksSingleNodeStack", () => {
       stackName: `stacks-single-node-${config.baseNodeConfig.stacksNodeConfiguration}`,
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
       ...config.baseNodeConfig
-  });
+    });
 
     // Prepare the stack for assertions.
     const template = Template.fromStack(stacksSingleNodeStack);
@@ -34,30 +35,23 @@ describe("StacksSingleNodeStack", () => {
         {
           "CidrIp": "0.0.0.0/0",
           "Description": Match.anyValue(),
-          "FromPort": 8800,
+          "FromPort": TEST_STACKS_P2P_PORT,
           "IpProtocol": "tcp",
-          "ToPort": 8814
+          "ToPort": TEST_STACKS_P2P_PORT
          },
          {
           "CidrIp": "0.0.0.0/0",
           "Description": Match.anyValue(),
-          "FromPort": 8800,
+          "FromPort": TEST_STACKS_P2P_PORT,
           "IpProtocol": "udp",
-          "ToPort": 8814
+          "ToPort": TEST_STACKS_P2P_PORT
          },
          {
           "CidrIp": "1.2.3.4/5",
           "Description": Match.anyValue(),
-          "FromPort": 8899,
+          "FromPort": TEST_STACKS_RPC_PORT,
           "IpProtocol": "tcp",
-          "ToPort": 8899
-         },
-         {
-          "CidrIp": "1.2.3.4/5",
-          "Description": Match.anyValue(),
-          "FromPort": 8900,
-          "IpProtocol": "tcp",
-          "ToPort": 8900
+          "ToPort": TEST_STACKS_RPC_PORT
          }
        ]
     })
@@ -91,11 +85,10 @@ describe("StacksSingleNodeStack", () => {
     template.hasResourceProperties("AWS::EC2::Volume", {
       AvailabilityZone: Match.anyValue(),
       Encrypted: true,
-      Iops: 12000,
+      Iops: TEST_STACKS_DATA_VOL_IOPS,
       MultiAttachEnabled: false,
-      Size: 2000,
-      Throughput: 700,
-      VolumeType: "gp3"
+      Size: TEST_STACKS_DATA_VOL_SIZE,
+      VolumeType: TEST_STACKS_DATA_VOL_TYPE
     })
 
     // Has EBS data volume attachment.

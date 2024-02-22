@@ -155,15 +155,19 @@ export const SingleNodeCWDashboardJSON = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "stacks_tip_height", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "stacks_tip_height", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}", "region": "${REGION}", "yAxis": "left" } ]
                 ],
-                "sparkline": true,
-                "view": "timeSeries",
+                "sparkline": false,
+                "view": "singleValue",
                 "stacked": false,
                 "region": "${REGION}",
                 "stat": "Maximum",
                 "period": 60,
-                "title": "Stacks Tip Height"
+                "title": "Stacks Tip Height",
+                "liveData": false,
+                "setPeriodToTimeRange": true,
+                "trend": false,
+                "singleValueFullPrecision": true
             }
         },
         {
@@ -173,16 +177,19 @@ export const SingleNodeCWDashboardJSON = {
             "x": 12,
             "type": "metric",
             "properties": {
-                "sparkline": true,
-                "view": "timeSeries",
+                "sparkline": false,
+                "view": "singleValue",
                 "stacked": false,
                 "region": "${REGION}",
                 "stat": "Maximum",
                 "period": 60,
                 "metrics": [
-                    [ "CWAgent", "burn_block_height", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "burn_block_height", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}", "region": "${REGION}" } ]
                 ],
-                "title": "Burn Block Height"
+                "title": "Burn Block Height",
+                "singleValueFullPrecision": true,
+                "setPeriodToTimeRange": true,
+                "trend": false
             }
         },
         {

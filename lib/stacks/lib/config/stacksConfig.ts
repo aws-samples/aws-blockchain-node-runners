@@ -31,7 +31,7 @@ const stacksNodeConfiguration: configTypes.StacksNodeConfiguration =
     <configTypes.StacksNodeConfiguration> process.env.STACKS_NODE_CONFIGURATION || DEFAULT_STACKS_NODE_CONFIGURATION;
 
 // Generate default configurations based on the determining parameters.
-export const defaults: configTypes.StacksBaseNodeConfig = stacksNodeConfigDefaults(stacksNetwork, stacksNodeConfiguration);
+export const defaults: configTypes.StacksHAConfig = stacksNodeConfigDefaults(stacksNetwork, stacksNodeConfiguration);
 
 // Generate the node config from the defaults.
 export const baseNodeConfig: configTypes.StacksBaseNodeConfig = {
@@ -62,7 +62,14 @@ export const baseNodeConfig: configTypes.StacksBaseNodeConfig = {
 };
 
 export const haNodeConfig: configTypes.StacksHAConfig = {
-    albHealthCheckGracePeriodMin: process.env.STACKS_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN ? parseInt(process.env.STACKS_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN) : 10,
-    heartBeatDelayMin: process.env.STACKS_HA_NODES_HEARTBEAT_DELAY_MIN ? parseInt(process.env.STACKS_HA_NODES_HEARTBEAT_DELAY_MIN) : 40,
-    numberOfNodes: process.env.STACKS_HA_NUMBER_OF_NODES ? parseInt(process.env.STACKS_HA_NUMBER_OF_NODES) : 2,
+    ...baseNodeConfig,
+    albHealthCheckGracePeriodMin: process.env.STACKS_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN
+        ? parseInt(process.env.STACKS_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN)
+        : defaults.albHealthCheckGracePeriodMin,
+    heartBeatDelayMin: process.env.STACKS_HA_NODES_HEARTBEAT_DELAY_MIN
+        ? parseInt(process.env.STACKS_HA_NODES_HEARTBEAT_DELAY_MIN)
+        : defaults.heartBeatDelayMin,
+    numberOfNodes: process.env.STACKS_HA_NUMBER_OF_NODES
+        ? parseInt(process.env.STACKS_HA_NUMBER_OF_NODES)
+        : defaults.numberOfNodes,
 };

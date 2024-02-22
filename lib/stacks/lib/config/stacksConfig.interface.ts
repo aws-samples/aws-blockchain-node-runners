@@ -1,6 +1,6 @@
 import * as configTypes from "../../../constructs/config.interface";
 
-export type StacksNetwork = "mainnet" | "testnet";
+export type StacksNetwork = "mainnet" | "testnet" | "xenon" | "helium" | "mocknet";
 export type StacksNodeConfiguration = "follower" | "signer" | "miner";
 
 export interface StacksVolumeConfig extends configTypes.DataVolumeConfig {
@@ -32,7 +32,7 @@ export interface StacksBaseNodeConfig extends StacksNetworkConfig, configTypes.B
     debugKeyName?: string;
 }
 
-export interface StacksHAConfig {
+export interface StacksHAConfig extends StacksBaseNodeConfig {
     albHealthCheckGracePeriodMin: number;
     heartBeatDelayMin: number;
     numberOfNodes: number;

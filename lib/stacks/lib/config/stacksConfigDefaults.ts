@@ -7,14 +7,19 @@ export const DEFAULT_STACKS_NODE_CONFIGURATION: configTypes.StacksNodeConfigurat
 export function stacksNodeConfigDefaults(
     stacksNetwork: configTypes.StacksNetwork,
     stacksNodeConfiguration: configTypes.StacksNodeConfiguration
-): configTypes.StacksBaseNodeConfig {
+): configTypes.StacksHAConfig {
+
+    const isMainnet: boolean = stacksNetwork === "mainnet";
 
     const defaultDataVolume: configTypes.StacksVolumeConfig = {
-        sizeGiB: stacksNetwork === "mainnet" ? 512 : 256,
+        sizeGiB: isMainnet ? 512 : 256,
         type: ec2.EbsDeviceVolumeType.GP3,
         iops: 12000,
         throughput: 700
     }
+
+    // It takes around an hour and a half for a mainnet follower node to start up.
+    const defaultHeartBeatDelayMin: number = isMainnet ? 100 : 60;
 
     // In the case of the signer a larger instance type may be required.
     // TODO: Benchmark the signing performance under different instance types.
@@ -43,7 +48,7 @@ export function stacksNodeConfigDefaults(
             stacksChainstateArchive: "https://archive.hiro.so/testnet/stacks-blockchain/testnet-stacks-blockchain-latest.tar.gz",
             stacksP2pPort: 20444,
             stacksRpcPort: 20443,
-            bitcoinPeerHost: "bitcoind.stacks.co",
+            bitcoinPeerHost: "bitcoind.testnet.stacks.co",
             bitcoinRpcUsername: "blockstack",
             bitcoinRpcPassword: "blockstacksystem",
             bitcoinP2pPort: 18333,
@@ -59,5 +64,9 @@ export function stacksNodeConfigDefaults(
         stacksSignerSecretArn: "none",
         stacksMinerSecretArn: "none",
         dataVolume: defaultDataVolume,
+        // High availability configs defaults.
+        albHealthCheckGracePeriodMin: 10,
+        heartBeatDelayMin: defaultHeartBeatDelayMin,
+        numberOfNodes: 2,
     };
 }

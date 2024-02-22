@@ -7,7 +7,7 @@ import * as config from "./lib/config/stacksConfig";
 
 import { StacksSingleNodeStack } from "./lib/single-node-stack";
 import { StacksCommonStack } from "./lib/common-stack";
-// import { StacksHANodesStack } from "./lib/ha-nodes-stack";
+import { StacksHANodesStack } from './lib/ha-nodes-stack';
 
 const app = new cdk.App();
 cdk.Tags.of(app).add("Project", "AWSStacks");
@@ -23,14 +23,12 @@ new StacksSingleNodeStack(app, "stacks-single-node", {
     ...config.baseNodeConfig
 });
 
-// TODO: Add the high availability nodes.
-//
-// new StacksHANodesStack(app, "stacks-ha-nodes", {
-//     stackName: `stacks-ha-nodes-${config.baseNodeConfig.stacksNodeConfiguration}`,
-//     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-//     ...config.baseNodeConfig,
-//     ...config.haNodeConfig
-// });
+new StacksHANodesStack(app, "stacks-ha-nodes", {
+    stackName: `stacks-ha-nodes-${config.baseNodeConfig.stacksNodeConfiguration}`,
+    env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+    ...config.baseNodeConfig,
+    ...config.haNodeConfig
+});
 
 // Security Check
 cdk.Aspects.of(app).add(

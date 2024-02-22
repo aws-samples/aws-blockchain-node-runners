@@ -7,69 +7,69 @@ import { StacksCommonStack } from "../lib/common-stack";
 
 describe("StacksCommonStack", () => {
   test("synthesizes the way we expect", () => {
-    // const app = new cdk.App();
+    const app = new cdk.App();
 
-    // // Create the StacksCommonStack.
-    // const stacksCommonStack = new StacksCommonStack(app, "stacks-common", {
-    //     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    //     stackName: `stacks-nodes-common`,
-    // });
+    // Create the StacksCommonStack.
+    const stacksCommonStack = new StacksCommonStack(app, "stacks-common", {
+        env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+        stackName: `stacks-nodes-common`,
+    });
 
-    // // Prepare the stack for assertions.
-    // const template = Template.fromStack(stacksCommonStack);
+    // Prepare the stack for assertions.
+    const template = Template.fromStack(stacksCommonStack);
 
-    // // Has EC2 instance role.
-    // template.hasResourceProperties("AWS::IAM::Role", {
-    //   AssumeRolePolicyDocument: {
-    //     Statement: [
-    //      {
-    //       Action: "sts:AssumeRole",
-    //       Effect: "Allow",
-    //       Principal: {
-    //        Service: "ec2.amazonaws.com"
-    //       }
-    //      }
-    //     ]
-    //    },
-    //    ManagedPolicyArns: [
-    //     {
-    //       "Fn::Join": [
-    //        "",
-    //        [
-    //         "arn:",
-    //         {
-    //          "Ref": "AWS::Partition"
-    //         },
-    //         ":iam::aws:policy/SecretsManagerReadWrite"
-    //        ]
-    //       ]
-    //      },
-    //     {
-    //      "Fn::Join": [
-    //       "",
-    //       [
-    //        "arn:",
-    //        {
-    //         Ref: "AWS::Partition"
-    //        },
-    //        ":iam::aws:policy/AmazonSSMManagedInstanceCore"
-    //       ]
-    //      ]
-    //     },
-    //     {
-    //      "Fn::Join": [
-    //       "",
-    //       [
-    //        "arn:",
-    //        {
-    //         "Ref": "AWS::Partition"
-    //        },
-    //        ":iam::aws:policy/CloudWatchAgentServerPolicy"
-    //       ]
-    //      ]
-    //     }
-    //    ]
-    // })
+    // Has EC2 instance role.
+    template.hasResourceProperties("AWS::IAM::Role", {
+      AssumeRolePolicyDocument: {
+        Statement: [
+         {
+          Action: "sts:AssumeRole",
+          Effect: "Allow",
+          Principal: {
+           Service: "ec2.amazonaws.com"
+          }
+         }
+        ]
+       },
+       ManagedPolicyArns: [
+        {
+          "Fn::Join": [
+           "",
+           [
+            "arn:",
+            {
+             "Ref": "AWS::Partition"
+            },
+            ":iam::aws:policy/SecretsManagerReadWrite"
+           ]
+          ]
+         },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            Ref: "AWS::Partition"
+           },
+           ":iam::aws:policy/AmazonSSMManagedInstanceCore"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::aws:policy/CloudWatchAgentServerPolicy"
+          ]
+         ]
+        }
+       ]
+    })
 
  });
 });

@@ -60,6 +60,7 @@ export class StacksSingleNodeStack extends cdk.Stack {
         const instanceSG = new StacksNodeSecurityGroupConstruct (this, "security-group", {
             vpc: vpc,
             stacksRpcPort: stacksRpcPort,
+            stacksP2pPort: stacksP2pPort,
             isAllowSshAccess: !!(debugKeyName),
         })
 
@@ -93,6 +94,7 @@ export class StacksSingleNodeStack extends cdk.Stack {
             vpcSubnets: {
                 subnetType: ec2.SubnetType.PUBLIC,
             },
+            // Ssh access for debugging. TODO: delete before merge to upstream repo.
             debugKeyName: debugKeyName
         });
 
@@ -107,7 +109,9 @@ export class StacksSingleNodeStack extends cdk.Stack {
             _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
             _STACKS_VERSION_: stacksVersion,
             _STACKS_NODE_CONFIGURATION_: stacksNodeConfiguration,
-            _STACKS_NETWORK_: stacksNetwork,
+            _STACKS_NETWORK_: stacksNetwork === "testnet"
+                ? "xenon"
+                : stacksNetwork,
             _STACKS_BOOTSTRAP_NODE_: stacksBootstrapNode,
             _STACKS_CHAINSTATE_ARCHIVE_: stacksChainstateArchive,
             _STACKS_P2P_PORT_: stacksP2pPort.toString(),
