@@ -40,10 +40,6 @@ echo "CLOUD_ASSETS_PATH=$CLOUD_ASSETS_PATH" >> /etc/environment
 
 source /etc/environment
 
-# Set STDOUT and STDERR to send to viewable text files at the root directory.
-exec >> /node.sh.log
-exec 2>> /node.sh.elog
-
 # Show environment file in the logs.
 cat /etc/environment
 
@@ -154,9 +150,8 @@ lsblk
 (
   # Impropperly using the data volume path temporarily because it will have the
   # space required to store the compressed chainstate.
-  exec >> /node.sh.download.chainstate.log
   sudo mkdir -p $DATA_VOLUME_PATH/tmp
-  wget $STACKS_CHAINSTATE_ARCHIVE \
+  wget -q $STACKS_CHAINSTATE_ARCHIVE \
     -O $DATA_VOLUME_PATH/tmp/chainstate.tar.gz
   tar -vxf $DATA_VOLUME_PATH/tmp/chainstate.tar.gz \
     -C $DATA_VOLUME_PATH
@@ -164,8 +159,6 @@ lsblk
 ) &
 
 (
-  exec >> /node.sh.build.log
-  exec 2>> /node.sh.build.elog
   # build-binaries.sh will ensure that the working directory the script is called from
   # has a ./src and a ./bin directory and will populate the ./src with the source code
   # and the ./bin with the compiled binaries.

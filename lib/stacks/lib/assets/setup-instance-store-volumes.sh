@@ -3,8 +3,6 @@
 # Grab `DATA_VOLUME_PATH` from environment file.
 source /etc/environment
 
-exec >> /setup-instance-store-volumes.sh.log
-
 # Note, it's bad if the DATA_VOLUME_TYPE is `instance-store` because it is
 # temporary. We should consider preventing this from being an option.
 if [[ "$DATA_VOLUME_TYPE" == "instance-store" ]]; then

@@ -1,8 +1,6 @@
 #!/bin/sh
 source /etc/environment
 
-exec >> /build-binaries.sh.log
-
 # Download
 STACKS_REPO="stacks-core"
 STACKS_ORG="stacks-network"

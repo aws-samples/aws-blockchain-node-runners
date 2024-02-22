@@ -147,6 +147,10 @@ export class StacksSingleNodeStack extends cdk.Stack {
             value: node.instanceId,
         });
 
+        new cdk.CfnOutput(this, "region", {
+            value: REGION,
+        });
+
         // Adding suppressions to the stack
         nag.NagSuppressions.addResourceSuppressions(
             this,
