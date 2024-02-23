@@ -96,7 +96,7 @@ export class SingleNodeConstruct extends cdkContructs.Construct {
             removalPolicy: cdk.RemovalPolicy.DESTROY,
           });
         }
-
+        
 
       new ec2.CfnVolumeAttachment(this, `data-volume${dataVolumeIndex}-attachment`, {
           // Device naming according to https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html
