@@ -129,6 +129,7 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 ```bash
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/solana
+   npm i --save-dev @types/node
    npx cdk deploy solana-common
 ```
 
@@ -149,7 +150,7 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 
 ```bash
    INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
+   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
     # We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
     curl http://$NODE_INTERNAL_IP:8899 -X POST -H "Content-Type: application/json" \
     --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
