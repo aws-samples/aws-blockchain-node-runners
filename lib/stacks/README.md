@@ -126,8 +126,42 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 
 ```bash
    INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
+   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
    curl http://$NODE_INTERNAL_IP:20443/v2/info'
+```
+
+You should get a response like this:
+
+```JSON
+{
+    "peer_version": 402653193,
+    "pox_consensus": "27dbe5fc464fd0b9e1da43691d8fac55d4ff2760",
+    "burn_block_height": 832605,
+    "stable_pox_consensus": "2a4365ecb6c1d9aed5308a5bbdf817ab134fe4fb",
+    "stable_burn_block_height": 832598,
+    "server_version": "stacks-node 0.0.1 (:+, release build, linux [x86_64])",
+    "network_id": 1,
+    "parent_network_id": 3652501241,
+    "stacks_tip_height": 141155,
+    "stacks_tip": "7ef7a91b012784ab5f19ce9f1c5665821b2a365e25527da07df76d210d9805e4",
+    "stacks_tip_consensus_hash": "dcbfa607058859324b95466cc52a77ae8d0692cd",
+    "genesis_chainstate_hash": "74237aa39aa50a83de11a4f53e9d3bb7d43461d1de9873f402e5453ae60bc59b",
+    "unanchored_tip": null,
+    "unanchored_seq": null,
+    "exit_at_block_height": null,
+    "node_public_key": "0246622dd66e1db792982e02ab933a056832e8bc5e9e6efc70f35576a16ca39966",
+    "node_public_key_hash": "93ef5fad09be740ce5e279b9b83ac910cd8a5cd4",
+    "affirmations": {
+        "heaviest": "pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+        "stacks_tip": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+        "sortition_tip": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+        "tentative_best": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp"
+    },
+    "last_pox_anchor": {
+        "anchor_block_hash": "95c86834f315efb220a1105ff3fe9543a099d28ee6fe996d758ca2dc8cbc8e57",
+        "anchor_block_txid": "88afd29afb8fd122512ab8951c2cf488f394b61a9c4fcb77ba3f3ba15c6500a8"
+    }
+}
 ```
 
 ### Deploy the HA Nodes
@@ -143,10 +177,10 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 2. Give the new RPC nodes about 90 minutes to initialize and then run the following query against the load balancer behind the RPC node created
 
 ```bash
-    export RPC_ABL_URL=$(cat ha-nodes-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
+    export RPC_ABL_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
     echo $RPC_ABL_URL
 
-    curl http://$RPC_ABL_URL:20443' | jq
+    curl http://$RPC_ABL_URL:20443/v2/info' | jq
 ```
 
 The result should show the status of the blockchain.
@@ -193,7 +227,7 @@ The result should show the status of the blockchain.
    echo "AWS_REGION=$AWS_REGION"
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
    sudo su -
-   tail -f /var/log/stacks/node.log
+   tail -f /var/log/stacks/stacks.log
 ```
 
 2. How to check the logs from the EC2 user-data script?
@@ -211,19 +245,6 @@ The result should show the status of the blockchain.
 ```
 
 3. How can I restart the Stacks service?
-
-``` bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid?|select(. != null)' )
-   export AWS_REGION=$(cat single-node-deploy.json | jq -r '..|.region?|select(. != null)' )
-   echo "INSTANCE_ID=$INSTANCE_ID"
-   echo "AWS_REGION=$AWS_REGION"
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo systemctl status stacks
-   # Then if the status is bad run the following:
-   sudo systemctl restart stacks
-```
-
-4.
 
 ``` bash
    export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid?|select(. != null)' )
