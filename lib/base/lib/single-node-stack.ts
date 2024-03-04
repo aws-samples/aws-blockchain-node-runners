@@ -18,7 +18,8 @@ export interface BaseSingleNodeStackProps extends cdk.StackProps {
     instanceCpuType: ec2.AmazonLinuxCpuType;
     baseNetworkId: configTypes.BaseNetworkId;
     restoreFromSnapshot: boolean;
-    l1Endpoint: string;
+    l1ExecutionEndpoint: string,
+    l1ConsensusEndpoint: string,
     dataVolume: configTypes.BaseDataVolumeConfig;
 }
 
@@ -39,9 +40,17 @@ export class BaseSingleNodeStack extends cdk.Stack {
             instanceCpuType,
             baseNetworkId,
             restoreFromSnapshot,
-            l1Endpoint,
+            l1ExecutionEndpoint,
+            l1ConsensusEndpoint,
             dataVolume,
         } = props;
+
+        if (l1ExecutionEndpoint === constants.NoneValue){
+            throw new Error("L1 Execution Endpoint cannot be set to None. Set BASE_L1_EXECUTION_ENDPOINT ");
+        }
+        if (l1ConsensusEndpoint === constants.NoneValue){
+            throw new Error("L1 Consensus Endpoint cannot be set to None. Set BASE_L1_CONSENSUS_ENDPOINT ");
+        }
 
         // Using default VPC
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
@@ -59,11 +68,6 @@ export class BaseSingleNodeStack extends cdk.Stack {
         // Getting the IAM role ARN from the common stack
         const importedInstanceRoleArn = cdk.Fn.importValue("BaseNodeInstanceRoleArn");
 
-        // If user has not supplied the URL for L1, attempting to use AMB node URL
-        let l1EndpointURL = l1Endpoint;
-        if (l1EndpointURL === constants.NoneValue){
-            l1EndpointURL = cdk.Fn.importValue("BaseAmbEthereumNodeRpcUrlWithBillingToken");
-        }
         const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
         // Making sure our instance will be able to read the assets
@@ -103,7 +107,8 @@ export class BaseSingleNodeStack extends cdk.Stack {
             _AUTOSCALING_GROUP_NAME_: constants.NoneValue,
             _RESTORE_FROM_SNAPSHOT_: restoreFromSnapshot.toString(),
             _FORMAT_DISK_: "true",
-            _L1_ENDPOINT_: l1EndpointURL,
+            _L1_EXECUTION_ENDPOINT_: l1ExecutionEndpoint,
+            _L1_CONSENSUS_ENDPOINT_: l1ConsensusEndpoint,
         });
 
         node.instance.addUserData(modifiedInitNodeScript);

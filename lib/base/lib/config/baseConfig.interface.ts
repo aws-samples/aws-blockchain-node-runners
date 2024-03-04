@@ -18,5 +18,6 @@ export interface BaseBaseNodeConfig extends configTypes.BaseNodeConfig {
     baseNetworkId: BaseNetworkId;
     dataVolume: BaseDataVolumeConfig;
     restoreFromSnapshot: boolean;
-    l1Endpoint: string;
+    l1ExecutionEndpoint: string;
+    l1ConsensusEndpoint: string;
 }
