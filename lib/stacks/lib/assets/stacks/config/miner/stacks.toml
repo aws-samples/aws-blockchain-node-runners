@@ -1,0 +1,38 @@
+[node]
+working_dir = "/var/lib/stacks"
+rpc_bind = "0.0.0.0:$STACKS_RPC_PORT"
+p2p_bind = "0.0.0.0:$STACKS_P2P_PORT"
+prometheus_bind = "0.0.0.0:9153"
+bootstrap_node = "$STACKS_BOOTSTRAP_NODE"
+
+# Stacks Miner Related Node Data
+miner = true
+mine_microblocks = false
+seed = "$STACKS_MINER_SEED"
+local_peer_seed = "$STACKS_MINER_LOCAL_PEER_SEED"
+mock_mining = "$STACKS_MINER_IS_MOCK_MINING"
+
+# Stacks Blockchain Stacks Miner Configuration.
+[miner]
+min_tx_fee = $STACKS_MINER_MIN_TX_FEE
+first_attempt_time_ms = $STACKS_MINER_FIRST_ATTEMPT_TIME_MS
+subsequent_attempt_time_ms = $STACKS_MINER_SUBSEQUENT_ATTEMPT_TIME_MS
+only_increase_tx_count = $STACKS_MINER_IS_ONLY_INCREASE_TX_COUNT
+
+[burnchain]
+# Bitcoin Network Data
+chain = "bitcoin"
+mode = "$STACKS_NETWORK"
+peer_host = "$BITCOIN_PEER_HOST"
+username = "$BITCOIN_RPC_USERNAME"
+password = "$BITCOIN_RPC_PASSWORD"
+rpc_port = $BITCOIN_RPC_PORT
+peer_port = $BITCOIN_P2P_PORT
+
+# Bitcoin Blockchain Stacks Miner Configuration.
+# wallet_name = "miner" # TODO: Figure out how to get wallet data
+burn_fee_cap = $STACKS_MINER_BURN_FEE_CAP
+satoshis_per_byte = $STACKS_MINER_SATOSHIS_PER_BYTE
+rbf_fee_increment = $STACKS_MINER_RBF_FEE_INCREMENT
+max_rbf = $STACKS_MINER_MAX_RBF
+poll_time_secs = $STACKS_MINER_POLL_TIME_SECS
