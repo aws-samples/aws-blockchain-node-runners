@@ -1,6 +1,10 @@
 # Sample AWS Blockchain Node Runner app for Base Nodes
 
-[Base](https://base.org/) is a "Layer 2" scaling solution for Ethereum. This blueprint helps to deploy Base RPC nodes on AWS and use [Amazon Managed Blockchain Access Ethereum](https://docs.aws.amazon.com/managed-blockchain/latest/ethereum-dev/ethereum-concepts.html) node for "Layer 1". It is meant to be used for development, testing or Proof of Concept purposes.
+[Base](https://base.org/) is a "Layer 2" scaling solution for Ethereum. This blueprint helps to deploy Base RPC nodes on AWS. It is meant to be used for development, testing or Proof of Concept purposes.
+
+| Contributed by |
+|:---------------|
+|[@frbrkoala](https://github.com/frbrkoala), [@danyalprout](https://github.com/danyalprout)|
 
 ## Overview of Deployment Architectures for Single Node setups
 
@@ -15,6 +19,7 @@
 
 ## Additional materials
 
+<details>
 <summary>Review the for pros and cons of this solution.</summary>
 
 ### Well-Architected Checklist
@@ -33,7 +38,7 @@ This is the Well-Architected checklist for Ethereum nodes implementation of the 
 |                         |                                   | Following principle of least privilege access                                    | In the node, root user is not used (using special user "bcuser" instead).  |
 |                         | Application security              | Security focused development practices                                           | cdk-nag is being used with documented suppressions.  |
 | Cost optimization       | Service selection                 | Use cost effective resources                                                     | Base nodes works well on ARM architecture and we use Graviton3-powered EC2 instances for better cost effectiveness.  |
-|                         | Cost awareness                    | Estimate costs                                                                   | One Base node on m7g.2xlarge and 3TiB EBS gp3 volume will cost around US$503.27 per month in the US East (N. Virginia) region. Additional charges will be applied for Ethereum L1 node and might vary between US$200 and US$500 per month. Approximately the total cost will be US$503.27 + US$500 = US$1003.27 per month. |
+|                         | Cost awareness                    | Estimate costs                                                                   | One Base node with on-Demand priced m7g.2xlarge and 3TiB EBS gp3 volume will cost around US$599.27 per month in the US East (N. Virginia) region. Additional charges will apply for Ethereum L1 node and will depend on the service used. |
 | Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution currently does not have high availability and is deployed to a single availability zone.  |
 |                         | Data backup                       | How is data backed up?                                                           | The data is not specially backed up. The node will have to re-sync its state from other nodes in the Base network to recover.  |
 |                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
@@ -54,10 +59,10 @@ This is the Well-Architected checklist for Ethereum nodes implementation of the 
 - Instance type [m7g.2xlarge](https://aws.amazon.com/ec2/instance-types/m7g/).
 - 2500GB EBS gp3 storage with at least 5000 IOPS.
 
-**Recommended for Base node**
+**Recommended for Base node on maiinet**
 
 - Instance type [m7g.4xlarge](https://aws.amazon.com/ec2/instance-types/m7g/).
-- 2500GB EBS gp3 storage with at least 6000 IOPS.`
+- 4100GB EBS gp3 storage with at least 6000 IOPS.`
 
 </details>
 
@@ -69,7 +74,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 ### Make sure you have access to Ethereum L1 node
 
-Base node needs a URL to a Full Ethereum Node to validate blocks it receives. You can run your own with [Ethereum node blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum) or use [one of Base partners](https://docs.base.org/tools/node-providers).
+Base node needs a URL to a Full Ethereum Node to validate blocks it receives. You can run your own with [Ethereum node blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum) or use [one of partners of Base](https://docs.base.org/tools/node-providers).
 
 ### On your Cloud9: Clone this repository and install dependencies
 
@@ -98,13 +103,10 @@ Base node needs a URL to a Full Ethereum Node to validate blocks it receives. Yo
 ```bash
 # Make sure you are in aws-blockchain-node-runners/lib/base
 cd lib/base
-npm install
 pwd
 cp ./sample-configs/.env-sample-rpc .env
 nano .env
 ```
-   > NOTE:
-   > Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
 
 4. Deploy common components such as IAM role
 
@@ -139,7 +141,7 @@ pwd
 # Make sure you are in aws-blockchain-node-runners/lib/base
 npx cdk deploy base-single-node --json --outputs-file single-node-deploy.json
 ```
-After starting the node you will need to wait for the initial synchronization process to finish.To see the progress, you may use SSM to connect into EC2 first and watch the log like this:
+A node connected to Sepolia network should start within an hour, while syncing nodes with Mainnet might take a while. Although you can force the node to use snapshots provided by Base team by setting `BASE_RESTORE_FROM_SNAPSHOT="true"` in `.env` file, you might still need to watch your node ifinish synchronizing. You can watch the progress with CloudWatch dashboard (see [Monitoring](#monitoring)) or check the progress manually. For manual access, use SSM to connect into EC2 first and watch the log like this:
 
 ```bash
 export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
@@ -167,7 +169,7 @@ curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","me
 A script on the Base node publishes current block and blocks behind metrics to CloudWatch metrics every 5 minutes. When the node is fully synced the blocks behind metric should get to 0, which might take about 1.5 days. To see the metrics:
 
 - Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
-- Open Dashboards and select `base-single-node-<your_ec2_instance_id>` from the list of dashboards.
+- Open Dashboards and select `base-single-node-<network>-<your_ec2_instance_id>` from the list of dashboards.
 
 ## From your Cloud9: Clear up and undeploy everything
 

@@ -77,15 +77,16 @@ STACK_NAME=${_STACK_NAME_}
 RESTORE_FROM_SNAPSHOT=${_RESTORE_FROM_SNAPSHOT_}
 FORMAT_DISK=${_FORMAT_DISK_}
 NETWORK_ID=${_NETWORK_ID_}
-L1_ENDPOINT=${_L1_ENDPOINT_}
+L1_EXECUTION_ENDPOINT=${_L1_EXECUTION_ENDPOINT_}
+L1_CONSENSUS_ENDPOINT=${_L1_CONSENSUS_ENDPOINT_}
 
 echo "REGION=$REGION" >> /etc/environment
 echo "NETWORK_ID=$NETWORK_ID" >> /etc/environment
-echo "L1_ENDPOINT=$L1_ENDPOINT" >> /etc/environment
+echo "L1_EXECUTION_ENDPOINT=$L1_EXECUTION_ENDPOINT" >> /etc/environment
+echo "L1_CONSENSUS_ENDPOINT=$L1_CONSENSUS_ENDPOINT" >> /etc/environment
 
 GIT_URL=https://github.com/base-org/node.git
 SYNC_CHECKER_FILE_NAME=syncchecker-base.sh
-SNAPSHOT_S3_PATH=s3://base-snapshots-$NETWORK_ID-archive.s3.amazonaws.com/$(curl https://base-snapshots-$NETWORK_ID-archive.s3.amazonaws.com/latest)
 
 yum -y install docker python3-pip cronie cronie-anacron gcc python3-devel git
 yum -y remove python-requests
@@ -148,12 +149,16 @@ echo "Configuring node"
 
 case $NETWORK_ID in
   "mainnet")
-    sed -i "s#OP_NODE_L1_ETH_RPC=https://1rpc.io/eth#OP_NODE_L1_ETH_RPC=$L1_ENDPOINT#g" /home/bcuser/node/.env.mainnet
+    sed -i "s#OP_NODE_L1_ETH_RPC=https://1rpc.io/eth#OP_NODE_L1_ETH_RPC=$L1_EXECUTION_ENDPOINT#g" /home/bcuser/node/.env.mainnet
     sed -i '/.env.mainnet/s/^#//g' /home/bcuser/node/docker-compose.yml
+    sed -i '/OP_NODE_L1_BEACON/s/^#//g' /home/bcuser/node/.env.mainnet
+    sed -i "s#OP_NODE_L1_BEACON=https://your.sepolia.beacon.node/endpoint-here#OP_NODE_L1_BEACON=$L1_CONSENSUS_ENDPOINT#g" /home/bcuser/node/.env.mainnet
     ;;
   "sepolia")
-    sed -i "s#OP_NODE_L1_ETH_RPC=https://rpc.sepolia.org#OP_NODE_L1_ETH_RPC=$L1_ENDPOINT#g" /home/bcuser/node/.env.sepolia
-    sed -i "s/.env.sepolia/s/^#//g" /home/bcuser/node/docker-compose.yml
+    sed -i "s#OP_NODE_L1_ETH_RPC=https://rpc.sepolia.org#OP_NODE_L1_ETH_RPC=$L1_EXECUTION_ENDPOINT#g" /home/bcuser/node/.env.sepolia
+    sed -i "/.env.sepolia/s/^#//g" /home/bcuser/node/docker-compose.yml
+    sed -i '/OP_NODE_L1_BEACON/s/^#//g' /home/bcuser/node/.env.sepolia
+    sed -i "s#OP_NODE_L1_BEACON=https://your.sepolia.beacon.node/endpoint-here#OP_NODE_L1_BEACON=$L1_CONSENSUS_ENDPOINT#g" /home/bcuser/node/.env.sepolia
     ;;
   *)
     echo "Network id is not valid."
