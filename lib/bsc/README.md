@@ -4,6 +4,10 @@ BNB Smart Chain (BSC), is a blockchain that supports EVM-compatible smart contra
 
 This blueprint is designed to assist in deploying a single node or a Highly Available (HA) [BNB Smart Chain (BSC) Fullnode](https://docs.bnbchain.org/docs/validator/fullnode/) on AWS. It is intended for use in development, testing, or Proof of Concept purposes.
 
+| Contributed by | 
+|:--------------------:|
+| [@StayHungryStayFoolish](https://github.com/StayHungryStayFoolish), [@frbrkoala](https://github.com/frbrkoala) |
+
 ## Overview of Deployment Architectures for HA setups
 
 ### HA setup
