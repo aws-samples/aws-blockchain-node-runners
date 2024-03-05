@@ -22,7 +22,8 @@ describe("BaseSingleNodeStack", () => {
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
       baseNetworkId: config.baseNodeConfig.baseNetworkId,
       restoreFromSnapshot: config.baseNodeConfig.restoreFromSnapshot,
-      l1Endpoint: config.baseNodeConfig.l1Endpoint,
+      l1ExecutionEndpoint: config.baseNodeConfig.l1ExecutionEndpoint,
+      l1ConsensusEndpoint: config.baseNodeConfig.l1ConsensusEndpoint,
       dataVolume: config.baseNodeConfig.dataVolume,
     });
 
@@ -87,7 +88,7 @@ describe("BaseSingleNodeStack", () => {
       ],
       IamInstanceProfile: Match.anyValue(),
       ImageId: Match.anyValue(),
-      InstanceType: "m6a.2xlarge",
+      InstanceType: "m7g.2xlarge",
       Monitoring: true,
       PropagateTagsToVolumeOnCreation: true,
       SecurityGroupIds: Match.anyValue(),
@@ -98,9 +99,9 @@ describe("BaseSingleNodeStack", () => {
     template.hasResourceProperties("AWS::EC2::Volume", {
       AvailabilityZone: Match.anyValue(),
       Encrypted: true,
-      Iops: 3000,
+      Iops: 5000,
       MultiAttachEnabled: false,
-      Size: 1000,
+      Size: 5100,
       Throughput: 700,
       VolumeType: "gp3"
     })
