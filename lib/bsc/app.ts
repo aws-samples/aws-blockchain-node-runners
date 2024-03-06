@@ -25,6 +25,7 @@ new BscSingleNodeStack(app, "bsc-single-node", {
     instanceCpuType: config.baseNodeConfig.instanceCpuType,
     bscNetwork: config.baseNodeConfig.bscNetwork,
     nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+    snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
     dataVolume: config.baseNodeConfig.dataVolume,
 });
 
@@ -36,6 +37,7 @@ new BscHANodesStack(app, "bsc-ha-nodes", {
     instanceCpuType: config.baseNodeConfig.instanceCpuType,
     bscNetwork: config.baseNodeConfig.bscNetwork,
     nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+    snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
     dataVolume: config.baseNodeConfig.dataVolume,
 
     albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,

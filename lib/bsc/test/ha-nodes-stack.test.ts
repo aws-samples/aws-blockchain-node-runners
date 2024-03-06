@@ -20,6 +20,7 @@ describe("BscHANodesStack", () => {
     instanceCpuType: config.baseNodeConfig.instanceCpuType,
     bscNetwork: config.baseNodeConfig.bscNetwork,
     nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+    snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
     dataVolume: config.baseNodeConfig.dataVolume,
 
     albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
@@ -105,7 +106,7 @@ describe("BscHANodesStack", () => {
       LaunchTemplateData: {
         BlockDeviceMappings: [
           {
-           "DeviceName": "/dev/sda1",
+           "DeviceName": "/dev/xvda",
            "Ebs": {
             "DeleteOnTermination": true,
             "Encrypted": true,

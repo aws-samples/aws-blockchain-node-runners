@@ -161,75 +161,40 @@ fi
 
 mkdir -p /data
 
-echo "Preparing EBS Volume"
-if $(lsblk | grep -q nvme1n1); then
-  echo "nvme1n1 is found. Configuring attached storage"
+if [[ "$DATA_VOLUME_TYPE" == "instance-store" ]]; then
+  echo "Data volume type is instance store"
 
-  mkfs -t ext4 /dev/nvme1n1
+  cd /opt
+  chmod +x /opt/setup-instance-store-volumes.sh
 
-  sleep 10
-  # Define the line to add to fstab
-  uuid=$(lsblk -n -o UUID /dev/nvme1n1)
-  line="UUID=$uuid /data ext4 defaults 0 2"
+  (crontab -l; echo "@reboot /opt/setup-instance-store-volumes.sh >/tmp/setup-instance-store-volumes.log 2>&1") | crontab -
+  crontab -l
 
-  # Write the line to fstab
-  echo $line | sudo tee -a /etc/fstab
-
-  mount -a
+  /opt/setup-instance-store-volumes.sh
 
 else
-  echo "nvme1n1 is not found. Not doing anything"
+  echo "Data volume type is EBS"
+
+  DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
+  mkfs -t xfs $DATA_VOLUME_ID
+  sleep 10
+  DATA_VOLUME_UUID=$(lsblk -fn -o UUID  $DATA_VOLUME_ID)
+  DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data xfs defaults 0 2"
+  echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
+  echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
+  echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
+  echo $DATA_VOLUME_FSTAB_CONF | tee -a /etc/fstab
+  mount -a
 fi
 
 lsblk -d
 
-echo "Downloading BSC snapshot from 46Club."
-
-cd /data
-
-BSC_SNAPSHOTS_FILE_NAME=geth.tar.zst
-BSC_SNAPSHOTS_DIR=/data/
-BSC_SNAPSHOTS_DOWNLOAD_STATUS=-1
-
-# take about 1 hour to download the bsc snapshot
-while (( BSC_SNAPSHOTS_DOWNLOAD_STATUS != 0 ))
-do
-        PIDS=$(pgrep aria2c)
-        if [ -z "$PIDS" ]; then
-                aria2c -s14 -x14 -k100M $BSC_SNAPSHOTS_URI -d $BSC_SNAPSHOTS_DIR -o $BSC_SNAPSHOTS_FILE_NAME
-        fi
-        BSC_SNAPSHOTS_DOWNLOAD_STATUS=$?
-        pid=$(pidof aria2c)
-        wait $pid
-        echo "aria2c exit."
-        case $BSC_SNAPSHOTS_DOWNLOAD_STATUS in
-                3)
-                        echo "file not exist."
-                        exit 3
-                        ;;
-                9)
-                        echo "No space left on device."
-                        exit 9
-                        ;;
-                *)
-                        continue
-                        ;;
-        esac
-done
-echo "Downloading BSC snapshot from 46Club succeed"
-
-sleep 60
-# take about 2 hours to decompression the bsc snapshot
-echo "Decompression BSC snapshot start ..."
-
-zstd -cd geth.tar.zst | pv | tar xvf - 2>&1 | tee unzip.log && echo "decompression success..." || echo "decompression failed..." >> bsc-snapshots-decompression.log
-echo "Decompression BSC snapshot success ..."
-
-mv /data/geth.full/geth /data/
-sudo rm -rf /data/geth.full
-sudo rm -rf /data/geth.tar.zst
-
-echo "BSC snapshot is ready !!!"
+# download snapshot if network is mainnet
+if [ "$BSC_NETWORK" == "mainnet"  ]; then
+  echo "Downloading BSC snapshot"
+  chmod +x /opt/download-snapshot.sh
+  /opt/download-snapshot.sh
+fi
 
 chown bcuser:bcuser -R /data
 

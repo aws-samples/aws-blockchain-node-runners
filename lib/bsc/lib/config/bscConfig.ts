@@ -27,6 +27,7 @@ export const baseNodeConfig: configTypes.BscBaseNodeConfig = {
     instanceCpuType: process.env.BSC_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64 ,
     bscNetwork: <configTypes.BscNetwork>process.env.BSC_CLUSTER || "mainnet",
     nodeConfiguration: <configTypes.BscNodeConfiguration>process.env.BSC_NODE_CONFIGURATION || "full",
+    snapshotsUrl: process.env.BSC_SNAPSHOTS_URL || constants.NoneValue,
     dataVolume: {
         sizeGiB: process.env.BSC_DATA_VOL_SIZE ? parseInt(process.env.BSC_DATA_VOL_SIZE) : 4000,
         type: parseDataVolumeType(process.env.BSC_DATA_VOL_TYPE?.toLowerCase() ? process.env.BSC_DATA_VOL_TYPE?.toLowerCase() : "gp3"),

@@ -20,6 +20,7 @@ describe("BSCSingleNodeStack", () => {
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
       bscNetwork: config.baseNodeConfig.bscNetwork,
       nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+      snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
       dataVolume: config.baseNodeConfig.dataVolume,
   });
 

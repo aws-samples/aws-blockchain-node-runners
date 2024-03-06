@@ -19,6 +19,7 @@ export interface BscSingleNodeStackProps extends cdk.StackProps {
     instanceCpuType: ec2.AmazonLinuxCpuType;
     bscNetwork: configTypes.BscNetwork;
     nodeConfiguration: configTypes.BscNodeConfiguration;
+    snapshotsUrl: string;
     dataVolume: configTypes.BscDataVolumeConfig;
 }
 
@@ -40,6 +41,7 @@ export class BscSingleNodeStack extends cdk.Stack {
             instanceCpuType,
             bscNetwork,
             nodeConfiguration,
+            snapshotsUrl,
             dataVolume,
         } = props;
 
@@ -71,6 +73,7 @@ export class BscSingleNodeStack extends cdk.Stack {
             dataVolumes: [dataVolume],
             machineImage: new ec2.AmazonLinuxImage({
                 generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+                kernel:ec2.AmazonLinuxKernel.KERNEL5_X,
                 cpuType: instanceCpuType,
             }),
             vpc,
@@ -91,7 +94,7 @@ export class BscSingleNodeStack extends cdk.Stack {
             _AWS_REGION_: REGION,
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
             _STACK_NAME_: STACK_NAME,
-            _BSC_SNAPSHOTS_URI_: process.env.BSC_SNAPSHOTS_URI || 'none',
+            _BSC_SNAPSHOTS_URI_: snapshotsUrl,
             _STACK_ID_: STACK_ID,
             _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
             _BSC_NODE_TYPE_: nodeConfiguration,

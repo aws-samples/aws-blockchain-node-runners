@@ -16,6 +16,7 @@ export interface BscBaseConfig extends configTypes.BaseConfig {
 export interface BscBaseNodeConfig extends configTypes.BaseNodeConfig {
     bscNetwork: BscNetwork;
     nodeConfiguration: BscNodeConfiguration;
+    snapshotsUrl: string;
     dataVolume: BscDataVolumeConfig;
 }
 

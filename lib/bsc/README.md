@@ -8,13 +8,21 @@ This blueprint is designed to assist in deploying a single node or a Highly Avai
 |:--------------------:|
 | [@StayHungryStayFoolish](https://github.com/StayHungryStayFoolish), [@frbrkoala](https://github.com/frbrkoala) |
 
-## Overview of Deployment Architectures for HA setups
+## Overview of Deployment Architectures
 
-### HA setup
+### Single Node setup
+![Single Nodes Deployment](./doc/assets/Architecture-Single-BSC-Node-Runners.drawio.png)
+
+1. The AWS Cloud Development Kit (CDK) is used to deploy a single node. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and othether script and configuration files required when launching EC2 as the BSC Node.
+2. A single RPC BSC Full node is deployed within in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on BSC Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+3. The BSC node is accessed by dApps or development tools internally. JSON RPC API is not exposed to the Internet to protect the node from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
+4. The BSC node send various monitoring metrics for both EC2 and BSC client to Amazon CloudWatch.
+
+### Highly Available setup
 
 ![Highly Available Nodes Deployment](./doc/assets/Architecture-HA-BSC-Node-Runners.drawio.png)
 
-1. The AWS Cloud Development Kit (CDK) deploys the highly available (HA) architecture built with stacks, as shown in the diagram above. An S3 bucket is utilized to store the execution scripts required when launching EC2 as the BSC Node and is updated through [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html).
+1. The AWS Cloud Development Kit (CDK) is used to deploy highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and othether script and configuration files required when launching EC2 as the BSC Node.
 2. A set of RPC BSC Fullnodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on BSC Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 3. The BSC nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
 4. The BSC nodes send various monitoring metrics for both EC2 and BSC nodes to Amazon CloudWatch.
@@ -58,7 +66,7 @@ This is the Well-Architected checklist for BSC nodes implementation of the AWS B
 
 | Usage pattern                                     | Ideal configuration                                                                                                      | Primary option on AWS                                                  | Config reference                                      |
 |---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|-------------------------------------------------------|
-| 1/ Fullnode                                       | 16 vCPU, 64 GB RAM, Accounts volume: 4TB, 10K IOPS, 700 MB/s throughput, Data volume: 3TB, 10K IOPS, 700 MB/s throughput | `m7g.4xlarge`, Data volume: EBS gp3 4TB, 10K IOPS, 700 MB/s throughput | [.env-sample-full](./sample-configs/.env-sample-full) |
+| 1/ Fullnode                                       | 16 vCPU, 64 GB RAM, Data volume: EBS gp3 4TB, 10K IOPS, 700 MB/s throughput | [.env-sample-full](./sample-configs/.env-sample-full) |
 </details>
 
 ## Setup Instructions
@@ -89,21 +97,19 @@ npm install
    > You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
 
 
-3. Configure and deploy multiple HA Nodes
+3. Configure the CDK app
 
-   Create your own copy of `.env` file and edit it to update with your AWS Account ID, AWS Region, BSC SNAPSHOTS URI:
+   Create your own copy of `.env` file and edit it to update with your AWS Account ID, AWS Region, and optionally the BSC SNAPSHOTS URI:
 
    ```bash
    # Make sure you are in aws-blockchain-node-runners/lib/bsc
    cd lib/bsc
-   npm install
    pwd
    cp ./sample-configs/.env-sample-full .env
    vim .env
    ```
    > **IMPORTANT**:
-   > 1. Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.  
-   > 2. Please check this GitHub: https://github.com/48Club/bsc-snapshots, use Geth full node link replace the `BSC_SNAPSHOTS_URI`.
+   > 1. If you want to set your own `BSC_SNAPSHOTS_URI`, check this GitHub: https://github.com/48Club/bsc-snapshots, and use Geth full node link.
 
 4. Deploy common components such as IAM role
 
@@ -265,6 +271,9 @@ export AWS_REGION=<your_target_AWS_region>
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/bsc
 
+# Undeploy Single Node
+cdk destroy bsc-single-node
+
 # Undeploy HA Nodes
 cdk destroy bsc-ha-nodes
 
@@ -276,7 +285,9 @@ cdk destroy bsc-common
 
 ### FAQ
 
-1. How to check the logs of the clients running on my sync node? Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
+1. How to check the logs of the clients running on my sync node? 
+
+Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
 
    **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 
@@ -290,7 +301,9 @@ aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo su ec2-user
 sudo journalctl -o cat -fu bsc
 ```
-2. How to check the logs from the EC2 user-data script? Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
+2. How to check the logs from the EC2 user-data script? 
+
+Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
 
 ```bash
 pwd
@@ -302,7 +315,9 @@ aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo cat /var/log/cloud-init-output.log
 ```
 
-3. How can I check the BSC service log on EC2? Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
+3. How can I check the BSC service log on EC2? 
+
+Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
 
 ```bash
 pwd
@@ -316,7 +331,9 @@ cd /data
 cat bsc.log
 ```
 
-4. How can I restart the BSC service? Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
+4. How can I restart the BSC service? 
+
+Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
 
 ```bash
 pwd
@@ -326,7 +343,7 @@ export INSTANCE_ID="i-**************"
 echo "INSTANCE_ID=" $INSTANCE_ID
 
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-sudo systemctl status bsc
+sudo systemctl restart bsc
 ```
 **NOTE:** You can also try the following command to obtain more information：
 - Check the BSC service status
