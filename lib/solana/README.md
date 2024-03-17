@@ -129,6 +129,7 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 ```bash
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/solana
+   npm i --save-dev @types/node
    npx cdk deploy solana-common
 ```
 
@@ -148,8 +149,8 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 7. Connect with the RPC API exposed by the node:
 
 ```bash
-   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PublicIpAddress' --output text)
+   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
+   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
     # We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
     curl http://$NODE_INTERNAL_IP:8899 -X POST -H "Content-Type: application/json" \
     --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
@@ -264,6 +265,31 @@ The result should be like this (the actual balance might change):
     sudo aws secretsmanager create-secret --name "solana/"$SOLANA_ADDRESS --description "Solana secret key pair" --secret-string file:///tmp/keypair.json --region $AWS_REGION
     #Delete key pair from the local file system
     rm -rf /tmp/keypair.json
+
+```
+5. How can I add swap space to the instance if my Solana node runs out of RAM during the initial sync?
+
+   There are two ways. Using the existing volume or using a new one. If your instance has Instance Store volume attached, it is better to keep your swap on it.
+
+   - Option 1: Dedicated Instance Store volume
+   
+```bash
+   sudo mkswap /dev/nvme3n1
+   sudo swapon /dev/nvme3n1
+   # Check the memory space is updated
+   free -g
+```
+
+   - Option 2: Existing volume (using Data directory as example):
+
+```bash
+   sudo mkdir /var/solana/data/swapfile
+   sudo dd if=/dev/zero of=/var/solana/data/swapfile bs=1MiB count=250KiB
+   sudo chmod 0600 /var/solana/data/swapfile
+   sudo mkswap /var/solana/data/swapfile
+   sudo swapon /var/solana/data/swapfile
+   free -g
+   sudo sysctl vm.swappiness=10
 
 ```
 
