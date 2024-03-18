@@ -15,20 +15,28 @@ export class IndyNodeStack extends cdk.Stack {
         });
 
         // SecurityGroup of Nodes for Clients
-        const clientSG = new ec2.SecurityGroup(this, "ClientSG", {
+        const clientSG = new ec2.SecurityGroup(this, 'ClientSG', {
             vpc,
             allowAllOutbound: true,
             disableInlineRules: true,
         });
-        clientSG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9702), "Allow 9702 from anywhere");
+        clientSG.addIngressRule(
+            ec2.Peer.securityGroupId(clientSG.securityGroupId),
+            ec2.Port.tcp(9702),
+            'Allow 9702 from internal for client'
+        )
 
         // SecurityGroup of Nodes for Other Nodes
-        const nodeSG = new ec2.SecurityGroup(this, "NodeSG", {
+        const nodeSG = new ec2.SecurityGroup(this, 'NodeSG', {
             vpc,
             allowAllOutbound: true,
             disableInlineRules: true,
         });
-        nodeSG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9701), "Allow 9701 from anywhere");
+        nodeSG.addIngressRule(
+            ec2.Peer.securityGroupId(nodeSG.securityGroupId),
+            ec2.Port.tcp(9701),
+            'Allow 9701 from internal for indy node'
+        );
 
         const ansibleBucket = new s3.Bucket(this, "AnsibleFileTransferBucket", {
             bucketName: `${cdk.Stack.of(this).account}-ansible-file-transfer-bucket`,
