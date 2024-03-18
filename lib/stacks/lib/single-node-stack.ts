@@ -5,30 +5,19 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as path from "path";
 import * as fs from "fs";
-import * as nodeCwDashboard from "./assets/node-cw-dashboard"
+import * as nodeCwDashboard from "./constructs/node-cw-dashboard"
 import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 import * as nag from "cdk-nag";
 import { SingleNodeConstruct } from "../../constructs/single-node"
-import * as configTypes from "./config/solanaConfig.interface";
+import * as configTypes from "./config/stacksConfig.interface";
 import * as constants from "../../constructs/constants";
-import { SolanaNodeSecurityGroupConstruct } from "./constructs/solana-node-security-group"
+import { StacksNodeSecurityGroupConstruct } from "./constructs/stacks-node-security-group"
 
-export interface SolanaSingleNodeStackProps extends cdk.StackProps {
-    instanceType: ec2.InstanceType;
-    instanceCpuType: ec2.AmazonLinuxCpuType;
-    solanaCluster: configTypes.SolanaCluster;
-    solanaVersion: string;
-    nodeConfiguration: configTypes.SolanaNodeConfiguration;
-    dataVolume: configTypes.SolanaDataVolumeConfig;
-    accountsVolume: configTypes.SolanaAccountsVolumeConfig;
-    solanaNodeIdentitySecretARN: string;
-    voteAccountSecretARN: string;
-    authorizedWithdrawerAccountSecretARN: string;
-    registrationTransactionFundingAccountSecretARN: string;
+export interface StacksSingleNodeStackProps extends cdk.StackProps, configTypes.StacksBaseNodeConfig {
 }
 
-export class SolanaSingleNodeStack extends cdk.Stack {
-    constructor(scope: cdkConstructs.Construct, id: string, props: SolanaSingleNodeStackProps) {
+export class StacksSingleNodeStack extends cdk.Stack {
+    constructor(scope: cdkConstructs.Construct, id: string, props: StacksSingleNodeStackProps) {
         super(scope, id, props);
 
         // Setting up necessary environment variables
@@ -40,25 +29,36 @@ export class SolanaSingleNodeStack extends cdk.Stack {
 
         // Getting our config from initialization properties
         const {
+            // Instance configuration
             instanceType,
-            instanceCpuType,
-            solanaCluster,
-            solanaVersion,
-            nodeConfiguration,
+            stacksNetwork,
+            stacksVersion,
+            stacksNodeConfiguration,
+            // Stacks networking
+            stacksBootstrapNode,
+            stacksChainstateArchive,
+            stacksP2pPort,
+            stacksRpcPort,
+            // Bitcoin networking
+            bitcoinPeerHost,
+            bitcoinRpcUsername,
+            bitcoinRpcPassword,
+            bitcoinP2pPort,
+            bitcoinRpcPort,
+            // CDK resources
+            stacksSignerSecretArn,
+            stacksMinerSecretArn,
             dataVolume,
-            accountsVolume,
-            solanaNodeIdentitySecretARN,
-            voteAccountSecretARN,
-            authorizedWithdrawerAccountSecretARN,
-            registrationTransactionFundingAccountSecretARN,
         } = props;
 
         // Using default VPC
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
 
-        // Setting up the security group for the node from Solana-specific construct
-        const instanceSG = new SolanaNodeSecurityGroupConstruct (this, "security-group", {
+        // Setting up the security group for the node from Stacks-specific construct
+        const instanceSG = new StacksNodeSecurityGroupConstruct (this, "security-group", {
             vpc: vpc,
+            stacksRpcPort: stacksRpcPort,
+            stacksP2pPort: stacksP2pPort,
         })
 
         // Making our scripts and configis from the local "assets" directory available for instance to download
@@ -67,27 +67,23 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         });
 
         // Getting the IAM role ARN from the common stack
-        const importedInstanceRoleArn = cdk.Fn.importValue("SolanaNodeInstanceRoleArn");
+        const importedInstanceRoleArn = cdk.Fn.importValue("StacksNodeInstanceRoleArn");
 
         const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
         // Making sure our instance will be able to read the assets
         asset.bucket.grantRead(instanceRole);
 
-        // Setting up the node using generic Single Node constract
-        if (instanceCpuType === ec2.AmazonLinuxCpuType.ARM_64) {
-            throw new Error("ARM_64 is not yet supported");
+        if (stacksNodeConfiguration === "miner" || stacksNodeConfiguration === "signer") {
+            throw new Error(`{stacksNodeConfiguration} node configuration is not yet supported.`);
         }
-
-        // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
-        const ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
 
         const node = new SingleNodeConstruct(this, "sync-node", {
             instanceName: STACK_NAME,
             instanceType,
-            dataVolumes: [dataVolume, accountsVolume],
-            rootDataVolumeDeviceName: "/dev/sda1",
-            machineImage: ec2.MachineImage.fromSsmParameter(ubuntu204stableImageSsmName),
+            dataVolumes: [dataVolume],
+            rootDataVolumeDeviceName: "/dev/xvda",
+            machineImage: ec2.MachineImage.latestAmazonLinux2023(),
             vpc,
             availabilityZone: chosenAvailabilityZone,
             role: instanceRole,
@@ -99,26 +95,32 @@ export class SolanaSingleNodeStack extends cdk.Stack {
 
         // Parsing user data script and injecting necessary variables
         const nodeStartScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
-        const accountsVolumeSizeBytes = accountsVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
         const dataVolumeSizeBytes = dataVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
 
         const modifiedInitNodeScript = cdk.Fn.sub(nodeStartScript, {
             _AWS_REGION_: REGION,
-            _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
             _STACK_NAME_: STACK_NAME,
             _STACK_ID_: STACK_ID,
             _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
-            _ACCOUNTS_VOLUME_TYPE_: accountsVolume.type,
-            _ACCOUNTS_VOLUME_SIZE_: accountsVolumeSizeBytes.toString(),
+            _STACKS_VERSION_: stacksVersion,
+            _STACKS_NODE_CONFIGURATION_: stacksNodeConfiguration,
+            _STACKS_NETWORK_: stacksNetwork === "testnet"
+                ? "xenon"
+                : stacksNetwork,
+            _STACKS_BOOTSTRAP_NODE_: stacksBootstrapNode,
+            _STACKS_CHAINSTATE_ARCHIVE_: stacksChainstateArchive,
+            _STACKS_P2P_PORT_: stacksP2pPort.toString(),
+            _STACKS_RPC_PORT_: stacksRpcPort.toString(),
+            _BITCOIN_PEER_HOST_: bitcoinPeerHost,
+            _BITCOIN_RPC_USERNAME_: bitcoinRpcUsername,
+            _BITCOIN_RPC_PASSWORD_: bitcoinRpcPassword,
+            _BITCOIN_P2P_PORT_: bitcoinP2pPort.toString(),
+            _BITCOIN_RPC_PORT_: bitcoinRpcPort.toString(),
+            _STACKS_SIGNER_SECRET_ARN_: stacksSignerSecretArn,
+            _STACKS_MINER_SECRET_ARN_: stacksMinerSecretArn,
             _DATA_VOLUME_TYPE_: dataVolume.type,
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
-            _SOLANA_VERSION_: solanaVersion,
-            _SOLANA_NODE_TYPE_: nodeConfiguration,
-            _NODE_IDENTITY_SECRET_ARN_: solanaNodeIdentitySecretARN,
-            _VOTE_ACCOUNT_SECRET_ARN_: voteAccountSecretARN,
-            _AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN_: authorizedWithdrawerAccountSecretARN,
-            _REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_: registrationTransactionFundingAccountSecretARN,
-            _SOLANA_CLUSTER_: solanaCluster,
+            _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
             _ASG_NAME_: constants.NoneValue,
         });
@@ -126,18 +128,22 @@ export class SolanaSingleNodeStack extends cdk.Stack {
 
         // Adding CloudWatch dashboard to the node
         const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SingleNodeCWDashboardJSON), {
-            INSTANCE_ID:node.instanceId,
+            INSTANCE_ID: node.instanceId,
             INSTANCE_NAME: STACK_NAME,
             REGION: REGION,
         })
 
-        new cw.CfnDashboard(this, 'solana-cw-dashboard', {
+        new cw.CfnDashboard(this, 'stacks-cw-dashboard', {
             dashboardName: `${STACK_NAME}-${node.instanceId}`,
             dashboardBody: dashboardString,
         });
 
         new cdk.CfnOutput(this, "node-instance-id", {
             value: node.instanceId,
+        });
+
+        new cdk.CfnOutput(this, "region", {
+            value: REGION,
         });
 
         // Adding suppressions to the stack
