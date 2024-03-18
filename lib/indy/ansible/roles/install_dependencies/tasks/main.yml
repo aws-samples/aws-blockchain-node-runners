@@ -1,0 +1,66 @@
+---
+# tasks file for install_dependencies
+- name: Add an apt key by id from a keyserver
+  ansible.builtin.apt_key:
+    keyserver: "{{ item.keyserver }}"
+    id: "{{ item.key }}"
+  with_items:
+    - { keyserver: keyserver.ubuntu.com, key: 9692C00E657DDE61 }
+    - { keyserver: keyserver.ubuntu.com, key: CE7709D068DB5E88 }
+    - { keyserver: keyserver.ubuntu.com, key: 3BC8C2DD662F1C45 }
+
+- name: Add specified repository into sources list
+  ansible.builtin.apt_repository:
+    repo: "{{ item }}"
+    state: present
+  with_items:
+    - "deb https://hyperledger.jfrog.io/artifactory/indy focal rc"
+    - "deb http://security.ubuntu.com/ubuntu bionic-security main"
+    - "deb https://repo.sovrin.org/deb bionic master"
+    - "deb https://sovrin.jfrog.io/artifactory/deb focal rc"
+
+- name: apt install
+  ansible.builtin.apt:
+    update_cache: true
+    pkg:
+      - python3-pip
+      - rocksdb=5.8.8
+      - libgflags-dev
+      - libsnappy-dev
+      - zlib1g-dev
+      - libbz2-dev
+      - liblz4-dev
+      - libgflags-dev
+      - python3-libnacl=1.6.1
+      - python3-sortedcontainers=1.5.7
+      - python3-ujson=1.33
+      - python3-pyzmq=22.3.0
+      - indy-plenum=1.13.1~rc3
+      - indy-node=1.13.2~rc5
+      - sovtoken=1.1.0~rc0
+      - sovtokenfees=1.1.0~rc0
+      - sovrin=1.2.0~rc1
+      - libssl1.0.0
+      - ursa=0.3.2-1
+
+- name: pip install boto3
+  ansible.builtin.pip:
+    name: boto3
+    state: latest
+
+- name: symbolic link for urusa
+  ansible.builtin.file:
+    src: "/usr/lib/ursa/{{ item }}"
+    dest: "/usr/lib/{{ item }}"
+    state: link
+  with_items:
+    - libursa.a
+    - libursa.so
+
+- name: replace for indy_config.py
+  ansible.builtin.template:
+    src: indy_config.py.j2
+    dest: /etc/indy/indy_config.py
+    owner: indy
+    group: indy
+    mode: '0774'

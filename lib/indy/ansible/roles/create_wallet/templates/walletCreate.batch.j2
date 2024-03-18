@@ -1,0 +1,6 @@
+wallet create {{ inventory_hostname }} key={{ inventory_hostname }}
+wallet open {{ inventory_hostname }} key={{ inventory_hostname }}
+did new seed={{ lookup('amazon.aws.aws_secret', '{{ inventory_hostname }}-indy-seed', on_denied='warn')}}
+
+wallet close
+exit

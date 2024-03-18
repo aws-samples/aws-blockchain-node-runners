@@ -1,0 +1,7 @@
+---
+# tasks file for run_indy
+- name: run indy-node
+  ansible.builtin.systemd:
+    name: indy-node
+    state: restarted
+    enabled: yes

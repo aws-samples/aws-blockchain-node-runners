@@ -1,0 +1,6 @@
+- name: Start indy service
+  become: yes
+  hosts:
+    - steward
+  roles:
+    - run_indy

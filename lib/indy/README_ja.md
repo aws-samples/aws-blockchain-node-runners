@@ -7,7 +7,7 @@
 ![Architecture](./doc/assets/Architecture.png)
 
 Hyperledger Indy のネットワークを AWS 上に構築するサンプルである。
-全体像は下図の通り、処理自体は ４ つの Steward (Validator Node) で行われ、ネットワークの管理は Trustee で行われる。実体は Steward 用の ４ つの EC2 インスタンスと、Trustee 用の １ つの EC2 インスタンスである。
+全体像は下図の通り、処理自体は ４ つの Steward (Validator Node) で行われ、ネットワークの管理は Trustee で行われる。実体は Steward 用の ４ つの EC2 インスタンスと、Trustee 用の 3 つの EC2 インスタンスである。
 
 ## Solution Walkthrough
 
@@ -26,8 +26,6 @@ npm install
 **NOTE:** In this tutorial we will set all major configuration through environment variables, but you also can modify parameters in `config/config.ts`.
 
 ### Deploy Indy Nodes
-
-Indy Network を Steward 用の４つの EC2 インスタンスと、Trustee 用の１つの EC2 インスタンスを用いて構築する。下記手順の中で DID など各種情報を取得し、それらを[こちらの Community のスプレッドシート](https://docs.google.com/spreadsheets/d/1LDduIeZp7pansd9deXeVSqGgdf0VdAHNMc7xYli3QAY/edit#gid=0)を参考にコピーしてまとめる。
 
 #### リソースの構築
 
@@ -54,123 +52,143 @@ npx cdk bootstrap
 npx cdk deploy
 
 Outputs:
-IndyNodeStack.Node1InstanceId = i-xxxxxxxxxxxxxxxxx
-IndyNodeStack.Node2InstanceId = i-xxxxxxxxxxxxxxxxx
-IndyNodeStack.Node3InstanceId = i-xxxxxxxxxxxxxxxxx
-IndyNodeStack.Node4InstanceId = i-xxxxxxxxxxxxxxxxx
-IndyNodeStack.TrusteeInstanceId = i-xxxxxxxxxxxxxxxxx
+IndyNetworkStack.AnsibleFileTransferBucketName = 111122223333-ansible-file-transfer-bucket
+IndyNetworkStack.steward1steward1InstanceId2F9F8910 = i-1234567890abcdef1
+IndyNetworkStack.steward2steward2InstanceId995438F2 = i-1234567890abcdef2
+IndyNetworkStack.steward3steward3InstanceIdB5D10BBE = i-1234567890abcdef3
+IndyNetworkStack.steward4steward4InstanceIdB3DD7753 = i-1234567890abcdef4
+IndyNetworkStack.trustee1trustee1InstanceId8FDDE052 = i-1234567890abcdef5
+IndyNetworkStack.trustee2trustee2InstanceIdE12079EA = i-1234567890abcdef6
+IndyNetworkStack.trustee3trustee3InstanceId508C4E4C = i-1234567890abcdef7
 ```
 
 **NOTE:** Steward インスタンスのユーザーデータは [Community の Doc](https://github.com/hyperledger/indy-node/blob/main/docs/source/install-docs/AWS-NodeInstall-20.04.md) を参考に作成している。
 
-#### Trustee の設定
+# Ansibleを使用した環境構築
 
-EC2 (もしくは Systems Manager) のコンソールから Session Manager 経由で Trustee インスタンスにログインし、Trustee/Steward の DID を生成する。
-​
+Macで実行する場合は次の環境変数を設定する。
 
-```bash
-cd /
-./indy-cli-rs
-​
-# 下記の操作を Trustee 用に 3回、Steward 用に 4回の計７回実施
-wallet create <WALLET_NAME> key=<KEY>
-wallet open <WALLET_NAME> key=<KEY>
-did new seed=<SEED>
-wallet close
+> export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
+## Ansibleの事前準備
+
+- pythonの仮想環境を作成しansibleを導入する
+  ```
+  $ cd ansible
+  $ python3 -m venv .venv
+  $ source .venv/bin/activate
+  ```
+
+  ```
+  $ pip install -r requirements.txt
+  ```
+
+## AnsibleとSession Manager
+
+- EC2 Instanceに対してSession Managerを使用したSSHアクセスを実現するために、 [Install the Session Manager plugin for the AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html) を参照して、Session Manager Pluginをインストールする。Session Managerを使用することでセキュリティグループの設定をすることなく、インターネットからアクセスできないPrivate SubnetのEC2 Instanceに対してAnsibleによるデプロイが可能となる。
+
+- AnsibleがAWS Systems Manager Session Managerを使用してEC2にSSHログインするためのプラグインをインストールする。
+  ```
+  $ ansible-galaxy collection install community.aws
+  ```
+
+## 構築対象のインスタンス情報をInventory.ymlに記載する
+- 環境構築を行うEC2インスタンスの情報を記載したIndentoryファイルを作成する。CDKの出力結果に記載されているインスタンスのIDをそれぞれのノードの設定欄に記入する。 `ansible_aws_ssm_bucket_name` には CDKの出力結果に記載されている `IndyNetworkStack.AnsibleFileTransferBucketName` の値を入力する。Ansibleが対象のホストに対してファイルを転送する時に、ここで指定したAmazon Simple Storage Service(Amazon S3) Bucketを使用する。
+  ```
+  $ vi inventory/inventory.yml
+  all:
+    hosts:
+      steward1:
+        ansible_aws_ssm_instance_id: i-1234567890abcdef1
+      steward2:
+        ansible_aws_ssm_instance_id: i-1234567890abcdef2
+      steward3:
+        ansible_aws_ssm_instance_id: i-1234567890abcdef3
+      steward4:
+        ansible_aws_ssm_instance_id: i-1234567890abcdef4
+      trustee1:
+        ansible_aws_ssm_instance_id: i-1234567890abcdef5
+      trustee2:
+        ansible_aws_ssm_instance_id: i-1234567890abcdef6
+      trustee3:
+        ansible_aws_ssm_instance_id: i-1234567890abcdef7
+    children:
+      steward:  
+        hosts:
+          steward[1:4]:
+      trustee:
+        hosts:
+          trustee1
+
+    vars:
+      ansible_connection: aws_ssm
+      ansible_aws_ssm_region: aa-example-1
+      ansible_aws_ssm_s3_addressing_style: virtual
+      ansible_aws_ssm_bucket_name: 111122223333-ansible-file-transfer-bucket
+  ```
+
+## Ansibleの設定
+Ansibleが参照するパラメータを設定ファイルで定義する。
+
 ```
-
-#### Steward の設定​
-
-EC2 (もしくは Systems Manager) のコンソールから Session Manager 経由で Steward インスタンスにログインして、Validator verkey, BLS key, BLS POP を生成する。
-
-```bash
-sudo init_indy_node <ALIAS> <NODE_IP> 9701 <CLIENT_IP> 9702 <SEED>
+$ vi inventory/group_vars/all.yml
+INDY_NETEORK_NAME: sample-network
 ```
-
-**NOTE:** ここでは Steward は Validator Node のことを表す ([参考情報](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/installation-and-configuration.md#32-validator-node-installation))。
-
-#### Genesis Files の生成
-
-1. これまでの手順で生成した情報を記載したスプレッドシートの各シート (Stewards / Trustees) をダウンロード
-   - File → Download → .csv
-2. `trustees.csv` / `stewards.csv` を Trustee インスタンスに保存
-
-**NOTE:** ローカルにダウンロードした CSV ファイルを Session Manager 経由で転送するには AWS CLI に加えて Session Manager Plugin を用いて下記コマンドで転送する ([参考情報](https://dev.classmethod.jp/articles/ssm-session-manager-support-for-tunneling-ssh-scp-on-windows10/))。
-
-```bash
-scp -i <PATH_TO_PEM> <PATH_TO_CSV> ec2-user@<i-xxxxxxxx>:~/
-```
-
 ​
-3. Genesis Files 生成
+## Ansibleによる環境構築の実行
 
-上記 2 つの CSV ファイルを用いて、`genesis_from_files.py` によって Genesis files (`pool_transactions_genesis`, `domain_transactions_genesis`) を生成する
+- inventory/inventory.ymlで設定したインスタンスにansibleが接続できることをansibleの `ping` モジュールを使用して確認する
+  ```
+  $ ansible -m ping all -i inventory/inventory.yml  
+  steward2 | SUCCESS => {
+      "changed": false,
+      "ping": "pong"
+  }
+  steward3 | SUCCESS => {
+      "changed": false,
+      "ping": "pong"
+  }
+  trustee1 | SUCCESS => {
+      "changed": false,
+      "ping": "pong"
+  }
+  steward4 | SUCCESS => {
+      "changed": false,
+      "ping": "pong"
+  }
+  trustee2 | SUCCESS => {
+      "changed": false,
+      "ping": "pong"
+  }
+  trustee3 | SUCCESS => {
+      "changed": false,
+      "ping": "pong"
+  }
+  steward1 | SUCCESS => {
+      "changed": false,
+      "ping": "pong"
+  }
+  ```
 
-```bash
-cd ~/
-wget -nc https://raw.githubusercontent.com/sovrin-foundation/steward-tools/master/create_genesis/genesis_from_files.py
-​
-chmod +x genesis_from_files.py
-./genesis_from_files.py --stewards stewards.csv --trustees trustees.csv
+- ansibleで `inventory/inventory.yml` で定義した対象のEC2インスタンスに対してHyperledger Indyの環境構築を実行する
+  ```
+  $ ansible-playbook playbook/site.yml
+  ```
 
-DEBUG:root:new line check for file: ./pool_transactions_genesis
-INFO:root:Starting ledger...
-INFO:root:Recovering tree from transaction log
-INFO:root:Recovered tree in 0.00010979999979099375 seconds
-DEBUG:root:new line check for file: ./domain_transactions_genesis
-INFO:root:Starting ledger...
-INFO:root:Recovering tree from transaction log
-INFO:root:Recovered tree in 8.670999977766769e-05 seconds
-```
 
-#### Node の設定
-
-各 Validator Node (Steward) の立ち上げを行う
-
-1. Genesis Files のダウンロードと各種ファイルの権限設定
-
-Genesis Files を Node インスタンスにダウンロードもしくはコピーする。そして、`/var/lib/indy/` 配下の全ファイルの権限を indy に設定する ([参考情報](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/NewNetwork/NewNetwork.md#iv-create-and-distribute-genesis-transaction-files)​)。
-
-```bash
-cd  /var/lib/indy/sample-network
-
-# domain_transactions_genesis と pool_transactions_genesis を保存
-# sudo curl -o domain_transactions_genesis <URL_TO_THE_RAW_DOMAIN_TRANSACTIONS_GENESIS_FILE>
-# sudo curl -o pool_transactions_genesis  <URL_TO_THE_RAW_POOL_TRANSACTIONS_GENESIS_FILE>
-
-sudo chown -R indy:indy ../
-```
-
-**NOTE:** `/var/lib/indy/sample-network` のディレクトリ名 は `lib/indy/lib/assets/user-data/steward.sh` で設定している `NETWORK_NAME` である。
-
-2. indy-node の起動と動作確認
-
-```bash
-sudo systemctl start indy-node
-sudo systemctl status indy-node
-sudo systemctl enable indy-node
-​
-sudo validator-info
-```
-
-**NOTE:** [ドキュメント](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/installation-and-configuration.md#35-add-node-to-a-pool)の 3.5.2 以降を実施している
-​
-
-#### 参考情報
-
+## 参考情報
 - [Indy Network の構築](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/NewNetwork/NewNetwork.md)
 - [Indy Node のための EC2 セットアップ](https://github.com/hyperledger/indy-node/blob/main/docs/source/install-docs/AWS-NodeInstall-20.04.md)
 - [Indy Node のセットアップ](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/installation-and-configuration.md)
-​
 
 ### 考慮事項
 
 本サンプルを利用するにあたり追加開発などで検討する事項を記載する。
 
-- インスタンスタイプを M 系に変更
-  - 現状は T 系インスタンスであるが本番環境では M 系などへの変更を推奨
-- Steward (Validator Node) にアタッチされている Node NIC の Security Group を修正
-  - Source IP を他ノードの Node IP に制限する (現在は VPC 内にオープンになっており、Client からもアクセスできる)
-  - Node の Private IP を固定
-- 必要に応じて Node の属するサブネットを Public Subnet にする
-- Steward と Node を別インスタンスにする
+-   インスタンスタイプを M 系に変更
+    -   現状は T 系インスタンスであるが本番環境では M 系などへの変更を推奨
+-   Steward (Validator Node) にアタッチされている Node NIC の Security Group を修正
+    -   Source IP を他ノードの Node IP に制限する (現在は VPC 内にオープンになっており、Client からもアクセスできる)
+    -   Node の Private IP を固定
+-   必要に応じて Node の属するサブネットを Public Subnet にする
+-   Steward と Node を別インスタンスにする

@@ -1,0 +1,9 @@
+---
+- import_playbook: 997_trustee_instance_start.yml
+- import_playbook: 000_install_dependencies.yml
+- import_playbook: 001_create_wallet.yml
+- import_playbook: 002_validator_init.yml
+- import_playbook: 003_create_genesis_files.yml
+- import_playbook: 004_fetch_genesis_files.yml
+- import_playbook: 005_run_indy.yml
+- import_playbook: 998_trustee_instance_stop.yml
