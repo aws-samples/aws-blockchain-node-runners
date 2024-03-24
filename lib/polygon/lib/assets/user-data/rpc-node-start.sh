@@ -117,6 +117,7 @@ pip3 uninstall -y urllib3
 pip3 install 'urllib3<2.0'
 
 echo "Making sure the user has all necessary permissions"
+mkdir -p /data
 chown -R bcuser:bcuser /data
 chmod -R 755 /data
 chmod -R 755 /home/bcuser
@@ -156,6 +157,9 @@ fi
 # Select the right docker-compose based on client combination
 case $CLIENT_COMBINATION in
   "bor-heimdall")
+    echo "Configuring env for bor-heimdall"
+    mkdir -p /data/polygon/bor/bor/chaindata
+    mkdir -p /data/polygon/heimdall/data
     # Copy docker-compose file
     cp /opt/docker-compose/docker-compose-bor-heimdall.yml /home/bcuser/docker-compose.yml
     # Configure clients
@@ -163,6 +167,8 @@ case $CLIENT_COMBINATION in
     /opt/polygon/configure-heimdall.sh $NETWORK
     ;;
   "erigon-heimdall")
+    mkdir -p /data/polygon/erigon
+    mkdir -p /data/polygon/heimdall/data
     # Copy docker-compose file\
     cp /opt/docker-compose/docker-compose-erigon-heimdall.yml /home/bcuser/docker-compose.yml
 
@@ -186,5 +192,5 @@ esac
 
 # Copy data from S3 and start clients
   echo "RPC node. Starting copy data script"
-  chmod +x /opt/copy-data-from-s3.sh
+  sudo chmod +x /opt/copy-data-from-s3.sh
   echo "/opt/copy-data-from-s3.sh" | at now +3 minutes
