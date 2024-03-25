@@ -132,9 +132,7 @@ groupadd -g 1002 bcuser
 useradd -u 1002 -g 1002 -m -s /bin/bash bcuser
 usermod -a -G docker bcuser
 usermod -a -G docker ec2-user
-chown -R bcuser:bcuser /secrets
 chmod -R 755 /home/bcuser
-chmod -R 755 /secrets
 
 echo "Starting docker"
 service docker start
@@ -152,7 +150,7 @@ case $NETWORK_ID in
     sed -i "s#OP_NODE_L1_ETH_RPC=https://1rpc.io/eth#OP_NODE_L1_ETH_RPC=$L1_EXECUTION_ENDPOINT#g" /home/bcuser/node/.env.mainnet
     sed -i '/.env.mainnet/s/^#//g' /home/bcuser/node/docker-compose.yml
     sed -i '/OP_NODE_L1_BEACON/s/^#//g' /home/bcuser/node/.env.mainnet
-    sed -i "s#OP_NODE_L1_BEACON=https://your.sepolia.beacon.node/endpoint-here#OP_NODE_L1_BEACON=$L1_CONSENSUS_ENDPOINT#g" /home/bcuser/node/.env.mainnet
+    sed -i "s#OP_NODE_L1_BEACON=https://your.mainet.beacon.node/endpoint-here#OP_NODE_L1_BEACON=$L1_CONSENSUS_ENDPOINT#g" /home/bcuser/node/.env.mainnet
     ;;
   "sepolia")
     sed -i "s#OP_NODE_L1_ETH_RPC=https://rpc.sepolia.org#OP_NODE_L1_ETH_RPC=$L1_EXECUTION_ENDPOINT#g" /home/bcuser/node/.env.sepolia
