@@ -137,7 +137,17 @@ describe("SolanaSingleNodeStack", () => {
     // Has CloudWatch dashboard.
     template.hasResourceProperties("AWS::CloudWatch::Dashboard", {
       DashboardBody: Match.anyValue(),
-      DashboardName: `solana-single-node-${config.baseNodeConfig.nodeConfiguration}`
+      DashboardName: {
+        "Fn::Join": [
+         "",
+         [
+          "solana-single-node-baserpc-",
+          {
+           "Ref": "syncnodesinglenode"
+          }
+         ]
+        ]
+       }
     })
 
  });
