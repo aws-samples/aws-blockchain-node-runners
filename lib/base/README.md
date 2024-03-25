@@ -124,14 +124,12 @@ npx cdk deploy base-common
 
 ### From your Cloud9: Deploy Single Node
 
-1. For L1 node you you can set your own URL in `BASE_L1_ENDPOINT` property of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or run your own Ethereum node [with Node Runner blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum). For example:
+1. For L1 node you you can set your own URLs in `BASE_L1_EXECUTION_ENDPOINT` and `BASE_L1_CONSENSUS_ENDPOINT` properties of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or you can run your own Ethereum node [with Node Runner blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum). For example:
 
 ```bash
-#For Mainnet: 
-BASE_L1_ENDPOINT=https://1rpc.io/eth
-
 #For Sepolia:
-BASE_L1_ENDPOINT=https://rpc.sepolia.org
+BASE_L1_EXECUTION_ENDPOINT="https://ethereum-sepolia-rpc.publicnode.com"
+BASE_L1_CONSENSUS_ENDPOINT="https://ethereum-sepolia-beacon-api.publicnode.com"
 ```
 
 2. Deploy Base RPC Node and wait for it to sync. For Mainnet it might take less than an hour when using snapshots (default) or multiple days if syncing from block 0.
@@ -141,7 +139,7 @@ pwd
 # Make sure you are in aws-blockchain-node-runners/lib/base
 npx cdk deploy base-single-node --json --outputs-file single-node-deploy.json
 ```
-A node connected to Sepolia network should start within an hour, while syncing nodes with Mainnet might take a while. Although you can force the node to use snapshots provided by Base team by setting `BASE_RESTORE_FROM_SNAPSHOT="true"` in `.env` file, you might still need to watch your node ifinish synchronizing. You can watch the progress with CloudWatch dashboard (see [Monitoring](#monitoring)) or check the progress manually. For manual access, use SSM to connect into EC2 first and watch the log like this:
+A node connected to Sepolia network should start within an hour, while syncing nodes with Mainnet might take a while. Although you can use snapshots provided by the Base team by setting `BASE_RESTORE_FROM_SNAPSHOT="true"` in `.env` file, you might still have wait for your node to finish synchronizing. You can watch the progress with CloudWatch dashboard (see [Monitoring](#monitoring)) or check the progress manually. For manual access, use SSM to connect into EC2 first and watch the log like this:
 
 ```bash
 export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
@@ -154,7 +152,7 @@ curl -d '{"id":0,"jsonrpc":"2.0","method":"optimism_syncStatus"}' \
 jq -r .result.unsafe_l2.timestamp))/60)) minutes
 ```
 
-3. Test Base RPC API [TODO: Is there an address we can query balance from?]
+3. Test Base RPC API
    Use curl to query from within the node instance:
 ```bash
 export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
