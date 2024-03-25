@@ -141,4 +141,4 @@
   # chown -R bcuser:bcuser $extract_dir
 
   # # Upload to S3
-  # s5cmd --log error cp $extract_dir/ $snapshot_s3_path$extract_dir/
+  sudo s5cmd --log error cp $extract_dir/ $snapshot_s3_path$extract_dir/
