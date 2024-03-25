@@ -110,13 +110,13 @@ sudo bash -c "cat >/etc/security/limits.d/90-solana-nofiles.conf <<EOF
 * - nofile 1000000
 EOF"
 
-echo 'Preparing directories and file system for Solana installation'
+echo 'Preparing fs for Solana installation'
 sudo mkdir /var/solana
 sudo mkdir /var/solana/data
 sudo mkdir /var/solana/accounts
 
 if [[ "$STACK_ID" != "none" ]]; then
-  echo "Install and enable CloudFormation helper scripts"
+  echo "Install CloudFormation helper scripts"
   mkdir -p /opt/aws/
   pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
   sudo ln -s /usr/local/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
@@ -213,12 +213,9 @@ sudo usermod -aG sudo solana
 cd /home/solana
 sudo mkdir ./bin
 
-# See details in https://github.com/aws-samples/aws-blockchain-node-runners/issues/31
 ln -s /var/solana/data/ledger /home/solana
-ulimit -n 1000000
 
 echo "Downloading x86 binaries for version v$SOLANA_VERSION"
-
 sudo wget -q https://github.com/solana-labs/solana/releases/download/v$SOLANA_VERSION/solana-release-x86_64-unknown-linux-gnu.tar.bz2
 sudo tar -xjvf solana-release-x86_64-unknown-linux-gnu.tar.bz2
 sudo mv solana-release/bin/* ./bin/
@@ -237,7 +234,7 @@ else
 fi
 if [[ "$SOLANA_NODE_TYPE" == "consensus" ]]; then
     if [[ $NODE_IDENTITY_SECRET_ARN == "none" ]]; then
-        echo "Storing generated node identity to AWS Secrets Manager"
+        echo "Store node identity to AWS Secrets Manager"
         NODE_IDENTITY=$(sudo ./solana-keygen pubkey /home/solana/config/vote-account-keypair.json)
         sudo aws secretsmanager create-secret --name "solana-node/"$NODE_IDENTITY --description "Solana Node Identity Secret created for stack $CF_STACK_NAME" --secret-string file:///home/solana/config/validator-keypair.json --region $AWS_REGION
     fi
@@ -245,14 +242,14 @@ if [[ "$SOLANA_NODE_TYPE" == "consensus" ]]; then
         echo "Create Vote Account Secret"
         sudo ./solana-keygen new --no-passphrase -o /home/solana/config/vote-account-keypair.json
         NODE_IDENTITY=$(sudo ./solana-keygen pubkey /home/solana/config/vote-account-keypair.json)
-        echo "Storing Vote Account Secret to AWS Secrets Manager"
+        echo "Store Vote Account Secret to AWS Secrets Manager"
         sudo aws secretsmanager create-secret --name "solana-node/"$NODE_IDENTITY --description "Solana Vote Account Secret created for stack $CF_STACK_NAME" --secret-string file:///home/solana/config/vote-account-keypair.json --region $AWS_REGION
 
         if [[ $AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN == "none" ]]; then
             echo "Create Authorized Withdrawer Account Secret"
             sudo ./solana-keygen new --no-passphrase -o /home/solana/config/authorized-withdrawer-keypair.json
             NODE_IDENTITY=$(sudo ./solana-keygen pubkey /home/solana/config/authorized-withdrawer-keypair.json)
-            echo "Storing Authorized Withdrawer Account  to AWS Secrets Manager"
+            echo "Store Authorized Withdrawer Account  to AWS Secrets Manager"
             sudo aws secretsmanager create-secret --name "solana-node/"$NODE_IDENTITY --description "Authorized Withdrawer Account Secret created for stack $CF_STACK_NAME" --secret-string file:///home/solana/config/authorized-withdrawer-keypair.json --region $AWS_REGION
 
         else
@@ -269,13 +266,13 @@ if [[ "$SOLANA_NODE_TYPE" == "consensus" ]]; then
           echo "Creating Vote Account on-chain"
           sudo ./solana create-vote-account /home/solana/config/vote-account-keypair.json /home/solana/config/validator-keypair.json /home/solana/config/authorized-withdrawer-keypair.json
 
-          echo "Deleting Transaction Funding Account Secret from the local disc"
+          echo "Delete Transaction Funding Account Secret from the local disc"
           sudo rm  /root/.config/solana/id.json
         else
           echo "Vote Account not created. Please create it manually: https://docs.solana.com/running-validator/validator-start#create-vote-account"
         fi
 
-        echo "Deleting Authorized Withdrawer Account from the local disc"
+        echo "Delete Authorized Withdrawer Account from the local disc"
         sudo rm /home/solana/config/authorized-withdrawer-keypair.json
     else
         echo "Get Vote Account Secret from AWS Secrets Manager"
