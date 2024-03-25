@@ -1,0 +1,15 @@
+{
+  "name": "aws-blockchain-node-runners-stacks",
+  "version": "0.2.0",
+  "scripts": {
+    "build": "npx tsc",
+    "watch": "npx tsc -w",
+    "test": "npx jest",
+    "cdk": "npx cdk",
+    "scan-cdk": "npx cdk synth"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.11.17"
+  }
+}
