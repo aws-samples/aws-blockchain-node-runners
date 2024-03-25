@@ -7,7 +7,6 @@ find "/var/solana/data/ledger" -name "snapshot-*" -size 0 -print -exec rm {} \; 
 export RUST_LOG=error
 export RUST_BACKTRACE=full
 export SOLANA_METRICS_CONFIG=__SOLANA_METRICS_CONFIG__
-ulimit -n 1000000
 
 TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 export EC2_INTERNAL_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-ipv4)

@@ -213,6 +213,10 @@ sudo usermod -aG sudo solana
 cd /home/solana
 sudo mkdir ./bin
 
+# See details in https://github.com/aws-samples/aws-blockchain-node-runners/issues/31
+ln -s /var/solana/data/ledger /home/solana
+ulimit -n 1000000
+
 echo "Downloading x86 binaries for version v$SOLANA_VERSION"
 
 sudo wget -q https://github.com/solana-labs/solana/releases/download/v$SOLANA_VERSION/solana-release-x86_64-unknown-linux-gnu.tar.bz2
