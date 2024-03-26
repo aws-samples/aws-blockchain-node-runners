@@ -156,7 +156,17 @@ describe("EthSyncNodeStack", () => {
     // Has CloudWatch dashboard.
     template.hasResourceProperties("AWS::CloudWatch::Dashboard", {
       DashboardBody: Match.anyValue(),
-      DashboardName: `eth-sync-node-${config.baseConfig.clientCombination}`
+      DashboardName: {
+        "Fn::Join": [
+         "",
+         [
+          "eth-sync-node-geth-lighthouse-",
+          {
+            "Ref": Match.anyValue()
+          }
+         ]
+        ]
+       }
     })
 
  });

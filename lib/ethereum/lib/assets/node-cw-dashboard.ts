@@ -1,4 +1,4 @@
-export const SyncNodeCWDashboardJSON = {
+export const NodeCWDashboardJSON = {
     "widgets": [
         {
             "height": 5,

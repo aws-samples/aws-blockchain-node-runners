@@ -43,7 +43,7 @@ services:
       - "30303:30303/udp"
 
   lighthouse_node:
-    image: sigp/lighthouse:v4.5.0
+    image: sigp/lighthouse:v5.1.2
     container_name: consensus
     restart: always
     command:
