@@ -63,13 +63,14 @@ export class EthSingleNodeStack extends cdk.Stack {
         asset.bucket.grantRead(instanceRole);
 
         // Setting up the node using generic Single Node constract
-        const syncNode = new SingleNodeConstruct(this, "single-node", {
+        const node = new SingleNodeConstruct(this, "single-node", {
             instanceName: STACK_NAME,
             instanceType,
             dataVolumes,
             machineImage: new ec2.AmazonLinuxImage({
                 generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
                 cpuType: instanceCpuType,
+                kernel: ec2.AmazonLinuxKernel.KERNEL5_X,
             }),
             vpc,
             availabilityZone: chosenAvailabilityZone,
@@ -92,28 +93,28 @@ export class EthSingleNodeStack extends cdk.Stack {
             _AUTOSTART_CONTAINER_: "true",
             _FORMAT_DISK_: "true",
             _NODE_ROLE_:nodeRole,
-            _NODE_CF_LOGICAL_ID_: syncNode.nodeCFLogicalId,
+            _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
             _LIFECYCLE_HOOK_NAME_: "",
             _AUTOSCALING_GROUP_NAME_: "",
         });
 
         // Adding modified userdata script to the instance prepared fro us by Single Node constract
-        syncNode.instance.addUserData(modifiedUserData);
+        node.instance.addUserData(modifiedUserData);
 
         // Adding CloudWatch dashboard to the node
-        const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SyncNodeCWDashboardJSON), {
-            INSTANCE_ID:syncNode.instanceId,
+        const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.NodeCWDashboardJSON), {
+            INSTANCE_ID:node.instanceId,
             INSTANCE_NAME: STACK_NAME,
             REGION: REGION,
         })
 
         new cw.CfnDashboard(this, 'single-cw-dashboard', {
-            dashboardName: STACK_NAME,
+            dashboardName: `${STACK_NAME}-${node.instanceId}`,
             dashboardBody: dashboardString,
         });
 
         new cdk.CfnOutput(this, "single-instance-id", {
-            value: syncNode.instanceId,
+            value: node.instanceId,
         });
 
         // Adding suppressions to the stack
