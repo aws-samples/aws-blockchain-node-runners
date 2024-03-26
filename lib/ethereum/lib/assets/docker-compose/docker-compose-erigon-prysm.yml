@@ -2,7 +2,7 @@
 version: "3"
 services:
   erigon_node:
-    image: thorax/erigon:2.57.0-__IMAGE_ARCH__
+    image: thorax/erigon:2.59.0-__IMAGE_ARCH__
     container_name: execution
     restart: always
     command:
@@ -43,7 +43,7 @@ services:
       - "30303:30303/udp"
 
   prysm_node:
-    image: rocketpool/prysm:v4.2.0
+    image: rocketpool/prysm:v5.0.1
     container_name: consensus
     restart: always
     command:

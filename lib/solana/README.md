@@ -129,7 +129,6 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 ```bash
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/solana
-   npm i --save-dev @types/node
    npx cdk deploy solana-common
 ```
 
