@@ -2,7 +2,7 @@
 version: "3"
 services:
   erigon_node:
-    image: thorax/erigon:2.57.0-__IMAGE_ARCH__
+    image: thorax/erigon:2.59.0-__IMAGE_ARCH__
     container_name: execution
     restart: always
     command:
