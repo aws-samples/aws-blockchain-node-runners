@@ -36,6 +36,16 @@ export class SolanaCommonStack extends cdk.Stack {
            actions: ["autoscaling:CompleteLifecycleAction"],
           }));
 
+        instanceRole.addToPolicy(
+            new iam.PolicyStatement({
+                resources: [
+                    `arn:aws:s3:::cloudformation-examples`,
+                    `arn:aws:s3:::cloudformation-examples/*`,
+                ],
+                actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
+            })
+        );
+
         new cdk.CfnOutput(this, "Instance Role ARN", {
             value: instanceRole.roleArn,
             exportName: "SolanaNodeInstanceRoleArn",

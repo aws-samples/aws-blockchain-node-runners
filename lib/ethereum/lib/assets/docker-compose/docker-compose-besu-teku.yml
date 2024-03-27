@@ -4,7 +4,7 @@ services:
     besu_node:
         environment:
             - "JAVA_OPTS=-Xmx8g"
-        image: hyperledger/besu:24.1.2-SNAPSHOT
+        image: hyperledger/besu:24.3.0
         container_name: execution
         restart: always
         command:
@@ -43,7 +43,7 @@ services:
         environment:
             - "JAVA_OPTS=-Xmx4g"
             - "TEKU_OPTS=-XX:-HeapDumpOnOutOfMemoryError"
-        image: consensys/teku:24.1.0-jdk17
+        image: consensys/teku:24.3.0-jdk17
         container_name: consensus
         restart: always
         command:

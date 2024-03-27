@@ -4,7 +4,7 @@ services:
     nethermind_node:
         environment:
             - "DOTNET_BUNDLE_EXTRACT_BASE_DIR=/var/lib/nethermind/data"
-        image: nethermind/nethermind:1.25.2
+        image: nethermind/nethermind:1.25.4
         container_name: execution
         restart: always
         command: [
@@ -12,7 +12,6 @@ services:
                 "mainnet",
                 "--datadir",
                 "/var/lib/nethermind/data",
-                # "--Sync.FastSync", "true",
                 "--Sync.SnapSync",
                 "true",
                 "--JsonRpc.JwtSecretFile",
@@ -54,7 +53,7 @@ services:
         environment:
             - "JAVA_OPTS=-Xmx4g"
             - "TEKU_OPTS=-XX:-HeapDumpOnOutOfMemoryError"
-        image: consensys/teku:24.1.0-jdk17
+        image: consensys/teku:24.3.0-jdk17
         container_name: consensus
         restart: always
         command:

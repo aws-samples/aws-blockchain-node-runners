@@ -2,7 +2,7 @@
 version: "3"
 services:
     geth_node:
-        image: ethereum/client-go:v1.13.10
+        image: ethereum/client-go:v1.13.14
         container_name: execution
         restart: always
         command:
@@ -38,7 +38,7 @@ services:
             - "30303:30303/udp"
 
     lighthouse_node:
-        image: sigp/lighthouse:v4.5.0
+        image: sigp/lighthouse:v5.1.2
         container_name: consensus
         restart: always
         command:

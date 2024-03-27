@@ -87,6 +87,7 @@ export class EthRpcNodesStack extends cdk.Stack {
             machineImage: new ec2.AmazonLinuxImage({
                 generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
                 cpuType: instanceCpuType,
+                kernel: ec2.AmazonLinuxKernel.KERNEL5_X,
             }),
             role: instanceRole,
             vpc,
