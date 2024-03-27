@@ -10,7 +10,7 @@ export default function Root({children}) {
 
         // check if dataLayer exists i.e can we track or not?
         if (typeof dataLayer !== 'undefined') {
-            
+
             // send new event to Google Tag Manager
             dataLayer.push({event: 'pageview'});
 
@@ -29,7 +29,7 @@ export default function Root({children}) {
             location="top"
             overlay="true"
             setDeclineCookie>
-         We use cookies to ensure you get the best experience on our website.    
+         We use cookies to ensure you get the best experience on our website.
          </CookieConsent>
 
         {children}

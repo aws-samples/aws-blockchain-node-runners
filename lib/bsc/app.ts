@@ -53,4 +53,3 @@ cdk.Aspects.of(app).add(
         logIgnores: false
     })
 );
-

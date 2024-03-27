@@ -35,7 +35,7 @@ export class SolanaCommonStack extends cdk.Stack {
            resources: [`arn:aws:autoscaling:${region}:${this.AWS_ACCOUNT_ID}:autoScalingGroup:*:autoScalingGroupName/solana-*`],
            actions: ["autoscaling:CompleteLifecycleAction"],
           }));
-        
+
         instanceRole.addToPolicy(
             new iam.PolicyStatement({
                 resources: [
