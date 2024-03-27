@@ -4,7 +4,7 @@
 |:--------------------:|
 | [worldwide-asset-exchange](https://github.com/worldwide-asset-exchange/)|
 
-WAX is a blockchain-based system designed for gaming industry. It provides high transaction throughput and near-instant block finality. The WAX team has created a AWS Cloud Development Kit (CDK) applicaiton to deploy WAX nodes on AWS for development, testing, or Proof of Concept purposes. See the application along with deployment instructions at [wax-aws-cdk](https://github.com/worldwide-asset-exchange/wax-aws-cdk). 
+WAX is a blockchain-based system designed for gaming industry. It provides high transaction throughput and near-instant block finality. The WAX team has created a AWS Cloud Development Kit (CDK) applicaiton to deploy WAX nodes on AWS for development, testing, or Proof of Concept purposes. See the application along with deployment instructions at [WAX-AWS-CDK](https://github.com/worldwide-asset-exchange/wax-aws-cdk). 
 
 ## Overview of Deployment Architecture
 
