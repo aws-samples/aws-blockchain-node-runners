@@ -1,0 +1,55 @@
+---
+- name: Check Instance Name
+  ansible.builtin.debug:
+    msg: "{{ inventory_hostname }}"
+
+- name: create did seed into secrets manager
+  community.aws.secretsmanager_secret:
+    name: "{{ inventory_hostname }}-indy-seed"
+    state: present
+    secret_type: string
+    secret: "{{ lookup('community.general.random_string', length=32, special=false) }}"
+    overwrite: false
+  delegate_to: localhost
+
+- name: make a batch file for create indy wallet
+  ansible.builtin.template:
+    src: "{{ item }}.batch.j2"
+    dest: "/tmp/{{ item }}.batch"
+    mode: '0644'
+  with_items:
+    - walletCreate
+    - walletOpen
+
+- name: create indy wallet
+  ansible.builtin.shell: indy-cli-rs /tmp/walletCreate.batch
+  args:
+    chdir: "{{ indy_cli_rs_path }}"
+  ignore_errors: yes
+
+- name: get DID and Verkey
+  ansible.builtin.shell: indy-cli-rs /tmp/walletOpen.batch
+  args:
+    chdir: "{{ indy_cli_rs_path }}"
+  register: create_wallet_result
+
+# debug create_wallet_result
+- name: debug create_wallet_result
+  ansible.builtin.debug:
+    var: create_wallet_result.stdout_lines[7]
+
+- name: Extract DID and Verkey
+  set_fact:
+    did: "{{ create_wallet_result.stdout_lines[7][2:24] }}"
+    verkey: "{{ create_wallet_result.stdout_lines[7][27:51] }}"
+
+- name: Store the DID and Verkey into secrets manager
+  community.aws.secretsmanager_secret:
+    name: "{{ inventory_hostname }}-indy-did"
+    state: present
+    secret_type: string
+    json_secret:
+      did: "{{ did }}"
+      verkey: "{{ verkey }}"
+    overwrite: true
+  delegate_to: localhost

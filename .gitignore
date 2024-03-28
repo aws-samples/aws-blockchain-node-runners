@@ -35,3 +35,5 @@ ha-nodes-deploy*.json
 *.OLD
 .env
 .idea
+
+lib/indy/ansible/.venv

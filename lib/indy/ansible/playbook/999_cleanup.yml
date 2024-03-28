@@ -1,0 +1,54 @@
+- name: Remove Secrets Manager
+  hosts:
+    - localhost
+  tasks:
+    - name: remove indy-seed from secrets manager
+      community.aws.secretsmanager_secret:
+        name: "{{ nodename }}-indy-seed"
+        state: absent
+        secret_type: string
+        secret: "{{ lookup('community.general.random_string', length=32, special=false) }}"
+        overwrite: false
+      with_items:
+        - steward1
+        - steward2
+        - steward3
+        - steward4
+        - trustee1
+        - trustee2
+        - trustee3
+      loop_control:
+        loop_var: nodename
+
+    - name: remove indy-did from secrets manager
+      community.aws.secretsmanager_secret:
+        name: "{{ nodename }}-indy-did"
+        state: absent
+        secret_type: string
+        secret: "{{ lookup('community.general.random_string', length=32, special=false) }}"
+        overwrite: false
+      with_items:
+        - steward1
+        - steward2
+        - steward3
+        - steward4
+        - trustee1
+        - trustee2
+        - trustee3
+      loop_control:
+        loop_var: nodename
+
+    - name: remove indy-nodeInfo from secrets manager
+      community.aws.secretsmanager_secret:
+        name: "{{ nodename }}-indy-nodeInfo"
+        state: absent
+        secret_type: string
+        secret: "{{ lookup('community.general.random_string', length=32, special=false) }}"
+        overwrite: false
+      with_items:
+        - steward1
+        - steward2
+        - steward3
+        - steward4
+      loop_control:
+        loop_var: nodename

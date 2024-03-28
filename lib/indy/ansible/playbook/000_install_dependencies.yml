@@ -1,0 +1,6 @@
+- name: install dependencies
+  hosts:
+    - indy
+  become: yes
+  roles:
+    - install_dependencies

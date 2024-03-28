@@ -1,0 +1,41 @@
+---
+- name: make indy directory
+  become: yes
+  ansible.builtin.file:
+    path: "/var/lib/indy/{{ INDY_NETEORK_NAME }}"
+    state: directory
+    group: indy
+    owner: indy
+    mode: '0755'
+    recurse: yes
+
+- amazon.aws.aws_caller_info:
+  register: aws_caller_info
+
+- name: join s3 bucket name
+  ansible.builtin.set_fact:
+    S3_BUCKET_NAME: "{{ aws_caller_info.account }}-ansible-file-transfer-bucket"
+
+# tasks file for fetch_genesis_files
+- name: fetch genesis files from s3 bucket
+  become: yes
+  amazon.aws.s3_object:
+    bucket: "{{ S3_BUCKET_NAME }}"
+    object: "/genesis/{{ item }}"
+    dest: "/var/lib/indy/{{ INDY_NETEORK_NAME }}/{{ item }}"
+    mode: get
+  with_items:
+    - pool_transactions_genesis
+    - domain_transactions_genesis
+
+- name: change owner and group of genesis files
+  become: yes
+  ansible.builtin.file:
+    path: "/var/lib/indy/{{ INDY_NETEORK_NAME }}/{{ item }}"
+    state: file
+    group: indy
+    owner: indy
+    mode: '0644'
+  with_items:
+    - pool_transactions_genesis
+    - domain_transactions_genesis

@@ -1,0 +1,14 @@
+{
+  "name": "aws-blockchain-node-runners-indy",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "npx tsc",
+    "watch": "npx tsc -w",
+    "test": "npx jest",
+    "cdk": "npx cdk",
+    "scan-cdk": "npx cdk synth"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security"
+  }
+}
