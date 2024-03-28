@@ -14,22 +14,21 @@ else
 fi
 
 # L2 client stats
-L2_CLIENT_HEAD=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".queued_unsafe_l2.number")
 L2_CLIENT_CURRENT=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".unsafe_l2.number")
+L2_CLIENT_CURRENT_BLOCK_TIMESTAMP=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".unsafe_l2.timestamp")
+L2_CLIENT_CURRENT_BLOCK_MINUTES_BEHIND="$((($(date +%s) - L2_CLIENT_CURRENT_BLOCK_TIMESTAMP)/60))"
 
-if [ "$L2_CLIENT_HEAD" == "null" ]; then 
-    L2_CLIENT_BLOCKS_BEHIND=0
-else
-    L2_CLIENT_BLOCKS_BEHIND="$((L2_CLIENT_HEAD-L2_CLIENT_CURRENT))"
+if [ "$L2_CLIENT_CURRENT" == "null" ]; then 
+    L2_CLIENT_CURRENT=0
 fi
 
-echo "L1_CLIENT_HEAD="$L1_CLIENT_HEAD
-echo "L1_CLIENT_CURRENT="$L1_CLIENT_CURRENT
-echo "L1_CLIENT_BLOCKS_BEHIND="$L1_CLIENT_BLOCKS_BEHIND
+# echo "L1_CLIENT_HEAD="$L1_CLIENT_HEAD
+# echo "L1_CLIENT_CURRENT="$L1_CLIENT_CURRENT
+# echo "L1_CLIENT_BLOCKS_BEHIND="$L1_CLIENT_BLOCKS_BEHIND
 
-echo "L2_CLIENT_HEAD="$L2_CLIENT_HEAD
-echo "L2_CLIENT_CURRENT="$L2_CLIENT_CURRENT
-echo "L2_CLIENT_BLOCKS_BEHIND="$L2_CLIENT_BLOCKS_BEHIND
+# echo "L2_CLIENT_CURRENT="$L2_CLIENT_CURRENT
+# echo "L2_CLIENT_CURRENT_BLOCK_TIMESTAMP="$L2_CLIENT_CURRENT_BLOCK_TIMESTAMP
+# echo "L2_CLIENT_CURRENT_BLOCK_MINUTES_BEHIND="$L2_CLIENT_CURRENT_BLOCK_MINUTES_BEHIND
 
 # Sending data to CloudWatch
 TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
@@ -41,5 +40,5 @@ aws cloudwatch put-metric-data --metric-name l1_current_block --namespace CWAgen
 aws cloudwatch put-metric-data --metric-name l1_blocks_behind --namespace CWAgent --value $L1_CLIENT_BLOCKS_BEHIND --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
 
 aws cloudwatch put-metric-data --metric-name l2_current_block --namespace CWAgent --value $L2_CLIENT_CURRENT --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
-aws cloudwatch put-metric-data --metric-name l2_blocks_behind --namespace CWAgent --value $L2_CLIENT_BLOCKS_BEHIND --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
+aws cloudwatch put-metric-data --metric-name l2_minutes_behind --namespace CWAgent --value $L2_CLIENT_CURRENT_BLOCK_MINUTES_BEHIND --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
 

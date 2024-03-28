@@ -1,10 +1,10 @@
 # Sample AWS Blockchain Node Runner app for Base Nodes
 
-[Base](https://base.org/) is a "Layer 2" scaling solution for Ethereum. This blueprint helps to deploy Base RPC nodes on AWS. It is meant to be used for development, testing or Proof of Concept purposes.
-
 | Contributed by |
 |:---------------|
 |[@frbrkoala](https://github.com/frbrkoala), [@danyalprout](https://github.com/danyalprout)|
+
+[Base](https://base.org/) is a "Layer 2" scaling solution for Ethereum. This blueprint helps to deploy Base RPC nodes on AWS. It is meant to be used for development, testing or Proof of Concept purposes.
 
 ## Overview of Deployment Architectures for Single Node setups
 

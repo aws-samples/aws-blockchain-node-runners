@@ -159,9 +159,9 @@ export const SyncNodeCWDashboardJSON = {
                 "stat": "Maximum",
                 "period": 60,
                 "metrics": [
-                    [ "CWAgent", "l2_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "l2_minutes_behind", "InstanceId", "${INSTANCE_ID}", { "label": "minutes" } ]
                 ],
-                "title": "L2 Blocks Behind"
+                "title": "L2 Minutes Behind"
             }
         },
         {
