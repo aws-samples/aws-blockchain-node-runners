@@ -1,0 +1,12 @@
+- name: Start the trustee instances
+  hosts:
+    - localhost
+  gather_facts: false
+  tasks:
+    - name: Start the trustee instances
+      amazon.aws.ec2_instance:
+        instance_ids: "{{ hostvars[item]['ansible_aws_ssm_instance_id'] }}"
+        # region: '{{ region }}'
+        state: running
+        wait: True
+      loop: "{{ groups['trustee'] }}"

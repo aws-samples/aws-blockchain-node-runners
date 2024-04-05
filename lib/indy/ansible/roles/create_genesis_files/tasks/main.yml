@@ -1,0 +1,1 @@
+- ansible.builtin.import_tasks: create_genesis_file.yml

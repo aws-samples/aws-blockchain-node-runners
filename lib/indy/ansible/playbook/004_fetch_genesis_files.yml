@@ -1,0 +1,5 @@
+- name: Fetch Genesis FIles
+  hosts:
+    - steward
+  roles:
+    - fetch_genesis_files

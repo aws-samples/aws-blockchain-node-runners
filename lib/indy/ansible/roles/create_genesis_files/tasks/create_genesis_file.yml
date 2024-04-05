@@ -1,0 +1,81 @@
+---
+- name: remove old genesis files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /tmp/pool_transactions_genesis
+    - /tmp/domain_transactions_genesis
+
+# tasks file for create_genesis_file
+- name: get nodeinfo from secrets manager
+  set_fact:
+    stewardNodeInfo1: "{{ lookup('amazon.aws.aws_secret', 'steward1-indy-nodeInfo', on_denied='warn')}}"
+    stewardNodeInfo2: "{{ lookup('amazon.aws.aws_secret', 'steward2-indy-nodeInfo', on_denied='warn')}}"
+    stewardNodeInfo3: "{{ lookup('amazon.aws.aws_secret', 'steward3-indy-nodeInfo', on_denied='warn')}}"
+    stewardNodeInfo4: "{{ lookup('amazon.aws.aws_secret', 'steward4-indy-nodeInfo', on_denied='warn')}}"
+
+- name: get didinfo from secrets manager
+  set_fact:
+    stewardDidInfo1: "{{ lookup('amazon.aws.aws_secret', 'steward1-indy-did', on_denied='warn')}}"
+    stewardDidInfo2: "{{ lookup('amazon.aws.aws_secret', 'steward2-indy-did', on_denied='warn')}}"
+    stewardDidInfo3: "{{ lookup('amazon.aws.aws_secret', 'steward3-indy-did', on_denied='warn')}}"
+    stewardDidInfo4: "{{ lookup('amazon.aws.aws_secret', 'steward4-indy-did', on_denied='warn')}}"
+
+- name: get trustee info from secrets manager
+  set_fact:
+    trusteeDidInfo1: "{{ lookup('amazon.aws.aws_secret', 'trustee1-indy-did', on_denied='warn')}}"
+    trusteeDidInfo2: "{{ lookup('amazon.aws.aws_secret', 'trustee2-indy-did', on_denied='warn')}}"
+    trusteeDidInfo3: "{{ lookup('amazon.aws.aws_secret', 'trustee3-indy-did', on_denied='warn')}}"
+
+- name: make stewards.csv
+  template:
+    src: stewards.csv.j2
+    dest: /tmp/stewards.csv
+
+- name: make trustee.csv
+  template:
+    src: trustee.csv.j2
+    dest: /tmp/trustee.csv
+
+- name: wget genesis_from_files.py
+  get_url:
+    url: https://raw.githubusercontent.com/sovrin-foundation/steward-tools/master/create_genesis/genesis_from_files.py
+    dest: /tmp/genesis_from_files.py
+    mode: 0755
+
+- name: execute genesis_from_files.py
+  shell: /tmp/genesis_from_files.py --stewards /tmp/stewards.csv --trustees /tmp/trustee.csv
+  args:
+    chdir: /tmp
+  register: genesis_result
+
+- name: fetch pool_transactions_genesis
+  ansible.builtin.fetch:
+    src: /tmp/pool_transactions_genesis
+    dest: /tmp/pool_transactions_genesis
+    flat: yes
+
+- name: fetch domain_transactions_genesis
+  ansible.builtin.fetch:
+    src: /tmp/domain_transactions_genesis
+    dest: /tmp/domain_transactions_genesis
+    flat: yes
+
+- amazon.aws.aws_caller_info:
+  register: aws_caller_info
+
+- name: join s3 bucket name
+  ansible.builtin.set_fact:
+    S3_BUCKET_NAME: "{{ aws_caller_info.account }}-ansible-file-transfer-bucket"
+
+- name: domain_transactions_genesis into s3 bucket
+  amazon.aws.s3_object:
+    bucket: "{{ S3_BUCKET_NAME }}"
+    object: "/genesis/{{ item }}"
+    src: "/tmp/{{ item }}"
+    mode: put
+  delegate_to: localhost
+  with_items:
+    - pool_transactions_genesis
+    - domain_transactions_genesis

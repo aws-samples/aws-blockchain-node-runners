@@ -1,0 +1,16 @@
+---
+# wget https://github.com/hyperledger/indy-cli-rs/releases/download/v0.1.0/indy-cli-rs-0.1.0-linux-x86_64.tar.gz
+
+- name: download indy cli
+  get_url:
+    url: https://github.com/hyperledger/indy-cli-rs/releases/download/v0.1.0/indy-cli-rs-0.1.0-linux-x86_64.tar.gz
+    dest: /tmp/indy-cli-rs-0.1.0-linux-x86_64.tar.gz
+    mode: '0755'
+
+# tar -xf indy-cli-rs-0.1.0-linux-x86_64.tar.gz
+- name: extract indy cli
+  become: yes
+  unarchive:
+    src: /tmp/indy-cli-rs-0.1.0-linux-x86_64.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes

@@ -1,0 +1,3 @@
+---
+# defaults file for create_wallet
+indy_cli_rs_path: "/"
