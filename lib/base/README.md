@@ -54,15 +54,15 @@ This is the Well-Architected checklist for Ethereum nodes implementation of the 
 
 ## Hardware Requirements
 
-**Minimum for Base node**
+**Minimum for Base node sepolia**
 
 - Instance type [m7g.2xlarge](https://aws.amazon.com/ec2/instance-types/m7g/).
-- 2500GB EBS gp3 storage with at least 5000 IOPS.
+- 1500GB EBS gp3 storage with at least 5000 IOPS.
 
-**Recommended for Base node on maiinet**
+**Recommended for Base node on mainnet**
 
-- Instance type [m7g.4xlarge](https://aws.amazon.com/ec2/instance-types/m7g/).
-- 4100GB EBS gp3 storage with at least 6000 IOPS.`
+- Instance type [m7g.2xlarge](https://aws.amazon.com/ec2/instance-types/m7g/).
+- 4100GB EBS gp3 storage with at least 5000 IOPS.`
 
 </details>
 
@@ -124,7 +124,7 @@ npx cdk deploy base-common
 
 ### From your Cloud9: Deploy Single Node
 
-1. For L1 node you you can set your own URLs in `BASE_L1_EXECUTION_ENDPOINT` and `BASE_L1_CONSENSUS_ENDPOINT` properties of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or you can run your own Ethereum node [with Node Runner blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum). For example:
+1. For L1 node you you can set your own URLs in `BASE_L1_EXECUTION_ENDPOINT` and `BASE_L1_CONSENSUS_ENDPOINT` properties of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or you can run your own Ethereum node [with Node Runner Ethereum blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum) (tested with geth-lighthouse combination). For example:
 
 ```bash
 #For Sepolia:
@@ -132,14 +132,14 @@ BASE_L1_EXECUTION_ENDPOINT="https://ethereum-sepolia-rpc.publicnode.com"
 BASE_L1_CONSENSUS_ENDPOINT="https://ethereum-sepolia-beacon-api.publicnode.com"
 ```
 
-2. Deploy Base RPC Node and wait for it to sync. For Mainnet it might take less than an hour when using snapshots (default) or multiple days if syncing from block 0.
+2. Deploy Base RPC Node and wait for it to sync. For Mainnet it might a day when using snapshots or about a week if syncing from block 0. You can use snapshots provided by the Base team by setting `BASE_RESTORE_FROM_SNAPSHOT="true"` in `.env` file.
 
 ```bash
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/base
 npx cdk deploy base-single-node --json --outputs-file single-node-deploy.json
 ```
-A node connected to Sepolia network should start within an hour, while syncing nodes with Mainnet might take a while. Although you can use snapshots provided by the Base team by setting `BASE_RESTORE_FROM_SNAPSHOT="true"` in `.env` file, you might still have wait for your node to finish synchronizing. You can watch the progress with CloudWatch dashboard (see [Monitoring](#monitoring)) or check the progress manually. For manual access, use SSM to connect into EC2 first and watch the log like this:
+After deployment you can watch the progress with CloudWatch dashboard (see [Monitoring](#monitoring)) or check the progress manually. For manual access, use SSM to connect into EC2 first and watch the log like this:
 
 ```bash
 export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
@@ -164,7 +164,7 @@ curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","me
 ```
 
 ### Monitoring
-A script on the Base node publishes current block and blocks behind metrics to CloudWatch metrics every 5 minutes. When the node is fully synced the blocks behind metric should get to 0, which might take about 1.5 days. To see the metrics:
+Every 5 minutes a script on the Base node publishes to CloudWatch service the metrics for current block for L1/L2 clients as well as blocks behind metric for L1 and minutes buehind for L2. When the node is fully synced the blocks behind metric should get to 4 and minutes behind should get down to 0. To see the metrics:
 
 - Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
 - Open Dashboards and select `base-single-node-<network>-<your_ec2_instance_id>` from the list of dashboards.
@@ -194,13 +194,13 @@ npx cdk destroy base-common
 
 1. How to check the logs of the clients running on my Base node?
 
-   **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+   **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error saying `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 
 ```bash
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/base
 
-export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
 echo "INSTANCE_ID=" $INSTANCE_ID
 export AWS_REGION=us-east-1
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
@@ -216,7 +216,7 @@ docker logs --tail 50 node_node_1 -f
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/base
 
-export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
 echo "INSTANCE_ID=" $INSTANCE_ID
 export AWS_REGION=us-east-1
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
@@ -226,7 +226,7 @@ sudo cat /var/log/cloud-init-output.log
 3. How can I restart the Base node?
 
 ``` bash
-export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
 echo "INSTANCE_ID=" $INSTANCE_ID
 export AWS_REGION=us-east-1
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION

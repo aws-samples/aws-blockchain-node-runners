@@ -29,6 +29,11 @@ export interface BaseNodeSecurityGroupConstructProps {
       // Private port
       sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8545), "Base Client RPC");
 
+      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcpRange(0, 12999), "All outbound connections except 13000");
+      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcpRange(13001, 65535), "All outbound connections except 13000");
+      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(0, 12999), "All outbound connections except 13000");
+      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(13001, 65535), "All outbound connections except 13000");
+
       this.securityGroup = sg
     }
   }
