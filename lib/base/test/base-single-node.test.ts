@@ -38,9 +38,32 @@ describe("BaseSingleNodeStack", () => {
       SecurityGroupEgress: [
         {
           "CidrIp": "0.0.0.0/0",
-          "Description": "Allow all outbound traffic by default",
-          "IpProtocol": "-1"
-        }
+          "Description": "All outbound connections except 13000",
+          "FromPort": 0,
+          "IpProtocol": "tcp",
+          "ToPort": 12999
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "All outbound connections except 13000",
+          "FromPort": 13001,
+          "IpProtocol": "tcp",
+          "ToPort": 65535
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "All outbound connections except 13000",
+          "FromPort": 0,
+          "IpProtocol": "udp",
+          "ToPort": 12999
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "All outbound connections except 13000",
+          "FromPort": 13001,
+          "IpProtocol": "udp",
+          "ToPort": 65535
+         }
       ],
       SecurityGroupIngress: [
         {

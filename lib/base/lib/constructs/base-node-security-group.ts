@@ -19,7 +19,7 @@ export interface BaseNodeSecurityGroupConstructProps {
       const sg = new ec2.SecurityGroup(this, `rpc-node-security-group`, {
         vpc,
         description: "Security Group for Blockchain nodes",
-        allowAllOutbound: true,
+        allowAllOutbound: false,
       });
 
       // Public ports
