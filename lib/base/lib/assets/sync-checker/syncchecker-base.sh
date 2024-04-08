@@ -7,7 +7,7 @@ OPTIMISM_SYNC_STATUS=$(curl -s -X POST -H "Content-Type: application/json" --dat
 L1_CLIENT_HEAD=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".head_l1.number")
 L1_CLIENT_CURRENT=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".current_l1.number")
 
-if [ $L1_CLIENT_HEAD -eq 0 ]; then 
+if [ $L1_CLIENT_HEAD -eq 0 ]; then
     L1_CLIENT_BLOCKS_BEHIND=0
 else
     L1_CLIENT_BLOCKS_BEHIND="$((L1_CLIENT_HEAD-L1_CLIENT_CURRENT))"
@@ -18,7 +18,7 @@ L2_CLIENT_CURRENT=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".unsafe_l2.number")
 L2_CLIENT_CURRENT_BLOCK_TIMESTAMP=$(echo $OPTIMISM_SYNC_STATUS | jq -r ".unsafe_l2.timestamp")
 L2_CLIENT_CURRENT_BLOCK_MINUTES_BEHIND="$((($(date +%s) - L2_CLIENT_CURRENT_BLOCK_TIMESTAMP)/60))"
 
-if [ "$L2_CLIENT_CURRENT" == "null" ]; then 
+if [ "$L2_CLIENT_CURRENT" == "null" ]; then
     L2_CLIENT_CURRENT=0
 fi
 
@@ -41,4 +41,3 @@ aws cloudwatch put-metric-data --metric-name l1_blocks_behind --namespace CWAgen
 
 aws cloudwatch put-metric-data --metric-name l2_current_block --namespace CWAgent --value $L2_CLIENT_CURRENT --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
 aws cloudwatch put-metric-data --metric-name l2_minutes_behind --namespace CWAgent --value $L2_CLIENT_CURRENT_BLOCK_MINUTES_BEHIND --timestamp $TIMESTAMP --dimensions  InstanceId=$INSTANCE_ID --region $REGION
-
