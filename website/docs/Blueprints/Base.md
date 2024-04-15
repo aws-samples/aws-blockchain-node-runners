@@ -4,6 +4,6 @@ sidebar_label: Base
 ---
 #
 
-import Readme from '../../../lib/Base/README.md';
+import Readme from '../../../lib/base/README.md';
 
 <Readme />
