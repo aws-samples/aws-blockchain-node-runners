@@ -41,3 +41,5 @@ npm run install-pre-commit-mac
 # Run
 npm run run-pre-commit
 ```
+
+4. Optionally, run [shellcheck](https://github.com/koalaman/shellcheck) to check for common problems in your shell scripts.

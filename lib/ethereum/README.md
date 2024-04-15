@@ -92,10 +92,10 @@ Create your own copy of `.env` file and edit it:
    # Make sure you are in aws-blockchain-node-runners/lib/ethereum
    cd lib/ethereum
    pwd
-   cp .env-sample .env
+   cp ./sample-configs/.env-geth-lighthouse .env
    nano .env
 ```
-   **NOTE:** Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
+   **NOTE:** You can find more examples inside the `sample-configs` directory.
 
 
 4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots

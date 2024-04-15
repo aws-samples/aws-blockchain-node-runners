@@ -80,9 +80,9 @@ This is the Well-Architected checklist for Solana nodes implementation of the AW
 
 | Usage pattern  | Ideal configuration  | Primary option on AWS  | Data Transfer Estimates | Config reference |
 |---|---|---|---|---|
-| 1/ Consensus node | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 10K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput, Data volume: EBS gp3 10K IOPS, 700 MB/s throughput | Proportional to the amount at stake. Between 200TB to 400TB/month  | [.env-sample-consensus](../../sample-configs/.env-sample-consensus) |
-| 2/ Base RPC node (no secondary indexes) | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 12K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput Data volume: EBS gp3 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-baserpc](../../sample-configs/.env-sample-baserpc) |
-| 3/ Extended RPC node (with all secondary indexes) | 64 vCPU, 1 TB RAM, Accounts volume: 1TB, 7K IOPS, 700 MB/s throughput, Data volume: 3TB, 16K IOPS, 700 MB/s throughput    | x2idn.16xlarge, Accounts: instance storage (ephemeral NVMe volumes) 1.9 TB, Data volume: 3TB, 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-extendedrpc](../../sample-configs/.env-sample-extendedrpc) |
+| 1/ Consensus node | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 10K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput, Data volume: EBS gp3 10K IOPS, 700 MB/s throughput | Proportional to the amount at stake. Between 200TB to 400TB/month  | [.env-sample-consensus](./sample-configs/.env-sample-consensus) |
+| 2/ Base RPC node (no secondary indexes) | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 12K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput Data volume: EBS gp3 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-baserpc](./sample-configs/.env-sample-baserpc) |
+| 3/ Extended RPC node (with all secondary indexes) | 64 vCPU, 1 TB RAM, Accounts volume: 1TB, 7K IOPS, 700 MB/s throughput, Data volume: 3TB, 16K IOPS, 700 MB/s throughput    | x2idn.16xlarge, Accounts: instance storage (ephemeral NVMe volumes) 1.9 TB, Data volume: 3TB, 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-extendedrpc](./sample-configs/.env-sample-extendedrpc) |
 </details>
 
 ## Setup Instructions
@@ -129,7 +129,6 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 ```bash
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/solana
-   npm i --save-dev @types/node
    npx cdk deploy solana-common
 ```
 
@@ -272,7 +271,7 @@ The result should be like this (the actual balance might change):
    There are two ways. Using the existing volume or using a new one. If your instance has Instance Store volume attached, it is better to keep your swap on it.
 
    - Option 1: Dedicated Instance Store volume
-   
+
 ```bash
    sudo mkswap /dev/nvme3n1
    sudo swapon /dev/nvme3n1

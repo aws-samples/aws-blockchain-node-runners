@@ -2,7 +2,7 @@
 version: "3"
 services:
   erigon_node:
-    image: thorax/erigon:2.57.0-__IMAGE_ARCH__
+    image: thorax/erigon:2.59.0-__IMAGE_ARCH__
     container_name: execution
     restart: always
     command:
@@ -43,7 +43,7 @@ services:
       - "30303:30303/udp"
 
   lighthouse_node:
-    image: sigp/lighthouse:v4.5.0
+    image: sigp/lighthouse:v5.1.2
     container_name: consensus
     restart: always
     command:
