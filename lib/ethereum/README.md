@@ -1,5 +1,9 @@
 # Sample AWS Blockchain Node Runner app for Ethereum Nodes
 
+| Contributed by |
+|:--------------------:|
+| [@aldredb](https://github.com/aldredb), [@frbrkoala](https://github.com/frbrkoala),  [@wgr2017](https://github.com/wgr2017) |
+
 ## Architecture Overview
 
 This blueprint has two options for running nodes. You can set up a single JSON RPC node or multiple nodes in highly-available setup. The details are below.
