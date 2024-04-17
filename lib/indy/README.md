@@ -1,5 +1,9 @@
 # Sample AWS Blockchain Node Runner app for Hyperledger Indy
 
+| Contributed by |
+|:--------------------:|
+| [@fsatsuki](https://github.com/fsatsuki) |
+
 [View this page in Japanese (日本語)](./README_ja.md)
 
 ## Architecture Overview
@@ -49,7 +53,7 @@ npx cdk bootstrap
 3. Deploying resources with CDK
 
 ```bash
-npx cdk deploy
+npx cdk deploy --json --outputs-file indy-test-deploy.json
 
 Outputs:
 IndyNetworkStack.AnsibleFileTransferBucketName = 111122223333-ansible-file-transfer-bucket
@@ -75,22 +79,13 @@ When running on a Mac, set the following environment variables.
 
 - Create a Python virtual environment and install ansible
  ```
- $cd ansible
- $ Python3 -m venv.venv
- $source.venv/bin/activate
+ $ cd ansible
+ $ python3 -m venv venv
+ $ source ./venv/bin/activate
  ```
 
  ```
  $ pip install -r requirements.txt
- ```
-
-##### Ansible and Session Manager
-
-- In order to achieve SSH access to the EC2 instance using Session Manager, refer to [Install the Session Manager plugin for the AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)  and install the Session Manager Plugin. By using the Session Manager, deployment by Ansible to an EC2 instance of a private subnet that cannot be accessed from the internet is possible without setting a security group.
-
-- Installs a ansible plug-in for SSH access to EC2 using the AWS Systems Manager Session Manager.
- ```
- $ ansible-galaxy collection install community.aws
  ```
 
 ##### Describe instance information to be built in inventory.yml
@@ -136,7 +131,7 @@ Define the parameters referred to by Ansible in the configuration file. Set Indy
 
 ```
 $ vi inventory/group_vars/all.yml
-INDY_NETEORK_NAME: sample-network
+INDY_NETWORK_NAME: sample-network
 ```
 
 ##### Execute environment construction with Ansible

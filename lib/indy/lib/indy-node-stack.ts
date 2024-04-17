@@ -61,5 +61,10 @@ export class IndyNodeStack extends cdk.Stack {
             value: ansibleBucket.bucketName,
             exportName: "AnsibleFileTransferBucketName",
         });
+
+        new cdk.CfnOutput(this, "DeploymentRegion", {
+            value: cdk.Stack.of(this).region,
+            exportName: "DeploymentRegion",
+        });
     }
 }
