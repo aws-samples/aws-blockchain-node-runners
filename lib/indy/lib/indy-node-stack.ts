@@ -48,14 +48,14 @@ export class IndyNodeStack extends cdk.Stack {
             removalPolicy: cdk.RemovalPolicy.DESTROY,
         });
 
-        new IndyStewardNodeInstance(this, "steward1", { vpc, clientSG, nodeSG, ansibleBucket });
-        new IndyStewardNodeInstance(this, "steward2", { vpc, clientSG, nodeSG, ansibleBucket });
-        new IndyStewardNodeInstance(this, "steward3", { vpc, clientSG, nodeSG, ansibleBucket });
-        new IndyStewardNodeInstance(this, "steward4", { vpc, clientSG, nodeSG, ansibleBucket });
+        const steward1 = new IndyStewardNodeInstance(this, "steward1", { vpc, clientSG, nodeSG, ansibleBucket });
+        const steward2 = new IndyStewardNodeInstance(this, "steward2", { vpc, clientSG, nodeSG, ansibleBucket });
+        const steward3 = new IndyStewardNodeInstance(this, "steward3", { vpc, clientSG, nodeSG, ansibleBucket });
+        const steward4 = new IndyStewardNodeInstance(this, "steward4", { vpc, clientSG, nodeSG, ansibleBucket });
 
-        new IndyTrusteeNodeInstance(this, "trustee1", { vpc, nodeSG });
-        new IndyTrusteeNodeInstance(this, "trustee2", { vpc, nodeSG });
-        new IndyTrusteeNodeInstance(this, "trustee3", { vpc, nodeSG });
+        const trustee1 = new IndyTrusteeNodeInstance(this, "trustee1", { vpc, nodeSG });
+        const trustee2 = new IndyTrusteeNodeInstance(this, "trustee2", { vpc, nodeSG });
+        const trustee3 = new IndyTrusteeNodeInstance(this, "trustee3", { vpc, nodeSG });
 
         new cdk.CfnOutput(this, "AnsibleFileTransferBucketName", {
             value: ansibleBucket.bucketName,
@@ -65,6 +65,41 @@ export class IndyNodeStack extends cdk.Stack {
         new cdk.CfnOutput(this, "DeploymentRegion", {
             value: cdk.Stack.of(this).region,
             exportName: "DeploymentRegion",
+        });
+
+        new cdk.CfnOutput(this, "steward1", {
+            value: steward1.constructId,
+            exportName: "steward1",
+        });
+
+        new cdk.CfnOutput(this, "steward2", {
+            value: steward2.constructId,
+            exportName: "steward2",
+        });
+
+        new cdk.CfnOutput(this, "steward3", {
+            value: steward3.constructId,
+            exportName: "steward3",
+        });
+
+        new cdk.CfnOutput(this, "steward4", {
+            value: steward4.constructId,
+            exportName: "steward4",
+        });
+
+        new cdk.CfnOutput(this, "trustee1", {
+            value: trustee1.constructId,
+            exportName: "trustee1",
+        });
+
+        new cdk.CfnOutput(this, "trustee2", {
+            value: trustee2.constructId,
+            exportName: "trustee2",
+        });
+
+        new cdk.CfnOutput(this, "trustee3", {
+            value: trustee3.constructId,
+            exportName: "trustee3",
         });
     }
 }

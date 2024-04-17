@@ -14,11 +14,14 @@ export interface IndyNodeInstanceProps {
 
 export class IndyStewardNodeInstance extends Construct {
     public readonly instance: ec2.Instance;
+    public readonly constructId: string;
 
     constructor(scope: Construct, id: string, props: IndyNodeInstanceProps) {
         super(scope, id);
 
         const { vpc, clientSG, nodeSG } = props;
+
+        constructId: id
 
         const clientNic: ec2.CfnInstance.NetworkInterfaceProperty = {
             deviceIndex: "0",
@@ -54,13 +57,13 @@ export class IndyStewardNodeInstance extends Construct {
             ],
         });
 
-        cdk.Tags.of(instance).add("Name", id);
+        cdk.Tags.of(instance).add("Name", this.constructId);
 
         instance.addToRolePolicy(
             new cdk.aws_iam.PolicyStatement({
                 effect: cdk.aws_iam.Effect.ALLOW,
                 actions: ["secretsmanager:GetSecretValue"],
-                resources: [`arn:aws:secretsmanager:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:secret:${id}-*`],
+                resources: [`arn:aws:secretsmanager:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:secret:${this.constructId}-*`],
             }),
         );
 
@@ -73,9 +76,9 @@ export class IndyStewardNodeInstance extends Construct {
 
         instance.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
-        new cdk.CfnOutput(this, `${id}InstanceId`, {
+        new cdk.CfnOutput(this, `${this.constructId}InstanceId`, {
             value: instance.instanceId,
-            exportName: `${id}InstanceId`,
+            exportName: `${this.constructId}InstanceId`,
         });
 
         this.instance = instance;

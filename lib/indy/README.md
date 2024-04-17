@@ -53,7 +53,7 @@ npx cdk bootstrap
 3. Deploying resources with CDK
 
 ```bash
-npx cdk deploy --json --outputs-file indy-test-deploy.json
+npx cdk deploy --json --outputs-file indy-test-deploy-output.json
 
 Outputs:
 IndyNetworkStack.AnsibleFileTransferBucketName = 111122223333-ansible-file-transfer-bucket
