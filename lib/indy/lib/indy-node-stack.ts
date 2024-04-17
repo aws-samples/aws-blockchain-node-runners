@@ -67,38 +67,38 @@ export class IndyNodeStack extends cdk.Stack {
             exportName: "DeploymentRegion",
         });
 
-        new cdk.CfnOutput(this, "steward1", {
-            value: steward1.constructId,
+        new cdk.CfnOutput(this, "steward1Output", {
+            value: steward1.instance.instanceId,
             exportName: "steward1",
         });
 
-        new cdk.CfnOutput(this, "steward2", {
-            value: steward2.constructId,
+        new cdk.CfnOutput(this, "steward2Output", {
+            value: steward2.instance.instanceId,
             exportName: "steward2",
         });
 
-        new cdk.CfnOutput(this, "steward3", {
-            value: steward3.constructId,
+        new cdk.CfnOutput(this, "steward3Output", {
+            value: steward3.instance.instanceId,
             exportName: "steward3",
         });
 
-        new cdk.CfnOutput(this, "steward4", {
-            value: steward4.constructId,
+        new cdk.CfnOutput(this, "steward4Output", {
+            value: steward4.instance.instanceId,
             exportName: "steward4",
         });
 
-        new cdk.CfnOutput(this, "trustee1", {
-            value: trustee1.constructId,
+        new cdk.CfnOutput(this, "trustee1Output", {
+            value: trustee1.instance.instanceId,
             exportName: "trustee1",
         });
 
-        new cdk.CfnOutput(this, "trustee2", {
-            value: trustee2.constructId,
+        new cdk.CfnOutput(this, "trustee2Output", {
+            value: trustee2.instance.instanceId,
             exportName: "trustee2",
         });
 
-        new cdk.CfnOutput(this, "trustee3", {
-            value: trustee3.constructId,
+        new cdk.CfnOutput(this, "trustee3Output", {
+            value: trustee3.instance.instanceId,
             exportName: "trustee3",
         });
     }

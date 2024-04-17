@@ -5,7 +5,7 @@ import * as nag from "cdk-nag";
 import { IndyNodeStack } from "./lib/indy-node-stack";
 
 const app = new cdk.App();
-new IndyNodeStack(app, "IndyNodeStack", {});
+new IndyNodeStack(app, "indy-sample-network-stack", {});
 
 // Security Check
 cdk.Aspects.of(app).add(

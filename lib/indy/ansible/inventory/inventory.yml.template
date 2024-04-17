@@ -1,19 +1,19 @@
 all:
   hosts:
     steward1:
-      ansible_aws_ssm_instance_id: _steward1steward1InstanceId_
+      ansible_aws_ssm_instance_id: _steward1InstanceId_
     steward2:
-      ansible_aws_ssm_instance_id: _steward2steward1InstanceId_
+      ansible_aws_ssm_instance_id: _steward2InstanceId_
     steward3:
-      ansible_aws_ssm_instance_id: _steward3steward1InstanceId_
+      ansible_aws_ssm_instance_id: _steward3InstanceId_
     steward4:
-      ansible_aws_ssm_instance_id: _steward1steward4InstanceId_
+      ansible_aws_ssm_instance_id: _steward1InstanceId_
     trustee1:
-      ansible_aws_ssm_instance_id: _trustee1trustee1InstanceId_
+      ansible_aws_ssm_instance_id: _trustee1InstanceId_
     trustee2:
-      ansible_aws_ssm_instance_id: _trustee2trustee2InstanceId_
+      ansible_aws_ssm_instance_id: _trustee2InstanceId_
     trustee3:
-      ansible_aws_ssm_instance_id: _trustee1trustee1InstanceId_
+      ansible_aws_ssm_instance_id: _trustee1InstanceId_
   children:
     steward:
       hosts:

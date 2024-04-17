@@ -33,16 +33,7 @@ npm install
 
 #### Building resources
 
-1. Install npm dependency packages
-
-```bash
-cd lib/indy
-pwd
-# Make sure you are in aws-blockchain-node-runners/lib/indy
-npm install
-```
-
-2. Setting up initial AWS Cloud Development Kit (CDK)
+1. Setting up initial AWS Cloud Development Kit (CDK)
 
 The following command is executed only when using AWS CDK for the first time in the region where the deployment will be carried out.
 
@@ -93,44 +84,15 @@ When running on a Mac, set the following environment variables.
 - Create an indentory file containing information on the EC2 instance that will build the environment. Enter the instance ID described in the CDK output results in the settings column for each node. The value of `indyNetworkStack.ansibleFileTransferBucketName` described in CDK output results is inputted to `ansible_aws_ssm_bucket_name`. When Ansible transfers files to the target host, the Amazon Simple Storage Service (Amazon S3) bucket specified here is used.
 
   ```
-  $ vi inventory/inventory.yml
-  all:
-    hosts:
-      steward1:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef1
-      steward2:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef2
-      steward3:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef3
-      steward4:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef4
-      trustee1:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef5
-      trustee2:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef6
-      trustee3:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef7
-    children:
-      steward:  
-        hosts:
-          steward[1:4]:
-      trustee:
-        hosts:
-          trustee1
-
-    vars:
-      ansible_connection: aws_ssm
-      ansible_aws_ssm_region: aa-example-1
-      ansible_aws_ssm_s3_addressing_style: virtual
-      ansible_aws_ssm_bucket_name: 111122223333-ansible-file-transfer-bucket
+  cd ..
+  ./configure-ansible-inventory.sh 
   ```
 
 
 ##### Ansible parameter settings
-Define the parameters referred to by Ansible in the configuration file. Set Indy's network name
+Open `inventory/group_vars/all.yml` file and define the parameters referred to by Ansible in the configuration file. Set Indy's network name
 
 ```
-$ vi inventory/group_vars/all.yml
 INDY_NETWORK_NAME: sample-network
 ```
 

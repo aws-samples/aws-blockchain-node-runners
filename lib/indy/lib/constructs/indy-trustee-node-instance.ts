@@ -9,14 +9,11 @@ export interface IndyNodeInstanceProps {
 
 export class IndyTrusteeNodeInstance extends Construct {
     public readonly instance: ec2.Instance;
-    public readonly constructId: string;
 
     constructor(scope: Construct, id: string, props: IndyNodeInstanceProps) {
         super(scope, id);
 
         const { vpc } = props;
-
-        constructId: id
 
         const instance = new ec2.Instance(this, "Instance", {
             vpc: vpc,
@@ -35,13 +32,13 @@ export class IndyTrusteeNodeInstance extends Construct {
             new cdk.aws_iam.PolicyStatement({
                 effect: cdk.aws_iam.Effect.ALLOW,
                 actions: ["secretsmanager:GetSecretValue"],
-                resources: [`arn:aws:secretsmanager:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:secret:${this.constructId}-*`],
+                resources: [`arn:aws:secretsmanager:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:secret:${id}-*`],
             }),
         );
 
-        new cdk.CfnOutput(this, `${this.constructId}InstanceId`, {
+        new cdk.CfnOutput(this, `${id}InstanceId`, {
             value: instance.instanceId,
-            exportName: `${this.constructId}InstanceId`,
+            exportName: `${id}InstanceId`,
         });
 
         this.instance = instance;
