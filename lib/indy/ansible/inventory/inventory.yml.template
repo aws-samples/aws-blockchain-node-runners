@@ -7,13 +7,13 @@ all:
     steward3:
       ansible_aws_ssm_instance_id: _steward3InstanceId_
     steward4:
-      ansible_aws_ssm_instance_id: _steward1InstanceId_
+      ansible_aws_ssm_instance_id: _steward4InstanceId_
     trustee1:
       ansible_aws_ssm_instance_id: _trustee1InstanceId_
     trustee2:
       ansible_aws_ssm_instance_id: _trustee2InstanceId_
     trustee3:
-      ansible_aws_ssm_instance_id: _trustee1InstanceId_
+      ansible_aws_ssm_instance_id: _trustee3InstanceId_
   children:
     steward:
       hosts:
