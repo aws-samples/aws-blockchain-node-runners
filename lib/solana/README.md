@@ -1,5 +1,9 @@
 # Sample AWS Blockchain Node Runner app for Solana Nodes
 
+| Contributed by |
+|:--------------------:|
+| [@frbrkoala](https://github.com/frbrkoala) |
+
 Solana nodes on AWS can be deployed in 3 different configurations: Consensus, base RPC and extended RPC with secondary indexes. In addition, you can choose to deploy those configurations as a single node or a highly available (HA) nodes setup. Learn more about configurations on [Solana on AWS documentation page](https://solana.com/developers/guides/rpc/configure-solana-rpc-on-aws) and below are the details on single node and HA deployment setups.
 
 ## Overview of Deployment Architectures for Single and HA setups
