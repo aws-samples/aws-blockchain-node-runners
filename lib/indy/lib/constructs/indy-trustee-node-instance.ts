@@ -1,10 +1,15 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as nag from "cdk-nag";
 import { Construct } from "constructs";
+import * as configTypes from "../config/indyConfig.interface";
 
 export interface IndyNodeInstanceProps {
     readonly vpc: ec2.IVpc;
     readonly nodeSG: ec2.ISecurityGroup;
+    readonly instanceType: ec2.InstanceType;
+    readonly instanceCpuType: ec2.AmazonLinuxCpuType;
+    readonly dataVolumes: configTypes.IndyDataVolumeConfig[];
 }
 
 export class IndyTrusteeNodeInstance extends Construct {
@@ -23,6 +28,16 @@ export class IndyTrusteeNodeInstance extends Construct {
             ),
             ssmSessionPermissions: true,
             securityGroup: props.nodeSG,
+            blockDevices: [
+                {
+                    deviceName: "/dev/sda1",
+                    volume: ec2.BlockDeviceVolume.ebs(30, {
+                        volumeType: ec2.EbsDeviceVolumeType.GP3,
+                        encrypted: true,
+                        deleteOnTermination: true,
+                    }),
+                },
+            ],
         });
         instance.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
@@ -42,5 +57,29 @@ export class IndyTrusteeNodeInstance extends Construct {
         });
 
         this.instance = instance;
+
+        nag.NagSuppressions.addResourceSuppressions(
+            this,
+            [
+                {
+                    id: "AwsSolutions-IAM4",
+                    reason: "AmazonSSMManagedInstanceCore are restrictive enough"
+                },
+                {
+                    id: "AwsSolutions-IAM5",
+                    reason: "It is ok to use wildcard in the secret name. this is a specific target"
+                },
+                {
+                    id: "AwsSolutions-EC28",
+                    reason: "Using basic monitoring to save costs"
+                },
+                {
+                    id: "AwsSolutions-EC29",
+                    reason: "Its Ok to terminate this instance as long as we have the data in the snapshot",
+      
+                },
+            ],
+            true
+        );
     }
 }

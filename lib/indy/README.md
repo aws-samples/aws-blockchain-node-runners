@@ -33,6 +33,18 @@ npm install
 
 #### Building resources
 
+1. Configure  your setup
+
+Create your own copy of `.env` file and edit it:
+```bash
+   # Make sure you are in aws-blockchain-node-runners/lib/ethereum
+   cd lib/ethereum
+   pwd
+   cp ./sample-configs/.env-geth-lighthouse .env
+   nano .env
+```
+   **NOTE:** You can find more examples inside the `sample-configs` directory.
+
 1. Setting up initial AWS Cloud Development Kit (CDK)
 
 The following command is executed only when using AWS CDK for the first time in the region where the deployment will be carried out.
