@@ -4,7 +4,7 @@ Most steps in this repository will need to be performed from a Linux command pro
 
 ## Create a Cloud9 environment
 
-Navigate to the AWS Cloud9 service in your Management Console, then select Create environment. Choose any name you want. For environment type, select **New EC2 instance**. For instance type, select **Additional instance type** and choose **t3.medium**. For platform, select **Amazon Linux 2**. Leave all other settings at their default, then select **Create**.
+Navigate to the AWS Cloud9 service in your Management Console, then select Create environment. Choose any name you want. For environment type, select **New EC2 instance**. For instance type, select **Additional instance type** and choose **t3.medium**. For platform, select **Amazon Linux 2023**. Leave all other settings at their default, then select **Create**.
 
 ## Create IAM Role for Cloud9 instance with AWS CLI
 

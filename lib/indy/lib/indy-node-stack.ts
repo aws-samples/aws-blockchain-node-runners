@@ -2,6 +2,8 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as config from "../lib/config/indyConfig";
+import * as nag from "cdk-nag";
 
 import { IndyStewardNodeInstance } from "./constructs/indy-steward-node-instance";
 import { IndyTrusteeNodeInstance } from "./constructs/indy-trustee-node-instance";
@@ -10,8 +12,35 @@ export class IndyNodeStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
+        const serverAccessLogBucket = new s3.Bucket(this, "serverAccessLogBucket", {
+            encryption: s3.BucketEncryption.S3_MANAGED,
+            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+            removalPolicy: cdk.RemovalPolicy.RETAIN,
+            versioned: true,
+            enforceSSL: true,
+            autoDeleteObjects: false,
+        })
+
         const vpc = new ec2.Vpc(this, "IndyVpc", {
-            ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
+            ipAddresses: ec2.IpAddresses.cidr(config.vpcAddresses),
+            flowLogs: {
+                s3: {
+                    destination: ec2.FlowLogDestination.toS3(
+                        new s3.Bucket(this, "VpcFlowLogBucket", {
+                            encryption: s3.BucketEncryption.S3_MANAGED,
+                            blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+                            removalPolicy: cdk.RemovalPolicy.RETAIN,
+                            versioned: true,
+                            enforceSSL: true,
+                            autoDeleteObjects: false,
+                            serverAccessLogsBucket: serverAccessLogBucket,
+                            serverAccessLogsPrefix: "vpcFlowLogs",
+                        }),
+                        "vpcFlowLogs"
+                    ),
+                    trafficType: ec2.FlowLogTrafficType.ALL,
+                }
+            }
         });
 
         // SecurityGroup of Nodes for Clients
@@ -46,16 +75,68 @@ export class IndyNodeStack extends cdk.Stack {
             enforceSSL: true,
             autoDeleteObjects: true,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
+            serverAccessLogsBucket: serverAccessLogBucket,
+            serverAccessLogsPrefix: "AnsibleFileTransferBucket",
         });
 
-        const steward1 = new IndyStewardNodeInstance(this, "steward1", { vpc, clientSG, nodeSG, ansibleBucket });
-        const steward2 = new IndyStewardNodeInstance(this, "steward2", { vpc, clientSG, nodeSG, ansibleBucket });
-        const steward3 = new IndyStewardNodeInstance(this, "steward3", { vpc, clientSG, nodeSG, ansibleBucket });
-        const steward4 = new IndyStewardNodeInstance(this, "steward4", { vpc, clientSG, nodeSG, ansibleBucket });
+        const steward1 = new IndyStewardNodeInstance(this, "steward1", { 
+            vpc, 
+            clientSG, 
+            nodeSG, 
+            ansibleBucket,
+            instanceType: config.studentNodeConfig.instanceType,
+            instanceCpuType: config.studentNodeConfig.instanceCpuType,
+            dataVolumes: config.studentNodeConfig.dataVolumes,
+        });
+        const steward2 = new IndyStewardNodeInstance(this, "steward2", { 
+            vpc, 
+            clientSG, 
+            nodeSG, 
+            ansibleBucket,
+            instanceType: config.studentNodeConfig.instanceType,
+            instanceCpuType: config.studentNodeConfig.instanceCpuType,
+            dataVolumes: config.studentNodeConfig.dataVolumes
+        });
+        const steward3 = new IndyStewardNodeInstance(this, "steward3", { 
+            vpc, 
+            clientSG, 
+            nodeSG, 
+            ansibleBucket,
+            instanceType: config.studentNodeConfig.instanceType,
+            instanceCpuType: config.studentNodeConfig.instanceCpuType,
+            dataVolumes: config.studentNodeConfig.dataVolumes
+        });
+        const steward4 = new IndyStewardNodeInstance(this, "steward4", { 
+            vpc, 
+            clientSG, 
+            nodeSG, 
+            ansibleBucket,
+            instanceType: config.studentNodeConfig.instanceType,
+            instanceCpuType: config.studentNodeConfig.instanceCpuType,
+            dataVolumes: config.studentNodeConfig.dataVolumes
+        });
 
-        const trustee1 = new IndyTrusteeNodeInstance(this, "trustee1", { vpc, nodeSG });
-        const trustee2 = new IndyTrusteeNodeInstance(this, "trustee2", { vpc, nodeSG });
-        const trustee3 = new IndyTrusteeNodeInstance(this, "trustee3", { vpc, nodeSG });
+        const trustee1 = new IndyTrusteeNodeInstance(this, "trustee1", { 
+            vpc, 
+            nodeSG,
+            instanceType: config.trusteeNodeConfig.instanceType,
+            instanceCpuType: config.trusteeNodeConfig.instanceCpuType,
+            dataVolumes: config.trusteeNodeConfig.dataVolumes
+        });
+        const trustee2 = new IndyTrusteeNodeInstance(this, "trustee2", { 
+            vpc, 
+            nodeSG,
+            instanceType: config.trusteeNodeConfig.instanceType,
+            instanceCpuType: config.trusteeNodeConfig.instanceCpuType,
+            dataVolumes: config.trusteeNodeConfig.dataVolumes
+        });
+        const trustee3 = new IndyTrusteeNodeInstance(this, "trustee3", { 
+            vpc,
+            nodeSG,
+            instanceType: config.trusteeNodeConfig.instanceType,
+            instanceCpuType: config.trusteeNodeConfig.instanceCpuType,
+            dataVolumes: config.trusteeNodeConfig.dataVolumes
+        });
 
         new cdk.CfnOutput(this, "AnsibleFileTransferBucketName", {
             value: ansibleBucket.bucketName,
@@ -101,5 +182,16 @@ export class IndyNodeStack extends cdk.Stack {
             value: trustee3.instance.instanceId,
             exportName: "trustee3",
         });
+
+        nag.NagSuppressions.addResourceSuppressions(
+            this,
+            [
+                {
+                    id: "AwsSolutions-S1",
+                    reason: "An access log bucket does not require an access log bucket."
+                }
+            ],
+            true
+        );
     }
 }
