@@ -17,9 +17,11 @@ export interface BaseSingleNodeStackProps extends cdk.StackProps {
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
     baseNetworkId: configTypes.BaseNetworkId;
+    baseNodeConfiguration: configTypes.BaseNodeConfiguration;
     restoreFromSnapshot: boolean;
     l1ExecutionEndpoint: string,
     l1ConsensusEndpoint: string,
+    snapshotUrl: string,
     dataVolume: configTypes.BaseDataVolumeConfig;
 }
 
@@ -39,6 +41,7 @@ export class BaseSingleNodeStack extends cdk.Stack {
             instanceType,
             instanceCpuType,
             baseNetworkId,
+            baseNodeConfiguration,
             restoreFromSnapshot,
             l1ExecutionEndpoint,
             l1ConsensusEndpoint,
@@ -103,12 +106,14 @@ export class BaseSingleNodeStack extends cdk.Stack {
             _DATA_VOLUME_TYPE_: dataVolume.type,
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
             _NETWORK_ID_: baseNetworkId,
+            _NODE_CONFIG_: baseNodeConfiguration,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
             _AUTOSCALING_GROUP_NAME_: constants.NoneValue,
             _RESTORE_FROM_SNAPSHOT_: restoreFromSnapshot.toString(),
             _FORMAT_DISK_: "true",
             _L1_EXECUTION_ENDPOINT_: l1ExecutionEndpoint,
             _L1_CONSENSUS_ENDPOINT_: l1ConsensusEndpoint,
+            _SNAPSHOT_URL_: props.snapshotUrl,
         });
 
         node.instance.addUserData(modifiedInitNodeScript);
