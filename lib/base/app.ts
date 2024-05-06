@@ -15,14 +15,16 @@ new BaseCommonStack(app, "base-common", {
 });
 
 new BaseSingleNodeStack(app, "base-single-node", {
-  stackName: `base-single-node-${config.baseNodeConfig.baseNetworkId}`,
+  stackName: `base-single-node-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
   env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
   instanceType: config.baseNodeConfig.instanceType,
   instanceCpuType: config.baseNodeConfig.instanceCpuType,
   baseNetworkId: config.baseNodeConfig.baseNetworkId,
+  baseNodeConfiguration: config.baseNodeConfig.baseNodeConfiguration,
   restoreFromSnapshot: config.baseNodeConfig.restoreFromSnapshot,
   l1ExecutionEndpoint: config.baseNodeConfig.l1ExecutionEndpoint,
   l1ConsensusEndpoint: config.baseNodeConfig.l1ConsensusEndpoint,
+  snapshotUrl: config.baseNodeConfig.snapshotUrl,
   dataVolume: config.baseNodeConfig.dataVolume,
 });

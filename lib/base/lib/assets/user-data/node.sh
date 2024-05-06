@@ -6,9 +6,11 @@ LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}
 AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}
 RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}
 ASSETS_S3_PATH=${_ASSETS_S3_PATH_}
-echo "LIFECYCLE_HOOK_NAME=$LIFECYCLE_HOOK_NAME" >> /etc/environment
-echo "AUTOSCALING_GROUP_NAME=$AUTOSCALING_GROUP_NAME" >> /etc/environment
-echo "ASSETS_S3_PATH=$ASSETS_S3_PATH" >> /etc/environment
+{
+  echo "LIFECYCLE_HOOK_NAME=$LIFECYCLE_HOOK_NAME"
+  echo "AUTOSCALING_GROUP_NAME=$AUTOSCALING_GROUP_NAME"
+  echo "ASSETS_S3_PATH=$ASSETS_S3_PATH"
+} >> /etc/environment
 
 arch=$(uname -m)
 
@@ -55,19 +57,22 @@ unzip -q awscliv2.zip
 rm /usr/bin/aws
 ln /usr/local/bin/aws /usr/bin/aws
 
-aws configure set default.s3.max_concurrent_requests 50
-aws configure set default.s3.multipart_chunksize 256MB
-
 echo 'Installing SSM Agent'
 yum install -y $SSM_AGENT_BINARY_URI
 
-echo "Installing s5cmd"
-cd /opt
-wget -q $S5CMD_URI -O s5cmd.tar.gz
-tar -xf s5cmd.tar.gz
-chmod +x s5cmd
-mv s5cmd /usr/bin
-s5cmd version
+# install aria2 a p2p downloader
+
+if [ "$arch" == "x86_64" ]; then
+  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
+  tar jxvf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
+  cd aria2-1.36.0-linux-gnu-64bit-build1/
+  make install
+else
+  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
+  tar jxvf aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
+  cd aria2-1.36.0-linux-gnu-arm-rbpi-build1/
+  make install
+fi
 
 # Base specific setup starts here
 
@@ -77,13 +82,19 @@ STACK_NAME=${_STACK_NAME_}
 RESTORE_FROM_SNAPSHOT=${_RESTORE_FROM_SNAPSHOT_}
 FORMAT_DISK=${_FORMAT_DISK_}
 NETWORK_ID=${_NETWORK_ID_}
+NODE_CONFIG=${_NODE_CONFIG_}
 L1_EXECUTION_ENDPOINT=${_L1_EXECUTION_ENDPOINT_}
 L1_CONSENSUS_ENDPOINT=${_L1_CONSENSUS_ENDPOINT_}
+SNAPSHOT_URL=${_SNAPSHOT_URL_}
 
-echo "REGION=$REGION" >> /etc/environment
-echo "NETWORK_ID=$NETWORK_ID" >> /etc/environment
-echo "L1_EXECUTION_ENDPOINT=$L1_EXECUTION_ENDPOINT" >> /etc/environment
-echo "L1_CONSENSUS_ENDPOINT=$L1_CONSENSUS_ENDPOINT" >> /etc/environment
+{ 
+  echo "REGION=$REGION"
+  echo "NETWORK_ID=$NETWORK_ID"
+  echo "NODE_CONFIG=$NODE_CONFIG"
+  echo "L1_EXECUTION_ENDPOINT=$L1_EXECUTION_ENDPOINT"
+  echo "L1_CONSENSUS_ENDPOINT=$L1_CONSENSUS_ENDPOINT"
+  echo "SNAPSHOT_URL=$SNAPSHOT_URL"
+} >> /etc/environment
 
 GIT_URL=https://github.com/base-org/node.git
 SYNC_CHECKER_FILE_NAME=syncchecker-base.sh
@@ -147,16 +158,42 @@ echo "Configuring node"
 
 case $NETWORK_ID in
   "mainnet")
-    sed -i "s#OP_NODE_L1_ETH_RPC=https://1rpc.io/eth#OP_NODE_L1_ETH_RPC=$L1_EXECUTION_ENDPOINT#g" /home/bcuser/node/.env.mainnet
-    sed -i '/.env.mainnet/s/^#//g' /home/bcuser/node/docker-compose.yml
-    sed -i '/OP_NODE_L1_BEACON/s/^#//g' /home/bcuser/node/.env.mainnet
-    sed -i "s#OP_NODE_L1_BEACON=https://your.mainnet.beacon.node/endpoint-here#OP_NODE_L1_BEACON=$L1_CONSENSUS_ENDPOINT#g" /home/bcuser/node/.env.mainnet
+    OP_CONFIG_FILE_PATH=/home/bcuser/node/.env.mainnet
     ;;
   "sepolia")
-    sed -i "s#OP_NODE_L1_ETH_RPC=https://rpc.sepolia.org#OP_NODE_L1_ETH_RPC=$L1_EXECUTION_ENDPOINT#g" /home/bcuser/node/.env.sepolia
+    OP_CONFIG_FILE_PATH=/home/bcuser/node/.env.sepolia
+    ;;
+  *)
+    echo "Network id is not valid."
+    exit 1
+    ;;
+esac
+
+case $NODE_CONFIG in
+  "full")
+    echo "OP_GETH_GCMODE=full" >> $OP_CONFIG_FILE_PATH
+    ;;
+  "archive")
+     echo "OP_GETH_GCMODE=archive" >> $OP_CONFIG_FILE_PATH
+    ;;
+  *)
+    echo "Network id is not valid."
+    exit 1
+    ;;
+esac
+
+case $NETWORK_ID in
+  "mainnet")
+    sed -i "s#OP_NODE_L1_ETH_RPC=https://1rpc.io/eth#OP_NODE_L1_ETH_RPC=$L1_EXECUTION_ENDPOINT#g" $OP_CONFIG_FILE_PATH
+    sed -i '/.env.mainnet/s/^#//g' /home/bcuser/node/docker-compose.yml
+    sed -i '/OP_NODE_L1_BEACON/s/^#//g' $OP_CONFIG_FILE_PATH
+    sed -i "s#OP_NODE_L1_BEACON=https://your.mainnet.beacon.node/endpoint-here#OP_NODE_L1_BEACON=$L1_CONSENSUS_ENDPOINT#g" $OP_CONFIG_FILE_PATH
+    ;;
+  "sepolia")
+    sed -i "s#OP_NODE_L1_ETH_RPC=https://rpc.sepolia.org#OP_NODE_L1_ETH_RPC=$L1_EXECUTION_ENDPOINT#g" $OP_CONFIG_FILE_PATH
     sed -i "/.env.sepolia/s/^#//g" /home/bcuser/node/docker-compose.yml
-    sed -i '/OP_NODE_L1_BEACON/s/^#//g' /home/bcuser/node/.env.sepolia
-    sed -i "s#OP_NODE_L1_BEACON=https://your.sepolia.beacon.node/endpoint-here#OP_NODE_L1_BEACON=$L1_CONSENSUS_ENDPOINT#g" /home/bcuser/node/.env.sepolia
+    sed -i '/OP_NODE_L1_BEACON/s/^#//g' $OP_CONFIG_FILE_PATH
+    sed -i "s#OP_NODE_L1_BEACON=https://your.sepolia.beacon.node/endpoint-here#OP_NODE_L1_BEACON=$L1_CONSENSUS_ENDPOINT#g" $OP_CONFIG_FILE_PATH
     ;;
   *)
     echo "Network id is not valid."
@@ -217,8 +254,8 @@ if [ "$RESTORE_FROM_SNAPSHOT" == "false" ]; then
   echo "sudo su bcuser && /usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml up -d" | at now +3 minutes
 else
   echo "Restoring data from snapshot"
-  chmod 766 /opt/restore-from-snapshot.sh
-  echo "/opt/restore-from-snapshot.sh" | at now +3 minutes
+  chmod 766 /opt/start-from-snapshot.sh
+  echo "/opt/start-from-snapshot.sh" | at now +3 minutes
 fi
 
 echo "All Done!!"
