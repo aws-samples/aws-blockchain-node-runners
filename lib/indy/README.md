@@ -102,7 +102,7 @@ When running on a Mac, set the following environment variables.
 
 
 ##### Ansible parameter settings
-Open `inventory/group_vars/all.yml` file and define the parameters referred to by Ansible in the configuration file. Set Indy's network name
+To change Indy's network name, open `ansible/inventory/group_vars/all.yml` file and change the parameter used by Ansible
 
 ```
 INDY_NETWORK_NAME: sample-network
@@ -113,7 +113,12 @@ INDY_NETWORK_NAME: sample-network
 - Use ansible's `ping` module to confirm that ansible can connect to the instance set in inventory/inventory.yml
 
   ```
-  $ ansible -m ping all -i inventory/inventory.yml  
+  cd ansible
+  ansible -m ping all -i inventory/inventory.yml
+  ```
+  The response should look like this:
+
+  ``` 
   steward2 | SUCCESS => {
       "changed": false,
       "ping": "pong"

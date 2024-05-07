@@ -75,7 +75,7 @@ export class IndyTrusteeNodeInstance extends Construct {
                 },
                 {
                     id: "AwsSolutions-EC29",
-                    reason: "Its Ok to terminate this instance as long as we have the data in the snapshot",
+                    reason: "Its Ok to terminate this instance as the same copies of the data are stored on each node",
       
                 },
             ],
