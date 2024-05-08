@@ -14,7 +14,7 @@ This blueprint is designed to assist in deploying a single node or a Highly Avai
 ![Single Nodes Deployment](./doc/assets/Architecture-Single-Fantom-Node-Runners.drawio.png)
 
 1. The AWS Cloud Development Kit (CDK) is used to deploy a single node. The CDK application stores assets like scripts and config files in S3 bucket to copy them to the EC2 instance when launching a Fantom Node.
-2. A single RPC Fantom Fullnode is deployed within in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on Fantom Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+2. A single RPC Fantom Fullnode is deployed within the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on Fantom Blockchain Network through an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 3. The Fantom node is accessed by dApps or development tools internally. JSON RPC API is not exposed to the Internet to protect the node from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
 4. The Fantom node send various monitoring metrics for both EC2 and Fantom client to Amazon CloudWatch.
 
@@ -22,9 +22,9 @@ This blueprint is designed to assist in deploying a single node or a Highly Avai
 
 ![Highly Available Nodes Deployment](./doc/assets/Architecture-HA-Fantom-Node-Runners.drawio.png)
 
-1. The CDK is used to deploy highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and othether script and configuration files required when launching EC2 as the Fantom Node.
-2. A set of RPC Fantom Fullnodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on Fantom Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-3. The Fantom nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
+1. The CDK is used to deploy highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and other scripts and configuration files required when launching EC2 as the Fantom Node.
+2. A set of RPC Fantom Fullnodes that are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronize with the rest of the nodes on Fantom Blockchain Network through an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+3. The Fantom nodes are accessed by dApps or development tools internally through an [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
 4. The Fantom nodes send various monitoring metrics for both EC2 and Fantom nodes to Amazon CloudWatch.
 
 ## Additional materials
@@ -180,14 +180,14 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
       INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.singleinstanceid? | select(. != null)')
       NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
 
-      # We query token balance of one of the system contracts: https://fantomscan.com/address/0x0000000000000000000000000000000000001006 TODO
-      curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
-      --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
+      # We query token balance of one of the system contracts: https://ftmscan.com/address/0x0000000000000000000000000000000000000001
+      curl http://$NODE_INTERNAL_IP:18545 -X POST -H "Content-Type: application/json" \
+      --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000000001", "latest"],"id":1,"jsonrpc":"2.0"}'
    ```
    You will get a response similar to this:
 
    ```json
-      {"jsonrpc":"2.0","id":1,"result":"0x3635c9adc5dea00000"}
+      {"jsonrpc":"2.0","id":1,"result":"0xbe9fa76042c4daf622"}
    ```
 
 ### Option 2: Highly Available RPC Nodes
@@ -207,10 +207,10 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
       echo $RPC_ALB_URL
    ```
 
-   Periodically check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the load balancer fronting your nodes:  TODO
+   Periodically check [Fantom Syncing Status](https://docs.chainstack.com/reference/fantom-syncing). Run the following query from within the same VPC and against the private IP of the load balancer fronting your nodes:
 
    ```bash
-   curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
+   curl http://$RPC_ALB_URL:18545 -X POST -H "Content-Type: application/json" \
    --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}'
    ```
 
@@ -240,7 +240,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
    }
    ```
 
-**NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
+**NOTE:** By default and for security reasons the load balancer is available only from inside the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before you consider opening it up to the internet, **please make sure you protect your RPC APIs**.
 
 3. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Run the following query against the private IP of the single RPC node you deployed:
 
@@ -248,14 +248,14 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
       export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
       echo $RPC_ALB_URL
 
-      # We query token balance of one of the system contracts: https://fantomscan.com/address/0x0000000000000000000000000000000000001006 TODO
+      # We query token balance of one of the system contracts: https://ftmscan.com/address/0x0000000000000000000000000000000000000001
       curl http://$RPC_ALB_URL:18545 -X POST -H "Content-Type: application/json" \
-      --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
+      --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000000001", "latest"],"id":1,"jsonrpc":"2.0"}'
    ```
    You will get a response similar to this:
 
    ```json
-      {"jsonrpc":"2.0","id":1,"result":"0x3635c9adc5dea00000"}
+      {"jsonrpc":"2.0","id":1,"result":"0xbe9fa76042c4daf622"}
    ```
 
 ### Clearing up and undeploy everything
@@ -334,21 +334,9 @@ sudo systemctl stop fantom && sleep 20 && sudo systemctl start fantom
 - View Fantom service configuration
   - `cat /etc/systemd/system/fantom.service`
 
-5. Where can I find more information about Fantom RPC API?
+5. Where can I find more information about Fantom?
 
-TODO Fantom Docs link
-
-Please refer to more [JSON-RPC API METHODS](https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods). The following are some commonly used API methods:
-   - eth_blockNumber
-   - eth_getBalance
-   - eth_accounts
-   - eth_call
-   - eth_estimateGas
-   - eth_signTransaction
-   - eth_sendTransaction
-   - eth_getBlockByHash
-   - eth_getBlockByNumber
-   - eth_getTransactionByHash
+Please refer to the [Fantom Developer Documentation](https://docs.fantom.foundation/)
 
 ## Upgrades
 
