@@ -85,21 +85,21 @@ export class FantomHANodesStack extends cdk.Stack {
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
             _AUTOSCALING_GROUP_NAME_: autoScalingGroupName
         });
+        
+        // Use Ubuntu 22.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
+        const ubuntu2204stableImageSsmName = "/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
 
         const rpcNodes = new HANodesConstruct(this, "rpc-nodes", {
             instanceType,
             dataVolumes: [dataVolume],
-            machineImage: new ec2.AmazonLinuxImage({
-                generation: AmazonLinuxGeneration.AMAZON_LINUX_2,
-                kernel:ec2.AmazonLinuxKernel.KERNEL5_X,
-                cpuType: instanceCpuType
-            }),
+            rootDataVolumeDeviceName: "/dev/sda1",
+            machineImage: ec2.MachineImage.fromSsmParameter(ubuntu2204stableImageSsmName),
             role: instanceRole,
             vpc,
             securityGroup: instanceSG.securityGroup,
             userData: modifiedInitNodeScript,
             numberOfNodes,
-            rpcPortForALB: 8545,
+            rpcPortForALB: 18545,
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
             lifecycleHookName: lifecycleHookName,

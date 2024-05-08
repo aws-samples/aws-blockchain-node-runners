@@ -1,31 +1,31 @@
-# Sample AWS Blockchain Node Runner app for BNB Smart Chain(FANTOM) Nodes
+# Sample AWS Blockchain Node Runner app for Fantom Blockchain Nodes
 
 | Contributed by |
 |:--------------------:|
-| [@StayHungryStayFoolish](https://github.com/StayHungryStayFoolish), [@frbrkoala](https://github.com/frbrkoala) |
+| [@ngl-aws](https://github.com/ngl-aws), [@frbrkoala](https://github.com/frbrkoala) |
 
-BNB Smart Chain (FANTOM), is a blockchain that supports EVM-compatible smart contracts and protocols. It utilizes the [Proof of Stake Authority(PoSA)](https://docs.bnbchain.org/docs/learn/intro#proof-of-staked-authority) consensus mechanism, which is a hybrid consensus mechanism based on a combination of [Proof of Authority (PoA)](https://en.wikipedia.org/wiki/Proof_of_authority) and [Delegated Proof of Stake (DPoS)](https://bitcoinwiki.org/wiki/DPoS).
+Fantom is a blockchain that supports EVM-compatible smart contracts and protocols. It utilizes [Delegated Proof of Stake (DPoS)](https://bitcoinwiki.org/wiki/DPoS).
 
-This blueprint is designed to assist in deploying a single node or a Highly Available (HA) [BNB Smart Chain (FANTOM) Fullnode](https://docs.bnbchain.org/docs/validator/fullnode/) on AWS. It is intended for use in development, testing, or Proof of Concept purposes.
+This blueprint is designed to assist in deploying a single node or a Highly Available (HA) [Fantom read-only node](https://docs.fantom.foundation/node/tutorials/run-a-read-only-node) on AWS. It is intended for use in development, testing, or Proof of Concept purposes.
 
 ## Overview of Deployment Architectures
 
 ### Single Node setup
-![Single Nodes Deployment](./doc/assets/Architecture-Single-fantom-Node-Runners.drawio.png)
+![Single Nodes Deployment](./doc/assets/Architecture-Single-Fantom-Node-Runners.drawio.png)
 
-1. The AWS Cloud Development Kit (CDK) is used to deploy a single node. The CDK application stores assets like scripts and config files in S3 bucket to copy them to the EC2 instance when launching a FANTOM Node.
-2. A single RPC FANTOM Fullnode is deployed within in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on FANTOM Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-3. The FANTOM node is accessed by dApps or development tools internally. JSON RPC API is not exposed to the Internet to protect the node from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
-4. The FANTOM node send various monitoring metrics for both EC2 and FANTOM client to Amazon CloudWatch.
+1. The AWS Cloud Development Kit (CDK) is used to deploy a single node. The CDK application stores assets like scripts and config files in S3 bucket to copy them to the EC2 instance when launching a Fantom Node.
+2. A single RPC Fantom Fullnode is deployed within in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on Fantom Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+3. The Fantom node is accessed by dApps or development tools internally. JSON RPC API is not exposed to the Internet to protect the node from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
+4. The Fantom node send various monitoring metrics for both EC2 and Fantom client to Amazon CloudWatch.
 
 ### Highly Available setup
 
-![Highly Available Nodes Deployment](./doc/assets/Architecture-HA-fantom-Node-Runners.drawio.png)
+![Highly Available Nodes Deployment](./doc/assets/Architecture-HA-Fantom-Node-Runners.drawio.png)
 
-1. The CDK is used to deploy highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and othether script and configuration files required when launching EC2 as the FANTOM Node.
-2. A set of RPC FANTOM Fullnodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on FANTOM Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-3. The FANTOM nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
-4. The FANTOM nodes send various monitoring metrics for both EC2 and FANTOM nodes to Amazon CloudWatch.
+1. The CDK is used to deploy highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and othether script and configuration files required when launching EC2 as the Fantom Node.
+2. A set of RPC Fantom Fullnodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on Fantom Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+3. The Fantom nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
+4. The Fantom nodes send various monitoring metrics for both EC2 and Fantom nodes to Amazon CloudWatch.
 
 ## Additional materials
 
@@ -33,27 +33,27 @@ This blueprint is designed to assist in deploying a single node or a Highly Avai
 
 <summary>Well-Architected Checklist</summary>
 
-This is the Well-Architected checklist for FANTOM nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+This is the Well-Architected checklist for Fantom nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
 
 | Pillar                  | Control                           | Question/Check                                                                   | Remarks |
 |:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that ports 30303 (TCP/UDP) for FANTOM are open to public to support P2P protocols. |
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that ports 5050 (TCP/UDP) for Fantom are open to public to support P2P protocols. |
 |                         |                                   | Traffic inspection                                                               | Traffic protection is not used in the solution. [AWS Web Applications Firewall (WAF)](https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html) could be implemented for traffic over HTTP(S), [AWS Shield](https://docs.aws.amazon.com/waf/latest/developerguide/shield-chapter.html) provides Distributed Denial of Service (DDoS) protection. Additional charges will apply. |
-|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Amazon Linux2 AMI(`Amazon Linux2 AMI(HVM)-Kernel 5.10`). You may choose to run hardening scripts on it. |
+|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Ubuntu 22.04 AMI(`Ubuntu 22.04.4`). You may choose to run hardening scripts on it. |
 |                         |                                   | Enable people to perform actions at a distance                                   | This solution uses [AWS Systems Manager for terminal session](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html#start-sys-console), not ssh ports. |
 |                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes. |
 |                         | Data protection in transit        | Use TLS                                                                          | The AWS Application Load balancer currently uses HTTP listener. Create HTTPS listener with self signed certificate if TLS is desired. |
 |                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user. |
 |                         |                                   | Following principle of least privilege access                                    | In all node types, root user is not used (using special user "bcuser" instead). |
 |                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions. |
-| Cost optimization       | Service selection                 | Use cost effective resources                                                     | 1/ We use Graviton-based binaries to improve costs for compute. We recommend using the `m7g.4xlarge` EC2 instance type to optimize computational costs.  2/ Cost-effective EBS gp3 are used instead of io2. |
-|                         | Cost awareness                    | Estimate costs                                                                   | Single RPC node with `m7g.4xlarge` EBS gp3 volumes about 4000 GB(1000 IOPS, 700 MBps/s throughput) with On-Demand pricing will cost around US$854.54 per month in the US East (N. Virginia) region. More cost-optimal option with 3 year EC2 Instance Savings plan the cost goes down to $594.15 USD. To create your own estimate use [AWS Pricing Calculator](https://calculator.aws/#/)                                                                                          |
-| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution uses AWS Application Load Balancer with RPC nodes for high availability. Newly provisioned FANTOM nodes triggered by Auto Scaling get up and running in about 300 minutes.  |
-|                         | Data backup                       | How is data backed up?                                                           | Considering blockchain data is replicated by nodes automatically and FANTOM nodes sync from start within an hour, we don't use any additional mechanisms to backup the data. |
+| Cost optimization       | Service selection                 | Use cost effective resources                                                     | 1/ We use x86-based binaries. We recommend using the `m6a.2xlarge` EC2 instance type to optimize computational costs.  2/ Cost-effective EBS gp3 are used instead of io2. |
+|                         | Cost awareness                    | Estimate costs                                                                   | Single RPC node with `m6a.2xlarge` EBS gp3 volumes about 4000 GB(1000 IOPS, 700 MBps/s throughput) with On-Demand pricing will cost around US$854.54 per month in the US East (N. Virginia) region. More cost-optimal option with 3 year EC2 Instance Savings plan the cost goes down to $594.15 USD. To create your own estimate use [AWS Pricing Calculator](https://calculator.aws/#/)                                                                                          |
+| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution uses AWS Application Load Balancer with RPC nodes for high availability. Newly provisioned Fantom nodes triggered by Auto Scaling get up and running in about 300 minutes.  |
+|                         | Data backup                       | How is data backed up?                                                           | Considering blockchain data is replicated by nodes automatically and Fantom nodes sync from start within an hour, we don't use any additional mechanisms to backup the data. |
 |                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
 | Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance, i.e. AWS Graviton-based Amazon EC2 instances. |
 |                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. gp3 Amazon EBS volumes with optimal IOPS and throughput. |
-|                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the FANTOM community and our own testing. |
+|                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the Fantom community and our own testing. |
 | Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health of workload is determined via AWS Application Load Balancer Target Group Health Checks, on port 8845. |
 | Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses Graviton-powered instances. There is a potential to use AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2. |
 </details>
@@ -65,7 +65,7 @@ This is the Well-Architected checklist for FANTOM nodes implementation of the AW
 
 | Usage pattern                                     | Ideal configuration                                                                                                      | Primary option on AWS                                                  | Config reference                                      |
 |---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|-------------------------------------------------------|
-| 1/ Fullnode                                       | 16 vCPU, 64 GB RAM, Data volume: EBS gp3 4TB, 10K IOPS, 700 MB/s throughput | `m7g.4xlarge` EBS gp3 volumes about 4000 GB(1000 IOPS, 700 MBps/s throughput) | [.env-sample-full](./sample-configs/.env-sample-full) |
+| 1/ Fullnode                                       | 8 vCPU, 32 GB RAM, Data volume: EBS gp3 2TB, 7K IOPS, 400 MB/s throughput | `m6a.2xlarge` EBS gp3 volumes about 2000 GB(7000 IOPS, 400 MBps/s throughput) | [.env-sample-full](./sample-configs/.env-sample-full) |
 </details>
 
 ## Setup Instructions
@@ -98,17 +98,17 @@ npm install
 
 3. Configure the CDK app
 
-   Create your own copy of `.env` file and edit it to update with your AWS Account ID, AWS Region, and optionally the FANTOM SNAPSHOTS URI:
+   Create your own copy of `.env` file and edit it to update with your AWS Account ID, AWS Region, and optionally the Fantom SNAPSHOTS URI:
 
    ```bash
    # Make sure you are in aws-blockchain-node-runners/lib/fantom
    cd lib/fantom
    pwd
-   cp ./sample-configs/.env-sample-full .env
+   cp ./sample-configs/.env-sample-read .env
    nano .env
    ```
    > **IMPORTANT**:
-   > 1. By default we use the latest Geth Fullnode snapshot from [48 Club](https://github.com/48Club/fantom-snapshots/blob/main/data.json) If you want to set your own `FANTOM_SNAPSHOTS_URI`, check this GitHub: https://github.com/48Club/fantom-snapshots, and use Geth full node link.
+   > 1. By default we use the latest Fantom snapshot from [Fantom](https://snapshot.fantom.network/files/snapsync/latest/listtgzfiles.txt) 
 
 4. Deploy common components such as IAM role
 
@@ -125,7 +125,7 @@ npm install
 
 ### Option 1: Single RPC Node
 
-1. The inital deployment a FANTOM Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the FANTOM Blockchain Network (next step).
+1. The inital deployment of a Fantom Fullnode and downloading its snapshot typically takes about 3-12 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. Maybe two. After deployment, you'll need to wait for the node to synchronize with the Fantom Blockchain Network (next step).
 
    ```bash
       pwd
@@ -144,7 +144,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
       INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.singleinstanceid? | select(. != null)')
       NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text --region us-east-1)
 
-      curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
+      curl http://$NODE_INTERNAL_IP:18545 -X POST -H "Content-Type: application/json" \
       --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}'
    ```
 
@@ -180,7 +180,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
       INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.singleinstanceid? | select(. != null)')
       NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
 
-      # We query token balance of one of the system contracts: https://fantomscan.com/address/0x0000000000000000000000000000000000001006
+      # We query token balance of one of the system contracts: https://fantomscan.com/address/0x0000000000000000000000000000000000001006 TODO
       curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
       --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
    ```
@@ -192,7 +192,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
 
 ### Option 2: Highly Available RPC Nodes
 
-1. The inital deployment of a FANTOM Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for your another half a day to a day for your nodes to synchronize with the FANTOM Blockchain Network, depending on how fresh the snapshot was.
+1. The inital deployment of a Fantom Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. Maybe two. After deployment, you'll need to wait for another half a day to a day for your nodes to synchronize with the Fantom Blockchain Network, depending on how fresh the snapshot was.
 
    ```bash
       pwd
@@ -207,7 +207,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
       echo $RPC_ALB_URL
    ```
 
-   Periodically check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the load balancer fronting your nodes:
+   Periodically check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the load balancer fronting your nodes:  TODO
 
    ```bash
    curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
@@ -248,8 +248,8 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
       export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
       echo $RPC_ALB_URL
 
-      # We query token balance of one of the system contracts: https://fantomscan.com/address/0x0000000000000000000000000000000000001006
-      curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
+      # We query token balance of one of the system contracts: https://fantomscan.com/address/0x0000000000000000000000000000000000001006 TODO
+      curl http://$RPC_ALB_URL:18545 -X POST -H "Content-Type: application/json" \
       --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
    ```
    You will get a response similar to this:
@@ -314,7 +314,7 @@ aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo cat /var/log/cloud-init-output.log
 ```
 
-3. How can I check the FANTOM service log on EC2?
+3. How can I restart the Fantom service?
 
 Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
 
@@ -326,31 +326,17 @@ export INSTANCE_ID="i-**************"
 echo "INSTANCE_ID=" $INSTANCE_ID
 
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-cd /data
-cat fantom.log
-```
-
-4. How can I restart the FANTOM service?
-
-Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
-
-```bash
-pwd
-# Make sure you are in aws-blockchain-node-runners/lib/fantom
-
-export INSTANCE_ID="i-**************"
-echo "INSTANCE_ID=" $INSTANCE_ID
-
-aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-sudo systemctl restart fantom
+sudo systemctl stop fantom && sleep 20 && sudo systemctl start fantom
 ```
 **NOTE:** You can also try the following command to obtain more information：
-- Check the FANTOM service status
+- Check the Fantom service status
   - `sudo systemctl status fantom`
-- View FANTOM service configuration
+- View Fantom service configuration
   - `cat /etc/systemd/system/fantom.service`
 
-5. Where can I find more infromation about FANTOM RPC API?
+5. Where can I find more information about Fantom RPC API?
+
+TODO Fantom Docs link
 
 Please refer to more [JSON-RPC API METHODS](https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods). The following are some commonly used API methods:
    - eth_blockNumber

@@ -23,16 +23,16 @@ export const baseConfig: configTypes.FantomBaseConfig = {
 };
 
 export const baseNodeConfig: configTypes.FantomBaseNodeConfig = {
-    instanceType: new ec2.InstanceType(process.env.FANTOM_INSTANCE_TYPE ? process.env.FANTOM_INSTANCE_TYPE : "m7g.4xlarge"),
+    instanceType: new ec2.InstanceType(process.env.FANTOM_INSTANCE_TYPE ? process.env.FANTOM_INSTANCE_TYPE : "m6a.2xlarge"),
     instanceCpuType: process.env.FANTOM_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64 ,
     fantomNetwork: <configTypes.FantomNetwork>process.env.FANTOM_CLUSTER || "mainnet",
-    nodeConfiguration: <configTypes.FantomNodeConfiguration>process.env.FANTOM_NODE_CONFIGURATION || "full",
+    nodeConfiguration: <configTypes.FantomNodeConfiguration>process.env.FANTOM_NODE_CONFIGURATION || "read",
     snapshotsUrl: process.env.FANTOM_SNAPSHOTS_URL || constants.NoneValue,
     dataVolume: {
-        sizeGiB: process.env.FANTOM_DATA_VOL_SIZE ? parseInt(process.env.FANTOM_DATA_VOL_SIZE) : 4000,
+        sizeGiB: process.env.FANTOM_DATA_VOL_SIZE ? parseInt(process.env.FANTOM_DATA_VOL_SIZE) : 2000,
         type: parseDataVolumeType(process.env.FANTOM_DATA_VOL_TYPE?.toLowerCase() ? process.env.FANTOM_DATA_VOL_TYPE?.toLowerCase() : "gp3"),
-        iops: process.env.FANTOM_DATA_VOL_IOPS ? parseInt(process.env.FANTOM_DATA_VOL_IOPS) : 10000,
-        throughput: process.env.FANTOM_DATA_VOL_THROUGHPUT ? parseInt(process.env.FANTOM_DATA_VOL_THROUGHPUT) : 700
+        iops: process.env.FANTOM_DATA_VOL_IOPS ? parseInt(process.env.FANTOM_DATA_VOL_IOPS) : 7000,
+        throughput: process.env.FANTOM_DATA_VOL_THROUGHPUT ? parseInt(process.env.FANTOM_DATA_VOL_THROUGHPUT) : 400
     }
 };
 

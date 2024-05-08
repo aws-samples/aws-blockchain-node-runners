@@ -24,12 +24,12 @@ export class FantomNodeSecurityGroupConstructs extends cdkConstructs.Construct {
         });
 
         // public ports
-        sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(30303), "P2P");
-        sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(30303), "P2P");
+        sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(5050), "P2P");
+        sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(5050), "P2P");
 
         // private ports
-        sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8545), "FANTOM RPC Port");
-        sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8546), "FANTOM WebSocket Port");
+        sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(18545), "FANTOM RPC Port");
+        sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(18546), "FANTOM WebSocket Port");
 
         this.securityGroup = sg;
 

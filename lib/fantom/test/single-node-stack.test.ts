@@ -42,30 +42,30 @@ describe("FANTOMSingleNodeStack", () => {
         {
           "CidrIp": "0.0.0.0/0",
           "Description": "P2P",
-          "FromPort": 30303,
+          "FromPort": 5050,
           "IpProtocol": "tcp",
-          "ToPort": 30303
+          "ToPort": 5050
          },
          {
           "CidrIp": "0.0.0.0/0",
           "Description": "P2P",
-          "FromPort": 30303,
+          "FromPort": 5050,
           "IpProtocol": "udp",
-          "ToPort": 30303
+          "ToPort": 5050
          },
          {
           "CidrIp": "1.2.3.4/5",
           "Description": "FANTOM RPC Port",
-          "FromPort": 8545,
+          "FromPort": 18545,
           "IpProtocol": "tcp",
-          "ToPort": 8545
+          "ToPort": 18545
          },
          {
           "CidrIp": "1.2.3.4/5",
           "Description": "FANTOM WebSocket Port",
-          "FromPort": 8546,
+          "FromPort": 18546,
           "IpProtocol": "tcp",
-          "ToPort": 8546
+          "ToPort": 18546
          }
        ]
     })
@@ -76,7 +76,7 @@ describe("FANTOMSingleNodeStack", () => {
       UserData: Match.anyValue(),
       BlockDeviceMappings: [
         {
-          DeviceName: "/dev/xvda",
+          DeviceName: "/dev/sda1",
           Ebs: {
             DeleteOnTermination: true,
             Encrypted: true,
@@ -88,7 +88,7 @@ describe("FANTOMSingleNodeStack", () => {
       ],
       IamInstanceProfile: Match.anyValue(),
       ImageId: Match.anyValue(),
-      InstanceType: "m7g.4xlarge",
+      InstanceType: "m6a.2xlarge",
       Monitoring: true,
       PropagateTagsToVolumeOnCreation: true,
       SecurityGroupIds: Match.anyValue(),
@@ -99,10 +99,10 @@ describe("FANTOMSingleNodeStack", () => {
     template.hasResourceProperties("AWS::EC2::Volume", {
       AvailabilityZone: Match.anyValue(),
       Encrypted: true,
-      Iops: 10000,
+      Iops: 7000,
       MultiAttachEnabled: false,
-      Size: 4000,
-      Throughput: 700,
+      Size: 2000,
+      Throughput: 400,
       VolumeType: "gp3"
     })
 

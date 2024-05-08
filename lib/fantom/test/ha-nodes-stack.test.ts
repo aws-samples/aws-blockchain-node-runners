@@ -46,30 +46,30 @@ describe("FantomHANodesStack", () => {
         {
           "CidrIp": "0.0.0.0/0",
           "Description": "P2P",
-          "FromPort": 30303,
+          "FromPort": 5050,
           "IpProtocol": "tcp",
-          "ToPort": 30303
+          "ToPort": 5050
          },
          {
           "CidrIp": "0.0.0.0/0",
           "Description": "P2P",
-          "FromPort": 30303,
+          "FromPort": 5050,
           "IpProtocol": "udp",
-          "ToPort": 30303
+          "ToPort": 5050
          },
          {
           "CidrIp": "1.2.3.4/5",
           "Description": "FANTOM RPC Port",
-          "FromPort": 8545,
+          "FromPort": 18545,
           "IpProtocol": "tcp",
-          "ToPort": 8545
+          "ToPort": 18545
          },
          {
           "CidrIp": "1.2.3.4/5",
           "Description": "FANTOM WebSocket Port",
-          "FromPort": 8546,
+          "FromPort": 18546,
           "IpProtocol": "tcp",
-          "ToPort": 8546
+          "ToPort": 18546
          },
          {
           "Description": "Allow access from ALB to Blockchain Node",
@@ -89,11 +89,11 @@ describe("FantomHANodesStack", () => {
     // Has security group from ALB to EC2.
     template.hasResourceProperties("AWS::EC2::SecurityGroupIngress", {
       Description: "Load balancer to target",
-      FromPort: 8545,
+      FromPort: 18545,
       GroupId: Match.anyValue(),
       IpProtocol: "tcp",
       SourceSecurityGroupId: Match.anyValue(),
-      ToPort: 8545,
+      ToPort: 18545,
     })
 
     // Has launch template profile for EC2 instances.
@@ -106,7 +106,7 @@ describe("FantomHANodesStack", () => {
       LaunchTemplateData: {
         BlockDeviceMappings: [
           {
-           "DeviceName": "/dev/xvda",
+           "DeviceName": "/dev/sda1",
            "Ebs": {
             "DeleteOnTermination": true,
             "Encrypted": true,
@@ -121,9 +121,9 @@ describe("FantomHANodesStack", () => {
            "Ebs": {
             "DeleteOnTermination": true,
             "Encrypted": true,
-            "Iops": 10000,
-            "Throughput": 700,
-            "VolumeSize": 4000,
+            "Iops": 7000,
+            "Throughput": 400,
+            "VolumeSize": 2000,
             "VolumeType": "gp3"
            }
           }
@@ -131,7 +131,7 @@ describe("FantomHANodesStack", () => {
          EbsOptimized: true,
          IamInstanceProfile: Match.anyValue(),
          ImageId: Match.anyValue(),
-         InstanceType:"m7g.4xlarge",
+         InstanceType:"m6a.2xlarge",
          SecurityGroupIds: [Match.anyValue()],
          UserData: Match.anyValue(),
          TagSpecifications: Match.anyValue(),

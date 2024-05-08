@@ -1,9 +1,9 @@
 import * as configTypes from "../../../constructs/config.interface";
 
-export type FantomNetwork = "mainnet" | "testnet";
-export type FantomNodeConfiguration = "full" ;
+export type FantomNetwork = "mainnet" ;
+export type FantomNodeConfiguration = "read" ;
 
-export type FantomNodeRole = "sync-node" | "rpc-node" | "single-node";
+export type FantomNodeRole = "rpc-node" | "single-node";
 
 export interface FantomDataVolumeConfig extends configTypes.DataVolumeConfig {
 

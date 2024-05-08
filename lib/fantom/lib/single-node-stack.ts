@@ -65,17 +65,17 @@ export class FantomSingleNodeStack extends cdk.Stack {
 
         // Making sure our instance will be able to read the assets
         asset.bucket.grantRead(instanceRole);
+        
+        // Use Ubuntu 22.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
+        const ubuntu2204stableImageSsmName = "/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
 
         // Setting up the node using generic Single Node constract
         const node = new SingleNodeConstruct(this, "single-node", {
             instanceName: STACK_NAME,
             instanceType,
             dataVolumes: [dataVolume],
-            machineImage: new ec2.AmazonLinuxImage({
-                generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-                kernel:ec2.AmazonLinuxKernel.KERNEL5_X,
-                cpuType: instanceCpuType,
-            }),
+            rootDataVolumeDeviceName: "/dev/sda1",
+            machineImage: ec2.MachineImage.fromSsmParameter(ubuntu2204stableImageSsmName),
             vpc,
             availabilityZone: chosenAvailabilityZone,
             role: instanceRole,
