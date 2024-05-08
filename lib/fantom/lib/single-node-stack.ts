@@ -65,7 +65,7 @@ export class FantomSingleNodeStack extends cdk.Stack {
 
         // Making sure our instance will be able to read the assets
         asset.bucket.grantRead(instanceRole);
-        
+
         // Use Ubuntu 22.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
         const ubuntu2204stableImageSsmName = "/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
 

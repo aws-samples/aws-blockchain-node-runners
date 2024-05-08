@@ -4,7 +4,7 @@
 
 FANTOM_SYNC_STATS=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --datadir=/data --exec "ftm.syncing"')
 # Syncing status results:
-# 
+#
 # { currentBlock: 37676547,
 # currentBlockHash: "0x0001ab120000187fd8069d3a4f6501d48ad4800778f40a76d79cf02469272a43",
 # currentBlockTime: "0x16ec7a4b9a82ebfe",
@@ -14,7 +14,7 @@ FANTOM_SYNC_STATS=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --dat
 # knownStates: 0,
 # pulledStates: 0,
 # startingBlock: 0 }
-# 
+#
 # Synced status results:
 #
 # false

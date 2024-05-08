@@ -108,7 +108,7 @@ npm install
    nano .env
    ```
    > **IMPORTANT**:
-   > 1. By default we use the latest Fantom snapshot from [Fantom](https://snapshot.fantom.network/files/snapsync/latest/listtgzfiles.txt) 
+   > 1. By default we use the latest Fantom snapshot from [Fantom](https://snapshot.fantom.network/files/snapsync/latest/listtgzfiles.txt)
 
 4. Deploy common components such as IAM role
 

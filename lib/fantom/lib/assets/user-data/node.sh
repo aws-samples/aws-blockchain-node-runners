@@ -106,7 +106,7 @@ sudo su -l bcuser -c "git clone https://github.com/Fantom-foundation/go-opera.gi
   git checkout release/1.1.3-rc.5 && \
   make"
 
-  
+
 echo 'Configuring FANTOM Node service as a system service'
 # Copy startup script to correct location
 if [[ "$FANTOM_NODE_TYPE" == "read" ]]; then
