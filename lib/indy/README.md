@@ -58,7 +58,11 @@ npx cdk bootstrap aws://<INSERT_YOUR_AWS_ACCOUNT_NUMBER>/<INSERT_YOUR_AWS_REGION
 ```bash
 npx cdk deploy --json --outputs-file indy-test-deploy-output.json
 
-Outputs:
+```
+
+The output should look like this::
+
+```
 IndyNetworkStack.AnsibleFileTransferBucketName = 111122223333-ansible-file-transfer-bucket
 IndyNetworkStack.steward1steward1InstanceId2F9F8910 = i-1234567890abcdef1
 IndyNetworkStack.steward2steward2InstanceId995438F2 = i-1234567890abcdef2
@@ -82,13 +86,13 @@ When running on a Mac, set the following environment variables.
 
 - Create a Python virtual environment and install ansible
  ```
- $ cd ansible
- $ python3 -m venv venv
- $ source ./venv/bin/activate
+ cd ansible
+ python3 -m venv venv
+ source ./venv/bin/activate
  ```
 
  ```
- $ pip install -r requirements.txt
+ pip install -r requirements.txt
  ```
 
 ##### Describe instance information to be built in inventory.yml
@@ -151,7 +155,7 @@ INDY_NETWORK_NAME: sample-network
 
 - Execute Hyperledger Indy environment construction for target EC2 instances defined in `inventory/inventory.yml` in ansible
  ```
- $ ansible-playbook playbook/site.yml
+ ansible-playbook playbook/site.yml
  ```
 
 
