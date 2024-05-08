@@ -4,7 +4,7 @@
 |:--------------------:|
 | [@ngl-aws](https://github.com/ngl-aws), [@frbrkoala](https://github.com/frbrkoala) |
 
-Fantom is a blockchain that supports EVM-compatible smart contracts and protocols. It utilizes [Delegated Proof of Stake (DPoS)](https://bitcoinwiki.org/wiki/DPoS).
+Fantom is a blockchain that supports EVM-compatible smart contracts and protocols. It utilizes [Proof of Stake (PoS)](https://docs.fantom.foundation/technology/proof-of-stake).
 
 This blueprint is designed to assist in deploying a single node or a Highly Available (HA) [Fantom read-only node](https://docs.fantom.foundation/node/tutorials/run-a-read-only-node) on AWS. It is intended for use in development, testing, or Proof of Concept purposes.
 
@@ -16,16 +16,16 @@ This blueprint is designed to assist in deploying a single node or a Highly Avai
 1. The AWS Cloud Development Kit (CDK) is used to deploy a single node. The CDK application stores assets like scripts and config files in S3 bucket to copy them to the EC2 instance when launching a Fantom Node.
 2. A single RPC Fantom Fullnode is deployed within the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on Fantom Blockchain Network through an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 3. The Fantom node is accessed by dApps or development tools internally. JSON RPC API is not exposed to the Internet to protect the node from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
-4. The Fantom node send various monitoring metrics for both EC2 and Fantom client to Amazon CloudWatch.
+4. The Fantom node sends various monitoring metrics for both the EC2 instance and the Fantom client to Amazon CloudWatch.
 
 ### Highly Available setup
 
 ![Highly Available Nodes Deployment](./doc/assets/Architecture-HA-Fantom-Node-Runners.drawio.png)
 
-1. The CDK is used to deploy highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and other scripts and configuration files required when launching EC2 as the Fantom Node.
+1. The CDK is used to deploy a highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and other scripts and configuration files required when launching EC2 as the Fantom Node.
 2. A set of RPC Fantom Fullnodes that are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronize with the rest of the nodes on Fantom Blockchain Network through an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 3. The Fantom nodes are accessed by dApps or development tools internally through an [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
-4. The Fantom nodes send various monitoring metrics for both EC2 and Fantom nodes to Amazon CloudWatch.
+4. The Fantom nodes send various monitoring metrics for both the EC2 and the Fantom nodes to Amazon CloudWatch.
 
 ## Additional materials
 
