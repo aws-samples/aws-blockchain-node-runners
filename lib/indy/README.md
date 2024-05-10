@@ -101,7 +101,7 @@ When running on a Mac, set the following environment variables.
 
   ```
   cd ..
-  ./configure-ansible-inventory.sh 
+  ./configure-ansible-inventory.sh
   ```
 
 
@@ -122,7 +122,7 @@ INDY_NETWORK_NAME: sample-network
   ```
   The response should look like this:
 
-  ``` 
+  ```
   steward2 | SUCCESS => {
       "changed": false,
       "ping": "pong"

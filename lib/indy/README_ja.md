@@ -91,7 +91,7 @@ Macで実行する場合は次の環境変数を設定する。
 
   ```
   cd ..
-  ./configure-ansible-inventory.sh 
+  ./configure-ansible-inventory.sh
   ```
 
 ## Ansibleの設定

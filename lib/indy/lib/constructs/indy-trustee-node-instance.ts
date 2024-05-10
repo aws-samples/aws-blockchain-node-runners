@@ -76,7 +76,7 @@ export class IndyTrusteeNodeInstance extends Construct {
                 {
                     id: "AwsSolutions-EC29",
                     reason: "Its Ok to terminate this instance as the same copies of the data are stored on each node",
-      
+
                 },
             ],
             true

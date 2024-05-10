@@ -79,58 +79,58 @@ export class IndyNodeStack extends cdk.Stack {
             serverAccessLogsPrefix: "AnsibleFileTransferBucket",
         });
 
-        const steward1 = new IndyStewardNodeInstance(this, "steward1", { 
-            vpc, 
-            clientSG, 
-            nodeSG, 
+        const steward1 = new IndyStewardNodeInstance(this, "steward1", {
+            vpc,
+            clientSG,
+            nodeSG,
             ansibleBucket,
             instanceType: config.stewardNodeConfig.instanceType,
             instanceCpuType: config.stewardNodeConfig.instanceCpuType,
             dataVolumes: config.stewardNodeConfig.dataVolumes,
         });
-        const steward2 = new IndyStewardNodeInstance(this, "steward2", { 
-            vpc, 
-            clientSG, 
-            nodeSG, 
+        const steward2 = new IndyStewardNodeInstance(this, "steward2", {
+            vpc,
+            clientSG,
+            nodeSG,
             ansibleBucket,
             instanceType: config.stewardNodeConfig.instanceType,
             instanceCpuType: config.stewardNodeConfig.instanceCpuType,
             dataVolumes: config.stewardNodeConfig.dataVolumes
         });
-        const steward3 = new IndyStewardNodeInstance(this, "steward3", { 
-            vpc, 
-            clientSG, 
-            nodeSG, 
+        const steward3 = new IndyStewardNodeInstance(this, "steward3", {
+            vpc,
+            clientSG,
+            nodeSG,
             ansibleBucket,
             instanceType: config.stewardNodeConfig.instanceType,
             instanceCpuType: config.stewardNodeConfig.instanceCpuType,
             dataVolumes: config.stewardNodeConfig.dataVolumes
         });
-        const steward4 = new IndyStewardNodeInstance(this, "steward4", { 
-            vpc, 
-            clientSG, 
-            nodeSG, 
+        const steward4 = new IndyStewardNodeInstance(this, "steward4", {
+            vpc,
+            clientSG,
+            nodeSG,
             ansibleBucket,
             instanceType: config.stewardNodeConfig.instanceType,
             instanceCpuType: config.stewardNodeConfig.instanceCpuType,
             dataVolumes: config.stewardNodeConfig.dataVolumes
         });
 
-        const trustee1 = new IndyTrusteeNodeInstance(this, "trustee1", { 
-            vpc, 
+        const trustee1 = new IndyTrusteeNodeInstance(this, "trustee1", {
+            vpc,
             nodeSG,
             instanceType: config.trusteeNodeConfig.instanceType,
             instanceCpuType: config.trusteeNodeConfig.instanceCpuType,
             dataVolumes: config.trusteeNodeConfig.dataVolumes
         });
-        const trustee2 = new IndyTrusteeNodeInstance(this, "trustee2", { 
-            vpc, 
+        const trustee2 = new IndyTrusteeNodeInstance(this, "trustee2", {
+            vpc,
             nodeSG,
             instanceType: config.trusteeNodeConfig.instanceType,
             instanceCpuType: config.trusteeNodeConfig.instanceCpuType,
             dataVolumes: config.trusteeNodeConfig.dataVolumes
         });
-        const trustee3 = new IndyTrusteeNodeInstance(this, "trustee3", { 
+        const trustee3 = new IndyTrusteeNodeInstance(this, "trustee3", {
             vpc,
             nodeSG,
             instanceType: config.trusteeNodeConfig.instanceType,

@@ -19,7 +19,7 @@
     - "deb https://repo.sovrin.org/deb bionic master"
     - "deb https://sovrin.jfrog.io/artifactory/deb focal rc"
 
-- name: Wait for /var/lib/dpkg/lock-frontend to be released 
+- name: Wait for /var/lib/dpkg/lock-frontend to be released
   shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
   changed_when: false
 
