@@ -37,10 +37,10 @@ npm install
 
 Create your own copy of `.env` file and edit it:
 ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/ethereum
+   # Make sure you are in aws-blockchain-node-runners/lib/indy
    cd lib/indy
    pwd
-   cp .env-sample .env
+   cp ./sample-configs/.env-sample .env
    nano .env
 ```
    **NOTE:** You can find more examples inside the `sample-configs` directory.
@@ -50,7 +50,7 @@ Create your own copy of `.env` file and edit it:
 The following command is executed only when using AWS CDK for the first time in the region where the deployment will be carried out.
 
 ```bash
-npx cdk bootstrap
+npx cdk bootstrap aws://<INSERT_YOUR_AWS_ACCOUNT_NUMBER>/<INSERT_YOUR_AWS_REGION>
 ```
 
 3. Deploying resources with CDK
@@ -58,7 +58,11 @@ npx cdk bootstrap
 ```bash
 npx cdk deploy --json --outputs-file indy-test-deploy-output.json
 
-Outputs:
+```
+
+The output should look like this::
+
+```
 IndyNetworkStack.AnsibleFileTransferBucketName = 111122223333-ansible-file-transfer-bucket
 IndyNetworkStack.steward1steward1InstanceId2F9F8910 = i-1234567890abcdef1
 IndyNetworkStack.steward2steward2InstanceId995438F2 = i-1234567890abcdef2
@@ -82,18 +86,18 @@ When running on a Mac, set the following environment variables.
 
 - Create a Python virtual environment and install ansible
  ```
- $ cd ansible
- $ python3 -m venv venv
- $ source ./venv/bin/activate
+ cd ansible
+ python3 -m venv venv
+ source ./venv/bin/activate
  ```
 
  ```
- $ pip install -r requirements.txt
+ pip install -r requirements.txt
  ```
 
 ##### Describe instance information to be built in inventory.yml
 
-- Create an indentory file containing information on the EC2 instance that will build the environment. Enter the instance ID described in the CDK output results in the settings column for each node. The value of `indyNetworkStack.ansibleFileTransferBucketName` described in CDK output results is inputted to `ansible_aws_ssm_bucket_name`. When Ansible transfers files to the target host, the Amazon Simple Storage Service (Amazon S3) bucket specified here is used.
+- Create an inventory file containing information on the EC2 instance that will build the environment. Enter the instance ID described in the CDK output results in the settings column for each node. The value of `indyNetworkStack.ansibleFileTransferBucketName` described in CDK output results is inputted to `ansible_aws_ssm_bucket_name`. When Ansible transfers files to the target host, the Amazon Simple Storage Service (Amazon S3) bucket specified here is used.
 
   ```
   cd ..
@@ -102,7 +106,7 @@ When running on a Mac, set the following environment variables.
 
 
 ##### Ansible parameter settings
-Open `inventory/group_vars/all.yml` file and define the parameters referred to by Ansible in the configuration file. Set Indy's network name
+To change Indy's network name, open `ansible/inventory/group_vars/all.yml` file and change the parameter used by Ansible
 
 ```
 INDY_NETWORK_NAME: sample-network
@@ -113,8 +117,12 @@ INDY_NETWORK_NAME: sample-network
 - Use ansible's `ping` module to confirm that ansible can connect to the instance set in inventory/inventory.yml
 
   ```
-  $ cd ansible
-  $ ansible -m ping all -i inventory/inventory.yml  
+  cd ansible
+  ansible -m ping all -i inventory/inventory.yml
+  ```
+  The response should look like this:
+
+  ``` 
   steward2 | SUCCESS => {
       "changed": false,
       "ping": "pong"

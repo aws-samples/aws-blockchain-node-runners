@@ -84,36 +84,36 @@ export class IndyNodeStack extends cdk.Stack {
             clientSG, 
             nodeSG, 
             ansibleBucket,
-            instanceType: config.studentNodeConfig.instanceType,
-            instanceCpuType: config.studentNodeConfig.instanceCpuType,
-            dataVolumes: config.studentNodeConfig.dataVolumes,
+            instanceType: config.stewardNodeConfig.instanceType,
+            instanceCpuType: config.stewardNodeConfig.instanceCpuType,
+            dataVolumes: config.stewardNodeConfig.dataVolumes,
         });
         const steward2 = new IndyStewardNodeInstance(this, "steward2", { 
             vpc, 
             clientSG, 
             nodeSG, 
             ansibleBucket,
-            instanceType: config.studentNodeConfig.instanceType,
-            instanceCpuType: config.studentNodeConfig.instanceCpuType,
-            dataVolumes: config.studentNodeConfig.dataVolumes
+            instanceType: config.stewardNodeConfig.instanceType,
+            instanceCpuType: config.stewardNodeConfig.instanceCpuType,
+            dataVolumes: config.stewardNodeConfig.dataVolumes
         });
         const steward3 = new IndyStewardNodeInstance(this, "steward3", { 
             vpc, 
             clientSG, 
             nodeSG, 
             ansibleBucket,
-            instanceType: config.studentNodeConfig.instanceType,
-            instanceCpuType: config.studentNodeConfig.instanceCpuType,
-            dataVolumes: config.studentNodeConfig.dataVolumes
+            instanceType: config.stewardNodeConfig.instanceType,
+            instanceCpuType: config.stewardNodeConfig.instanceCpuType,
+            dataVolumes: config.stewardNodeConfig.dataVolumes
         });
         const steward4 = new IndyStewardNodeInstance(this, "steward4", { 
             vpc, 
             clientSG, 
             nodeSG, 
             ansibleBucket,
-            instanceType: config.studentNodeConfig.instanceType,
-            instanceCpuType: config.studentNodeConfig.instanceCpuType,
-            dataVolumes: config.studentNodeConfig.dataVolumes
+            instanceType: config.stewardNodeConfig.instanceType,
+            instanceCpuType: config.stewardNodeConfig.instanceCpuType,
+            dataVolumes: config.stewardNodeConfig.dataVolumes
         });
 
         const trustee1 = new IndyTrusteeNodeInstance(this, "trustee1", { 
