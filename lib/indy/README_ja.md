@@ -105,6 +105,7 @@ INDY_NETWORK_NAME: sample-network
 
 - inventory/inventory.ymlで設定したインスタンスにansibleが接続できることをansibleの `ping` モジュールを使用して確認する
   ```
+  $ cd ansible
   $ ansible -m ping all -i inventory/inventory.yml  
   steward2 | SUCCESS => {
       "changed": false,
@@ -136,11 +137,60 @@ INDY_NETWORK_NAME: sample-network
   }
   ```
 
+- cloud-initが全て `Done`になっていることを確認する
+
+  ```
+  $ ansible -m command all -i inventory/inventory.yml  -a "cloud-init status --wait"
+
+  steward4 | CHANGED | rc=0 >>
+
+  status: done
+  steward3 | CHANGED | rc=0 >>
+
+  status: done
+  steward2 | CHANGED | rc=0 >>
+
+  status: done
+  steward1 | CHANGED | rc=0 >>
+
+  status: done
+  trustee1 | CHANGED | rc=0 >>
+
+  status: done
+  trustee2 | CHANGED | rc=0 >>
+
+  status: done
+  trustee3 | CHANGED | rc=0 >>
+
+  status: done
+  ```
+
 - ansibleで `inventory/inventory.yml` で定義した対象のEC2インスタンスに対してHyperledger Indyの環境構築を実行する
   ```
   $ ansible-playbook playbook/site.yml
   ```
 
+## すべてを削除する方法
+
+1. Secrets ManagerからIndyのseed, nodeInfo, didを削除する
+
+```bash
+$ ansible-playbook playbook/999_cleanup.yml
+```
+
+2. Indy Nodeを削除する
+
+```bash
+   # Setting the AWS account id and region in case local .env file is lost
+    export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+    export AWS_REGION=<your_target_AWS_region>
+
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/indy
+
+    # Undeploy Indy Node
+    cdk destroy --all
+```
 
 ## 参考情報
 - [Indy Network の構築](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/NewNetwork/NewNetwork.md)

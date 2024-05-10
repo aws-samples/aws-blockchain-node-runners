@@ -19,9 +19,22 @@
     - "deb https://repo.sovrin.org/deb bionic master"
     - "deb https://sovrin.jfrog.io/artifactory/deb focal rc"
 
-- name: apt install
+- name: Wait for /var/lib/dpkg/lock-frontend to be released 
+  shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+  changed_when: false
+
+- name: apt update
   ansible.builtin.apt:
     update_cache: true
+  register: result_update
+  until: result_update is succeeded
+  retries: 10
+  delay: 60
+
+- name: apt install
+  ansible.builtin.apt:
+    update_cache: false
+    lock_timeout: 300
     pkg:
       - python3-pip
       - rocksdb=5.8.8
@@ -42,6 +55,10 @@
       - sovrin=1.2.0~rc1
       - libssl1.0.0
       - ursa=0.3.2-1
+  register: result_install
+  until: result_install is succeeded
+  retries: 10
+  delay: 60
 
 - name: pip install boto3
   ansible.builtin.pip:

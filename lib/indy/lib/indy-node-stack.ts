@@ -15,10 +15,10 @@ export class IndyNodeStack extends cdk.Stack {
         const serverAccessLogBucket = new s3.Bucket(this, "serverAccessLogBucket", {
             encryption: s3.BucketEncryption.S3_MANAGED,
             blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-            removalPolicy: cdk.RemovalPolicy.RETAIN,
-            versioned: true,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            versioned: false,
             enforceSSL: true,
-            autoDeleteObjects: false,
+            autoDeleteObjects: true,
         })
 
         const vpc = new ec2.Vpc(this, "IndyVpc", {
@@ -29,10 +29,10 @@ export class IndyNodeStack extends cdk.Stack {
                         new s3.Bucket(this, "VpcFlowLogBucket", {
                             encryption: s3.BucketEncryption.S3_MANAGED,
                             blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-                            removalPolicy: cdk.RemovalPolicy.RETAIN,
-                            versioned: true,
+                            removalPolicy: cdk.RemovalPolicy.DESTROY,
+                            versioned: false,
                             enforceSSL: true,
-                            autoDeleteObjects: false,
+                            autoDeleteObjects: true,
                             serverAccessLogsBucket: serverAccessLogBucket,
                             serverAccessLogsPrefix: "vpcFlowLogs",
                         }),
