@@ -11,7 +11,7 @@ This blueprint is designed to assist in deploying a single node or a Highly Avai
 ## Overview of Deployment Architectures
 
 ### Single Node setup
-![Single Nodes Deployment](./doc/assets/Architecture-Single-Fantom-Node-Runners.drawio.png)
+![Single Nodes Deployment](./doc/assets/Architecture-Single-FANTOM-Node-Runners.drawio.png)
 
 1. The AWS Cloud Development Kit (CDK) is used to deploy a single node. The CDK application stores assets like scripts and config files in S3 bucket to copy them to the EC2 instance when launching a Fantom Node.
 2. A single RPC Fantom Fullnode is deployed within the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on Fantom Blockchain Network through an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
@@ -20,7 +20,7 @@ This blueprint is designed to assist in deploying a single node or a Highly Avai
 
 ### Highly Available setup
 
-![Highly Available Nodes Deployment](./doc/assets/Architecture-HA-Fantom-Node-Runners.drawio.png)
+![Highly Available Nodes Deployment](./doc/assets/Architecture-HA-FANTOM-Node-Runners.drawio.png)
 
 1. The CDK is used to deploy a highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and other scripts and configuration files required when launching EC2 as the Fantom Node.
 2. A set of RPC Fantom Fullnodes that are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronize with the rest of the nodes on Fantom Blockchain Network through an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
@@ -82,7 +82,7 @@ cd aws-blockchain-node-runners
 npm install
 ```
 
-### Deploy the HA Nodes
+### Prepare to deploy nodes
 
 1. Make sure you are in the root directory of the cloned repository
 
@@ -101,9 +101,9 @@ npm install
    Create your own copy of `.env` file and edit it to update with your AWS Account ID, AWS Region, and optionally the Fantom SNAPSHOTS URI:
 
    ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/fantom
    cd lib/fantom
    pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/fantom
    cp ./sample-configs/.env-sample-read .env
    nano .env
    ```
@@ -152,25 +152,19 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
 
    ```javascript
    {
-        "jsonrpc": "2.0",
-        "id": 1,
-        "result": {
-                 "currentBlock": "0x211f0d8",
-                 "healedBytecodeBytes": "0x0",
-                 "healedBytecodes": "0x0",
-                 "healedTrienodeBytes": "0x0",
-                 "healedTrienodes": "0x0",
-                 "healingBytecode": "0x0",
-                 "healingTrienodes": "0x0",
-                 "highestBlock": "0x2123bff",
-                 "startingBlock": "0x20910d7",
-                 "syncedAccountBytes": "0x0",
-                 "syncedAccounts": "0x0",
-                 "syncedBytecodeBytes": "0x0",
-                 "syncedBytecodes": "0x0",
-                 "syncedStorage": "0x0",
-                 "syncedStorageBytes": "0x0"
-        }
+        jsonrpc: "2.0",
+        id: 1,
+        result: {
+			currentBlock: 37676547,
+			currentBlockHash: "0x0001ab120000187fd8069d3a4f6501d48ad4800778f40a76d79cf02469272a43",
+			currentBlockTime: "0x16ec7a4b9a82ebfe",
+			currentEpoch: "0x1ab13",
+			highestBlock: 80196141,
+			highestEpoch: "0x44343",
+			knownStates: 0,
+			pulledStates: 0,
+			startingBlock: 0 
+		}
    }
    ```
 
@@ -192,7 +186,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
 
 ### Option 2: Highly Available RPC Nodes
 
-1. The inital deployment of a Fantom Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. Maybe two. After deployment, you'll need to wait for another half a day to a day for your nodes to synchronize with the Fantom Blockchain Network, depending on how fresh the snapshot was.
+1. The inital deployment of a Fantom Full node and downloading its snapshot typically takes about 6 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. Maybe two. After deployment, you'll need to wait for hour or more for your nodes to synchronize with the Fantom Blockchain Network, depending on how fresh the snapshot was.
 
    ```bash
       pwd
@@ -218,24 +212,18 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
 
    ```javascript
    {
-        "jsonrpc": "2.0",
-        "id": 1,
-        "result": {
-                 "currentBlock": "0x211f0d8",
-                 "healedBytecodeBytes": "0x0",
-                 "healedBytecodes": "0x0",
-                 "healedTrienodeBytes": "0x0",
-                 "healedTrienodes": "0x0",
-                 "healingBytecode": "0x0",
-                 "healingTrienodes": "0x0",
-                 "highestBlock": "0x2123bff",
-                 "startingBlock": "0x20910d7",
-                 "syncedAccountBytes": "0x0",
-                 "syncedAccounts": "0x0",
-                 "syncedBytecodeBytes": "0x0",
-                 "syncedBytecodes": "0x0",
-                 "syncedStorage": "0x0",
-                 "syncedStorageBytes": "0x0"
+        jsonrpc: "2.0",
+        id: 1,
+        result: {
+			currentBlock: 37676547,
+			currentBlockHash: "0x0001ab120000187fd8069d3a4f6501d48ad4800778f40a76d79cf02469272a43",
+			currentBlockTime: "0x16ec7a4b9a82ebfe",
+			currentEpoch: "0x1ab13",
+			highestBlock: 80196141,
+			highestEpoch: "0x44343",
+			knownStates: 0,
+			pulledStates: 0,
+			startingBlock: 0 
         }
    }
    ```

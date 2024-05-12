@@ -18,9 +18,11 @@ FANTOM_SYNC_STATS=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --dat
 # Synced status results:
 #
 # false
+#
+# TODO: if a node falls behind, does it revert to syncing?
 
 # If false, then get current block number:
-if $FANTOM_SYNC_STATS == false; then
+if $FANTOM_SYNC_STATS != false; then
 
 FANTOM_SYNC_BLOCK=$(echo $FANTOM_SYNC_STATS | jq -r ".currentBlock")
 FANTOM_HIGHEST_BLOCK=$(echo $FANTOM_SYNC_STATS | jq -r ".highestBlock")

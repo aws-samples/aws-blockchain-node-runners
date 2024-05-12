@@ -4,7 +4,7 @@ source /etc/environment
 
 if [[ "$DATA_VOLUME_TYPE" == "instance-store" ]]; then
   echo "Data volume type is instance store"
-  export DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
+  export DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk 'max < $4 {max = $4; vol = $1} END {print vol}')
 fi
 
 if [ -n "$DATA_VOLUME_ID" ]; then
@@ -29,8 +29,6 @@ if [ -n "$DATA_VOLUME_ID" ]; then
     fi
 
     sudo mount -a
-
-    /opt/download-snapshot.sh
 
     chown bcuser:bcuser -R /data
   else
