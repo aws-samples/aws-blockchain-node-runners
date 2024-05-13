@@ -101,7 +101,7 @@ When running on a Mac, set the following environment variables.
 
   ```
   cd ..
-  ./configure-ansible-inventory.sh 
+  ./configure-ansible-inventory.sh
   ```
 
 
@@ -122,7 +122,7 @@ INDY_NETWORK_NAME: sample-network
   ```
   The response should look like this:
 
-  ``` 
+  ```
   steward2 | SUCCESS => {
       "changed": false,
       "ping": "pong"
@@ -153,10 +153,60 @@ INDY_NETWORK_NAME: sample-network
   }
   ```
 
+- Use ansible's `command` module to check the cloud-init status was done.
+
+  ```
+  $ ansible -m command all -i inventory/inventory.yml  -a "cloud-init status --wait"
+
+  steward4 | CHANGED | rc=0 >>
+
+  status: done
+  steward3 | CHANGED | rc=0 >>
+
+  status: done
+  steward2 | CHANGED | rc=0 >>
+
+  status: done
+  steward1 | CHANGED | rc=0 >>
+
+  status: done
+  trustee1 | CHANGED | rc=0 >>
+
+  status: done
+  trustee2 | CHANGED | rc=0 >>
+
+  status: done
+  trustee3 | CHANGED | rc=0 >>
+
+  status: done
+  ```
+
 - Execute Hyperledger Indy environment construction for target EC2 instances defined in `inventory/inventory.yml` in ansible
  ```
- ansible-playbook playbook/site.yml
+ $ ansible-playbook playbook/site.yml
  ```
+
+## Clearing up and undeploying everything
+
+1. Remove Indy's seed, nodeInfo, did on the Secrets Manager
+
+```bash
+$ ansible-playbook playbook/999_cleanup.yml
+```
+
+2. Undeploy Indy Nodes
+
+```bash
+   # Setting the AWS account id and region in case local .env file is lost
+    export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+    export AWS_REGION=<your_target_AWS_region>
+
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/indy
+
+    # Undeploy Indy Node
+    cdk destroy --all
+```
 
 
 #### reference information
