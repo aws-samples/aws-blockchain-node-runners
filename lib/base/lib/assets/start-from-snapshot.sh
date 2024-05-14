@@ -5,33 +5,33 @@ echo "Downloading snpashot"
 
 cd /data
 
-BASE_SNAPSHOT_FILE_NAME=snalshot.tar.gz
+BASE_SNAPSHOT_FILE_NAME=snapshot.tar.gz
 BASE_SNAPSHOT_DIR=/data/
 BASE_SNAPSHOT_DOWNLOAD_STATUS=-1
-BASE_LATEST_SNAPSHOT_FILE_NAME=$(curl https://$NETWORK_ID-$NODE_CONFIG-snapshots.base.org/latest)
 
 if [ "$SNAPSHOT_URL" == "none" ] || [ -z "${SNAPSHOT_URL}" ]; then
+  BASE_LATEST_SNAPSHOT_FILE_NAME=$(curl https://$NETWORK_ID-$NODE_CONFIG-snapshots.base.org/latest)
   SNAPSHOT_URL=https://$NETWORK_ID-$NODE_CONFIG-snapshots.base.org/$BASE_LATEST_SNAPSHOT_FILE_NAME
 fi
 
 while (( BASE_SNAPSHOT_DOWNLOAD_STATUS != 0 ))
 do
-        PIDS=$(pgrep aria2c)
+        PIDS=$(pgrep wget)
         if [ -z "$PIDS" ]; then
-                aria2c -x3 $SNAPSHOT_URL -d $BASE_SNAPSHOT_DIR -o $BASE_SNAPSHOT_FILE_NAME -l aria2c.log --log-level=warn --allow-piece-length-change=true
+                wget --continue --retry-connrefused --waitretry=66 --read-timeout=20 --output-document$BASE_SNAPSHOT_DIR/$BASE_SNAPSHOT_FILE_NAME -o download.log -t 0 $SNAPSHOT_URL
         fi
         BASE_SNAPSHOT_DOWNLOAD_STATUS=$?
-        pid=$(pidof aria2c)
+        pid=$(pidof wget)
         wait $pid
-        echo "aria2c exit."
+        echo "wget exit."
         case $BASE_SNAPSHOT_DOWNLOAD_STATUS in
-                3)
-                        echo "file not exist."
-                        exit 3
+                2)
+                        echo "CLI parsing error. Check variables."
+                        exit 2
                         ;;
-                9)
-                        echo "No space left on device."
-                        exit 9
+                3)
+                        echo "File I/O error."
+                        exit 3
                         ;;
                 *)
                         continue
@@ -45,14 +45,14 @@ sleep 60
 # take about 2 hours to decompress the snapshot
 echo "Decompression snapshot start ..."
 
-tar -I zstdmt -xf  $BASE_SNAPSHOT_DIR/$BASE_SNAPSHOT_FILE_NAME -C /data 2>&1 | tee unzip.log && echo "decompression success..." || echo "decompression failed..." >> snapshots-decompression.log
-echo "Decompressing snapshot success ..."
+tar -zxvf  $BASE_SNAPSHOT_DIR/$BASE_SNAPSHOT_FILE_NAME -C /data 2>&1 | tee unzip.log && echo "decompresed successfully..." || echo "decompression failed..." >> snapshots-decompression.log
+echo "Decompresed snapshot ..."
 
 mv /data/snapshots/$NETWORK_ID/download/* /data && \
 rm -rf /data/snapshots && \
 rm -rf /data/$BASE_SNAPSHOT_FILE_NAME
 
-echo "Snapshot is ready !!!"
+echo "Processed snapshot"
 
 chown -R bcuser:bcuser /data && \
 sudo su bcuser && \
