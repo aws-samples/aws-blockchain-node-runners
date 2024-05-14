@@ -60,20 +60,6 @@ ln /usr/local/bin/aws /usr/bin/aws
 echo 'Installing SSM Agent'
 yum install -y $SSM_AGENT_BINARY_URI
 
-# install aria2 a p2p downloader
-
-if [ "$arch" == "x86_64" ]; then
-  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
-  tar jxvf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
-  cd aria2-1.36.0-linux-gnu-64bit-build1/
-  make install
-else
-  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
-  tar jxvf aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
-  cd aria2-1.36.0-linux-gnu-arm-rbpi-build1/
-  make install
-fi
-
 # Base specific setup starts here
 
 # Set by Base-specic CDK components and stacks
