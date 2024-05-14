@@ -85,24 +85,24 @@ When running on a Mac, set the following environment variables.
 ##### Preparing for Ansible
 
 - Create a Python virtual environment and install ansible
- ```
- cd ansible
- python3 -m venv venv
- source ./venv/bin/activate
+ ```bash
+    cd ansible
+    python3 -m venv venv
+    source ./venv/bin/activate
  ```
 
- ```
- pip install -r requirements.txt
+ ```bash
+    pip install -r requirements.txt
  ```
 
 ##### Describe instance information to be built in inventory.yml
 
 - Create an inventory file containing information on the EC2 instance that will build the environment. Enter the instance ID described in the CDK output results in the settings column for each node. The value of `indyNetworkStack.ansibleFileTransferBucketName` described in CDK output results is inputted to `ansible_aws_ssm_bucket_name`. When Ansible transfers files to the target host, the Amazon Simple Storage Service (Amazon S3) bucket specified here is used.
 
-  ```
+```bash
   cd ..
   ./configure-ansible-inventory.sh
-  ```
+```
 
 
 ##### Ansible parameter settings
@@ -116,13 +116,13 @@ INDY_NETWORK_NAME: sample-network
 
 - Use ansible's `ping` module to confirm that ansible can connect to the instance set in inventory/inventory.yml
 
-  ```
+```bash
   cd ansible
   ansible -m ping all -i inventory/inventory.yml
-  ```
+```
   The response should look like this:
 
-  ```
+```bash
   steward2 | SUCCESS => {
       "changed": false,
       "ping": "pong"
@@ -151,13 +151,16 @@ INDY_NETWORK_NAME: sample-network
       "changed": false,
       "ping": "pong"
   }
-  ```
+```
 
-- Use ansible's `command` module to check the cloud-init status was done.
+- Before proceeding with configuring Indy, we need to make sure the initialization scripts are finished. To check their stats, use ansible's `command` module. If the check shows cloud-init is not finished wait and try again in 5-10 minutes until status was done.
 
-  ```
-  $ ansible -m command all -i inventory/inventory.yml  -a "cloud-init status --wait"
+```bash
+  ansible -m command all -i inventory/inventory.yml  -a "cloud-init status --wait"
+```
+  The response should look like this:
 
+```bash
   steward4 | CHANGED | rc=0 >>
 
   status: done
@@ -179,19 +182,21 @@ INDY_NETWORK_NAME: sample-network
   trustee3 | CHANGED | rc=0 >>
 
   status: done
-  ```
+```
 
 - Execute Hyperledger Indy environment construction for target EC2 instances defined in `inventory/inventory.yml` in ansible
- ```
- $ ansible-playbook playbook/site.yml
- ```
+```bash
+    ansible-playbook playbook/site.yml
+```
 
 ## Clearing up and undeploying everything
 
 1. Remove Indy's seed, nodeInfo, did on the Secrets Manager
 
 ```bash
-$ ansible-playbook playbook/999_cleanup.yml
+    # make sure you are in 'ansible' directory
+    cd ansible
+    ansible-playbook playbook/999_cleanup.yml
 ```
 
 2. Undeploy Indy Nodes
@@ -205,7 +210,7 @@ $ ansible-playbook playbook/999_cleanup.yml
    # Make sure you are in aws-blockchain-node-runners/lib/indy
 
     # Undeploy Indy Node
-    cdk destroy --all
+    npx cdk destroy --all
 ```
 
 
