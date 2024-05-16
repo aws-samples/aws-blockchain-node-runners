@@ -18,7 +18,7 @@ while (( BASE_SNAPSHOT_DOWNLOAD_STATUS != 0 ))
 do
         PIDS=$(pgrep wget)
         if [ -z "$PIDS" ]; then
-                wget --continue --retry-connrefused --waitretry=66 --read-timeout=20 --output-document$BASE_SNAPSHOT_DIR/$BASE_SNAPSHOT_FILE_NAME -o download.log -t 0 $SNAPSHOT_URL
+            wget --continue --retry-connrefused --waitretry=66 --read-timeout=20 --output-document $BASE_SNAPSHOT_DIR/$BASE_SNAPSHOT_FILE_NAME -nv -o download.log -t 0 $SNAPSHOT_URL
         fi
         BASE_SNAPSHOT_DOWNLOAD_STATUS=$?
         pid=$(pidof wget)
@@ -53,7 +53,3 @@ rm -rf /data/snapshots && \
 rm -rf /data/$BASE_SNAPSHOT_FILE_NAME
 
 echo "Processed snapshot"
-
-chown -R bcuser:bcuser /data && \
-sudo su bcuser && \
-/usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml up -d

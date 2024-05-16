@@ -241,7 +241,15 @@ if [ "$RESTORE_FROM_SNAPSHOT" == "false" ]; then
 else
   echo "Restoring data from snapshot"
   chmod 766 /opt/start-from-snapshot.sh
-  echo "/opt/start-from-snapshot.sh" | at now +3 minutes
+  /opt/download-snapshot.sh
+  if [ "$?" == 0 ]; then
+    echo "Snapshot download successful"
+  else
+    echo "Snapshot download failed, falling back to fresh sync"
+  fi
+  chown -R bcuser:bcuser /data
+  sudo su bcuser
+  /usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml up -d
 fi
 
 echo "All Done!!"
