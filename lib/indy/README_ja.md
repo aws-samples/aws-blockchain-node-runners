@@ -29,13 +29,15 @@ npm install
 
 #### リソースの構築
 
-1. npm の依存パッケージをインストール
+1. Configure  your setup
 
+Create your own copy of `.env` file and edit it:
 ```bash
-cd lib/indy
-pwd
-# Make sure you are in aws-blockchain-node-runners/lib/indy
-npm install
+   # Make sure you are in aws-blockchain-node-runners/lib/ethereum
+   cd lib/indy
+   pwd
+   cp .env-sample .env
+   nano .env
 ```
 
 2. AWS Cloud Development Kit (CDK) の初期設定
@@ -49,7 +51,7 @@ npx cdk bootstrap
 3. CDK でリソースの構築
 
 ```bash
-npx cdk deploy
+npx cdk deploy --json --outputs-file indy-test-deploy-output.json
 
 Outputs:
 IndyNetworkStack.AnsibleFileTransferBucketName = 111122223333-ansible-file-transfer-bucket
@@ -75,70 +77,35 @@ Macで実行する場合は次の環境変数を設定する。
 - pythonの仮想環境を作成しansibleを導入する
   ```
   $ cd ansible
-  $ python3 -m venv .venv
-  $ source .venv/bin/activate
+  $ python3 -m venv venv
+  $ source venv/bin/activate
   ```
 
   ```
   $ pip install -r requirements.txt
   ```
 
-## AnsibleとSession Manager
+##### Describe instance information to be built in inventory.yml
 
-- EC2 Instanceに対してSession Managerを使用したSSHアクセスを実現するために、 [Install the Session Manager plugin for the AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html) を参照して、Session Manager Pluginをインストールする。Session Managerを使用することでセキュリティグループの設定をすることなく、インターネットからアクセスできないPrivate SubnetのEC2 Instanceに対してAnsibleによるデプロイが可能となる。
+- Create an indentory file containing information on the EC2 instance that will build the environment. Enter the instance ID described in the CDK output results in the settings column for each node. The value of `indyNetworkStack.ansibleFileTransferBucketName` described in CDK output results is inputted to `ansible_aws_ssm_bucket_name`. When Ansible transfers files to the target host, the Amazon Simple Storage Service (Amazon S3) bucket specified here is used.
 
-- AnsibleがAWS Systems Manager Session Managerを使用してEC2にSSHログインするためのプラグインをインストールする。
   ```
-  $ ansible-galaxy collection install community.aws
-  ```
-
-## 構築対象のインスタンス情報をInventory.ymlに記載する
-- 環境構築を行うEC2インスタンスの情報を記載したIndentoryファイルを作成する。CDKの出力結果に記載されているインスタンスのIDをそれぞれのノードの設定欄に記入する。 `ansible_aws_ssm_bucket_name` には CDKの出力結果に記載されている `IndyNetworkStack.AnsibleFileTransferBucketName` の値を入力する。Ansibleが対象のホストに対してファイルを転送する時に、ここで指定したAmazon Simple Storage Service(Amazon S3) Bucketを使用する。
-  ```
-  $ vi inventory/inventory.yml
-  all:
-    hosts:
-      steward1:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef1
-      steward2:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef2
-      steward3:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef3
-      steward4:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef4
-      trustee1:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef5
-      trustee2:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef6
-      trustee3:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef7
-    children:
-      steward:  
-        hosts:
-          steward[1:4]:
-      trustee:
-        hosts:
-          trustee1
-
-    vars:
-      ansible_connection: aws_ssm
-      ansible_aws_ssm_region: aa-example-1
-      ansible_aws_ssm_s3_addressing_style: virtual
-      ansible_aws_ssm_bucket_name: 111122223333-ansible-file-transfer-bucket
+  cd ..
+  ./configure-ansible-inventory.sh
   ```
 
 ## Ansibleの設定
-Ansibleが参照するパラメータを設定ファイルで定義する。
+Open `inventory/group_vars/all.yml` file and define the parameters referred to by Ansible in the configuration file. Set Indy's network name
 
 ```
-$ vi inventory/group_vars/all.yml
-INDY_NETEORK_NAME: sample-network
+INDY_NETWORK_NAME: sample-network
 ```
 ​
 ## Ansibleによる環境構築の実行
 
 - inventory/inventory.ymlで設定したインスタンスにansibleが接続できることをansibleの `ping` モジュールを使用して確認する
   ```
+  $ cd ansible
   $ ansible -m ping all -i inventory/inventory.yml  
   steward2 | SUCCESS => {
       "changed": false,
@@ -170,11 +137,60 @@ INDY_NETEORK_NAME: sample-network
   }
   ```
 
+- cloud-initが全て `Done`になっていることを確認する
+
+  ```
+  $ ansible -m command all -i inventory/inventory.yml  -a "cloud-init status --wait"
+
+  steward4 | CHANGED | rc=0 >>
+
+  status: done
+  steward3 | CHANGED | rc=0 >>
+
+  status: done
+  steward2 | CHANGED | rc=0 >>
+
+  status: done
+  steward1 | CHANGED | rc=0 >>
+
+  status: done
+  trustee1 | CHANGED | rc=0 >>
+
+  status: done
+  trustee2 | CHANGED | rc=0 >>
+
+  status: done
+  trustee3 | CHANGED | rc=0 >>
+
+  status: done
+  ```
+
 - ansibleで `inventory/inventory.yml` で定義した対象のEC2インスタンスに対してHyperledger Indyの環境構築を実行する
   ```
   $ ansible-playbook playbook/site.yml
   ```
 
+## すべてを削除する方法
+
+1. Secrets ManagerからIndyのseed, nodeInfo, didを削除する
+
+```bash
+$ ansible-playbook playbook/999_cleanup.yml
+```
+
+2. Indy Nodeを削除する
+
+```bash
+   # Setting the AWS account id and region in case local .env file is lost
+    export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+    export AWS_REGION=<your_target_AWS_region>
+
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/indy
+
+    # Undeploy Indy Node
+    cdk destroy --all
+```
 
 ## 参考情報
 - [Indy Network の構築](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/NewNetwork/NewNetwork.md)

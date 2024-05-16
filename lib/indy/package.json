@@ -7,8 +7,5 @@
     "test": "npx jest",
     "cdk": "npx cdk",
     "scan-cdk": "npx cdk synth"
-  },
-  "dependencies": {
-    "fs": "^0.0.1-security"
   }
 }

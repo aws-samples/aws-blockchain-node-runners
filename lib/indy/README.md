@@ -1,5 +1,9 @@
 # Sample AWS Blockchain Node Runner app for Hyperledger Indy
 
+| Contributed by |
+|:--------------------:|
+| [@fsatsuki](https://github.com/fsatsuki) |
+
 [View this page in Japanese (日本語)](./README_ja.md)
 
 ## Architecture Overview
@@ -29,29 +33,36 @@ npm install
 
 #### Building resources
 
-1. Install npm dependency packages
+1. Configure  your setup
 
+Create your own copy of `.env` file and edit it:
 ```bash
-cd lib/indy
-pwd
-# Make sure you are in aws-blockchain-node-runners/lib/indy
-npm install
+   # Make sure you are in aws-blockchain-node-runners/lib/indy
+   cd lib/indy
+   pwd
+   cp ./sample-configs/.env-sample .env
+   nano .env
 ```
+   **NOTE:** You can find more examples inside the `sample-configs` directory.
 
-2. Setting up initial AWS Cloud Development Kit (CDK)
+1. Setting up initial AWS Cloud Development Kit (CDK)
 
 The following command is executed only when using AWS CDK for the first time in the region where the deployment will be carried out.
 
 ```bash
-npx cdk bootstrap
+npx cdk bootstrap aws://<INSERT_YOUR_AWS_ACCOUNT_NUMBER>/<INSERT_YOUR_AWS_REGION>
 ```
 
 3. Deploying resources with CDK
 
 ```bash
-npx cdk deploy
+npx cdk deploy --json --outputs-file indy-test-deploy-output.json
 
-Outputs:
+```
+
+The output should look like this::
+
+```
 IndyNetworkStack.AnsibleFileTransferBucketName = 111122223333-ansible-file-transfer-bucket
 IndyNetworkStack.steward1steward1InstanceId2F9F8910 = i-1234567890abcdef1
 IndyNetworkStack.steward2steward2InstanceId995438F2 = i-1234567890abcdef2
@@ -74,77 +85,44 @@ When running on a Mac, set the following environment variables.
 ##### Preparing for Ansible
 
 - Create a Python virtual environment and install ansible
- ```
- $cd ansible
- $ Python3 -m venv.venv
- $source.venv/bin/activate
- ```
-
- ```
- $ pip install -r requirements.txt
+ ```bash
+    cd ansible
+    python3 -m venv venv
+    source ./venv/bin/activate
  ```
 
-##### Ansible and Session Manager
-
-- In order to achieve SSH access to the EC2 instance using Session Manager, refer to [Install the Session Manager plugin for the AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)  and install the Session Manager Plugin. By using the Session Manager, deployment by Ansible to an EC2 instance of a private subnet that cannot be accessed from the internet is possible without setting a security group.
-
-- Installs a ansible plug-in for SSH access to EC2 using the AWS Systems Manager Session Manager.
- ```
- $ ansible-galaxy collection install community.aws
+ ```bash
+    pip install -r requirements.txt
  ```
 
 ##### Describe instance information to be built in inventory.yml
 
-- Create an indentory file containing information on the EC2 instance that will build the environment. Enter the instance ID described in the CDK output results in the settings column for each node. The value of `indyNetworkStack.ansibleFileTransferBucketName` described in CDK output results is inputted to `ansible_aws_ssm_bucket_name`. When Ansible transfers files to the target host, the Amazon Simple Storage Service (Amazon S3) bucket specified here is used.
+- Create an inventory file containing information on the EC2 instance that will build the environment. Enter the instance ID described in the CDK output results in the settings column for each node. The value of `indyNetworkStack.ansibleFileTransferBucketName` described in CDK output results is inputted to `ansible_aws_ssm_bucket_name`. When Ansible transfers files to the target host, the Amazon Simple Storage Service (Amazon S3) bucket specified here is used.
 
-  ```
-  $ vi inventory/inventory.yml
-  all:
-    hosts:
-      steward1:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef1
-      steward2:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef2
-      steward3:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef3
-      steward4:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef4
-      trustee1:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef5
-      trustee2:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef6
-      trustee3:
-        ansible_aws_ssm_instance_id: i-1234567890abcdef7
-    children:
-      steward:  
-        hosts:
-          steward[1:4]:
-      trustee:
-        hosts:
-          trustee1
-
-    vars:
-      ansible_connection: aws_ssm
-      ansible_aws_ssm_region: aa-example-1
-      ansible_aws_ssm_s3_addressing_style: virtual
-      ansible_aws_ssm_bucket_name: 111122223333-ansible-file-transfer-bucket
-  ```
+```bash
+  cd ..
+  ./configure-ansible-inventory.sh
+```
 
 
 ##### Ansible parameter settings
-Define the parameters referred to by Ansible in the configuration file. Set Indy's network name
+To change Indy's network name, open `ansible/inventory/group_vars/all.yml` file and change the parameter used by Ansible
 
 ```
-$ vi inventory/group_vars/all.yml
-INDY_NETEORK_NAME: sample-network
+INDY_NETWORK_NAME: sample-network
 ```
 
 ##### Execute environment construction with Ansible
 
 - Use ansible's `ping` module to confirm that ansible can connect to the instance set in inventory/inventory.yml
 
-  ```
-  $ ansible -m ping all -i inventory/inventory.yml  
+```bash
+  cd ansible
+  ansible -m ping all -i inventory/inventory.yml
+```
+  The response should look like this:
+
+```bash
   steward2 | SUCCESS => {
       "changed": false,
       "ping": "pong"
@@ -173,12 +151,67 @@ INDY_NETEORK_NAME: sample-network
       "changed": false,
       "ping": "pong"
   }
-  ```
+```
+
+- Before proceeding with configuring Indy, we need to make sure the initialization scripts are finished. To check their stats, use ansible's `command` module. If the check shows cloud-init is not finished wait and try again in 5-10 minutes until status was done.
+
+```bash
+  ansible -m command all -i inventory/inventory.yml  -a "cloud-init status --wait"
+```
+  The response should look like this:
+
+```bash
+  steward4 | CHANGED | rc=0 >>
+
+  status: done
+  steward3 | CHANGED | rc=0 >>
+
+  status: done
+  steward2 | CHANGED | rc=0 >>
+
+  status: done
+  steward1 | CHANGED | rc=0 >>
+
+  status: done
+  trustee1 | CHANGED | rc=0 >>
+
+  status: done
+  trustee2 | CHANGED | rc=0 >>
+
+  status: done
+  trustee3 | CHANGED | rc=0 >>
+
+  status: done
+```
 
 - Execute Hyperledger Indy environment construction for target EC2 instances defined in `inventory/inventory.yml` in ansible
- ```
- $ ansible-playbook playbook/site.yml
- ```
+```bash
+    ansible-playbook playbook/site.yml
+```
+
+## Clearing up and undeploying everything
+
+1. Remove Indy's seed, nodeInfo, did on the Secrets Manager
+
+```bash
+    # make sure you are in 'ansible' directory
+    cd ansible
+    ansible-playbook playbook/999_cleanup.yml
+```
+
+2. Undeploy Indy Nodes
+
+```bash
+   # Setting the AWS account id and region in case local .env file is lost
+    export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+    export AWS_REGION=<your_target_AWS_region>
+
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/indy
+
+    # Undeploy Indy Node
+    npx cdk destroy --all
+```
 
 
 #### reference information

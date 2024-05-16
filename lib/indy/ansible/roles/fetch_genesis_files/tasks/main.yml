@@ -2,7 +2,7 @@
 - name: make indy directory
   become: yes
   ansible.builtin.file:
-    path: "/var/lib/indy/{{ INDY_NETEORK_NAME }}"
+    path: "/var/lib/indy/{{ INDY_NETWORK_NAME }}"
     state: directory
     group: indy
     owner: indy
@@ -22,7 +22,7 @@
   amazon.aws.s3_object:
     bucket: "{{ S3_BUCKET_NAME }}"
     object: "/genesis/{{ item }}"
-    dest: "/var/lib/indy/{{ INDY_NETEORK_NAME }}/{{ item }}"
+    dest: "/var/lib/indy/{{ INDY_NETWORK_NAME }}/{{ item }}"
     mode: get
   with_items:
     - pool_transactions_genesis
@@ -31,7 +31,7 @@
 - name: change owner and group of genesis files
   become: yes
   ansible.builtin.file:
-    path: "/var/lib/indy/{{ INDY_NETEORK_NAME }}/{{ item }}"
+    path: "/var/lib/indy/{{ INDY_NETWORK_NAME }}/{{ item }}"
     state: file
     group: indy
     owner: indy

@@ -2,14 +2,19 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as S3 from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
-
+import * as nag from "cdk-nag";
 import { readFileSync } from "fs";
+import * as configTypes from "../config/indyConfig.interface";
+
 
 export interface IndyNodeInstanceProps {
     readonly vpc: ec2.IVpc;
     readonly clientSG: ec2.ISecurityGroup;
     readonly nodeSG: ec2.ISecurityGroup;
     readonly ansibleBucket: S3.Bucket;
+    readonly instanceType: ec2.InstanceType;
+    readonly instanceCpuType: ec2.AmazonLinuxCpuType;
+    readonly dataVolumes: configTypes.IndyDataVolumeConfig[];
 }
 
 export class IndyStewardNodeInstance extends Construct {
@@ -79,5 +84,29 @@ export class IndyStewardNodeInstance extends Construct {
         });
 
         this.instance = instance;
+
+        nag.NagSuppressions.addResourceSuppressions(
+            this,
+            [
+                {
+                    id: "AwsSolutions-IAM4",
+                    reason: "AmazonSSMManagedInstanceCore are restrictive enough"
+                },
+                {
+                    id: "AwsSolutions-IAM5",
+                    reason: "It is ok to use wildcard in the secret name. this is a specific target"
+                },
+                {
+                    id: "AwsSolutions-EC28",
+                    reason: "Using basic monitoring to save costs"
+                },
+                {
+                    id: "AwsSolutions-EC29",
+                    reason: "Its Ok to terminate this instance as the same copies of the data are stored on each node",
+
+                },
+            ],
+            true
+        );
     }
 }
