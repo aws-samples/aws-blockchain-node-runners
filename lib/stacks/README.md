@@ -1,5 +1,9 @@
 # Sample AWS Blockchain Node Runner app for Stacks Nodes
 
+| Contributed by |
+|:--------------------:|
+| [@AshtonStephens](https://github.com/AshtonStephens) |
+
 Stacks nodes on AWS can currently be deployed in only the "follower" configuration, but is scoped to handle three different configurations: "follower", "miner", and "signer". You can choose to deploy nodes as a single node or a highly available (HA) node.
 
 ## Overview of Deployment Architectures for Single and HA setups

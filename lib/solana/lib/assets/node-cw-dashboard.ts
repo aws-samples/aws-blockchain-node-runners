@@ -283,6 +283,42 @@ export const SingleNodeCWDashboardJSON = {
                 "period": 60,
                 "title": "nvme1n1 Volume Read/Write throughput (bytes/sec)"
             }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 15,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "CWAgent", "disk_used_percent", "InstanceId", "${INSTANCE_ID}", "device", "nvme1n1", "path", "/var/solana/data", "fstype", "xfs", { "region": "${REGION}", "label": "/home/ubuntu/l2geth-source/l2geth-datadir" } ]
+                ],
+                "sparkline": true,
+                "view": "singleValue",
+                "region": "${REGION}",
+                "title": "nvme1n1 Disk Used (%)",
+                "period": 60,
+                "stat": "Average"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 15,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "CWAgent", "disk_used_percent", "InstanceId", "${INSTANCE_ID}", "device", "nvme2n1",  "path", "/var/solana/accounts", "fstype", "xfs", { "region": "${REGION}", "label": "/home/ubuntu/l2geth-source/l2geth-datadir" } ]
+                ],
+                "sparkline": true,
+                "view": "singleValue",
+                "region": "${REGION}",
+                "title": "nvme2n1 Disk Used (%)",
+                "period": 60,
+                "stat": "Average"
+            }
         }
     ]
 }

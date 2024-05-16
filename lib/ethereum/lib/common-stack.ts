@@ -74,6 +74,10 @@ export class EthCommonStack extends cdk.Stack {
                     `arn:aws:s3:::amazonlinux-2-repos-${region}/*`,
                     `arn:aws:s3:::${asset.s3BucketName}`,
                     `arn:aws:s3:::${asset.s3BucketName}/*`,
+                    "arn:aws:s3:::cloudformation-examples",
+                    "arn:aws:s3:::cloudformation-examples/*",
+                    "arn:aws:s3:::amazoncloudwatch-agent",
+                    "arn:aws:s3:::amazoncloudwatch-agent/*"
                 ],
                 actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
             })
