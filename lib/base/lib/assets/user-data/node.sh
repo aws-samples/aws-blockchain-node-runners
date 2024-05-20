@@ -33,6 +33,20 @@ yum update -y
 yum -y install amazon-cloudwatch-agent collectd jq yq gcc ncurses-devel aws-cfn-bootstrap zstd
 wget $YQ_URI -O /usr/bin/yq && chmod +x /usr/bin/yq
 
+# install aria2 a p2p downloader
+
+if [ "$arch" == "x86_64" ]; then
+  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
+  tar jxvf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
+  cd aria2-1.36.0-linux-gnu-64bit-build1/
+  make install
+else
+  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
+  tar jxvf aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
+  cd aria2-1.36.0-linux-gnu-arm-rbpi-build1/
+  make install
+fi
+
 cd /opt
 
 echo "Downloading assets zip file"
@@ -187,6 +201,8 @@ case $NETWORK_ID in
     ;;
 esac
 
+echo "OP_NODE_L1_TRUST_RPC=true"  >> $OP_CONFIG_FILE_PATH
+
 sed -i "s#GETH_HOST_DATA_DIR=./geth-data#GETH_HOST_DATA_DIR=/data/geth#g" /home/bcuser/node/.env
 
 chown -R bcuser:bcuser /home/bcuser/node
@@ -197,6 +213,27 @@ chmod 766 /opt/syncchecker.sh
 
 echo "*/5 * * * * /opt/syncchecker.sh" | crontab
 crontab -l
+
+echo "Configuring node as a service"
+mkdir /home/bcuser/bin
+mv /opt/base/node.sh /home/bcuser/bin/node.sh
+chmod 766 /home/bcuser/bin/node.sh
+chown -R bcuser:bcuser /home/bcuser
+
+sudo bash -c 'cat > /etc/systemd/system/base.service <<EOF
+[Unit]
+Description=Base Node
+After=network-online.target
+[Service]
+Type=simple
+Restart=always
+RestartSec=30
+User=bcuser
+Environment="PATH=/bin:/usr/bin:/home/bcuser/bin"
+ExecStart=/home/bcuser/bin/node.sh
+[Install]
+WantedBy=multi-user.target
+EOF'
 
 echo "Signaling completion to CloudFormation to continue with volume mount"
 /opt/aws/bin/cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $REGION
@@ -235,21 +272,21 @@ chown -R bcuser:bcuser /data
 chmod -R 755 /data
 
 if [ "$RESTORE_FROM_SNAPSHOT" == "false" ]; then
-  echo "Skipping restoration from snapshot. Starting docker-compose in 3 min."
-  cd /home/bcuser/node
-  echo "sudo su bcuser && /usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml up -d" | at now +3 minutes
+  echo "Skipping restoration from snapshot. Starting node"
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now base
 else
-  echo "Restoring data from snapshot"
-  chmod 766 /opt/start-from-snapshot.sh
-  /opt/download-snapshot.sh
-  if [ "$?" == 0 ]; then
-    echo "Snapshot download successful"
-  else
-    echo "Snapshot download failed, falling back to fresh sync"
-  fi
-  chown -R bcuser:bcuser /data
-  sudo su bcuser
-  /usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml up -d
+  echo "Restoring node from snapshot"
+  chmod +x /opt/restore-from-snapshot.sh
+  echo "/opt/restore-from-snapshot.sh" | at now + 1 min
+fi
+
+if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
+  echo "Signaling ASG lifecycle hook to complete"
+  TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
+  aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$AUTOSCALING_GROUP_NAME"  --region $AWS_REGION
 fi
 
 echo "All Done!!"
+set -e
