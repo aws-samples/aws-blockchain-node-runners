@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 echo "Script is starting..."
-ulimit -n 500000
 
 # Start the node
 cd /home/bcuser/node
