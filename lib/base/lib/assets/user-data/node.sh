@@ -273,8 +273,8 @@ chmod -R 755 /data
 
 if [ "$RESTORE_FROM_SNAPSHOT" == "false" ]; then
   echo "Skipping restoration from snapshot. Starting node"
-  sudo systemctl daemon-reload
-  sudo systemctl enable --now base
+  systemctl daemon-reload
+  systemctl enable --now base
 else
   echo "Restoring node from snapshot"
   chmod +x /opt/restore-from-snapshot.sh
