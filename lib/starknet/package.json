@@ -2,7 +2,7 @@
   "name": "aws-blockchain-node-runners-starknet",
   "version": "0.1.0",
   "bin": {
-    "starknet": "bin/starknet.js"
+    "starknet": "app.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -13,9 +13,5 @@
     "cdk_synth_single_node": "cdk synth starknet-single-node",
     "cdk_deploy_single_node": "cdk deploy starknet-single-node",
     "cdk_destroy_single_node": "cdk destroy starknet-single-node"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.11",
-    "@types/node": "^20.12.7"
   }
 }
