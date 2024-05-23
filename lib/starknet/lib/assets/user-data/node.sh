@@ -1,20 +1,23 @@
 #!/bin/bash
 set +e
 
-echo "AWS_REGION=${_AWS_REGION_}" >> /etc/environment
-echo "ASSETS_S3_PATH=${_ASSETS_S3_PATH_}" >> /etc/environment
-echo "STACK_NAME=${_STACK_NAME_}" >> /etc/environment
-echo "STACK_ID=${_STACK_ID_}" >> /etc/environment
-echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}" >> /etc/environment
-echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}" >> /etc/environment
-echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}" >> /etc/environment
-echo "STARKNET_NODE_VERSION=${_STARKNET_NODE_VERSION_}" >> /etc/environment
-echo "STARKNET_NETWORK_ID=${_STARKNET_NETWORK_ID_}" >> /etc/environment
-echo "STARKNET_L1_ENDPOINT=${_STARKNET_L1_ENDPOINT_}" >> /etc/environment
+{
+  echo "AWS_REGION=${_AWS_REGION_}"
+  echo "ASSETS_S3_PATH=${_ASSETS_S3_PATH_}"
+  echo "STACK_NAME=${_STACK_NAME_}"
+  echo "STACK_ID=${_STACK_ID_}"
+  echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}"
+  echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}"
+  echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}"
+  echo "STARKNET_NODE_VERSION=${_STARKNET_NODE_VERSION_}"
+  echo "STARKNET_NETWORK_ID=${_STARKNET_NETWORK_ID_}"
+  echo "STARKNET_L1_ENDPOINT=${_STARKNET_L1_ENDPOINT_}" 
+} >> /etc/environment
+
 source /etc/environment
 
-sudo apt-get -yqq update
-sudo apt-get -yqq install -y build-essential cargo pkg-config git upx-ucl libjemalloc-dev libjemalloc2 awscli jq unzip python3-pip
+apt-get -yqq update
+apt-get -yqq install -y build-essential cargo pkg-config git upx-ucl libjemalloc-dev libjemalloc2 awscli jq unzip python3-pip
 
 cd /opt
 
@@ -25,14 +28,14 @@ unzip -q assets.zip
 
 echo "Install and configure CloudWatch agent"
 wget -q https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-sudo dpkg -i -E amazon-cloudwatch-agent.deb
+dpkg -i -E amazon-cloudwatch-agent.deb
 
 echo 'Configuring CloudWatch Agent'
 mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
 cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
 
 echo "Starting CloudWatch Agent"
-sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 -a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
 systemctl status amazon-cloudwatch-agent
 
@@ -68,30 +71,31 @@ echo "Waiting for volumes to be available"
 sleep 60
 
 echo "Install Juno Starknet agent"
-pwd
-whoami
+
 cd /home/ubuntu
-pwd
+
 git clone --branch $STARKNET_NODE_VERSION --single-branch https://github.com/NethermindEth/juno.git juno-source
 cd /home/ubuntu/juno-source
 
 echo "Preparing EBS Volume"
 DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
-sudo mkfs -t xfs $DATA_VOLUME_ID
+mkfs -t xfs $DATA_VOLUME_ID
 sleep 10
 DATA_VOLUME_UUID=$(lsblk -fn -o UUID  $DATA_VOLUME_ID)
-DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /home/ubuntu/juno-source/juno-datadir xfs defaults 0 2"
+DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data xfs defaults 0 2"
 echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
 echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
 echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
 echo $DATA_VOLUME_FSTAB_CONF | sudo tee -a /etc/fstab
-sudo mkdir "juno-datadir"
-sudo mount -a
+mkdir "/data"
+mkdir "/data/juno"
+mount -a
+chown ubuntu:ubuntu -R /data
 
 echo "Install Go 1.22 Version"
-sudo snap info go
-sudo snap install go --channel=1.22/stable --classic
-whereis go
+snap info go
+snap install go --channel=1.22/stable --classic
+
 export GOPATH=/snap/bin/go
 go env|grep CACHE
 sudo su - ubuntu
@@ -139,10 +143,26 @@ EOF'
 sudo systemctl daemon-reload
 sudo systemctl enable --now starknet
 
+# Configuring logrotate
+sudo bash -c 'sudo cat > logrotate.starkneterr <<EOF
+/var/log/starknet/error.log {
+  rotate 7
+  daily
+  missingok
+  postrotate
+    systemctl kill -s USR1 starknet.service
+  endscript
+}
+EOF'
+
+sudo cp logrotate.starkneterr /etc/logrotate.d/starkneterr
+sudo systemctl restart logrotate.service
+
 echo "Configuring syncchecker script"
 cd /opt
 sudo mv /opt/sync-checker/syncchecker-starknet.sh /opt/syncchecker.sh
 sudo chmod +x /opt/syncchecker.sh
 
-(crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
+echo "*/5 * * * * /opt/syncchecker.sh" | crontab
 crontab -l
+echo "All done!"

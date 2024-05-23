@@ -134,7 +134,7 @@ export const SyncNodeCWDashboardJSON = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "elc_sync_block", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "starknet_current_block", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                 ],
                 "sparkline": true,
                 "view": "timeSeries",
@@ -159,7 +159,7 @@ export const SyncNodeCWDashboardJSON = {
                 "stat": "Maximum",
                 "period": 60,
                 "metrics": [
-                    [ "CWAgent", "elc_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "starknet_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                 ],
                 "title": "Starknet Client Blocks Behind"
             }
@@ -221,7 +221,7 @@ export const SyncNodeCWDashboardJSON = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "disk_used_percent", "path", "/home/ubuntu/juno-source/juno-datadir", "InstanceId", "${INSTANCE_ID}", "device", "nvme1n1", "fstype", "xfs", { "region": "${REGION}", "label": "/home/ubuntu/juno-source/juno-datadir" } ]
+                    [ "CWAgent", "disk_used_percent", "path", "/data", "InstanceId", "${INSTANCE_ID}", "device", "nvme1n1", "fstype", "xfs", { "region": "${REGION}", "label": "/data" } ]
                 ],
                 "sparkline": true,
                 "view": "singleValue",

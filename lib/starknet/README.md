@@ -87,8 +87,16 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
    > ```
 
+5. [OPTIONAL] If you are not planning to set your own `STARKNET_L1_ENDPOINT` URL, deploy Amazon Managed Blockchain (AMB) Access Ethereum node and wait about 35-70 minutes for the node to sync
 
-5. Deploy Starknet Full Node
+   ```bash
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/starknet
+   npx cdk deploy starknet-ethereum-l1-node --json --outputs-file starknet-ethereum-l1-node.json
+   ```
+   To watch the progress, open the [AMB Web UI](https://console.aws.amazon.com/managedblockchain/home), click the name of your target network from the list (Mainnet, Goerly, etc.) and watch the status of the node to change from `Creating` to `Available`.
+
+6. Deploy Starknet Full Node
 
    ```bash
    pwd
@@ -143,7 +151,9 @@ A script on the Starknet node publishes current block and blocks behind metrics 
 
    # Undeploy Single Node
    npx cdk destroy starknet-single-node
-
+   
+   # Undeploy AMB Etheruem node
+   npx cdk destroy starknet-ethereum-l1-node
 
    # Delete all common components like IAM role and Security Group
    npx cdk destroy starknet-common

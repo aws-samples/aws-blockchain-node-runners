@@ -5,7 +5,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as path from "path";
 import * as fs from "fs";
-import * as nodeCwDashboard from "./assets/node-cw-dashboard"
+import * as nodeCwDashboard from "./constructs/node-cw-dashboard"
 import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 import * as nag from "cdk-nag";
 import { SingleNodeConstruct } from "../../constructs/single-node"
@@ -42,6 +42,14 @@ export class StarknetSingleNodeStack extends cdk.Stack {
             dataVolume,
             starknetL1Endpoint,
         } = props;
+        
+        let starknetL1EndpointURL: string;
+        if (starknetL1Endpoint == constants.NoneValue){
+            // STARKNET_L1_ENDPOINT seems to be empty, trying to connect with pre-provioned AMB Access Ethereum URL
+            starknetL1EndpointURL = cdk.Fn.importValue("AmbEthereumNodeRpcUrlWithBillingToken");
+        } else {
+            starknetL1EndpointURL = starknetL1Endpoint
+        }
 
         // Using default VPC
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
@@ -102,7 +110,7 @@ export class StarknetSingleNodeStack extends cdk.Stack {
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
             _STARKNET_NODE_VERSION_: starknetNodeVersion,
             _STARKNET_NETWORK_ID_: starknetNetworkId,
-            _STARKNET_L1_ENDPOINT_: starknetL1Endpoint,
+            _STARKNET_L1_ENDPOINT_: starknetL1EndpointURL,
         });
         node.instance.addUserData(modifiedInitNodeScript);
 
