@@ -1,5 +1,9 @@
 # Sample AWS Blockchain Node Runner app for Scroll Nodes
 
+| Contributed by |
+|:--------------------:|
+| [@alickmail](https://github.com/alickmail) |
+
 [Scroll](https://docs.scroll.io/en/getting-started/overview/) is a "Layer 2" scaling solution for Ethereum leveraging zero knowledge proofs. This blueprint helps to deploy Scroll nodes (L2Geth) on AWS as RPC nodes and use [Amazon Managed Blockchain Access Ethereum](https://docs.aws.amazon.com/managed-blockchain/latest/ethereum-dev/ethereum-concepts.html) node for "Layer 1". It is meant to be used for development, testing or Proof of Concept purposes.
 
 ## Overview of Deployment Architectures for Single Node setups

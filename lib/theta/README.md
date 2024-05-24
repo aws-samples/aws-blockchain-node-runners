@@ -117,7 +117,6 @@ npm install
    npx cdk deploy edge-common --parameters edgeNodePassword=$EDGE_NODE_PASSWORD
    ```
 
-  
 
 ### Single RPC Edge Node
 
@@ -156,7 +155,8 @@ Alternatively, you can manually check. Run the following query from within a Ses
    }
    ```
 
-3. Once the startup is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. 
+
+3. Once the startup is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet.
 
 
 
