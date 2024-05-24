@@ -21,4 +21,5 @@ export interface StarknetBaseNodeConfig extends configTypes.BaseNodeConfig {
     starknetNetworkId: StarknetNetworkId;
     starknetNodeVersion: string;
     dataVolume: StarknetDataVolumeConfig;
+    snapshotUrl: string;
 }

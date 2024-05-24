@@ -34,6 +34,7 @@ new StarknetSingleNodeStack(app, "starknet-single-node", {
   starknetNetworkId: config.baseNodeConfig.starknetNetworkId,
   starknetL1Endpoint: config.baseNodeConfig.starknetL1Endpoint,
   starknetNodeVersion: config.baseNodeConfig.starknetNodeVersion,
+  snapshotUrl: config.baseNodeConfig.snapshotUrl
 });
 
 // Security Check

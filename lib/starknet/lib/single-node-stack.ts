@@ -20,6 +20,7 @@ export interface StarknetSingleNodeStackProps extends cdk.StackProps {
     starknetNodeVersion: string;
     dataVolume: configTypes.StarknetDataVolumeConfig;
     starknetL1Endpoint: string;
+    snapshotUrl: string;
 }
 
 export class StarknetSingleNodeStack extends cdk.Stack {
@@ -41,6 +42,7 @@ export class StarknetSingleNodeStack extends cdk.Stack {
             starknetNodeVersion,
             dataVolume,
             starknetL1Endpoint,
+            snapshotUrl,
         } = props;
         
         let starknetL1EndpointURL: string;
@@ -111,6 +113,7 @@ export class StarknetSingleNodeStack extends cdk.Stack {
             _STARKNET_NODE_VERSION_: starknetNodeVersion,
             _STARKNET_NETWORK_ID_: starknetNetworkId,
             _STARKNET_L1_ENDPOINT_: starknetL1EndpointURL,
+            _SNAPSHOT_URL_: props.snapshotUrl,
         });
         node.instance.addUserData(modifiedInitNodeScript);
 

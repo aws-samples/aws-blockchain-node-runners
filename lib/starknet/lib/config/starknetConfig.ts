@@ -37,4 +37,5 @@ export const baseNodeConfig: configTypes.StarknetBaseNodeConfig = {
         iops: process.env.STARKNET_DATA_VOL_IOPS ? parseInt(process.env.STARKNET_DATA_VOL_IOPS): 3000,
         throughput: process.env.STARKNET_DATA_VOL_THROUGHPUT ? parseInt(process.env.STARKNET_DATA_VOL_THROUGHPUT): 250,
     },
+    snapshotUrl: process.env.STARKNET_SNAPSHOT_URL || constants.NoneValue,
 };

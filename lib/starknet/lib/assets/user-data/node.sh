@@ -11,13 +11,32 @@ set +e
   echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}"
   echo "STARKNET_NODE_VERSION=${_STARKNET_NODE_VERSION_}"
   echo "STARKNET_NETWORK_ID=${_STARKNET_NETWORK_ID_}"
-  echo "STARKNET_L1_ENDPOINT=${_STARKNET_L1_ENDPOINT_}" 
+  echo "STARKNET_L1_ENDPOINT=${_STARKNET_L1_ENDPOINT_}"
+  echo "SNAPSHOT_URL=${_SNAPSHOT_URL_}"
 } >> /etc/environment
 
 source /etc/environment
 
+arch=$(uname -m)
+
 apt-get -yqq update
 apt-get -yqq install -y build-essential cargo pkg-config git upx-ucl libjemalloc-dev libjemalloc2 awscli jq unzip python3-pip
+
+cd /tmp
+
+# install aria2 a p2p downloader
+
+if [ "$arch" == "x86_64" ]; then
+  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
+  tar jxvf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
+  cd aria2-1.36.0-linux-gnu-64bit-build1/
+  make install
+else
+  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
+  tar jxvf aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
+  cd aria2-1.36.0-linux-gnu-arm-rbpi-build1/
+  make install
+fi
 
 cd /opt
 
@@ -70,27 +89,45 @@ fi
 echo "Waiting for volumes to be available"
 sleep 60
 
+mkdir "/data"
+
+if [[ "$DATA_VOLUME_TYPE" == "instance-store" ]]; then
+  echo "Data volume type is instance store"
+
+  cd /opt
+  chmod +x /opt/setup-instance-store-volumes.sh
+
+  (crontab -l; echo "@reboot /opt/setup-instance-store-volumes.sh >/tmp/setup-instance-store-volumes.log 2>&1") | crontab -
+  crontab -l
+
+  DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk 'max < $4 {max = $4; vol = $1} END {print vol}')
+
+else
+  echo "Data volume type is EBS"
+
+  DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
+fi
+
+mkfs -t ext4 $DATA_VOLUME_ID
+sleep 10
+DATA_VOLUME_UUID=$(lsblk -fn -o UUID $DATA_VOLUME_ID)
+DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data ext4 defaults 0 2"
+echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
+echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
+echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
+echo $DATA_VOLUME_FSTAB_CONF | tee -a /etc/fstab
+mount -a
+
+mkdir "/data/juno"
+mount -a
+chown ubuntu:ubuntu -R /data
+
 echo "Install Juno Starknet agent"
 
 cd /home/ubuntu
 
 git clone --branch $STARKNET_NODE_VERSION --single-branch https://github.com/NethermindEth/juno.git juno-source
 cd /home/ubuntu/juno-source
-
-echo "Preparing EBS Volume"
-DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
-mkfs -t xfs $DATA_VOLUME_ID
-sleep 10
-DATA_VOLUME_UUID=$(lsblk -fn -o UUID  $DATA_VOLUME_ID)
-DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data xfs defaults 0 2"
-echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
-echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
-echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
-echo $DATA_VOLUME_FSTAB_CONF | sudo tee -a /etc/fstab
-mkdir "/data"
-mkdir "/data/juno"
-mount -a
-chown ubuntu:ubuntu -R /data
 
 echo "Install Go 1.22 Version"
 snap info go
@@ -115,7 +152,7 @@ sudo chmod +x /home/ubuntu/bin/node.sh
 sudo mkdir /var/log/starknet
 sudo chown ubuntu:ubuntu /var/log/starknet
 
-echo "Starting starknet as a service"
+echo "Configuring starknet as a service"
 sudo bash -c 'cat > /etc/systemd/system/starknet.service <<EOF
 [Unit]
 Description=Starknet Node
@@ -140,8 +177,15 @@ StandardError=file:/var/log/starknet/error.log
 WantedBy=multi-user.target
 EOF'
 
-sudo systemctl daemon-reload
-sudo systemctl enable --now starknet
+if [ "$RESTORE_FROM_SNAPSHOT" == "false" ]; then
+  echo "Skipping restoration from snapshot. Starting node"
+  systemctl daemon-reload
+  systemctl enable --now starknet
+else
+  echo "Restoring node from snapshot"
+  chmod +x /opt/restore-from-snapshot.sh
+  echo "/opt/restore-from-snapshot.sh" | at now + 1 min
+fi
 
 # Configuring logrotate
 sudo bash -c 'sudo cat > logrotate.starkneterr <<EOF
@@ -164,5 +208,5 @@ sudo mv /opt/sync-checker/syncchecker-starknet.sh /opt/syncchecker.sh
 sudo chmod +x /opt/syncchecker.sh
 
 echo "*/5 * * * * /opt/syncchecker.sh" | crontab
-crontab -l
+crontab -l 
 echo "All done!"

@@ -23,7 +23,8 @@ describe("StarknetSingleNodeStack", () => {
       starknetNodeVersion: config.baseNodeConfig.starknetNodeVersion,
       dataVolume: config.baseNodeConfig.dataVolume,
       starknetNetworkId: config.baseNodeConfig.starknetNetworkId,
-      starknetL1Endpoint: config.baseNodeConfig.starknetL1Endpoint
+      starknetL1Endpoint: config.baseNodeConfig.starknetL1Endpoint,
+      snapshotUrl: config.baseNodeConfig.snapshotUrl
     });
 
     template = Template.fromStack(starknetSingleNodeStack);
