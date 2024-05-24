@@ -1,0 +1,24 @@
+{
+  "name": "aws-blockchain-node-runners-bsc",
+  "version": "0.1.0",
+  "bin": {
+    "scroll": "bin/bsc.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk",
+    "cdk_deploy_common": "cdk deploy edge-common",
+    "cdk_deploy_ha_nodes": "cdk deploy edge-single-node",
+    "cdk_destroy_common": "cdk destroy edge-common",
+    "cdk_destroy_ha_nodes": "cdk destroy edge-single-nodes"
+  },
+  "dependencies": {
+    "@types/node": "^20.10.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12"
+  }
+}
