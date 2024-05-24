@@ -6,10 +6,12 @@ LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}
 AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}
 RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}
 ASSETS_S3_PATH=${_ASSETS_S3_PATH_}
+DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}
 {
   echo "LIFECYCLE_HOOK_NAME=$LIFECYCLE_HOOK_NAME"
   echo "AUTOSCALING_GROUP_NAME=$AUTOSCALING_GROUP_NAME"
   echo "ASSETS_S3_PATH=$ASSETS_S3_PATH"
+  echo "DATA_VOLUME_TYPE=$DATA_VOLUME_TYPE"
 } >> /etc/environment
 
 arch=$(uname -m)
@@ -34,6 +36,7 @@ yum -y install amazon-cloudwatch-agent collectd jq yq gcc ncurses-devel aws-cfn-
 wget $YQ_URI -O /usr/bin/yq && chmod +x /usr/bin/yq
 
 # install aria2 a p2p downloader
+cd /tmp
 
 if [ "$arch" == "x86_64" ]; then
   wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
@@ -235,36 +238,47 @@ ExecStart=/home/bcuser/bin/node.sh
 WantedBy=multi-user.target
 EOF'
 
-echo "Signaling completion to CloudFormation to continue with volume mount"
-/opt/aws/bin/cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $REGION
+if [[ "$LIFECYCLE_HOOK_NAME" == "none" ]]; then
+  echo "We run single node setup. Signaling completion to CloudFormation to continue with volume mount"
+  /opt/aws/bin/cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $REGION
+fi
 
 echo "Preparing data volume"
 
-echo "Wait for one minute for the volume to be available"
-sleep 60
+echo "Wait for one minute for the volume to become available"
+sleep 60s
 
-if $(lsblk | grep -q nvme1n1); then
-  echo "nvme1n1 is found. Configuring attached storage"
+if [[ "$DATA_VOLUME_TYPE" == "instance-store" ]]; then
+  echo "Data volume type is instance store"
 
-  if [ "$FORMAT_DISK" == "false" ]; then
-    echo "Not creating a new filesystem in the disk. Existing data might be present!!"
-  else
-    mkfs -t ext4 /dev/nvme1n1
-  fi
+  cd /opt
+  chmod +x /opt/setup-instance-store-volumes.sh
 
-  sleep 10
-  # Define the line to add to fstab
-  uuid=$(lsblk -n -o UUID /dev/nvme1n1)
-  line="UUID=$uuid /data ext4 defaults 0 2"
+  (crontab -l; echo "@reboot /opt/setup-instance-store-volumes.sh >/tmp/setup-instance-store-volumes.log 2>&1") | crontab -
+  crontab -l
 
-  # Write the line to fstab
-  echo $line | sudo tee -a /etc/fstab
-
-  mount -a
+  DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk 'max < $4 {max = $4; vol = $1} END {print vol}')
 
 else
-  echo "nvme1n1 is not found. Not doing anything"
+  echo "Data volume type is EBS"
+
+  DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
 fi
+
+mkfs -t ext4 $DATA_VOLUME_ID
+echo "waiting for volume to get UUID"
+  OUTPUT=0;
+  while [ "$OUTPUT" = 0 ]; do 
+    DATA_VOLUME_UUID=$(lsblk -fn -o UUID $DATA_VOLUME_ID)
+    OUTPUT=$(echo $DATA_VOLUME_UUID | grep -c - $2)
+    echo $OUTPUT
+  done
+DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data ext4 defaults 0 2"
+echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
+echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
+echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
+echo $DATA_VOLUME_FSTAB_CONF | tee -a /etc/fstab
+mount -a
 
 lsblk -d
 
