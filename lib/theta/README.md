@@ -118,7 +118,6 @@ npm install
    ```
 
 
-
 ### Single RPC Edge Node
 
 1. Deploy the stack
@@ -155,6 +154,7 @@ Alternatively, you can manually check. Run the following query from within a Ses
       }
    }
    ```
+
 
 3. Once the startup is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet.
 
