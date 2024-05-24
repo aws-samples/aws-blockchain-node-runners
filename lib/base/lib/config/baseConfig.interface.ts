@@ -23,3 +23,9 @@ export interface BaseBaseNodeConfig extends configTypes.BaseNodeConfig {
     l1ConsensusEndpoint: string;
     snapshotUrl: string;
 }
+
+export interface BaseHAConfig {
+    albHealthCheckGracePeriodMin: number;
+    heartBeatDelayMin: number;
+    numberOfNodes: number;
+}

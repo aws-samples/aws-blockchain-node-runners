@@ -15,15 +15,17 @@ describe("BaseSingleNodeStack", () => {
 
     // Create the BaseSingleNodeStack.
     baseSingleNodeStack = new BaseSingleNodeStack(app, "base-single-node", {
-      stackName: `base-single-node-${config.baseNodeConfig.baseNetworkId}`,
+      stackName: `base-single-node-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-
+    
       instanceType: config.baseNodeConfig.instanceType,
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
       baseNetworkId: config.baseNodeConfig.baseNetworkId,
+      baseNodeConfiguration: config.baseNodeConfig.baseNodeConfiguration,
       restoreFromSnapshot: config.baseNodeConfig.restoreFromSnapshot,
       l1ExecutionEndpoint: config.baseNodeConfig.l1ExecutionEndpoint,
       l1ConsensusEndpoint: config.baseNodeConfig.l1ConsensusEndpoint,
+      snapshotUrl: config.baseNodeConfig.snapshotUrl,
       dataVolume: config.baseNodeConfig.dataVolume,
     });
 
@@ -111,7 +113,7 @@ describe("BaseSingleNodeStack", () => {
       ],
       IamInstanceProfile: Match.anyValue(),
       ImageId: Match.anyValue(),
-      InstanceType: "m7g.2xlarge",
+      InstanceType: "m7g.4xlarge",
       Monitoring: true,
       PropagateTagsToVolumeOnCreation: true,
       SecurityGroupIds: Match.anyValue(),
@@ -124,7 +126,7 @@ describe("BaseSingleNodeStack", () => {
       Encrypted: true,
       Iops: 5000,
       MultiAttachEnabled: false,
-      Size: 5100,
+      Size: 7200,
       Throughput: 700,
       VolumeType: "gp3"
     })
@@ -145,7 +147,7 @@ describe("BaseSingleNodeStack", () => {
         "Fn::Join": [
           "",
           [
-           "base-single-node-mainnet-",
+           "base-single-node-full-mainnet-",
            {
             "Ref": Match.anyValue()
            }

@@ -122,7 +122,7 @@ npx cdk deploy base-common
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
    > ```
 
-### From your Cloud9: Deploy Single Node
+### Option 1: Deploy Single Node
 
 1. For L1 node you you can set your own URLs in `BASE_L1_EXECUTION_ENDPOINT` and `BASE_L1_CONSENSUS_ENDPOINT` properties of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or you can run your own Ethereum node [with Node Runner Ethereum blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum) (tested with geth-lighthouse combination). For example:
 
@@ -163,11 +163,47 @@ aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545
 ```
 
+### Option 2: Highly Available RPC Nodes
+
+1. For L1 node you you can set your own URLs in `BASE_L1_EXECUTION_ENDPOINT` and `BASE_L1_CONSENSUS_ENDPOINT` properties of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or you can run your own Ethereum node [with Node Runner Ethereum blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum) (tested with geth-lighthouse combination). For example:
+
+```bash
+#For Sepolia:
+BASE_L1_EXECUTION_ENDPOINT="https://ethereum-sepolia-rpc.publicnode.com"
+BASE_L1_CONSENSUS_ENDPOINT="https://ethereum-sepolia-beacon-api.publicnode.com"
+```
+
+2. Deploy Base RPC Node and wait for it to sync. For Mainnet it might a day when using snapshots or about a week if syncing from block 0. You can use snapshots provided by the Base team by setting `BASE_RESTORE_FROM_SNAPSHOT="true"` in `.env` file.
+
+   ```bash
+      pwd
+      # Make sure you are in aws-blockchain-node-runners/lib/base
+      npx cdk deploy base-ha-nodes --json --outputs-file ha-nodes-deploy.json
+   ```
+
+2. Give the new RPC **full** nodes about 2-3 hours (24 hours for **archive** node) to initialize and then run the following query against the load balancer behind the RPC node created
+
+   ```bash
+      export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
+      echo $RPC_ALB_URL
+   ```
+
+   Periodically check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the load balancer fronting your nodes:
+
+   ```bash
+   curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
+   --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+   ```
+
+**NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
+
 ### Monitoring
-Every 5 minutes a script on the Base node publishes to CloudWatch service the metrics for current block for L1/L2 clients as well as blocks behind metric for L1 and minutes buehind for L2. When the node is fully synced the blocks behind metric should get to 4 and minutes behind should get down to 0. To see the metrics:
+Every 5 minutes a script on the Base node publishes to CloudWatch service the metrics for current block for L1/L2 clients as well as blocks behind metric for L1 and minutes behind for L2. When the node is fully synced the blocks behind metric should get to 4 and minutes behind should get down to 0. To see the metrics for **single node only**:
 
 - Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
 - Open Dashboards and select `base-single-node-<network>-<your_ec2_instance_id>` from the list of dashboards.
+
+Metrics for **ha nodes** configuration is not yet implemented (contributions are welcome!)
 
 ## From your Cloud9: Clear up and undeploy everything
 
@@ -183,6 +219,9 @@ pwd
 
 # Undeploy Single Node
 npx cdk destroy base-single-node
+
+# Undeploy HA Nodes
+npx cdk destroy base-ha-nodes
 
 # Delete all common components like IAM role and Security Group
 npx cdk destroy base-common

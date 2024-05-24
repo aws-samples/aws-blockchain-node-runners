@@ -39,3 +39,9 @@ export const baseNodeConfig: configTypes.BaseBaseNodeConfig = {
         throughput: process.env.BASE_DATA_VOL_THROUGHPUT ? parseInt(process.env.BASE_DATA_VOL_THROUGHPUT): 700,
     },
 };
+
+export const haNodeConfig: configTypes.BaseHAConfig = {
+    albHealthCheckGracePeriodMin: process.env.BASE_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN ? parseInt(process.env.BASE_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN) : 10,
+    heartBeatDelayMin: process.env.BASE_HA_NODES_HEARTBEAT_DELAY_MIN ? parseInt(process.env.BASE_HA_NODES_HEARTBEAT_DELAY_MIN) : 40,
+    numberOfNodes: process.env.BASE_HA_NUMBER_OF_NODES ? parseInt(process.env.BASE_HA_NUMBER_OF_NODES) : 2
+};
