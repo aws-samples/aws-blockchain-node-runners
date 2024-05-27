@@ -35,7 +35,7 @@ yum update -y
 yum -y install amazon-cloudwatch-agent collectd jq yq gcc ncurses-devel aws-cfn-bootstrap zstd
 wget $YQ_URI -O /usr/bin/yq && chmod +x /usr/bin/yq
 
-# install aria2 a p2p downloader
+echo " Installing aria2 a p2p downloader"
 cd /tmp
 
 if [ "$arch" == "x86_64" ]; then
@@ -49,6 +49,14 @@ else
   cd aria2-1.36.0-linux-gnu-arm-rbpi-build1/
   make install
 fi
+
+echo " Installing s5cmd"
+cd /opt
+wget -q $S5CMD_URI -O s5cmd.tar.gz
+tar -xf s5cmd.tar.gz
+chmod +x s5cmd
+mv s5cmd /usr/bin
+s5cmd version
 
 cd /opt
 
@@ -83,7 +91,6 @@ yum install -y $SSM_AGENT_BINARY_URI
 REGION=${_REGION_}
 STACK_NAME=${_STACK_NAME_}
 RESTORE_FROM_SNAPSHOT=${_RESTORE_FROM_SNAPSHOT_}
-FORMAT_DISK=${_FORMAT_DISK_}
 NETWORK_ID=${_NETWORK_ID_}
 NODE_CONFIG=${_NODE_CONFIG_}
 L1_EXECUTION_ENDPOINT=${_L1_EXECUTION_ENDPOINT_}
@@ -290,9 +297,15 @@ if [ "$RESTORE_FROM_SNAPSHOT" == "false" ]; then
   systemctl daemon-reload
   systemctl enable --now base
 else
-  echo "Restoring node from snapshot"
-  chmod +x /opt/restore-from-snapshot.sh
-  echo "/opt/restore-from-snapshot.sh" | at now + 1 min
+  if [ "$NODE_CONFIG" == "archive" ]; then
+    echo "Restoring archive node from snapshot over s3"
+    chmod +x /opt/restore-from-snapshot-archive-s3.sh
+    echo "/opt/restore-from-snapshot-archive-s3.sh" | at now + 1 min
+  else 
+    echo "Restoring full node from snapshot over http"
+    chmod +x /opt/restore-from-snapshot-http.sh
+    echo "/opt/restore-from-snapshot-http.sh" | at now + 1 min
+  fi
 fi
 
 if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then

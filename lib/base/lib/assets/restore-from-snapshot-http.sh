@@ -16,7 +16,6 @@ if [ "$SNAPSHOT_URL" == "none" ] || [ -z "${SNAPSHOT_URL}" ]; then
   SNAPSHOT_URL=https://$NETWORK_ID-$NODE_CONFIG-snapshots.base.org/$LATEST_SNAPSHOT_FILE_NAME
 fi
 
-# take about 1 hour to download the Snapshot
 while (( SNAPSHOT_DOWNLOAD_STATUS != 0 ))
 do
         PIDS=$(pgrep aria2c)
