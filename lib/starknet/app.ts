@@ -27,7 +27,7 @@ new StarknetAMBEthereumSingleNodeStack(app, "starknet-ethereum-l1-node", {
 new StarknetSingleNodeStack(app, "starknet-single-node", {
   stackName: `starknet-single-node-${config.baseNodeConfig.starknetNetworkId}`,
   env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-  
+
   instanceType: config.baseNodeConfig.instanceType,
   instanceCpuType: config.baseNodeConfig.instanceCpuType,
   dataVolume: config.baseNodeConfig.dataVolume,

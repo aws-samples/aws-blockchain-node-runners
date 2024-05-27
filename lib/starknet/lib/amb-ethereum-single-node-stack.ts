@@ -40,7 +40,7 @@ export class StarknetAMBEthereumSingleNodeStack extends cdk.Stack {
             value: ambEthereumNode.wssRpcUrlWithBillingToken,
             exportName: "AmbEthereumNodeRpcUrlWithBillingToken",
         });
-        
+
         // Adding suppressions to the stack
         nag.NagSuppressions.addResourceSuppressions(
             this,

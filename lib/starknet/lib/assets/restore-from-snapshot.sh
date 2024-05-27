@@ -46,6 +46,7 @@ tar -xvf  $SNAPSHOT_DIR/$SNAPSHOT_FILE_NAME -C /data 2>&1 | tee unzip.log && ech
 
 echo "Decompresed snapshot, cleaning up..."
 
+rm -f /data/juno
 mv /data/juno_$STARKNET_NETWORK_ID /data/juno && \
 rm -rf $SNAPSHOT_DIR/$SNAPSHOT_FILE_NAME
 

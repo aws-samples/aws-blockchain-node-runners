@@ -109,7 +109,13 @@ else
 fi
 
 mkfs -t ext4 $DATA_VOLUME_ID
-sleep 10
+echo "waiting for volume to get UUID"
+  OUTPUT=0;
+  while [ "$OUTPUT" = 0 ]; do
+    DATA_VOLUME_UUID=$(lsblk -fn -o UUID $DATA_VOLUME_ID)
+    OUTPUT=$(echo $DATA_VOLUME_UUID | grep -c - $2)
+    echo $OUTPUT
+  done
 DATA_VOLUME_UUID=$(lsblk -fn -o UUID $DATA_VOLUME_ID)
 DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data ext4 defaults 0 2"
 echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
@@ -208,5 +214,5 @@ sudo mv /opt/sync-checker/syncchecker-starknet.sh /opt/syncchecker.sh
 sudo chmod +x /opt/syncchecker.sh
 
 echo "*/5 * * * * /opt/syncchecker.sh" | crontab
-crontab -l 
+crontab -l
 echo "All done!"

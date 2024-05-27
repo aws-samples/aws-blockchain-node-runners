@@ -7,21 +7,19 @@ EC2_INTERNAL_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.
 STARKNET_SYNC_STATS=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"starknet_syncing","params":[],"id":1}' http://$EC2_INTERNAL_IP:6060 | jq -r ".result")
 
 if [[ "$STARKNET_SYNC_STATS" == "false" ]]; then
-    echo "Node is fully synced. No syncing data available."
-    exit 0
+    STARKNET_CURRENT_BLOCK=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"starknet_blockNumber","params":[],"id":1}' http://$EC2_INTERNAL_IP:6060 | jq -r ".result")
+    STARKNET_HIGHEST_BLOCK=$STARKNET_CURRENT_BLOCK
 else
     # Extract current and highest block numbers from the syncing status
     STARKNET_CURRENT_BLOCK=$(echo "$STARKNET_SYNC_STATS" | jq -r ".current_block_num")
     STARKNET_HIGHEST_BLOCK=$(echo "$STARKNET_SYNC_STATS" | jq -r ".highest_block_num")
-
-    # Echo the current and highest block numbers for verification
-    echo "Current Block: $STARKNET_CURRENT_BLOCK"
-    echo "Highest Block: $STARKNET_HIGHEST_BLOCK"
 fi
 
 STARKNET_BLOCKS_BEHIND="$((STARKNET_HIGHEST_BLOCK-STARKNET_CURRENT_BLOCK))"
-
-    echo "STARKNET_BLOCKS_BEHIND Block: $STARKNET_BLOCKS_BEHIND"
+# Echo the current and highest block numbers for verification
+echo "Current Block: $STARKNET_CURRENT_BLOCK"
+echo "Highest Block: $STARKNET_HIGHEST_BLOCK"
+echo "STARKNET_BLOCKS_BEHIND Block: $STARKNET_BLOCKS_BEHIND"
 
 # Sending data to CloudWatch
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)

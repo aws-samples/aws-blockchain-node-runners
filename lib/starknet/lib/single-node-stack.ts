@@ -44,7 +44,7 @@ export class StarknetSingleNodeStack extends cdk.Stack {
             starknetL1Endpoint,
             snapshotUrl,
         } = props;
-        
+
         let starknetL1EndpointURL: string;
         if (starknetL1Endpoint == constants.NoneValue){
             // STARKNET_L1_ENDPOINT seems to be empty, trying to connect with pre-provioned AMB Access Ethereum URL

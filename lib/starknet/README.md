@@ -151,7 +151,7 @@ A script on the Starknet node publishes current block and blocks behind metrics 
 
    # Undeploy Single Node
    npx cdk destroy starknet-single-node
-   
+
    # Undeploy AMB Etheruem node
    npx cdk destroy starknet-ethereum-l1-node
 

@@ -23,7 +23,7 @@ export const baseConfig: configTypes.StarknetBaseConfig = {
     region: process.env.AWS_REGION || "us-east-1",
 }
 
-export const baseNodeConfig: configTypes.StarknetBaseNodeConfig = {    
+export const baseNodeConfig: configTypes.StarknetBaseNodeConfig = {
     ambEntereumNodeNetworkId: <configTypes.AMBEthereumNodeNetworkId> process.env.AMB_ENTEREUM_NODE_NETWORK_ID || "mainnet",
     ambEntereumNodeInstanceType: process.env.AMB_ETHEREUM_NODE_INSTANCE_TYPE || "bc.m5.xlarge",
     instanceType: new ec2.InstanceType(process.env.STARKNET_INSTANCE_TYPE ? process.env.STARKNET_INSTANCE_TYPE : "m6a.2xlarge"),
