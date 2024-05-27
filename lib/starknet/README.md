@@ -17,8 +17,39 @@
 3. You will need access to a fully-synced Ethereum RPC endpoint before running Juno.
 4. The Starknet node sends various monitoring metrics for both EC2 and Starknet nodes to Amazon CloudWatch.
 
+## Additional Materials
 
-## Hardware Requirements
+<details>
+
+<summary>Well-Architected Checklist</summary>
+
+This is the Well-Architected checklist for Stacks nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+
+| Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
+|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | There are no ports open to public. RPC port 6060 is open only IP addresses from the same VPC. |
+|                         |                                   | Traffic inspection                                                               | AWS WAF could be implemented for traffic inspection. Additional charges will apply.  |
+|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Ubuntu Server 20.04 AMI. You may choose to run hardening scripts on it.  |
+|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
+|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes.  |
+|                         |                                   | Use encrypted Amazon Simple Storage Service (Amazon S3) buckets                  | This solution uses Amazon S3 managed keys (SSE-S3) encryption.  |
+|                         | Data protection in transit        | Use TLS                                                                          | TLS is not used in this solution. Port 6060 is the only open port, but you may create HTTPS listener with self signed certificate if TLS is desired.  |
+|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
+|                         |                                   | Following principle of least privilege access                                    | In all node types, root user is not used (using special user "ubuntu" instead).  |
+|                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions.  |
+| Cost optimization       | Service selection                 | Use cost effective resources                                                     | 1. AMD-based instances are used for Consensus and RPC node to save the costs. Consider compiling Graviton-based binaries to improve costs for compute.<br/>2. Cost-effective EBS gp3 are preferred instead of io2. |
+|                         | Cost awareness                    | Estimate costs                                                                   | Single RPC node with `m6a.2xlarge` EBS gp3 volume about 600 GB with On-Demand pricing will cost around US$323.29 per month in the US East (N. Virginia) region not including network requests for follower nodes. More analysis needed. |
+| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution ues only for a single-node deployment. If the running node failed, you will need to undeploy the existing stack and re-deploy the node again. |
+|                         | Data backup                       | How is data backed up?                                                           | Considering blockchain data is replicated by nodes automatically and Starknet nodes sync from start within an hour and a half, we don't use any additional mechanisms to backup the data.  |
+|                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
+| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance, i.e. AWS AMD-based Amazon EC2 instances.  |
+|                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. gp3 Amazon EBS volumes with optimal IOPS and throughput.  |
+|                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the Starknet community.  |
+| Operational excellence  | Workload health                   | How is health of workload determined?                                            | We rely on metrics reported to CloudWatch by `/opt/syncchecker.sh` script. |
+| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses AMD-powered instances. There is a potential to use AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2.  |
+</details>
+
+### Hardware Requirements
 
 **Minimum for Starknet node**
 
@@ -28,9 +59,7 @@
 **Recommended for Starknet node**
 
 - Instance type [m6a.2xlarge](https://aws.amazon.com/ec2/instance-types/m6a/).
-- 250GB EBS gp3 storage with at least 3000 IOPS.`
-
-</details>
+- 600GB EBS gp3 storage with at least 3000 IOPS to store and upzip snapshots.
 
 ## Setup Instructions
 
