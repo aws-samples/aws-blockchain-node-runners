@@ -13,8 +13,13 @@ if [ -n "$DATA_VOLUME_ID" ]; then
 
     mkfs.ext4 $DATA_VOLUME_ID
     echo "Data volume formatted. Mounting..."
-    # Waiting wihtouht using sleep as it sometimes just hangs....
-    coproc read -t 10 && wait "$!" || true
+    echo "waiting for volume to get UUID"
+    OUTPUT=0;
+    while [ "$OUTPUT" = 0 ]; do 
+      DATA_VOLUME_UUID=$(lsblk -fn -o UUID $DATA_VOLUME_ID)
+      OUTPUT=$(echo $DATA_VOLUME_UUID | grep -c - $2)
+      echo $OUTPUT
+    done
     DATA_VOLUME_UUID=$(lsblk -fn -o UUID  $DATA_VOLUME_ID)
     DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data ext4 defaults 0 2"
     echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
