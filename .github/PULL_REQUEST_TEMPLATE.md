@@ -9,6 +9,10 @@ Consult the [CONTRIBUTING](https://github.com/aws-samples/aws-blockchain-node-ru
 
 <!-- What inspired you to submit this pull request? -->
 
+### License
+
+By submitting this pull request, I confirm that you can use, modify, copy, and redistribute this contribution, under the terms of your choice.
+
 ### More
 
 - [ ] Yes, I have tested the PR using my local account setup (Provide any test evidence report under Additional Notes)
