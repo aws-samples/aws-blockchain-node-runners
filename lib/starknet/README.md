@@ -87,7 +87,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
    > ```
 
-5. [OPTIONAL] If you are not planning to set your own `STARKNET_L1_ENDPOINT` URL, deploy Amazon Managed Blockchain (AMB) Access Ethereum node and wait about 35-70 minutes for the node to sync
+5. [OPTIONAL] You can use Amazon Managed Blockchain (AMB) Access Ethereum node as L1 node. To do that, leave `STARKNET_L1_ENDPOINT` URL empty and, deploy Amazon Managed Blockchain (AMB) Access Ethereum node. Wait about 35-70 minutes for the node to sync.
 
    ```bash
    pwd
@@ -103,7 +103,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    # Make sure you are in aws-blockchain-node-runners/lib/starknet
    npx cdk deploy starknet-single-node --json --outputs-file single-node-deploy.json
    ```
-   After starting the node you will need to wait for the initial synchronization process to finish. To see the progress, you may use SSM to connect into EC2 first and watch the log like this:
+   After starting the node you will need to wait for the initial synchronization process to finish. When using snapshot, the node should become available within a couple of hours, but migh take about 3-4 days to sync it from block 0. To check the progress, you may use SSM to connect into EC2 first and watch the log like this:
 
    ```bash
    export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
@@ -112,6 +112,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
    tail -f /var/log/starknet/error.log
    ```
+   
 
 7. Test Starknet RPC API
    Use curl to query from within the node instance:
@@ -135,7 +136,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 A script on the Starknet node publishes current block and blocks behind metrics to CloudWatch metrics every 5 minutes. When the node is fully synced the blocks behind metric should get to 0.To see the metrics:
 
 - Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
-- Open Dashboards and select `starknet-single-node` from the list of dashboards.
+- Open Dashboards and select `starknet-single-node-<network_id>` from the list of dashboards.
 
 ## Clear up and undeploy everything
 
@@ -172,10 +173,10 @@ A script on the Starknet node publishes current block and blocks behind metrics 
    # Make sure you are in aws-blockchain-node-runners/lib/starknet
 
    export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
+   echo "INSTANCE_ID="$INSTANCE_ID
    export AWS_REGION=us-east-1
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo journalctl -o cat -fu starknet
+   tail -f /var/log/starknet/error.log
    ```
 2. How to check the logs from the EC2 user-data script?
 
@@ -203,4 +204,4 @@ A script on the Starknet node publishes current block and blocks behind metrics 
 4. Where to find the key juno directories?
 
    - The directory with binaries is `/home/ubuntu/juno-source`.
-   - The data directory of juno agent is `/home/ubuntu/juno-source/juno-datadir`
+   - The data directory of juno agent is `/data`
