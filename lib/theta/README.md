@@ -48,15 +48,12 @@ This is the Well-Architected checklist for Edge nodes implementation of the AWS 
 | Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses T4-powered instances. This is a lower end, data-center GPU that will be sufficient for getting the average user up and running on the Theta Edge Network. |
 </details>
 
-<details>
-
-<summary>Recommended Infrastructure</summary>
+### Recommended Infrastructure
 
 
 | Usage pattern                                     | Ideal configuration                                                                                                      | Primary option on AWS                                                  | Config reference                                      |
 |---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|-------------------------------------------------------|
 | Edge Node                                       | 4 vCPU, 16 GB RAM, Data volume: EBS gp3 256GB, 3K IOPS, 125 MB/s throughput | `g4dn.2xlarge` EBS gp3 volumes about 256 GB(10000 IOPS, 125 MBps/s throughput) | [.env-sample-full](./sample-configs/.env-sample-full) |
-</details>
 
 ## Setup Instructions
 
@@ -100,7 +97,6 @@ npm install
 
 
 4. Deploy common components such as IAM role
-   <br>
 
    > **IMPORTANT**:
    > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
