@@ -226,8 +226,9 @@ crontab -l
 
 echo "Configuring node as a service"
 mkdir /home/bcuser/bin
-mv /opt/base/node.sh /home/bcuser/bin/node.sh
-chmod 766 /home/bcuser/bin/node.sh
+mv /opt/base/node-start.sh /home/bcuser/bin/node-start.sh
+mv /opt/base/node-stop.sh /home/bcuser/bin/node-stop.sh
+chmod 766 /home/bcuser/bin/*
 chown -R bcuser:bcuser /home/bcuser
 
 sudo bash -c 'cat > /etc/systemd/system/base.service <<EOF
@@ -240,7 +241,8 @@ Restart=always
 RestartSec=30
 User=bcuser
 Environment="PATH=/bin:/usr/bin:/home/bcuser/bin"
-ExecStart=/home/bcuser/bin/node.sh
+ExecStart=/home/bcuser/bin/node-start.sh
+ExecStop=/home/bcuser/bin/node-stop.sh
 [Install]
 WantedBy=multi-user.target
 EOF'
