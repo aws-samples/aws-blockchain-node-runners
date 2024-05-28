@@ -64,10 +64,10 @@ export class EdgeSingleNodeStack extends cdk.Stack {
 
         const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
+        const sSMEdgeNodePasswordARN = cdk.Fn.importValue("SSMEdgeNodePasswordARN");
+
         // Making sure our instance will be able to read the assets
         asset.bucket.grantRead(instanceRole);
-
-
 
         // Setting up the node using generic Single Node constract
         const node = new SingleNodeConstruct(this, "single-node", {
@@ -106,7 +106,7 @@ export class EdgeSingleNodeStack extends cdk.Stack {
             _EDGE_NETWORK_: edgeNetwork,
             _EDGE_NODE_GPU_: edgeNodeGpu,
             _EDGE_LAUNCHER_VERSION_: edgeLauncherVersion,
-            _EDGE_NODE_PASSWORD_: cdk.SecretValue.secretsManager("edgeNodePassword").unsafeUnwrap().toString()
+            _EDGE_NODE_PASSWORD_SSM_ARN_: sSMEdgeNodePasswordARN
         });
 
         // Adding modified userdata script to the instance prepared fro us by Single Node constract

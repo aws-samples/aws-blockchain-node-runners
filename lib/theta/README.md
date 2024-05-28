@@ -6,16 +6,16 @@
 
 The Edge Node turns your computer into an edge computing node in the Theta EdgeCloud. The Edge Node can execute various types of jobs including AI/deep learning model training and inference, as well as video transcoding and relaying. By running the edge node, you can contribute unused computational and bandwidth resources and earn token rewards.
 
-This blueprint is designed to assist in deploying a single node  [Theta Edge Network Edge Node](https://docs.thetatoken.org/docs/setup-theta-edge-node) on AWS. It is intended for personal use purposes.
+This blueprint is designed to assist in deploying a single node  [Theta Edge Network Edge Node](https://docs.thetatoken.org/docs/setup-theta-edge-node) on AWS. It is intended for research and develoment use purposes.
 
 ## Overview of Deployment Architectures
 
 ### Single Node setup
 ![Single Nodes Deployment](./doc/assets/Architecture-Theta-Edge-Single-Node.drawio.png)
 
-1. The AWS Cloud Development Kit (CDK) is used to deploy a single node. The CDK application stores assets like scripts and config files in S3 bucket to copy them to the EC2 instance when launching an Edge Node.
-2. A single RPC Theta Edge Node is deployed within in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on Theta Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-3. The Theta node is accessed by the user internally. JSON RPC API is not exposed to the Internet to protect the node from unauthorized access. User needs to SSH into the EC2 Instance using Session Manager to interact with the RPC API .
+1. A single RPC Theta Edge Node is deployed within in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on Theta Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html). The Theta node is accessed by the user internally. JSON RPC API is not exposed to the Internet to protect the node from unauthorized access. User can get console acess to EC2 Instance using Session Manager to interact with the RPC API from CLI.
+2. The AWS Cloud Development Kit (CDK) is used to deploy a single node. The CDK application stores assets like scripts and config files in S3 bucket to copy them to the EC2 instance when launching an Edge Node.
+3. The Theta node pulls password from Secrets Manager during startup only.
 4. The Theta node sends various monitoring metrics for both the EC2 Instance and Edge Node to Amazon CloudWatch.
 
 
@@ -34,7 +34,7 @@ This is the Well-Architected checklist for Edge nodes implementation of the AWS 
 |                         |                                   | Enable people to perform actions at a distance                                   | This solution uses [AWS Systems Manager for terminal session](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html#start-sys-console), not ssh ports. |
 |                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes. |
 |                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user. |
-|                         |                                   | Following principle of least privilege access                                    | In all node types, root user is not used (using special user "edgeuser" instead). |
+|                         |                                   | Following principle of least privilege access                                    | In all node types, root user is not used (using special user "bcuser" instead). |
 |                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions. |
 | Cost optimization       | Service selection                 | Use cost effective resources                                                     | Although we can run the Edge Node without a GPU, we choose to use a `g4dn.xlarge` w/ a T4 GPU & 256gb GP3 EBS Storage to take advantage of the jobs the Theta Edge Network has to offer|
 |                         | Cost awareness                    | Estimate costs                                                                   | Single RPC node with `g4dn.xlarge` EBS gp3 volumes about 256 GB(10000 IOPS, 125 MBps/s throughput) with On-Demand pricing will cost around US$296.81 per month in the US East (N. Virginia) region. More cost-optimal option with 3 year EC2 Instance Savings plan the cost goes down to $159.80 USD. To create your own estimate use [AWS Pricing Calculator](https://calculator.aws/#/)                                                                                          |
@@ -43,7 +43,7 @@ This is the Well-Architected checklist for Edge nodes implementation of the AWS 
 |                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
 | Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance, i.e. AWS lower end GPU Amazon EC2 instances. |
 |                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. gp3 Amazon EBS volumes with optimal IOPS and throughput. |
-|                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the Theta community and our own testing. |
+|                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the Theta community. |
 | Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health of the workload is based on EC2 status checks. |
 | Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses T4-powered instances. This is a lower end, data-center GPU that will be sufficient for getting the average user up and running on the Theta Edge Network. |
 </details>
@@ -114,7 +114,7 @@ npm install
 
    # Set a password for your theta edge node wallet client
    EDGE_NODE_PASSWORD=letscompute # please change 'letscompute' to something more secure
-   npx cdk deploy edge-common --parameters edgeNodePassword=$EDGE_NODE_PASSWORD
+   npx cdk deploy theta-edge-common --parameters edgeNodePassword=$EDGE_NODE_PASSWORD
    ```
 
 
@@ -124,7 +124,7 @@ npm install
    ```bash
       pwd
       # Make sure you are in aws-blockchain-node-runners/lib/theta
-      npx cdk deploy edge-single-node --json --outputs-file single-node-deploy.json
+      npx cdk deploy theta-edge-single-node --json --outputs-file single-node-deploy.json
    ```
 
 2. After the node is initialised you need to wait another 10 minutes for the inital edge node startup process to complete. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every minute, where you can watch `theta_current_block_height`. When the node is fully launched you should see the `Theta Client Block Height` & `Theta Client Peer Count` dashboards populate. To see them:
@@ -172,11 +172,11 @@ pwd
 # Make sure you are in aws-blockchain-node-runners/lib/theta
 
 # Destroy Single Node
-npx cdk destroy edge-single-node
+npx cdk destroy theta-edge-single-node
 
 
  # Delete all common components like IAM role and Security Group
-npx cdk destroy edge-common
+npx cdk destroy theta-edge-common
 ```
 2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
 

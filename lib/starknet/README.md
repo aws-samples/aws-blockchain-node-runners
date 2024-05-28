@@ -141,7 +141,7 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
    tail -f /var/log/starknet/error.log
    ```
-   
+
 
 7. Test Starknet RPC API
    Use curl to query from within the node instance:

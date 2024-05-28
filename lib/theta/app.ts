@@ -10,13 +10,13 @@ import * as nag from "cdk-nag";
 const app = new cdk.App();
 cdk.Tags.of(app).add("Project", "AWS_THETA_EDGE");
 
-new EdgeCommonStack(app, "edge-common", {
-    stackName: `edge-nodes-common`,
+new EdgeCommonStack(app, "theta-edge-common", {
+    stackName: `theta-edge-nodes-common`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region }
 });
 
-new EdgeSingleNodeStack(app, "edge-single-node", {
-    stackName: `edge-single-node-${config.baseNodeConfig.edgeNetwork}`,
+new EdgeSingleNodeStack(app, "theta-edge-single-node", {
+    stackName: `theta-edge-single-node-${config.baseNodeConfig.edgeNetwork}`,
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     nodeRole: <configTypes.EdgeNodeRole> "single-node",
@@ -27,7 +27,6 @@ new EdgeSingleNodeStack(app, "edge-single-node", {
     edgeLauncherVersion: config.baseNodeConfig.edgeLauncherVersion,
     dataVolume: config.baseNodeConfig.dataVolume
 });
-
 
 
 // Security Check

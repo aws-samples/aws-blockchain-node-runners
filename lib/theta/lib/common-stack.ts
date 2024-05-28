@@ -52,6 +52,11 @@ export class EdgeCommonStack extends cdk.Stack {
 
         secretEdgeNodePassword.grantRead(instanceRole)
 
+        new cdk.CfnOutput(this, "ssm-edge-node-password-ARN", {
+            value: secretEdgeNodePassword.secretArn,
+            exportName: "SSMEdgeNodePasswordARN",
+        });
+
 
         // cdk-nag suppressions
         nag.NagSuppressions.addResourceSuppressions(

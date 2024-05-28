@@ -12,6 +12,7 @@ echo "EDGE_NETWORK=${_EDGE_NETWORK_}" >> /etc/environment
 echo "EDGE_LAUNCHER_VERSION=${_EDGE_LAUNCHER_VERSION_}" >> /etc/environment
 echo "EDGE_NODE_GPU=${_EDGE_NODE_GPU_}" >> /etc/environment
 echo "NODE_ROLE=${_NODE_ROLE_}" >> /etc/environment
+EDGE_NODE_PASSWORD_SSM_ARN=${_EDGE_NODE_PASSWORD_SSM_ARN_}
 
 source /etc/environment
 
@@ -34,7 +35,6 @@ yum update -y
 amazon-linux-extras install epel -y
 yum groupinstall "Development Tools" -y
 yum -y install amazon-cloudwatch-agent collectd jq gcc10-10.5.0-1.amzn2.0.2 ncurses-devel telnet aws-cfn-bootstrap
-
 
 cd /opt
 
@@ -62,14 +62,6 @@ aws configure set default.s3.multipart_chunksize 256MB
 
 echo 'Installing SSM Agent'
 yum install -y $SSM_AGENT_BINARY_URI
-
-echo "Installing s5cmd"
-cd /opt
-wget -q $S5CMD_URI -O s5cmd.tar.gz
-tar -xf s5cmd.tar.gz
-chmod +x s5cmd
-mv s5cmd /usr/bin
-s5cmd version
 
 if [ "$EDGE_NODE_GPU" == "enabled"  ]; then
   echo "Installing nvidia drivers"
@@ -99,33 +91,23 @@ if [ "$EDGE_NODE_GPU" == "enabled"  ]; then
   sudo mv /usr/bin/cc.bak /usr/bin/cc
 fi
 
-
-
 echo "Installing docker"
 yum install docker -y
 sudo service docker start
 sudo systemctl enable docker
 
+echo 'Adding bcuser user and group'
+sudo groupadd -g 1002 bcuser
+sudo useradd -u 1002 -g 1002 -m -s /bin/bash bcuser
+sudo usermod -aG docker bcuser
 
-
-
-
-echo 'Adding edgeuser user and group'
-sudo groupadd -g 1002 edgeuser
-sudo useradd -u 1002 -g 1002 -m -s /bin/bash edgeuser
-sudo usermod -aG sudo edgeuser
-sudo usermod -aG docker edgeuser
-
-echo "Configuring metricscollector script"
+echo "Configuring syncchecker script"
 cd /opt
-mv /opt/theta_metrics/metricscollector.sh /opt/metricscollector.sh
-chmod +x /opt/metricscollector.sh
+mv /opt/sync-checker/syncchecker-theta.sh /opt/syncchecker.sh
+chmod +x /opt/syncchecker.sh
 
-
-(crontab -l; echo "*/1 * * * * /opt/metricscollector.sh >/tmp/metricscollector.log 2>&1") | crontab -
+(crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
 crontab -l
-
-
 
 if [ "$NODE_ROLE" == "single-node"  ]; then
   echo "Single node. Signaling completion to CloudFormation"
@@ -148,39 +130,47 @@ if [[ "$DATA_VOLUME_TYPE" == "instance-store" ]]; then
   (crontab -l; echo "@reboot /opt/setup-instance-store-volumes.sh >/tmp/setup-instance-store-volumes.log 2>&1") | crontab -
   crontab -l
 
-  /opt/setup-instance-store-volumes.sh
+  DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk 'max < $4 {max = $4; vol = $1} END {print vol}')
 
 else
   echo "Data volume type is EBS"
 
   DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
-  mkfs -t xfs $DATA_VOLUME_ID
-  sleep 10
-  DATA_VOLUME_UUID=$(lsblk -fn -o UUID  $DATA_VOLUME_ID)
-  DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data xfs defaults 0 2"
-  echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
-  echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
-  echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
-  echo $DATA_VOLUME_FSTAB_CONF | tee -a /etc/fstab
-  mount -a
 fi
+
+mkfs -t ext4 $DATA_VOLUME_ID
+echo "waiting for volume to get UUID"
+  OUTPUT=0;
+  while [ "$OUTPUT" = 0 ]; do
+    DATA_VOLUME_UUID=$(lsblk -fn -o UUID $DATA_VOLUME_ID)
+    OUTPUT=$(echo $DATA_VOLUME_UUID | grep -c - $2)
+    echo $OUTPUT
+  done
+DATA_VOLUME_UUID=$(lsblk -fn -o UUID $DATA_VOLUME_ID)
+DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data ext4 defaults 0 2"
+echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
+echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
+echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
+echo $DATA_VOLUME_FSTAB_CONF | tee -a /etc/fstab
+mount -a
 
 lsblk -d
 
-chown edgeuser:edgeuser -R /data
+chown bcuser:bcuser -R /data
 
 docker pull thetalabsorg/edgelauncher_mainnet:latest
 
+sudo su bcuser
 
-export EDGE_NODE_PASSWORD=`aws secretsmanager get-secret-value --secret-id edgeNodePassword --query SecretString --output text`
+EDGE_NODE_PASSWORD=$(aws secretsmanager get-secret-value --secret-id $EDGE_NODE_PASSWORD_SSM_ARN --query SecretString --output text --region $AWS_REGION)
 
 if [[ "$EDGE_NODE_GPU" == "enabled" ]]; then
-  docker run -d --gpus all -e EDGELAUNCHER_CONFIG_PATH=/edgelauncher/data/$EDGE_NETWORK -e PASSWORD=$EDGE_NODE_PASSWORD -v /data/edgelauncher:/edgelauncher/data/$EDGE_NETWORK -p 127.0.0.1:15888:15888 -p 127.0.0.1:17888:17888 -p 127.0.0.1:17935:17935 --name edgelauncher --restart unless-stopped -it thetalabsorg/edgelauncher_$EDGE_NETWORK:$EDGE_LAUNCHER_VERSION
+  docker run -d --gpus all --user $(id -u):$(id -g) -e EDGELAUNCHER_CONFIG_PATH=/edgelauncher/data/$EDGE_NETWORK -e PASSWORD=$EDGE_NODE_PASSWORD -v /data/edgelauncher:/edgelauncher/data/$EDGE_NETWORK -p 127.0.0.1:15888:15888 -p 127.0.0.1:17888:17888 -p 127.0.0.1:17935:17935 --name edgelauncher --restart unless-stopped -it thetalabsorg/edgelauncher_$EDGE_NETWORK:$EDGE_LAUNCHER_VERSION
 
 else
-    docker run -d -e EDGELAUNCHER_CONFIG_PATH=/edgelauncher/data/$EDGE_NETWORK -e PASSWORD=$EDGE_NODE_PASSWORD -v /data/edgelauncher:/edgelauncher/data/$EDGE_NETWORK -p 127.0.0.1:15888:15888 -p 127.0.0.1:17888:17888 -p 127.0.0.1:17935:17935 --name edgelauncher --restart unless-stopped -it thetalabsorg/edgelauncher_$EDGE_NETWORK:$EDGE_LAUNCHER_VERSION
+  docker run -d --user $(id -u):$(id -g) -e EDGELAUNCHER_CONFIG_PATH=/edgelauncher/data/$EDGE_NETWORK -e PASSWORD=$EDGE_NODE_PASSWORD -v /data/edgelauncher:/edgelauncher/data/$EDGE_NETWORK -p 127.0.0.1:15888:15888 -p 127.0.0.1:17888:17888 -p 127.0.0.1:17935:17935 --name edgelauncher --restart unless-stopped -it thetalabsorg/edgelauncher_$EDGE_NETWORK:$EDGE_LAUNCHER_VERSION
 fi
-
+EDGE_NODE_PASSWORD=""
 
 echo "All Done!!"
 set -e
