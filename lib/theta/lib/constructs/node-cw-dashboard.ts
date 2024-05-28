@@ -230,7 +230,7 @@ export const SyncNodeCWDashboardJSON = (instanceType: string, dataVolumeType: st
                 "type": "metric",
                 "properties": {
                     "metrics": [
-                        [ "CWAgent", "disk_used_percent", "path", "/data", "InstanceId", "${INSTANCE_ID}", "device", disk_name, "fstype", "xfs", { "region": "${REGION}", "label": "/data" } ]
+                        [ "CWAgent", "disk_used_percent", "path", "/data", "InstanceId", "${INSTANCE_ID}", "device", disk_name, "fstype", "ext4", { "region": "${REGION}", "label": "/data" } ]
                     ],
                     "sparkline": true,
                     "view": "singleValue",

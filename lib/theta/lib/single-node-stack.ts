@@ -2,11 +2,10 @@ import * as cdk from "aws-cdk-lib";
 import * as cdkConstructs from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as path from "path";
 import * as fs from "fs";
-import * as nodeCwDashboard from "./assets/node-cw-dashboard"
+import * as nodeCwDashboard from "./constructs/node-cw-dashboard"
 import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 import * as constants from "../../constructs/constants";
 import { SingleNodeConstruct } from "../../constructs/single-node"
