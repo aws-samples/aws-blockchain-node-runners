@@ -7,11 +7,13 @@ AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}
 RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}
 ASSETS_S3_PATH=${_ASSETS_S3_PATH_}
 DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}
+DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}
 {
   echo "LIFECYCLE_HOOK_NAME=$LIFECYCLE_HOOK_NAME"
   echo "AUTOSCALING_GROUP_NAME=$AUTOSCALING_GROUP_NAME"
   echo "ASSETS_S3_PATH=$ASSETS_S3_PATH"
   echo "DATA_VOLUME_TYPE=$DATA_VOLUME_TYPE"
+  echo "DATA_VOLUME_SIZE=$DATA_VOLUME_SIZE"
 } >> /etc/environment
 
 arch=$(uname -m)
@@ -242,7 +244,6 @@ RestartSec=30
 User=bcuser
 Environment="PATH=/bin:/usr/bin:/home/bcuser/bin"
 ExecStart=/home/bcuser/bin/node-start.sh
-ExecStop=/home/bcuser/bin/node-stop.sh
 [Install]
 WantedBy=multi-user.target
 EOF'
