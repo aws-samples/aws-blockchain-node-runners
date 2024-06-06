@@ -163,7 +163,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
 			highestEpoch: "0x44343",
 			knownStates: 0,
 			pulledStates: 0,
-			startingBlock: 0 
+			startingBlock: 0
 		}
    }
    ```
@@ -223,7 +223,7 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
 			highestEpoch: "0x44343",
 			knownStates: 0,
 			pulledStates: 0,
-			startingBlock: 0 
+			startingBlock: 0
         }
    }
    ```
