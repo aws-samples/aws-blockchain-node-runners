@@ -75,9 +75,8 @@ export class TzSingleNodeStack extends cdk.Stack {
             instanceName: STACK_NAME,
             instanceType,
             dataVolumes: [dataVolume],
-            machineImage: new ec2.AmazonLinuxImage({
-                generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-                kernel:ec2.AmazonLinuxKernel.KERNEL5_X,
+            machineImage: new ec2.AmazonLinux2023ImageSsmParameter({
+                kernel: ec2.AmazonLinux2023Kernel.KERNEL_6_1,
                 cpuType: instanceCpuType,
             }),
             vpc,
