@@ -9,9 +9,10 @@ echo "Downloading TZ snapshot from $TZ_SNAPSHOTS_URI."
 TZ_SNAPSHOTS_FILE_NAME=snapshot
 TZ_SNAPSHOTS_DIR=~/.tezos-node/node
 
-wget -O /tmp/$TZ_SNAPSHOTS_FILE_NAME $TZ_SNAPSHOTS_URI
-octez-node snapshot import /tmp/$TZ_SNAPSHOTS_FILE_NAME --data-dir $TZ_SNAPSHOTS_DIR --no-check
-rm /tmp/$TZ_SNAPSHOTS_FILE_NAME
+mkdir ~/tezos-snapshots
+wget -O ~/tezos-snapshots/$TZ_SNAPSHOTS_FILE_NAME $TZ_SNAPSHOTS_URI
+octez-node snapshot import ~/tezos-snapshots/$TZ_SNAPSHOTS_FILE_NAME --data-dir $TZ_SNAPSHOTS_DIR --no-check
+rm ~/tezos-snapshots/$TZ_SNAPSHOTS_FILE_NAME
 
 
 echo "TZ snapshot is ready !!!"
