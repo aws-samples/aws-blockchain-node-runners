@@ -299,7 +299,7 @@ pwd
 export INSTANCE_ID="i-**************"
 echo "INSTANCE_ID=" $INSTANCE_ID
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-sudo cat /var/log/cloud-init-output.log
+sudo cat /var/log/user-data.log
 ```
 
 3. How can I restart the Fantom service?

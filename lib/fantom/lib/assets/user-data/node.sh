@@ -196,7 +196,7 @@ else
   echo "Data volume type is EBS"
 
   DATA_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$DATA_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
-  mkfs -t ext4 $DATA_VOLUME_ID
+  sudo mkfs.xfs -f $DATA_VOLUME_ID
   sleep 10
   DATA_VOLUME_UUID=$(lsblk -fn -o UUID  $DATA_VOLUME_ID)
   DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data ext4 defaults 0 2"

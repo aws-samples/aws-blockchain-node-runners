@@ -1,19 +1,19 @@
 #!/bin/bash
 
-#FANTOM_SYNC_STATS=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"ftm_syncing","params":[],"id":1}' http://localhost:18545 | jq -r ".result")
-
 FANTOM_SYNC_STATS=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --datadir=/data --exec "ftm.syncing"')
 # Syncing status results:
 #
-# { currentBlock: 37676547,
-# currentBlockHash: "0x0001ab120000187fd8069d3a4f6501d48ad4800778f40a76d79cf02469272a43",
-# currentBlockTime: "0x16ec7a4b9a82ebfe",
-# currentEpoch: "0x1ab13",
-# highestBlock: 80196141,
-# highestEpoch: "0x44343",
-# knownStates: 0,
-# pulledStates: 0,
-# startingBlock: 0 }
+#{
+#  currentBlock: 37676547,
+#  currentBlockHash: "0x0001ab120000187fd8069d3a4f6501d48ad4800778f40a76d79cf02469272a43",
+#  currentBlockTime: "0x16ec7a4b9a82ebfe",
+#  currentEpoch: "0x1ab13",
+#  highestBlock: 82410549,
+#  highestEpoch: "0x45f22",
+#  knownStates: 0,
+#  pulledStates: 0,
+#  startingBlock: 0
+#}
 #
 # Synced status results:
 #
@@ -22,16 +22,15 @@ FANTOM_SYNC_STATS=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --dat
 # TODO: if a node falls behind, does it revert to syncing?
 
 # If false, then get current block number:
-if $FANTOM_SYNC_STATS != false; then
-
-FANTOM_SYNC_BLOCK=$(echo $FANTOM_SYNC_STATS | jq -r ".currentBlock")
-FANTOM_HIGHEST_BLOCK=$(echo $FANTOM_SYNC_STATS | jq -r ".highestBlock")
-
-FANTOM_BLOCKS_BEHIND="$((FANTOM_HIGHEST_BLOCK-FANTOM_SYNC_BLOCK))"
+if [ -n "$FANTOM_SYNC_STATS" ] && [ "$FANTOM_SYNC_STATS" != "false" ]; then
+    FANTOM_SYNC_BLOCK=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --datadir=/data --exec "ftm.syncing.currentBlock"')
+    FANTOM_HIGHEST_BLOCK=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --datadir=/data --exec "ftm.syncing.highestBlock"')
+    
+    FANTOM_BLOCKS_BEHIND="$((FANTOM_HIGHEST_BLOCK-FANTOM_SYNC_BLOCK))"
 
 else
-FANTOM_SYNC_BLOCK=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --datadir=/data --exec "ftm.blockNumber"')
-FANTOM_BLOCKS_BEHIND=0
+    FANTOM_SYNC_BLOCK=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --datadir=/data --exec "ftm.blockNumber"')
+    FANTOM_BLOCKS_BEHIND=0
 fi
 
 # Sending data to CloudWatch
