@@ -132,7 +132,7 @@ BASE_L1_EXECUTION_ENDPOINT="https://ethereum-sepolia-rpc.publicnode.com"
 BASE_L1_CONSENSUS_ENDPOINT="https://ethereum-sepolia-beacon-api.publicnode.com"
 ```
 
-2. Deploy Base RPC Node and wait for it to sync. For Mainnet it might a day when using snapshots or about a week if syncing from block 0. You can use snapshots provided by the Base team by setting `BASE_RESTORE_FROM_SNAPSHOT="true"` in `.env` file.
+2. Deploy Base RPC Node and wait for it to sync. For Full node on Mainnet it might take a day when using snapshots or about a week if syncing from block 0. You can use snapshots provided by the Base team by setting `BASE_RESTORE_FROM_SNAPSHOT="true"` in `.env` file.
 
 ```bash
 pwd

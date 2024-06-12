@@ -300,15 +300,9 @@ if [ "$RESTORE_FROM_SNAPSHOT" == "false" ]; then
   systemctl daemon-reload
   systemctl enable --now base
 else
-  if [ "$NODE_CONFIG" == "archive" ]; then
-    echo "Restoring archive node from snapshot over s3"
-    chmod +x /opt/restore-from-snapshot-archive-s3.sh
-    echo "/opt/restore-from-snapshot-archive-s3.sh" | at now + 1 min
-  else 
-    echo "Restoring full node from snapshot over http"
-    chmod +x /opt/restore-from-snapshot-http.sh
-    echo "/opt/restore-from-snapshot-http.sh" | at now + 1 min
-  fi
+  echo "Restoring full node from snapshot over http"
+  chmod +x /opt/restore-from-snapshot-http.sh
+  echo "/opt/restore-from-snapshot-http.sh" | at now + 1 min
 fi
 
 if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
