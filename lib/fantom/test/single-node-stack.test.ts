@@ -2,33 +2,30 @@ import { Match, Template } from "aws-cdk-lib/assertions";
 import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
-import * as config from "../lib/config/solanaConfig";
-import { SolanaSingleNodeStack } from "../lib/single-node-stack";
+import * as config from "../lib/config/fantomConfig";
+import * as configTypes from "../lib/config/fantomConfig.interface";
+import { FantomSingleNodeStack } from "../lib/single-node-stack";
 
-describe("SolanaSingleNodeStack", () => {
+describe("FANTOMSingleNodeStack", () => {
   test("synthesizes the way we expect", () => {
     const app = new cdk.App();
 
-    // Create the SolanaSingleNodeStack.
-    const solanaSingleNodeStack = new SolanaSingleNodeStack(app, "solana-sync-node", {
-      stackName: `solana-single-node-${config.baseNodeConfig.nodeConfiguration}`,
-      env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+    // Create the EthSingleNodeStack.
+    const fantomSingleNodeStack = new FantomSingleNodeStack(app, "fantom-single-node", {
+      stackName: `fantom-single-node`,
 
+      env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+      nodeRole: <configTypes.FantomNodeRole> "single-node",
       instanceType: config.baseNodeConfig.instanceType,
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
-      solanaCluster: config.baseNodeConfig.solanaCluster,
-      solanaVersion: config.baseNodeConfig.solanaVersion,
+      fantomNetwork: config.baseNodeConfig.fantomNetwork,
       nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+      snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
       dataVolume: config.baseNodeConfig.dataVolume,
-      accountsVolume: config.baseNodeConfig.accountsVolume,
-      solanaNodeIdentitySecretARN: config.baseNodeConfig.solanaNodeIdentitySecretARN,
-      voteAccountSecretARN: config.baseNodeConfig.voteAccountSecretARN,
-      authorizedWithdrawerAccountSecretARN: config.baseNodeConfig.authorizedWithdrawerAccountSecretARN,
-      registrationTransactionFundingAccountSecretARN: config.baseNodeConfig.registrationTransactionFundingAccountSecretARN,
   });
 
     // Prepare the stack for assertions.
-    const template = Template.fromStack(solanaSingleNodeStack);
+    const template = Template.fromStack(fantomSingleNodeStack);
 
     // Has EC2 instance security group.
     template.hasResourceProperties("AWS::EC2::SecurityGroup", {
@@ -44,31 +41,31 @@ describe("SolanaSingleNodeStack", () => {
        SecurityGroupIngress: [
         {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols (gossip, turbine, repair, etc)",
-          "FromPort": 8800,
+          "Description": "P2P",
+          "FromPort": 5050,
           "IpProtocol": "tcp",
-          "ToPort": 8814
+          "ToPort": 5050
          },
          {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols (gossip, turbine, repair, etc)",
-          "FromPort": 8800,
+          "Description": "P2P",
+          "FromPort": 5050,
           "IpProtocol": "udp",
-          "ToPort": 8814
+          "ToPort": 5050
          },
          {
           "CidrIp": "1.2.3.4/5",
-          "Description": "RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)",
-          "FromPort": 8899,
+          "Description": "FANTOM RPC Port",
+          "FromPort": 18545,
           "IpProtocol": "tcp",
-          "ToPort": 8899
+          "ToPort": 18545
          },
          {
           "CidrIp": "1.2.3.4/5",
-          "Description": "RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)",
-          "FromPort": 8900,
+          "Description": "FANTOM WebSocket Port",
+          "FromPort": 18546,
           "IpProtocol": "tcp",
-          "ToPort": 8900
+          "ToPort": 18546
          }
        ]
     })
@@ -91,7 +88,7 @@ describe("SolanaSingleNodeStack", () => {
       ],
       IamInstanceProfile: Match.anyValue(),
       ImageId: Match.anyValue(),
-      InstanceType: "r6a.8xlarge",
+      InstanceType: "m6a.2xlarge",
       Monitoring: true,
       PropagateTagsToVolumeOnCreation: true,
       SecurityGroupIds: Match.anyValue(),
@@ -102,10 +99,10 @@ describe("SolanaSingleNodeStack", () => {
     template.hasResourceProperties("AWS::EC2::Volume", {
       AvailabilityZone: Match.anyValue(),
       Encrypted: true,
-      Iops: 12000,
+      Iops: 7000,
       MultiAttachEnabled: false,
       Size: 2000,
-      Throughput: 700,
+      Throughput: 400,
       VolumeType: "gp3"
     })
 
@@ -116,28 +113,12 @@ describe("SolanaSingleNodeStack", () => {
       VolumeId: Match.anyValue(),
     })
 
-    // Has EBS accounts volume.
-    template.hasResourceProperties("AWS::EC2::Volume", {
-      AvailabilityZone: Match.anyValue(),
-      Encrypted: true,
-      Iops: 6000,
-      MultiAttachEnabled: false,
-      Size: 500,
-      Throughput: 700,
-      VolumeType: "gp3"
-    })
-
-    // Has EBS accounts volume attachment.
-    template.hasResourceProperties("AWS::EC2::VolumeAttachment", {
-      Device: "/dev/sdg",
-      InstanceId: Match.anyValue(),
-      VolumeId: Match.anyValue(),
-    })
-
     // Has CloudWatch dashboard.
     template.hasResourceProperties("AWS::CloudWatch::Dashboard", {
       DashboardBody: Match.anyValue(),
-      DashboardName: {"Fn::Join": ["", ["solana-single-node-baserpc-",{ "Ref": Match.anyValue() }]]}
+      DashboardName: {
+        "Fn::Join": ["", ["fantom-single-node-",{ "Ref": Match.anyValue() }]]
+      }
     })
 
  });
