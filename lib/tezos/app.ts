@@ -7,6 +7,7 @@ import { TzCommonStack } from "./lib/common-stack";
 import { TzSingleNodeStack } from "./lib/single-node-stack";
 import { TzHANodesStack } from "./lib/ha-nodes-stack";
 import * as nag from "cdk-nag";
+import { TzSyncNodesStack } from './lib/sync-node-stack';
 
 const app = new cdk.App();
 cdk.Tags.of(app).add("Project", "AWS_TZ");
@@ -28,10 +29,21 @@ new TzSingleNodeStack(app, "tz-single-node", {
     snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
     downloadSnapshot: config.baseNodeConfig.downloadSnapshot == "true",
     dataVolume: config.baseNodeConfig.dataVolume,
-    octezVersion: config.baseNodeConfig.octezVersion
 });
 
-new TzHANodesStack(app, "tz-ha-nodes", {
+const sync_node = new TzSyncNodesStack(app, "tz-sync-node", {
+    stackName: `tz-sync-nodes-${config.baseNodeConfig.historyMode}-${config.baseNodeConfig.tzNetwork}`,
+    env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+    nodeRole: <configTypes.TzNodeRole> "rpc-node",
+    instanceType: config.baseNodeConfig.instanceType,
+    instanceCpuType: config.baseNodeConfig.instanceCpuType,
+    tzNetwork: config.baseNodeConfig.tzNetwork,
+    historyMode: config.baseNodeConfig.historyMode,
+    snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
+    downloadSnapshot: config.baseNodeConfig.downloadSnapshot == "true"
+})
+
+const ha_stack = new TzHANodesStack(app, "tz-ha-nodes", {
     stackName: `tz-ha-nodes-${config.baseNodeConfig.historyMode}-${config.baseNodeConfig.tzNetwork}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     nodeRole: <configTypes.TzNodeRole> "rpc-node",
@@ -44,8 +56,10 @@ new TzHANodesStack(app, "tz-ha-nodes", {
 
     albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
     heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
-    numberOfNodes: config.haNodeConfig.numberOfNodes
+    numberOfNodes: config.haNodeConfig.numberOfNodes,
+    downloadSnapshot: config.baseNodeConfig.downloadSnapshot == "true"
 });
+ha_stack.addDependency(sync_node)
 
 // Security Check
 cdk.Aspects.of(app).add(

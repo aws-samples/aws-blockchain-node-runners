@@ -13,6 +13,7 @@ echo "TZ_DOWNLOAD_SNAPSHOT=${_TZ_DOWNLOAD_SNAPSHOT_}" >> /etc/environment
 echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
 echo "AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}" >> /etc/environment
 echo "NODE_ROLE=${_NODE_ROLE_}" >> /etc/environment
+echo "S3_SYNC_BUCKET=${_S3_SYNC_BUCKET_}" >> /etc/environment
 source /etc/environment
 
 arch=$(uname -m)
@@ -36,13 +37,6 @@ yum groupinstall "Development Tools" -y
 yum -y install amazon-cloudwatch-agent collectd jq gcc ncurses-devel telnet aws-cfn-bootstrap
 
 cd /opt
-
-# echo 'Installing AWS CLI v2'
-# curl $AWS_CLI_BINARY_URI -o "awscliv2.zip"
-# unzip -q awscliv2.zip
-# ./aws/install
-# rm /usr/bin/aws
-# ln /usr/local/bin/aws /usr/bin/aws
 
 echo "Downloading assets zip file"
 aws s3 cp $ASSETS_S3_PATH ./assets.zip --region $AWS_REGION
@@ -97,6 +91,7 @@ if [[ "$STACK_ID" != "none" ]]; then
   cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
 fi
 
+
 echo "Install Octez-node and its dependencies"
 
 if [ "$arch" == "x86_64" ]; then
@@ -127,13 +122,7 @@ echo "Configuring node"
 su tezos -c "octez-node config init --data-dir ~/.tezos-node/node --network=$TZ_NETWORK  --history-mode=$TZ_HISTORY_MODE  --net-addr='[::]:9732' --rpc-addr='[::]:8732'"
 su tezos -c "octez-node identity generate"
 
-
-# download snapshot if network is mainnet
-if [ "$TZ_NETWORK" == "mainnet"  ] && [ "$TZ_DOWNLOAD_SNAPSHOT" == "true" ]; then
-  echo "Downloading Tezos snapshot and importing"
-  chmod +x /opt/download-snapshot.sh
-  su tezos -c "/opt/download-snapshot.sh"
-fi
+su tezos -c "aws s3 sync s3://$S3_SYNC_BUCKET/node ~/.tezos-node/node"
 
 echo "Running node"
 su tezos -c "octez-node run --data-dir ~/.tezos-node/node --rpc-addr 127.0.0.1 &"

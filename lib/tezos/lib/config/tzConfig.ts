@@ -34,12 +34,11 @@ export const baseNodeConfig: configTypes.TzBaseNodeConfig = {
         iops: process.env.TZ_DATA_VOL_IOPS ? parseInt(process.env.TZ_DATA_VOL_IOPS) : 10000,
         throughput: process.env.TZ_DATA_VOL_THROUGHPUT ? parseInt(process.env.TZ_DATA_VOL_THROUGHPUT) : 700
     },
-    octezVersion: process.env.TZ_OCTEZ_VERSION ? <configTypes.TzOctezVersion>process.env.TZ_OCTEZ_VERSION : "19.2",
     downloadSnapshot: process.env.TZ_DOWNLOAD_SNAPSHOT ? process.env.TZ_DOWNLOAD_SNAPSHOT : "true"
 };
 
 export const haNodeConfig: configTypes.TzHAConfig = {
-    albHealthCheckGracePeriodMin: process.env.TZ_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN ? parseInt(process.env.TZ_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN) : 10,
+    albHealthCheckGracePeriodMin: process.env.TZ_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN ? parseInt(process.env.TZ_HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN) : 15,
     heartBeatDelayMin: process.env.TZ_HA_NODES_HEARTBEAT_DELAY_MIN ? parseInt(process.env.TZ_HA_NODES_HEARTBEAT_DELAY_MIN) : 40,
     numberOfNodes: process.env.TZ_HA_NUMBER_OF_NODES ? parseInt(process.env.TZ_HA_NUMBER_OF_NODES) : 2
 };

@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import * as cdkConstructs from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import { AmazonLinuxGeneration, AmazonLinuxImage } from "aws-cdk-lib/aws-ec2";
 import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as configTypes from "./config/tzConfig.interface";
@@ -18,6 +19,7 @@ export interface TzHANodesStackProps extends cdk.StackProps {
     instanceCpuType: ec2.AmazonLinuxCpuType;
     tzNetwork: configTypes.TzNetwork;
     historyMode: configTypes.TzNodeHistoryMode;
+    downloadSnapshot: boolean;
     snapshotsUrl: string;
     dataVolume: configTypes.TzDataVolumeConfig;
     albHealthCheckGracePeriodMin: number;
@@ -31,19 +33,22 @@ export class TzHANodesStack extends cdk.Stack {
 
         const REGION = cdk.Stack.of(this).region;
         const STACK_NAME = cdk.Stack.of(this).stackName;
+        const AWS_ACCOUNT_ID = cdk.Stack.of(this).account
         const lifecycleHookName = STACK_NAME;
         const autoScalingGroupName = STACK_NAME;
 
         const {
-            nodeRole,
             instanceType,
+            nodeRole,
             instanceCpuType,
             tzNetwork,
+            historyMode,
+            downloadSnapshot,
             snapshotsUrl,
             dataVolume,
+            numberOfNodes,
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
-            numberOfNodes
         } = props;
 
         // using default vpc
@@ -62,35 +67,37 @@ export class TzHANodesStack extends cdk.Stack {
             path: path.join(__dirname, "assets")
         });
 
+        const snapshotBucket = s3.Bucket.fromBucketName(this, "snapshots-s3-bucket", cdk.Fn.importValue('SnapshotBucketName'))
+
         asset.bucket.grantRead(instanceRole);
+        snapshotBucket.grantRead(instanceRole);
 
         // parsing user data script and injecting necessary variables
-        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
-        const dataVolumeSizeBytes = dataVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
-
+        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node-ha.sh")).toString();
+       
         const modifiedInitNodeScript = cdk.Fn.sub(nodeScript, {
             _AWS_REGION_: REGION,
-            _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
             _STACK_NAME_: STACK_NAME,
             _TZ_SNAPSHOTS_URI_: snapshotsUrl,
             _STACK_ID_: constants.NoneValue,
             _NODE_CF_LOGICAL_ID_: constants.NoneValue,
-            _DATA_VOLUME_TYPE_: dataVolume.type,
-            _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
             _NODE_ROLE_: nodeRole,
 
+            _TZ_HISTORY_MODE_: historyMode,
+            _TZ_DOWNLOAD_SNAPSHOT_ : String(downloadSnapshot),
             _TZ_NETWORK_: tzNetwork,
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
-            _AUTOSCALING_GROUP_NAME_: autoScalingGroupName
+            _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
+            _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
+            _S3_SYNC_BUCKET_: cdk.Fn.importValue('SnapshotBucketName')
         });
 
         const rpcNodes = new HANodesConstruct(this, "rpc-nodes", {
             instanceType,
             dataVolumes: [dataVolume],
-            machineImage: new ec2.AmazonLinuxImage({
-                generation: AmazonLinuxGeneration.AMAZON_LINUX_2,
-                kernel:ec2.AmazonLinuxKernel.KERNEL5_X,
-                cpuType: instanceCpuType
+            machineImage: new ec2.AmazonLinux2023ImageSsmParameter({
+                kernel: ec2.AmazonLinux2023Kernel.KERNEL_6_1,
+                cpuType: instanceCpuType,
             }),
             role: instanceRole,
             vpc,
@@ -101,7 +108,7 @@ export class TzHANodesStack extends cdk.Stack {
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
             lifecycleHookName: lifecycleHookName,
-            autoScalingGroupName: autoScalingGroupName
+            autoScalingGroupName: autoScalingGroupName,
         });
 
 
@@ -127,7 +134,15 @@ export class TzHANodesStack extends cdk.Stack {
                 {
                     id: "AwsSolutions-IAM5",
                     reason: "Need read access to the S3 bucket with assets"
-                }
+                },
+                {
+                    id: "AwsSolutions-IAM4",
+                    reason: "AmazonSSMManagedInstanceCore and CloudWatchAgentServerPolicy are restrictive enough"
+                },
+                {
+                    id: "AwsSolutions-EC29",
+                    reason: "We do not need to have termination protection for sync nodes"
+                } 
             ],
             true
         );

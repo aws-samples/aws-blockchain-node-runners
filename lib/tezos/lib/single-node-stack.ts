@@ -22,7 +22,6 @@ export interface TzSingleNodeStackProps extends cdk.StackProps {
     downloadSnapshot: boolean;
     snapshotsUrl: string;
     dataVolume: configTypes.TzDataVolumeConfig;
-    octezVersion: configTypes.TzOctezVersion;
 }
 
 export class TzSingleNodeStack extends cdk.Stack {
@@ -46,7 +45,6 @@ export class TzSingleNodeStack extends cdk.Stack {
             downloadSnapshot,
             snapshotsUrl,
             dataVolume,
-            octezVersion,
         } = props;
 
         // Using default VPC
@@ -101,10 +99,7 @@ export class TzSingleNodeStack extends cdk.Stack {
             _STACK_ID_: STACK_ID,
             _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
             _TZ_HISTORY_MODE_: historyMode,
-            _DATA_VOLUME_TYPE_: dataVolume.type,
-            _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
             _NODE_ROLE_: nodeRole,
-            _TZ_OCTEZ_VERSION_: octezVersion,
             _TZ_DOWNLOAD_SNAPSHOT_ : String(downloadSnapshot),
 
             _TZ_NETWORK_: tzNetwork,

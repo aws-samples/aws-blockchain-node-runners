@@ -4,7 +4,6 @@ export type TzNetwork = "mainnet" | "sandbox" | "ghostnet";
 export type TzNodeHistoryMode = "full" | "rolling" | "archive";
 
 export type TzNodeRole = "sync-node" | "rpc-node" | "single-node";
-export type TzOctezVersion = "20.0"| "19.2";
 
 export interface TzDataVolumeConfig extends configTypes.DataVolumeConfig {
 
@@ -18,7 +17,6 @@ export interface TzBaseNodeConfig extends configTypes.BaseNodeConfig {
     historyMode: TzNodeHistoryMode;
     snapshotsUrl: string;
     dataVolume: TzDataVolumeConfig;
-    octezVersion: TzOctezVersion;
     downloadSnapshot: string;
 }
 
