@@ -22,8 +22,7 @@ describe("TZSingleNodeStack", () => {
       historyMode: config.baseNodeConfig.historyMode,
       snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
       dataVolume: config.baseNodeConfig.dataVolume,
-      downloadSnapshot: true,
-      octezVersion: "20.0" 
+      downloadSnapshot: true
   });
 
     // Prepare the stack for assertions.

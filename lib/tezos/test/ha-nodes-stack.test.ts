@@ -128,7 +128,7 @@ describe("TzHANodesStack", () => {
     // Has Auto Scaling Lifecycle Hook.
     template.hasResourceProperties("AWS::AutoScaling::LifecycleHook", {
       DefaultResult: "ABANDON",
-      HeartbeatTimeout: config.haNodeConfig.heartBeatDelayMin * 60,
+      HeartbeatTimeout: config.haNodeConfig.heartBeatDelayMin,
       LifecycleHookName: `tz-ha-nodes-${config.baseNodeConfig.historyMode}`,
       LifecycleTransition: "autoscaling:EC2_INSTANCE_LAUNCHING",
     });
