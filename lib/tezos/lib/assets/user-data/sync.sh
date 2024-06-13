@@ -10,9 +10,10 @@ echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}" >> /etc/environment
 echo "TZ_HISTORY_MODE=${_TZ_HISTORY_MODE_}" >> /etc/environment
 echo "TZ_NETWORK=${_TZ_NETWORK_}" >> /etc/environment
 echo "TZ_DOWNLOAD_SNAPSHOT=${_TZ_DOWNLOAD_SNAPSHOT_}" >> /etc/environment
+echo "S3_SYNC_BUCKET=${_S3_SYNC_BUCKET_}" >> /etc/environment
 echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
 echo "AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}" >> /etc/environment
-echo "NODE_ROLE=${_NODE_ROLE_}" >> /etc/environment
+echo "NODE_CF_LOGICAL_ID=${_NODE_CF_LOGICAL_ID_}" >> /etc/environment
 source /etc/environment
 
 arch=$(uname -m)
@@ -37,38 +38,13 @@ yum -y install amazon-cloudwatch-agent collectd jq gcc ncurses-devel telnet aws-
 
 cd /opt
 
-# echo 'Installing AWS CLI v2'
-# curl $AWS_CLI_BINARY_URI -o "awscliv2.zip"
-# unzip -q awscliv2.zip
-# ./aws/install
-# rm /usr/bin/aws
-# ln /usr/local/bin/aws /usr/bin/aws
-
 echo "Downloading assets zip file"
 aws s3 cp $ASSETS_S3_PATH ./assets.zip --region $AWS_REGION
 unzip -q assets.zip
 
-echo 'Configuring CloudWatch Agent'
-cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
-
-echo "Starting CloudWatch Agent"
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
--a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
-systemctl status amazon-cloudwatch-agent
-
 aws configure set default.s3.max_concurrent_requests 50
 aws configure set default.s3.multipart_chunksize 256MB
 
-echo 'Installing SSM Agent'
-yum install -y $SSM_AGENT_BINARY_URI
-
-echo "Installing s5cmd"
-cd /opt
-wget -q $S5CMD_URI -O s5cmd.tar.gz
-tar -xf s5cmd.tar.gz
-chmod +x s5cmd
-mv s5cmd /usr/bin
-s5cmd version
 
 if [[ "$STACK_ID" != "none" ]]; then
   echo "Install CloudFormation helper scripts"
@@ -94,8 +70,8 @@ if [[ "$STACK_ID" != "none" ]]; then
   systemctl enable --now cfn-hup
   systemctl start cfn-hup.service
 
-  cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
 fi
+
 
 echo "Install Octez-node and its dependencies"
 
@@ -106,7 +82,6 @@ else
     curl -o /usr/local/bin/octez-node https://gitlab.com/tezos/tezos/-/package_files/130342826/download
     curl -o /usr/local/bin/octez-client https://gitlab.com/tezos/tezos/-/package_files/130342347/download
 fi
-
 
 chmod +x /usr/local/bin/octez-node
 chmod +x /usr/local/bin/octez-client
@@ -135,25 +110,11 @@ if [ "$TZ_NETWORK" == "mainnet"  ] && [ "$TZ_DOWNLOAD_SNAPSHOT" == "true" ]; the
   su tezos -c "/opt/download-snapshot.sh"
 fi
 
-echo "Running node"
-su tezos -c "octez-node run --data-dir ~/.tezos-node/node --rpc-addr 127.0.0.1 &"
+
+su tezos -c "aws s3 sync ~/.tezos-node/ s3://$S3_SYNC_BUCKET/"
+echo "Synced node to S3"
 
 
-
-echo "Configuring syncchecker script"
-cd /opt
-sudo mv /opt/sync-checker/syncchecker-tezos.sh /opt/syncchecker.sh
-sudo chmod +x /opt/syncchecker.sh
-
-(crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
-crontab -l
-
-if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
-  echo "Signaling ASG lifecycle hook to complete"
-  TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-  INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
-  aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$AUTOSCALING_GROUP_NAME"  --region $AWS_REGION
-fi
+cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
 
 echo "All Done!!"
-set -e
