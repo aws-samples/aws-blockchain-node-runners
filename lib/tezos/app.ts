@@ -12,12 +12,12 @@ import { TzSyncNodesStack } from './lib/sync-node-stack';
 const app = new cdk.App();
 cdk.Tags.of(app).add("Project", "AWS_TZ");
 
-new TzCommonStack(app, "tz-common", {
+const commonStack = new TzCommonStack(app, "tz-common", {
     stackName: `tz-nodes-common`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region }
 });
 
-new TzSingleNodeStack(app, "tz-single-node", {
+const singleNodeStack = new TzSingleNodeStack(app, "tz-single-node", {
     stackName: `tz-single-node-${config.baseNodeConfig.historyMode}-${config.baseNodeConfig.tzNetwork}`,
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
@@ -30,6 +30,7 @@ new TzSingleNodeStack(app, "tz-single-node", {
     downloadSnapshot: config.baseNodeConfig.downloadSnapshot == "true",
     dataVolume: config.baseNodeConfig.dataVolume,
 });
+singleNodeStack.addDependency(commonStack);
 
 const sync_node = new TzSyncNodesStack(app, "tz-sync-node", {
     stackName: `tz-sync-nodes-${config.baseNodeConfig.historyMode}-${config.baseNodeConfig.tzNetwork}`,
@@ -59,7 +60,8 @@ const ha_stack = new TzHANodesStack(app, "tz-ha-nodes", {
     numberOfNodes: config.haNodeConfig.numberOfNodes,
     downloadSnapshot: config.baseNodeConfig.downloadSnapshot == "true"
 });
-ha_stack.addDependency(sync_node)
+ha_stack.addDependency(commonStack);
+ha_stack.addDependency(sync_node);
 
 // Security Check
 cdk.Aspects.of(app).add(

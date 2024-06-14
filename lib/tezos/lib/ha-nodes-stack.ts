@@ -82,7 +82,6 @@ export class TzHANodesStack extends cdk.Stack {
             _STACK_ID_: constants.NoneValue,
             _NODE_CF_LOGICAL_ID_: constants.NoneValue,
             _NODE_ROLE_: nodeRole,
-
             _TZ_HISTORY_MODE_: historyMode,
             _TZ_DOWNLOAD_SNAPSHOT_ : String(downloadSnapshot),
             _TZ_NETWORK_: tzNetwork,
@@ -104,7 +103,7 @@ export class TzHANodesStack extends cdk.Stack {
             securityGroup: instanceSG.securityGroup,
             userData: modifiedInitNodeScript,
             numberOfNodes,
-            rpcPortForALB: 8545,
+            rpcPortForALB: 8733,
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
             lifecycleHookName: lifecycleHookName,
