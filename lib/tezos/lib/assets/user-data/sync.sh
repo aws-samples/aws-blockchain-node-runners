@@ -110,11 +110,52 @@ if [ "$TZ_NETWORK" == "mainnet"  ] && [ "$TZ_DOWNLOAD_SNAPSHOT" == "true" ]; the
   su tezos -c "/opt/download-snapshot.sh"
 fi
 
+chmod +x /opt/copy-data-to-s3.sh
+# Copy data to S3 bucket
+su tezos -c "/opt/copy-data-to-s3.sh"
 
-su tezos -c "aws s3 sync ~/.tezos-node/ s3://$S3_SYNC_BUCKET/"
-echo "Synced node to S3"
+echo "Setting up sync service"
+cat >/etc/systemd/system/s3sync.service <<EOL
+[Unit]
+Description="Sync node files to S3 bucket"
 
+[Service]
+ExecStart=/opt/copy-data-to-s3.sh
+EOL
 
+# Take a snapshot once a day at midnight
+echo "Setting up sync timer"
+cat >/etc/systemd/system/s3sync.timer <<EOL
+[Unit]
+Description="Run S3 Sync service at midnight everyday"
+
+[Timer]
+OnCalendar=*-*-* 00:00:00
+Unit=s3sync.service
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+systemctl start s3sync.timer
+systemctl enable s3sync.timer
 cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
+
+echo "Setting up node as service"
+cat >/etc/systemd/system/node.service <<EOL
+[Unit]
+Description="Run the octez-node"
+
+[Service]
+User=tezos
+Group=tezos
+ExecStart=octez-node run --data-dir /home/tezos/.tezos-node/node --rpc-addr 127.0.0.1
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+systemctl start node.service
+systemctl enable node.service
 
 echo "All Done!!"
