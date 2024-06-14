@@ -124,16 +124,31 @@ su tezos -c "octez-node identity generate"
 
 su tezos -c "aws s3 sync s3://$S3_SYNC_BUCKET/node ~/.tezos-node/node"
 
+echo "Setting up node as service"
+cat >/etc/systemd/system/node.service <<EOL
+[Unit]
+Description="Run the octez-node"
+
+[Service]
+User=tezos
+Group=tezos
+ExecStart=octez-node run --data-dir /home/tezos/.tezos-node/node --rpc-addr 127.0.0.1
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+systemctl enable node.service
+
 echo "Running node"
-su tezos -c "octez-node run --data-dir ~/.tezos-node/node --rpc-addr 127.0.0.1 &"
-
-
+systemctl start node.service
 
 echo "Configuring syncchecker script"
 cd /opt
 sudo mv /opt/sync-checker/syncchecker-tezos.sh /opt/syncchecker.sh
 sudo chmod +x /opt/syncchecker.sh
 
+# TODO // fix
 (crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
 crontab -l
 

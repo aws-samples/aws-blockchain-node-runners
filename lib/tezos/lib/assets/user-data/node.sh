@@ -136,9 +136,23 @@ if [ "$TZ_NETWORK" == "mainnet"  ] && [ "$TZ_DOWNLOAD_SNAPSHOT" == "true" ]; the
 fi
 
 echo "Running node"
-su tezos -c "octez-node run --data-dir ~/.tezos-node/node --rpc-addr 127.0.0.1 &"
 
+echo "Setting up node as service"
+cat >/etc/systemd/system/node.service <<EOL
+[Unit]
+Description="Run the octez-node"
 
+[Service]
+User=tezos
+Group=tezos
+ExecStart=octez-node run --data-dir /home/tezos/.tezos-node/node --rpc-addr 127.0.0.1
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+systemctl enable node.service
+systemctl start node.service
 
 echo "Configuring syncchecker script"
 cd /opt
