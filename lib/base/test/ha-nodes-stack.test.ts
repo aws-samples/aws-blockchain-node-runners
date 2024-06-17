@@ -14,7 +14,7 @@ describe("BaseHANodesStack", () => {
     const baseHANodesStack = new BaseHANodesStack(app, "base-sync-node", {
       stackName: `base-ha-nodes-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    
+
       instanceType: config.baseNodeConfig.instanceType,
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
       baseNetworkId: config.baseNodeConfig.baseNetworkId,
@@ -24,7 +24,7 @@ describe("BaseHANodesStack", () => {
       l1ConsensusEndpoint: config.baseNodeConfig.l1ConsensusEndpoint,
       snapshotUrl: config.baseNodeConfig.snapshotUrl,
       dataVolume: config.baseNodeConfig.dataVolume,
-    
+
       albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
       heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
       numberOfNodes: config.haNodeConfig.numberOfNodes

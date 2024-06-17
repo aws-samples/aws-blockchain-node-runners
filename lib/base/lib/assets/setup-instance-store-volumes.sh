@@ -15,7 +15,7 @@ if [ -n "$DATA_VOLUME_ID" ]; then
     echo "Data volume formatted. Mounting..."
     echo "waiting for volume to get UUID"
     OUTPUT=0;
-    while [ "$OUTPUT" = 0 ]; do 
+    while [ "$OUTPUT" = 0 ]; do
       DATA_VOLUME_UUID=$(lsblk -fn -o UUID $DATA_VOLUME_ID)
       OUTPUT=$(echo $DATA_VOLUME_UUID | grep -c - $2)
       echo $OUTPUT
