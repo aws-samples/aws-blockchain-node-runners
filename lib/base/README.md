@@ -124,7 +124,7 @@ npx cdk deploy base-common
 
 ### Option 1: Deploy Single Node
 
-1. For L1 node you you can set your own URLs in `BASE_L1_EXECUTION_ENDPOINT` and `BASE_L1_CONSENSUS_ENDPOINT` properties of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or you can run your own Ethereum node [with Node Runner Ethereum blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum) (tested with geth-lighthouse combination). For example:
+1. For L1 node you you can set your own URLs in `BASE_L1_EXECUTION_ENDPOINT` and `BASE_L1_CONSENSUS_ENDPOINT` properties of `.env` file. It can be one of [the providers recommended by Base](https://docs.base.org/tools/node-providers) or you can run your own Ethereum node [with Node Runner Ethereum blueprint](https://aws-samples.github.io/aws-blockchain-node-runners/docs/Blueprints/Ethereum) (tested with single-node geth-lighthouse combination). For example:
 
 ```bash
 #For Sepolia:
@@ -181,7 +181,7 @@ BASE_L1_CONSENSUS_ENDPOINT="https://ethereum-sepolia-beacon-api.publicnode.com"
       npx cdk deploy base-ha-nodes --json --outputs-file ha-nodes-deploy.json
    ```
 
-2. Give the new RPC **full** nodes about 2-3 hours (24 hours for **archive** node) to initialize and then run the following query against the load balancer behind the RPC node created
+2. Give the new RPC **full** nodes about 5 hours to initialize and then run the following query against the load balancer behind the RPC node created.
 
    ```bash
       export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
@@ -196,6 +196,8 @@ BASE_L1_CONSENSUS_ENDPOINT="https://ethereum-sepolia-beacon-api.publicnode.com"
    ```
 
 **NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
+
+**NOTE:** We currently don't recommend running **archive** nodes in HA setup, because it takes way too long to get them synced. Use single-node setup instead.
 
 ### Monitoring
 Every 5 minutes a script on the Base node publishes to CloudWatch service the metrics for current block for L1/L2 clients as well as blocks behind metric for L1 and minutes behind for L2. When the node is fully synced the blocks behind metric should get to 4 and minutes behind should get down to 0. To see the metrics for **single node only**:

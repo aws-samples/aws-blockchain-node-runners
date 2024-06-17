@@ -17,7 +17,7 @@ describe("BaseSingleNodeStack", () => {
     baseSingleNodeStack = new BaseSingleNodeStack(app, "base-single-node", {
       stackName: `base-single-node-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    
+
       instanceType: config.baseNodeConfig.instanceType,
       instanceCpuType: config.baseNodeConfig.instanceCpuType,
       baseNetworkId: config.baseNodeConfig.baseNetworkId,

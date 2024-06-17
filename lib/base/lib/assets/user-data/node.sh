@@ -99,7 +99,7 @@ L1_EXECUTION_ENDPOINT=${_L1_EXECUTION_ENDPOINT_}
 L1_CONSENSUS_ENDPOINT=${_L1_CONSENSUS_ENDPOINT_}
 SNAPSHOT_URL=${_SNAPSHOT_URL_}
 
-{ 
+{
   echo "REGION=$REGION"
   echo "NETWORK_ID=$NETWORK_ID"
   echo "NODE_CONFIG=$NODE_CONFIG"
@@ -278,7 +278,7 @@ fi
 mkfs -t ext4 $DATA_VOLUME_ID
 echo "waiting for volume to get UUID"
   OUTPUT=0;
-  while [ "$OUTPUT" = 0 ]; do 
+  while [ "$OUTPUT" = 0 ]; do
     DATA_VOLUME_UUID=$(lsblk -fn -o UUID $DATA_VOLUME_ID)
     OUTPUT=$(echo $DATA_VOLUME_UUID | grep -c - $2)
     echo $OUTPUT
@@ -309,7 +309,7 @@ if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
   echo "Signaling ASG lifecycle hook to complete"
   TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
   INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
-  aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$AUTOSCALING_GROUP_NAME"  --region $AWS_REGION
+  aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$AUTOSCALING_GROUP_NAME"  --region $REGION
 fi
 
 echo "All Done!!"
