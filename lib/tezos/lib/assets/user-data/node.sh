@@ -12,7 +12,8 @@ echo "TZ_NETWORK=${_TZ_NETWORK_}" >> /etc/environment
 echo "TZ_DOWNLOAD_SNAPSHOT=${_TZ_DOWNLOAD_SNAPSHOT_}" >> /etc/environment
 echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
 echo "AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}" >> /etc/environment
-echo "NODE_ROLE=${_NODE_ROLE_}" >> /etc/environment
+echo "INSTANCE_TYPE=${_INSTANCE_TYPE_}" >> /etc/environment
+echo "S3_SYNC_BUCKET=${_S3_SYNC_BUCKET_}" >> /etc/environment
 source /etc/environment
 
 arch=$(uname -m)
@@ -94,7 +95,6 @@ if [[ "$STACK_ID" != "none" ]]; then
   systemctl enable --now cfn-hup
   systemctl start cfn-hup.service
 
-  cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
 fi
 
 echo "Install Octez-node and its dependencies"
@@ -129,10 +129,22 @@ su tezos -c "octez-node identity generate"
 
 
 # download snapshot if network is mainnet
-if [ "$TZ_NETWORK" == "mainnet"  ] && [ "$TZ_DOWNLOAD_SNAPSHOT" == "true" ]; then
-  echo "Downloading Tezos snapshot and importing"
-  chmod +x /opt/download-snapshot.sh
-  su tezos -c "/opt/download-snapshot.sh"
+if [ "$INSTANCE_TYPE" == "SYNC"  ] || [ "$INSTANCE_TYPE" == "SINGLE" ]; then
+  if [ "$TZ_NETWORK" == "mainnet"  ] && [ "$TZ_DOWNLOAD_SNAPSHOT" == "true" ]; then
+    echo "Downloading Tezos snapshot and importing"
+    chmod +x /opt/download-snapshot.sh
+    su tezos -c "/opt/download-snapshot.sh"
+  fi
+fi
+
+
+if [[ "$INSTANCE_TYPE" == "HA" ]]; then
+  su tezos -c "aws s3 sync s3://$S3_SYNC_BUCKET/node ~/.tezos-node/node"
+fi
+
+if [[ "$INSTANCE_TYPE" == "SYNC" ]]; then
+  chmod +x /opt/copy-data-to-s3.sh
+  su tezos -c "/opt/copy-data-to-s3.sh"
 fi
 
 echo "Running node"
@@ -159,8 +171,34 @@ cd /opt
 sudo mv /opt/sync-checker/syncchecker-tezos.sh /opt/syncchecker.sh
 sudo chmod +x /opt/syncchecker.sh
 
-(crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
-crontab -l
+
+echo "Setting up sync-checker service"
+cat >/etc/systemd/system/sync-checker.service <<EOL
+[Unit]
+Description="Sync checker for the tezos node"
+
+[Service]
+ExecStart=/opt/syncchecker.sh
+EOL
+
+# Run every minute
+echo "Setting up sync-checker timer"
+cat >/etc/systemd/system/sync-checker.timer <<EOL
+[Unit]
+Description="Run Sync checker service every minute"
+
+[Timer]
+OnCalendar=*:*:0/1
+Unit=sync-checker.service
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+echo "Starting sync checker timer"
+systemctl start sync-checker.timer
+systemctl enable sync-checker.timer
+
 
 if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
   echo "Signaling ASG lifecycle hook to complete"
@@ -169,5 +207,6 @@ if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
   aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$AUTOSCALING_GROUP_NAME"  --region $AWS_REGION
 fi
 
+cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
 echo "All Done!!"
 set -e
