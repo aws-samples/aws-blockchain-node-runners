@@ -23,13 +23,13 @@ export const baseConfig: configTypes.TzBaseConfig = {
 };
 
 export const baseNodeConfig: configTypes.TzBaseNodeConfig = {
-    instanceType: new ec2.InstanceType(process.env.TZ_INSTANCE_TYPE ? process.env.TZ_INSTANCE_TYPE : "c5.2xlarge"),
+    instanceType: new ec2.InstanceType(process.env.TZ_INSTANCE_TYPE ? process.env.TZ_INSTANCE_TYPE : "c7g.xlarge"),
     instanceCpuType: process.env.TZ_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64 ,
     tzNetwork: <configTypes.TzNetwork>process.env.TZ_CLUSTER || "mainnet",
     historyMode: <configTypes.TzNodeHistoryMode>process.env.TZ_HISTORY_MODE || "full",
     snapshotsUrl: process.env.TZ_SNAPSHOT_URI || constants.NoneValue,
     dataVolume: {
-        sizeGiB: process.env.TZ_DATA_VOL_SIZE ? parseInt(process.env.TZ_DATA_VOL_SIZE) : 4000,
+        sizeGiB: process.env.TZ_DATA_VOL_SIZE ? parseInt(process.env.TZ_DATA_VOL_SIZE) : 2000,
         type: parseDataVolumeType(process.env.TZ_DATA_VOL_TYPE?.toLowerCase() ? process.env.TZ_DATA_VOL_TYPE?.toLowerCase() : "gp3"),
         iops: process.env.TZ_DATA_VOL_IOPS ? parseInt(process.env.TZ_DATA_VOL_IOPS) : 10000,
         throughput: process.env.TZ_DATA_VOL_THROUGHPUT ? parseInt(process.env.TZ_DATA_VOL_THROUGHPUT) : 700
