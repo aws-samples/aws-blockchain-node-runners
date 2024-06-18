@@ -73,7 +73,7 @@ export class TzHANodesStack extends cdk.Stack {
         snapshotBucket.grantRead(instanceRole);
 
         // parsing user data script and injecting necessary variables
-        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node-ha.sh")).toString();
+        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
        
         const modifiedInitNodeScript = cdk.Fn.sub(nodeScript, {
             _AWS_REGION_: REGION,
@@ -81,14 +81,14 @@ export class TzHANodesStack extends cdk.Stack {
             _TZ_SNAPSHOTS_URI_: snapshotsUrl,
             _STACK_ID_: constants.NoneValue,
             _NODE_CF_LOGICAL_ID_: constants.NoneValue,
-            _NODE_ROLE_: nodeRole,
             _TZ_HISTORY_MODE_: historyMode,
             _TZ_DOWNLOAD_SNAPSHOT_ : String(downloadSnapshot),
             _TZ_NETWORK_: tzNetwork,
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
             _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
-            _S3_SYNC_BUCKET_: cdk.Fn.importValue('SnapshotBucketName')
+            _S3_SYNC_BUCKET_: cdk.Fn.importValue('SnapshotBucketName'),
+            _INSTANCE_TYPE_: "HA"
         });
 
         const rpcNodes = new HANodesConstruct(this, "rpc-nodes", {
@@ -103,11 +103,12 @@ export class TzHANodesStack extends cdk.Stack {
             securityGroup: instanceSG.securityGroup,
             userData: modifiedInitNodeScript,
             numberOfNodes,
-            rpcPortForALB: 8733,
+            rpcPortForALB: 8732,
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
             lifecycleHookName: lifecycleHookName,
             autoScalingGroupName: autoScalingGroupName,
+            healthCheckPath: "/monitor/bootstrapped"
         });
 
 

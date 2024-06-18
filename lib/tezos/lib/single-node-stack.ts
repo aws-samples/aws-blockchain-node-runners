@@ -99,12 +99,13 @@ export class TzSingleNodeStack extends cdk.Stack {
             _STACK_ID_: STACK_ID,
             _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
             _TZ_HISTORY_MODE_: historyMode,
-            _NODE_ROLE_: nodeRole,
             _TZ_DOWNLOAD_SNAPSHOT_ : String(downloadSnapshot),
 
             _TZ_NETWORK_: tzNetwork,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
             _AUTOSCALING_GROUP_NAME_: constants.NoneValue,
+            _INSTANCE_TYPE_: "SINGLE",
+            _S3_SYNC_BUCKET_: constants.NoneValue
         });
 
         // Adding modified userdata script to the instance prepared fro us by Single Node constract
