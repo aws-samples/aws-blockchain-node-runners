@@ -110,7 +110,7 @@ export class TzSyncNodesStack extends cdk.Stack {
                 actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
             })
         );
-        const syncNodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "sync.sh")).toString();
+        const syncNodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
         
 
         const syncNode = new ec2.Instance(this, "sync-node", {
@@ -152,6 +152,7 @@ export class TzSyncNodesStack extends cdk.Stack {
               _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
               _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
               _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
+              _INSTANCE_TYPE_: "SYNC",
           });
 
           syncNode.addUserData(modifiedSyncNodeScript);
