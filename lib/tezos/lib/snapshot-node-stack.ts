@@ -14,7 +14,7 @@ import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb";
 import * as nag from "cdk-nag";
 import { SnapshotsS3BucketConstruct } from "../../constructs/snapshots-bucket";
 
-export interface TzSyncNodesStackProps extends cdk.StackProps {
+export interface TzSnapshotNodeStackProps extends cdk.StackProps {
     nodeRole: configTypes.TzNodeRole;
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
@@ -24,8 +24,8 @@ export interface TzSyncNodesStackProps extends cdk.StackProps {
     snapshotsUrl: string;
 }
 
-export class TzSyncNodesStack extends cdk.Stack {
-    constructor(scope: cdkConstructs.Construct, id: string, props: TzSyncNodesStackProps) {
+export class TzSnapshotNodeStack extends cdk.Stack {
+    constructor(scope: cdkConstructs.Construct, id: string, props: TzSnapshotNodeStackProps) {
         super(scope, id, props);
 
         const REGION = cdk.Stack.of(this).region;
@@ -65,22 +65,22 @@ export class TzSyncNodesStack extends cdk.Stack {
 
 
         const snapshotsBucket = new SnapshotsS3BucketConstruct(this, "snapshots-s3-bucket", {
-            bucketName: `snapshot-${STACK_NAME}-${AWS_ACCOUNT_ID}-${REGION}`,
+            bucketName: `${STACK_NAME}-${AWS_ACCOUNT_ID}-${REGION}`,
         });
 
         const s3VPCEndpoint = vpc.addGatewayEndpoint("s3-vpc-endpoint", {
             service: ec2.GatewayVpcEndpointAwsService.S3,
         });
 
-        const syncInstanceRole = new iam.Role(this, `sync-instance-role`, {
+        const snapshotInstanceRole = new iam.Role(this, `snapshot-instance-role`, {
             assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
             managedPolicies: [
                 iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy"),
             ],
         });
 
-        asset.bucket.grantRead(syncInstanceRole);
-        syncInstanceRole.addToPolicy(
+        asset.bucket.grantRead(snapshotInstanceRole);
+        snapshotInstanceRole.addToPolicy(
             new iam.PolicyStatement({
                 resources: [
                     snapshotsBucket.bucketArn, 
@@ -110,11 +110,11 @@ export class TzSyncNodesStack extends cdk.Stack {
                 actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
             })
         );
-        const syncNodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
+        const snapshotNodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
         
 
-        const syncNode = new ec2.Instance(this, "sync-node", {
-            instanceName: "sync-node",
+        const snapshotNode = new ec2.Instance(this, "snapshot-node", {
+            instanceName: "snapshot-node",
             instanceType: instanceType,
             machineImage: new ec2.AmazonLinux2023ImageSsmParameter({
                 kernel: ec2.AmazonLinux2023Kernel.KERNEL_6_1,
@@ -135,11 +135,11 @@ export class TzSyncNodesStack extends cdk.Stack {
               ],
             detailedMonitoring: true,
             propagateTagsToVolumeOnCreation: true,
-            role: syncInstanceRole,
+            role: snapshotInstanceRole,
             securityGroup: instanceSG.securityGroup,
           });
 
-          const modifiedSyncNodeScript = cdk.Fn.sub(syncNodeScript, {
+          const modifiedSnapshotNodeScript = cdk.Fn.sub(snapshotNodeScript, {
               _AWS_REGION_: REGION,
               _STACK_NAME_: STACK_NAME,
               _TZ_SNAPSHOTS_URI_: snapshotsUrl,
@@ -148,18 +148,18 @@ export class TzSyncNodesStack extends cdk.Stack {
               _TZ_DOWNLOAD_SNAPSHOT_ : String(downloadSnapshot),
               _TZ_NETWORK_: tzNetwork,
               _S3_SYNC_BUCKET_: snapshotsBucket.bucketName,
-              _NODE_CF_LOGICAL_ID_: syncNode.instance.logicalId,
+              _NODE_CF_LOGICAL_ID_: snapshotNode.instance.logicalId,
               _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
               _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
               _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
-              _INSTANCE_TYPE_: "SYNC",
+              _INSTANCE_TYPE_: "SNAPSHOT",
           });
 
-          syncNode.addUserData(modifiedSyncNodeScript);
+          snapshotNode.addUserData(modifiedSnapshotNodeScript);
 
 
         // Getting logical ID of the instance to send ready signal later once the instance is initialized
-        const syncNodeCfn = syncNode.node.defaultChild as ec2.CfnInstance;
+        const snapshotNodeCfn = snapshotNode.node.defaultChild as ec2.CfnInstance;
 
         // CloudFormation Config: wait for 15 min for the node to start
         const creationPolicy: cdk.CfnCreationPolicy = {
@@ -170,7 +170,7 @@ export class TzSyncNodesStack extends cdk.Stack {
         };
         
 
-        syncNodeCfn.cfnOptions.creationPolicy = creationPolicy;
+        snapshotNodeCfn.cfnOptions.creationPolicy = creationPolicy;
 
         new cdk.CfnOutput(this, "SnapshotBucketName", {
             value: snapshotsBucket.bucketName,
@@ -203,7 +203,7 @@ export class TzSyncNodesStack extends cdk.Stack {
                 },
                 {
                     id: "AwsSolutions-EC29",
-                    reason: "We do not need to have termination protection for sync nodes"
+                    reason: "We do not need to have termination protection for snapshot nodes"
                 } 
             ],
             true
