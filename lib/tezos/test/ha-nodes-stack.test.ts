@@ -11,7 +11,7 @@ describe("TzHANodesStack", () => {
     const app = new cdk.App();
 
     // Create the TzHANodesStack.
-    const tzHANodesStack = new TzHANodesStack(app, "tz-sync-node", {
+    const tzHANodesStack = new TzHANodesStack(app, "tz-snapshot-node", {
     stackName: `tz-ha-nodes-${config.baseNodeConfig.historyMode}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     nodeRole: <configTypes.TzNodeRole> "rpc-node",

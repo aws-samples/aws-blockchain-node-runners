@@ -129,7 +129,7 @@ su tezos -c "octez-node identity generate"
 
 
 # download snapshot if network is mainnet
-if [ "$INSTANCE_TYPE" == "SYNC"  ] || [ "$INSTANCE_TYPE" == "SINGLE" ]; then
+if [ "$INSTANCE_TYPE" == "SNAPSHOT"  ] || [ "$INSTANCE_TYPE" == "SINGLE" ]; then
   if [ "$TZ_NETWORK" == "mainnet"  ] && [ "$TZ_DOWNLOAD_SNAPSHOT" == "true" ]; then
     echo "Downloading Tezos snapshot and importing"
     chmod +x /opt/download-snapshot.sh
@@ -142,7 +142,7 @@ if [[ "$INSTANCE_TYPE" == "HA" ]]; then
   su tezos -c "aws s3 sync s3://$S3_SYNC_BUCKET/node ~/.tezos-node/node"
 fi
 
-if [[ "$INSTANCE_TYPE" == "SYNC" ]]; then
+if [[ "$INSTANCE_TYPE" == "SNAPSHOT" ]]; then
   chmod +x /opt/copy-data-to-s3.sh
   su tezos -c "/opt/copy-data-to-s3.sh"
 fi
