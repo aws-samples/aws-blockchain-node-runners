@@ -27,7 +27,6 @@ export class TzNodeSecurityGroupConstructs extends cdkConstructs.Construct {
         // private ports
         sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9732), "RPC Port");
         sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(9732), "RPC Port");
-        sg.addIngressRule(ec2.Peer.ipv4('3.16.146.0/29'), ec2.Port.tcp(22));
 
         this.securityGroup = sg;
 

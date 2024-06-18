@@ -22,6 +22,7 @@ describe("TzHANodesStack", () => {
     historyMode: config.baseNodeConfig.historyMode,
     snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
     dataVolume: config.baseNodeConfig.dataVolume,
+    downloadSnapshot: Boolean(config.baseNodeConfig.downloadSnapshot),
 
     albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
     heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
@@ -44,18 +45,11 @@ describe("TzHANodesStack", () => {
        ],
        SecurityGroupIngress: [
         {
-          "CidrIp": "0.0.0.0/0",
-          "Description": "RPC Port",
-          "FromPort": 9732,
+          "CidrIp": "1.2.3.4/5",
+          "Description": "Blockchain Node RPC",
+          "FromPort": 8732,
           "IpProtocol": "tcp",
-          "ToPort": 9732
-         },
-         {
-          "CidrIp": "0.0.0.0/0",
-          "Description": "RPC Port",
-          "FromPort": 9732,
-          "IpProtocol": "udp",
-          "ToPort": 9732
+          "ToPort": 8732
          }
        ]
     })
@@ -63,11 +57,11 @@ describe("TzHANodesStack", () => {
     // Has security group from ALB to EC2.
     template.hasResourceProperties("AWS::EC2::SecurityGroupIngress", {
       Description: "Load balancer to target",
-      FromPort: 8545,
+      FromPort: 8732,
       GroupId: Match.anyValue(),
       IpProtocol: "tcp",
       SourceSecurityGroupId: Match.anyValue(),
-      ToPort: 8545,
+      ToPort: 8732,
     })
 
     // Has launch template profile for EC2 instances.
@@ -97,7 +91,7 @@ describe("TzHANodesStack", () => {
             "Encrypted": true,
             "Iops": 10000,
             "Throughput": 700,
-            "VolumeSize": 4000,
+            "VolumeSize": 2000,
             "VolumeType": "gp3"
            }
           }
@@ -105,7 +99,7 @@ describe("TzHANodesStack", () => {
          EbsOptimized: true,
          IamInstanceProfile: Match.anyValue(),
          ImageId: Match.anyValue(),
-         InstanceType:"m7g.4xlarge",
+         InstanceType: "c7g.xlarge",
          SecurityGroupIds: [Match.anyValue()],
          UserData: Match.anyValue(),
          TagSpecifications: Match.anyValue(),
@@ -128,7 +122,7 @@ describe("TzHANodesStack", () => {
     // Has Auto Scaling Lifecycle Hook.
     template.hasResourceProperties("AWS::AutoScaling::LifecycleHook", {
       DefaultResult: "ABANDON",
-      HeartbeatTimeout: config.haNodeConfig.heartBeatDelayMin,
+      HeartbeatTimeout: config.haNodeConfig.heartBeatDelayMin * 60,
       LifecycleHookName: `tz-ha-nodes-${config.baseNodeConfig.historyMode}`,
       LifecycleTransition: "autoscaling:EC2_INSTANCE_LAUNCHING",
     });
@@ -144,16 +138,32 @@ describe("TzHANodesStack", () => {
       }
       ],
       SecurityGroupIngress: [
-      {
-        "CidrIp": "1.2.3.4/5",
-        "Description": "Blockchain Node RPC",
-        "FromPort": 8545,
-        "IpProtocol": "tcp",
-        "ToPort": 8545
-      }
+        {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "RPC Port",
+          "FromPort": 9732,
+          "IpProtocol": "tcp",
+          "ToPort": 9732
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "RPC Port",
+          "FromPort": 9732,
+          "IpProtocol": "udp",
+          "ToPort": 9732
+         },
+         {
+          "Description": "Allow access from ALB to Blockchain Node",
+          "FromPort": 0,
+          "IpProtocol": "tcp",
+          "SourceSecurityGroupId": Match.anyValue(),
+          "ToPort": 65535,
+        }
       ],
       VpcId: Match.anyValue(),
   });
+
+
 
     // Has ALB.
     template.hasResourceProperties("AWS::ElasticLoadBalancingV2::LoadBalancer", {
@@ -195,7 +205,7 @@ describe("TzHANodesStack", () => {
         }
        ],
        LoadBalancerArn: Match.anyValue(),
-       Port: 8545,
+       Port: 8732,
        Protocol: "HTTP"
     })
 
@@ -203,13 +213,13 @@ describe("TzHANodesStack", () => {
     template.hasResourceProperties("AWS::ElasticLoadBalancingV2::TargetGroup", {
       HealthCheckEnabled: true,
       HealthCheckIntervalSeconds: 30,
-      HealthCheckPath: "/",
-      HealthCheckPort: "8545",
+      HealthCheckPath: "/monitor/bootstrapped",
+      HealthCheckPort: "8732",
       HealthyThresholdCount: 3,
       Matcher: {
       HttpCode: "200-299"
       },
-      Port: 8545,
+      Port: 8732,
       Protocol: "HTTP",
       TargetGroupAttributes: [
       {
