@@ -147,7 +147,6 @@ if [[ "$INSTANCE_TYPE" == "SNAPSHOT" ]]; then
   su tezos -c "/opt/copy-data-to-s3.sh"
 fi
 
-echo "Running node"
 
 echo "Setting up node as service"
 cat >/etc/systemd/system/node.service <<EOL
@@ -164,6 +163,7 @@ WantedBy=multi-user.target
 EOL
 
 systemctl enable node.service
+echo "Running node"
 systemctl start node.service
 
 echo "Configuring syncchecker script"
