@@ -33,7 +33,7 @@ const singleNodeStack = new TzSingleNodeStack(app, "tz-single-node", {
 singleNodeStack.addDependency(commonStack);
 
 const snapshotNode = new TzSnapshotNodeStack(app, "tz-snapshot-node", {
-    stackName: `tz-snapshot-nodes-${config.baseNodeConfig.historyMode}-${config.baseNodeConfig.tzNetwork}`,
+    stackName: `tz-snapshot-node-${config.baseNodeConfig.historyMode}-${config.baseNodeConfig.tzNetwork}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
     nodeRole: <configTypes.TzNodeRole> "rpc-node",
     instanceType: config.baseNodeConfig.instanceType,
