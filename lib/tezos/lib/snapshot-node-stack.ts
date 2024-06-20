@@ -113,8 +113,8 @@ export class TzSnapshotNodeStack extends cdk.Stack {
         const snapshotNodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
         
 
-        const snapshotNode = new ec2.Instance(this, "snapshot-node", {
-            instanceName: "snapshot-node",
+        const snapshotNode = new ec2.Instance(this, "tz-snapshot-node", {
+            instanceName: "tz-snapshot-node",
             instanceType: instanceType,
             machineImage: new ec2.AmazonLinux2023ImageSsmParameter({
                 kernel: ec2.AmazonLinux2023Kernel.KERNEL_6_1,

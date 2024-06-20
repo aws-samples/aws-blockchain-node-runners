@@ -11,7 +11,7 @@ TZ_SNAPSHOTS_DIR=~/.tezos-node/node
 
 mkdir ~/tezos-snapshots
 wget -O ~/tezos-snapshots/$TZ_SNAPSHOTS_FILE_NAME $TZ_SNAPSHOTS_URI
-octez-node snapshot import ~/tezos-snapshots/$TZ_SNAPSHOTS_FILE_NAME --data-dir $TZ_SNAPSHOTS_DIR --no-check
+octez-node snapshot import ~/tezos-snapshots/$TZ_SNAPSHOTS_FILE_NAME --data-dir $TZ_SNAPSHOTS_DIR 
 rm ~/tezos-snapshots/$TZ_SNAPSHOTS_FILE_NAME
 
 
