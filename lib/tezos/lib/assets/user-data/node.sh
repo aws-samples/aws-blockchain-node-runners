@@ -158,7 +158,7 @@ Description="Run the octez-node"
 [Service]
 User=tezos
 Group=tezos
-ExecStart=octez-node run --data-dir /home/tezos/.tezos-node/node --rpc-addr 127.0.0.1 --log-output="/home/tezos/.tezos-node/octez-node.log" --allow-all-rpc
+ExecStart=octez-node run --data-dir /home/tezos/.tezos-node/node --log-output="/home/tezos/.tezos-node/octez-node.log" --allow-all-rpc
 
 [Install]
 WantedBy=multi-user.target
