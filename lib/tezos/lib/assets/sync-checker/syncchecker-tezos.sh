@@ -1,11 +1,13 @@
 #!/bin/bash
-TZ_CHAIN_ID=$(curl -s -m 1 -H "Content-Type: application/json" http://localhost:8732/monitor/active_chains | jq -r ".[] | .chain_id")
-TZ_SYNC_STATUS=$(curl -s -m 1 -H "Content-Type: application/json" http://localhost:8732/chains/$TZ_CHAIN_ID/is_bootstrapped | jq -r ".sync_state")
+set +e
 
-if [[ "$TZ_SYNC_STATUS" == "synced" ]]; then
-    TZ_CURRENT_BLOCK=$(curl -s -m 1 -H "Content-Type: application/json" http://localhost:8732/chains/$TZ_CHAIN_ID/levels/checkpoint | jq -r ".level")
+source /etc/environment
+
+
+if [[ "$TZ_NETWORK" == "mainnet" ]]; then
+    TZ_CURRENT_BLOCK=$(octez-client rpc get /chains/main/blocks/head/header/shell | jq -r ".level")
 else
-    TZ_CURRENT_BLOCK=$(curl -s -m 1 -H "Content-Type: application/json" http://localhost:8732/chains/$TZ_CHAIN_ID/levels/checkpoint | jq -r ".level")
+    TZ_CURRENT_BLOCK=$(octez-client rpc get /chains/test/blocks/head/header/shell | jq -r ".level")
 fi
 
 
