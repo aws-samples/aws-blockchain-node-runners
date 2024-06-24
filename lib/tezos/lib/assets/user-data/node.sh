@@ -100,16 +100,18 @@ fi
 echo "Install Octez-node and its dependencies"
 
 if [ "$arch" == "x86_64" ]; then
-    curl -o /usr/local/bin/octez-node https://gitlab.com/tezos/tezos/-/package_files/130339583/download
-    curl -o /usr/local/bin/octez-client https://gitlab.com/tezos/tezos/-/package_files/130339263/download
-else
-    curl -o /usr/local/bin/octez-node https://gitlab.com/tezos/tezos/-/package_files/130342826/download
-    curl -o /usr/local/bin/octez-client https://gitlab.com/tezos/tezos/-/package_files/130342347/download
+    curl -o octez-binaries.tar.gz https://gitlab.com/tezos/tezos/-/package_files/133747462/download
+    tar xf octez-binaries.tar.gz 
+    mv ./octez-arm64/* /usr/local/bin/
+    else
+    curl -o octez-binaries.tar.gz https://gitlab.com/tezos/tezos/-/package_files/133748628/download
+    tar xf octez-binaries.tar.gz 
+    mv ./octez-arm64/* /usr/local/bin/
 fi
 
 
-chmod +x /usr/local/bin/octez-node
-chmod +x /usr/local/bin/octez-client
+
+find /usr/local/bin/ -name "octez-*" -exec chmod +x {} \;
 groupadd tezos
 adduser -g tezos tezos
 #mkdir -p /var/tezos/node
@@ -156,7 +158,7 @@ Description="Run the octez-node"
 [Service]
 User=tezos
 Group=tezos
-ExecStart=octez-node run --data-dir /home/tezos/.tezos-node/node --rpc-addr 127.0.0.1
+ExecStart=octez-node run --data-dir /home/tezos/.tezos-node/node --rpc-addr 127.0.0.1 --log-output="/home/tezos/.tezos-node/octez-node.log" --allow-all-rpc
 
 [Install]
 WantedBy=multi-user.target
