@@ -75,7 +75,7 @@ describe("TZSingleNodeStack", () => {
       ],
       IamInstanceProfile: Match.anyValue(),
       ImageId: Match.anyValue(),
-      InstanceType: "c7g.xlarge",
+      InstanceType: "m6gd.xlarge",
       Monitoring: true,
       PropagateTagsToVolumeOnCreation: true,
       SecurityGroupIds: Match.anyValue(),
@@ -88,7 +88,7 @@ describe("TZSingleNodeStack", () => {
       Encrypted: true,
       Iops: 10000,
       MultiAttachEnabled: false,
-      Size: 2000,
+      Size: 1000,
       Throughput: 700,
       VolumeType: "gp3"
     })

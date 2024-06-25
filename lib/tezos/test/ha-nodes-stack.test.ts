@@ -91,7 +91,7 @@ describe("TzHANodesStack", () => {
             "Encrypted": true,
             "Iops": 10000,
             "Throughput": 700,
-            "VolumeSize": 2000,
+            "VolumeSize": 1000,
             "VolumeType": "gp3"
            }
           }
@@ -99,7 +99,7 @@ describe("TzHANodesStack", () => {
          EbsOptimized: true,
          IamInstanceProfile: Match.anyValue(),
          ImageId: Match.anyValue(),
-         InstanceType: "c7g.xlarge",
+         InstanceType: "m6gd.xlarge",
          SecurityGroupIds: [Match.anyValue()],
          UserData: Match.anyValue(),
          TagSpecifications: Match.anyValue(),
