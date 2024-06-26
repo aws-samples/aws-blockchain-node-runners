@@ -56,10 +56,10 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 Create your own copy of `.env` file and edit it:
 ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/tezos-node
-   cd lib/tezos-node
+   # Make sure you are in aws-blockchain-node-runners/lib/tezos
+   cd lib/tezos
    pwd
-   cp ./sample-configs/.env-sample-full .env
+   cp ./sample-configs/.env-sample-full.env
    nano .env
 ```
    **NOTE:** You can find more examples inside the `sample-configs` directory.
@@ -69,7 +69,7 @@ Create your own copy of `.env` file and edit it:
 
 ```bash
    pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/tezos-node
+   # Make sure you are in aws-blockchain-node-runners/lib/tezos
    npx cdk deploy tz-common
 ```
 
@@ -79,7 +79,7 @@ Create your own copy of `.env` file and edit it:
 
 ```bash
    pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/tezos-node
+   # Make sure you are in aws-blockchain-node-runners/lib/tezos
    npx cdk deploy tz-single-node --json --outputs-file single-node-deploy.json
 ```
    **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`
@@ -111,7 +111,7 @@ The result should be like this (the actual balance might change):
 
 ```bash
    pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/ethereum
+   # Make sure you are in aws-blockchain-node-runners/lib/tezos
    npx cdk deploy snapshot-node --json --outputs-file sync-node-deploy.json
 ```
    **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`
@@ -129,7 +129,7 @@ Note: the snapshot backup process will automatically run ever day at midnight ti
 
 ```bash
    pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/ethereum
+   # Make sure you are in aws-blockchain-node-runners/lib/tezos
    npx cdk deploy tz-ha-nodes --json --outputs-file rpc-node-deploy.json
 ```
 
@@ -139,7 +139,6 @@ Note: the snapshot backup process will automatically run ever day at midnight ti
     export RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.alburl? | select(. != null)')
     echo $RPC_ABL_URL
 
-    # We query token balance of Beacon deposit contract: https://etherscan.io/address/0x00000000219ab540356cbb839cbe05303d7705fa
     curl http://$RPC_ABL_URL:8732/chains/main/is_bootstrapped 
 ```
 
@@ -171,7 +170,7 @@ The result should be like this (the actual balance might change):
     export AWS_REGION=<your_target_AWS_region>
 
    pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/ethereum
+   # Make sure you are in aws-blockchain-node-runners/lib/tezos
 
     # Undeploy Single RPC Node
     cdk destroy tz-single-node
