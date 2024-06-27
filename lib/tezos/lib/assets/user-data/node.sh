@@ -126,8 +126,7 @@ chmod +x /tmp/fetch-params.sh
 su tezos -c "/tmp/fetch-params.sh"
 
 echo "Configuring node"
-su tezos -c "octez-node config init --data-dir ~/.tezos-node/node --network=$TZ_NETWORK  --history-mode=$TZ_HISTORY_MODE  --net-addr='[::]:9732' --rpc-addr='[::]:8732'"
-su tezos -c "octez-node identity generate"
+su tezos -c "octez-node config init  --network=$TZ_NETWORK  --history-mode=$TZ_HISTORY_MODE  --net-addr='[::]:9732' --rpc-addr='[::]:8732' --allow-all-rpc [::]:8732"
 
 
 # download snapshot if network is mainnet
@@ -158,7 +157,7 @@ Description="Run the octez-node"
 [Service]
 User=tezos
 Group=tezos
-ExecStart=octez-node run --data-dir /home/tezos/.tezos-node/node --log-output="/home/tezos/.tezos-node/octez-node.log" --allow-all-rpc 0.0.0.0
+ExecStart=octez-node run 
 
 [Install]
 WantedBy=multi-user.target
