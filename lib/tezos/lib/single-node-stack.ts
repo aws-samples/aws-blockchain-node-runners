@@ -88,9 +88,6 @@ export class TzSingleNodeStack extends cdk.Stack {
 
         // Parsing user data script and injecting necessary variables
         const userData = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
-
-        const dataVolumeSizeBytes = dataVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
-
         const modifiedUserData = cdk.Fn.sub(userData, {
             _AWS_REGION_: REGION,
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,

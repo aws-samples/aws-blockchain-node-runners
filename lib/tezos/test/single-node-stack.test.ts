@@ -42,17 +42,31 @@ describe("TZSingleNodeStack", () => {
        SecurityGroupIngress: [
         {
           "CidrIp": "0.0.0.0/0",
-          "Description": "RPC Port",
+          "Description": "Peer connection port",
           "FromPort": 9732,
           "IpProtocol": "tcp",
           "ToPort": 9732
          },
          {
           "CidrIp": "0.0.0.0/0",
-          "Description": "RPC Port",
+          "Description": "Peer connection port",
           "FromPort": 9732,
           "IpProtocol": "udp",
           "ToPort": 9732
+         },
+         {
+          "CidrIp": "1.2.3.4/5",
+          "Description": "RPC Port",
+          "FromPort": 8732,
+          "IpProtocol": "tcp",
+          "ToPort": 8732
+         },
+         {
+          "CidrIp": "1.2.3.4/5",
+          "Description": "RPC Port",
+          "FromPort": 8732,
+          "IpProtocol": "udp",
+          "ToPort": 8732
          }
        ]
     })
