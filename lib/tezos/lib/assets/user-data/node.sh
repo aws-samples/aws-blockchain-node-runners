@@ -146,6 +146,8 @@ fi
 if [[ "$INSTANCE_TYPE" == "SNAPSHOT" ]]; then
   chmod +x /opt/copy-data-to-s3.sh
   su tezos -c "/opt/copy-data-to-s3.sh"
+  chmod +x /opt/setup-s3-sync-service.sh
+  /opt/setup-s3-sync-service.sh
 fi
 
 
