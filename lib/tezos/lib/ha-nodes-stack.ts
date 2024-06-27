@@ -74,7 +74,7 @@ export class TzHANodesStack extends cdk.Stack {
 
         // parsing user data script and injecting necessary variables
         const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
-       
+
         const modifiedInitNodeScript = cdk.Fn.sub(nodeScript, {
             _AWS_REGION_: REGION,
             _STACK_NAME_: STACK_NAME,
@@ -142,7 +142,7 @@ export class TzHANodesStack extends cdk.Stack {
                 {
                     id: "AwsSolutions-EC29",
                     reason: "We do not need to have termination protection for sync nodes"
-                } 
+                }
             ],
             true
         );

@@ -83,8 +83,8 @@ export class TzSnapshotNodeStack extends cdk.Stack {
         snapshotInstanceRole.addToPolicy(
             new iam.PolicyStatement({
                 resources: [
-                    snapshotsBucket.bucketArn, 
-                    snapshotsBucket.arnForObjects("*"), 
+                    snapshotsBucket.bucketArn,
+                    snapshotsBucket.arnForObjects("*"),
                     "arn:aws:s3:::lambsonacid-octez-*"
             ],
                 actions: ["s3:ListBucket", "s3:*Object"],
@@ -111,7 +111,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
             })
         );
         const snapshotNodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
-        
+
 
         const snapshotNode = new ec2.Instance(this, "tz-snapshot-node", {
             instanceName: "tz-snapshot-node",
@@ -168,7 +168,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
             timeout: "PT90M",
             },
         };
-        
+
 
         snapshotNodeCfn.cfnOptions.creationPolicy = creationPolicy;
 
@@ -204,7 +204,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
                 {
                     id: "AwsSolutions-EC29",
                     reason: "We do not need to have termination protection for snapshot nodes"
-                } 
+                }
             ],
             true
         );
