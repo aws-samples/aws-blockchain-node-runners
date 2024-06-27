@@ -2,7 +2,7 @@
 
 | Contributed by |
 |:--------------------:|
-| [@AhGhanima](https://github.com/AhGhanima) |
+| [@AhGhanima](https://github.com/AhGhanima), [@chrisdotn](https://github.com/chrisdotn) |
 
 ## Architecture Overview
 
