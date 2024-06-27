@@ -142,7 +142,7 @@ Note: the snapshot backup process will automatically run ever day at midnight ti
     curl http://$RPC_ABL_URL:8732/chains/main/is_bootstrapped 
 ```
 
-The result should be like this (the actual balance might change):
+The result should be like this:
 
 ```javascript
    {"bootstrapped":true,"sync_state":"synced"}
