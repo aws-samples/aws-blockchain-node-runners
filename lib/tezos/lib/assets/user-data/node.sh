@@ -101,11 +101,11 @@ echo "Install Octez-node and its dependencies"
 
 if [ "$arch" == "x86_64" ]; then
     curl -o octez-binaries.tar.gz https://gitlab.com/tezos/tezos/-/package_files/133747462/download
-    tar xf octez-binaries.tar.gz 
+    tar xf octez-binaries.tar.gz
     mv ./octez-arm64/* /usr/local/bin/
     else
     curl -o octez-binaries.tar.gz https://gitlab.com/tezos/tezos/-/package_files/133748628/download
-    tar xf octez-binaries.tar.gz 
+    tar xf octez-binaries.tar.gz
     mv ./octez-arm64/* /usr/local/bin/
 fi
 
@@ -159,7 +159,7 @@ Description="Run the octez-node"
 [Service]
 User=tezos
 Group=tezos
-ExecStart=octez-node run 
+ExecStart=octez-node run
 
 [Install]
 WantedBy=multi-user.target

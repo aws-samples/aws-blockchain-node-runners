@@ -95,8 +95,8 @@ Create your own copy of `.env` file and edit it:
    INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.singleinstanceid? | select(. != null)')
    NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
 
-    # We query if the node is synced to main 
-    curl http://$NODE_INTERNAL_IP:8732/chains/main/is_bootstrapped 
+    # We query if the node is synced to main
+    curl http://$NODE_INTERNAL_IP:8732/chains/main/is_bootstrapped
 ```
 
 The result should be like this (the actual balance might change):
@@ -139,7 +139,7 @@ Note: the snapshot backup process will automatically run ever day at midnight ti
     export RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.alburl? | select(. != null)')
     echo $RPC_ABL_URL
 
-    curl http://$RPC_ABL_URL:8732/chains/main/is_bootstrapped 
+    curl http://$RPC_ABL_URL:8732/chains/main/is_bootstrapped
 ```
 
 The result should be like this:
