@@ -9,12 +9,12 @@
 This blueprint has two options for running nodes. You can set up a single JSON RPC node or multiple nodes in highly-available setup. The details are below.
 
 ### Single RPC node setup
-![SingleNodeSetup](./doc/assets/Architecture-PoC.png)
+![SingleNodeSetup](./doc/assets/Architecture-Single.png)
 
 This setup is for small scale PoC or development environments. It deploys a single EC2 instance with the tezos client. The RPC port is exposed only to internal IP range of the VPC, while P2P ports allow external access to keep the client synced.
 
 ### Highly available setup
-![Architecture](./doc/assets/Architecture.png)
+![Architecture](./doc/assets/Architecture-HA.png)
 
 1.	An ongoing data synchronization process is configured with nodes in the Tezos network with a sync node and RPC nodes.
 2.	The sync node is used to create a copy of node's state data in Amazon S3 bucket.
