@@ -2,11 +2,11 @@
 
 | Contributed by |
 |:--------------------:|
-| [@vladupshot](https://github.com/vladupshot), [@allora-rc](https://github.com/allora-rc) |
+| [@clementupshot](https://github.com/clementupshot), [@allora-rc](https://github.com/allora-rc) |
 
 [Allora](https://www.allora.network/) is a self-improving decentralized Artificial Intelligence (AI) network. The primary goal of the network is to be the marketplace for intelligence. In other words, Allora aims to incentivize data scientists (workers) to provide high-quality inferences as requested by consumers. Inferences include predictions of arbitrary future events or difficult computations requiring specialized knowledge.
 
-The Allora Network brings together
+The Allora Network brings together:
 
   - [Consumers](https://docs.allora.network/devs) who pay for and acquire inferences or expertise to be revealed
   - [Workers](https://v2.docs.allora.network/datasci) who reveal inferences
@@ -17,65 +17,110 @@ With these ingredients, the Allora Network is able to continuously learn and imp
 
 Allora Worker nodes are the interfaces between data scientists' models and the Allora Network. A worker node is a machine-intelligent application registered on the Allora chain that provides inference/prediction on a particular topic it's subscribed to and gets rewarded based on the inference quality.
 
-This blueprint is designed to assist in deploying a single Allora [Worker Node](https://v2.docs.allora.network/datasci) on AWS. It is intended for use in development, testing, or Proof of Concept (PoC) purposes.
+This blueprint is designed to assist in deploying a single Allora [Worker Node](https://v2.docs.allora.network/datasci) on AWS. It is intended for use in development, testing, or Proof of Concept (PoC) environments.
 
 ## Overview of Deployment Architecture
 
 ### Single Worker Node Setup
 ![Single Worker Node Deployment](./doc/assets/Architecture-Single-Allora-Worker-Node.png)
 
-1. The Allora worker node is deployed in the Default VPC. An  Internet Gateway.
-2. The Woeker is used by dApps or development tools internally from within the Default VPC. JSON RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
-3. The Allora Worker Node uses all required secrets locally. Optionally, AWS Secrets Manager as secure backup.
-The Stacks node sends various monitoring metrics for both EC2 and Stacks nodes to Amazon CloudWatch.
+The AWS Cloud Development Kit (CDK) is used to deploy a single Allora Worker Node. The CDK application deploys the following infrastructure:
+   
+  - Virtual Private Cloud (VPC)
+  - Internet Gateway (IGW) to allow inbound requests for inferences from consumers and outbound responses from the worker node revealing inferences
+  - Public subnet that has a direct route to the IGW
+  - Security Group (SG) with TCP Port 9010 open inbound allowing requests for inferences to be routed to the Allora Worker Node
+  - Single Amazon Elastic Compute Cloud (EC2) instance (the Allora Worker Node) assigned to the public subnet
+  - Elastic IP Address (EIP) associated with the EC2 instance to maintain consistent IP addressing across instance restarts
 
-This blueprint creates a setup where the Allora worker node is supported by a side node providing inferences. They communicate through an endpoint so the worker will request inferences to the side node (the Inference Server). This makes an ultra-light worker node.
+The Allora Worker Node is accessed by the user internally and is not exposed to the Internet to protect the node from unauthorized access. A user can gain access to the EC2 Instance using AWS Session Manager. 
 
-## Worke Node System Requirements
+Multiple processes run on the Allora Worker Node (EC2 instance):
+
+  - Docker container with the worker node logic that handles communnication bet
+  - Docker container running the model server that reveal inferences to consumers
+
+Allora Public Head Nodes publish the Allora chain requests (requests for inferences from consumers) to Allora worker nodes. When a worker node is initialized, it starts with an environment variable called BOOT_NODES, which helps handle the connection and communications between worker nodes and the head nodes.
+
+The worker node (docker container) will call the function that invokes custom logic that handles. The request-response is a bidirectional flow from the Allora chain (inference requests from consumers) to the public head nodes to the worker node and finally to the model server that reveals inferences. 
+
+
+## Worker Node System Requirements
 
 - Operating System: Any modern Linux operating system
 - CPU: Minimum of 1/2 core
 - Memory: 2 to 4 GB
-- Storage: SSD or NVMe with at least 5GB of space.
+- Storage: SSD or NVMe with at least 5GB of space
 
-## Additional materials
+## Setup Instructions
 
-<details>
+### Setup Cloud9
 
-<summary>Well-Architected Checklist</summary>
+We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../docs/setup-cloud9.md).
 
+### Clone this repository and install dependencies
 
-This is the Well-Architected checklist for Allora Worker Nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+```bash
+   git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
+   cd aws-blockchain-node-runners
+   npm install
+```
 
-| Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
-|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
-| Security                | Network protection                | Are there unnecessary open ports in security groups?                             |    |
-|                         |                                   | Traffic inspection                                                               | AWS WAF could be implemented for traffic inspection. Additional charges will apply.  |
-|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Canonical, Ubuntu, 24.04 LTS. You may choose to run hardening scripts on it.  |
-|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
-|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes.  |
-|                         | Data protection in transit        | Use TLS                                                                          |  |
-|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
-|                         |                                   | Following principle of least privilege access                                    | In the node, root user is not used (using special user "ubuntu" instead).  |
-|                         | Application security              | Security focused development practices                                           | cdk-nag is being used with documented suppressions.  |
-| Cost optimization       | Service selection                 | Use cost effective resources                                                     |  |
-|                         | Cost awareness                    | Estimate costs                                                                   |  |
-| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution currently does not have high availability and is deployed to a single availability zone.  |
-|                         | Data backup                       | How is data backed up?                                                           | The data is not specially backed up. The node will have to re-sync its state from other nodes in the Allora network to recover.  |
-|                         | Resource monitoring               | How are workload resources monitored?                                            |   |
-| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                |   |
-|                         | Storage selection                 | How is storage solution selected?                                                |   |
-|                         | Architecture selection            | How is the best performance architecture selected?                               |   |
-| Operational excellence  | Workload health                   | How is health of workload determined?                                            |   |
-| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 |   |
-</details>
-<details>
+### Deploy single worker node
 
-<summary>Recommended Infrastructure</summary>
+1. Make sure you are in the root directory of the cloned repository
 
+2. Configure your setup
 
-| Usage pattern                                     | Ideal configuration                                                                                                      | Primary option on AWS                                                  | Config reference                                      |
-|---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|-------------------------------------------------------|
-| 1/ Fullnode                                       | 8 vCPU, 32 GB RAM, Data volume: EBS gp3 2TB, 7K IOPS, 400 MB/s throughput | `m6a.2xlarge` EBS gp3 volumes about 2000 GB(7000 IOPS, 400 MBps/s throughput) | [.env-sample-full](./sample-configs/.env-sample-full) |
-</details>
+    Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
+    ```bash
+   # Make sure you are in aws-blockchain-node-runners/lib/allora
+   cd lib/allora
+   npm install
+   pwd
+   cp ./sample-configs/.env-sample-full .env
+   nano .env
+    ```
+   > NOTE:
+   > Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
 
+   > IMPORTANT:
+   > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
+   > ```bash
+   > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
+   > ```
+
+3. Deploy Allora Worker Node
+
+   ```bash
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/allora
+   npx cdk deploy allora-single-node --json --outputs-file single-node-deploy.json
+   ```
+
+## Clear up and undeploy everything
+
+1. Undeploy worker node and common components
+
+   ```bash
+   # Setting the AWS account id and region in case local .env file is lost
+   export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+   export AWS_REGION=<your_target_AWS_region>
+
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/allora
+
+   # Undeploy Single Node
+   npx cdk destroy allora-single-node
+   ```
+
+2. Follow these steps to delete the Cloud9 instance in [Cloud9 Setup](../../docs/setup-cloud9.md)
+
+   Navigate to the AWS Cloud9 service in your Management Console, then select the environment you have created. On the top right, click **Delete** button and  follow the instructions.
+
+3. Delete the instance profile and IAM role
+
+```bash
+aws iam delete-instance-profile --instance-profile-name Cloud9-Developer-Access
+aws iam delete-role --role-name Cloud9-Developer-Access
+```
