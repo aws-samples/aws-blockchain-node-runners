@@ -9,10 +9,10 @@ export class AlloraStack extends cdk.Stack {
     super(scope, id, props);
 
     // Parameters
-    const resourceNamePrefixParam = new cdk.CfnParameter(this, 'ResourceNamePrefix', {
-      type: 'String',
-      description: 'Prefix for resource names to override AWS auto-generated naming convention',
-    });
+    // const resourceNamePrefixParam = new cdk.CfnParameter(this, 'ResourceNamePrefix', {
+    //   type: 'String',
+    //   description: 'Prefix for resource names to override AWS auto-generated naming convention',
+    // });
 
     const instanceSizeParam = new cdk.CfnParameter(this, 'InstanceSize', {
       type: 'String',
@@ -21,25 +21,18 @@ export class AlloraStack extends cdk.Stack {
     });
 
     // Create VPC
-    const vpc = new ec2.Vpc(this, 'Vec4AlloraWorker1Vpc', {
+    const vpc = new ec2.Vpc(this, 'AlloraWorkerxVpc', {
       maxAzs: 1,
       natGateways: 0,
       subnetConfiguration: [{
         cidrMask: 24,
-        name: `Vec4AlloraWorker1PublicSubnet`,
+        name: `AlloraWorkerxPublicSubnet`,
         subnetType: ec2.SubnetType.PUBLIC,
       }]
     });
 
-    // Create and attach Internet Gateway
-    // const igw = new ec2.CfnInternetGateway(this, 'Vec4AlloraWorker1IGW');
-    // new ec2.CfnVPCGatewayAttachment(this, 'Vec4AlloraWorker1VpcIgwAttachment', {
-    //   vpcId: vpc.vpcId,
-    //   internetGatewayId: igw.ref,
-    // });
-
     // Security Group with inbound TCP port 9010 open
-    const securityGroup = new ec2.SecurityGroup(this, 'Vec4AlloraWorker1SecurityGroup', {
+    const securityGroup = new ec2.SecurityGroup(this, 'AlloraWorkerxSecurityGroup', {
       vpc,
       allowAllOutbound: true,
       description: 'Allow inbound TCP 9010',
@@ -47,7 +40,7 @@ export class AlloraStack extends cdk.Stack {
     securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9010), 'Allow inbound TCP 9010');
 
     // EC2 Instance
-    const instance = new ec2.Instance(this, 'Vec4AlloraWorker1Instance', {
+    const instance = new ec2.Instance(this, 'AlloraWorkerxInstance', {
       vpc,
       instanceType: new ec2.InstanceType(instanceSizeParam.valueAsString),
       machineImage: ec2.MachineImage.genericLinux({
@@ -66,16 +59,10 @@ export class AlloraStack extends cdk.Stack {
     });
 
     // Elastic IP
-    const eip = new ec2.CfnEIP(this, 'Vec4AlloraWorker1EIP');
-    new ec2.CfnEIPAssociation(this, 'Vec4AlloraWorker1EIPAssociation', {
+    const eip = new ec2.CfnEIP(this, 'AlloraWorkerxEIP');
+    new ec2.CfnEIPAssociation(this, 'AlloraWorkerxEIPAssociation', {
       eip: eip.ref,
       instanceId: instance.instanceId,
     });
-
-    // Add Tags for resource naming convention
-    // cdk.Tags.of(vpc).add('Name', `${resourceNamePrefixParam.valueAsString}-Vpc`);
-    // cdk.Tags.of(securityGroup).add('Name', `${resourceNamePrefixParam.valueAsString}-SecurityGroup`);
-    // cdk.Tags.of(instance).add('Name', `${resourceNamePrefixParam.valueAsString}-Instance`);
-    // cdk.Tags.of(eip).add('Name', `${resourceNamePrefixParam.valueAsString}-EIP`);
   }
 }
