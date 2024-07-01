@@ -27,6 +27,7 @@ const singleNodeStack = new TzSingleNodeStack(app, "tz-single-node", {
     tzNetwork: config.baseNodeConfig.tzNetwork,
     historyMode: config.baseNodeConfig.historyMode,
     snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
+    octezDownloadUri: config.baseNodeConfig.octezDownloadUri,
     downloadSnapshot: config.baseNodeConfig.downloadSnapshot == "true",
     dataVolume: config.baseNodeConfig.dataVolume,
 });

@@ -10,6 +10,7 @@ echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}" >> /etc/environment
 echo "TZ_HISTORY_MODE=${_TZ_HISTORY_MODE_}" >> /etc/environment
 echo "TZ_NETWORK=${_TZ_NETWORK_}" >> /etc/environment
 echo "TZ_DOWNLOAD_SNAPSHOT=${_TZ_DOWNLOAD_SNAPSHOT_}" >> /etc/environment
+echo "TZ_OCTEZ_DOWNLOAD_URI=${_TZ_OCTEZ_DOWNLOAD_URI_}" >> /etc/environment
 echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
 echo "AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}" >> /etc/environment
 echo "INSTANCE_TYPE=${_INSTANCE_TYPE_}" >> /etc/environment
@@ -100,11 +101,13 @@ fi
 echo "Install Octez-node and its dependencies"
 
 if [ "$arch" == "x86_64" ]; then
-    curl -o octez-binaries.tar.gz https://gitlab.com/tezos/tezos/-/package_files/133747462/download
+    # curl -o octez-binaries.tar.gz https://gitlab.com/tezos/tezos/-/package_files/133747462/download
+    curl -o octez-binaries.tar.gz $TZ_OCTEZ_DOWNLOAD_URI
     tar xf octez-binaries.tar.gz
-    mv ./octez-arm64/* /usr/local/bin/
+    mv ./octez-x86_64/* /usr/local/bin/
     else
-    curl -o octez-binaries.tar.gz https://gitlab.com/tezos/tezos/-/package_files/133748628/download
+    # curl -o octez-binaries.tar.gz https://gitlab.com/tezos/tezos/-/package_files/133748628/download
+    curl -o octez-binaries.tar.gz $TZ_OCTEZ_DOWNLOAD_URI
     tar xf octez-binaries.tar.gz
     mv ./octez-arm64/* /usr/local/bin/
 fi
