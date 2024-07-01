@@ -172,9 +172,9 @@ export class TzSnapshotNodeStack extends cdk.Stack {
 
         snapshotNodeCfn.cfnOptions.creationPolicy = creationPolicy;
 
-        new cdk.CfnOutput(this, "SnapshotBucketName", {
+        new cdk.CfnOutput(this, "TezosSnapshotBucket", {
             value: snapshotsBucket.bucketName,
-            exportName: "SnapshotBucketName",
+            exportName: "TezosSnapshotBucket",
           });
 
         // Adding suppressions to the stack
