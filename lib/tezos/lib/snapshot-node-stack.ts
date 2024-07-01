@@ -22,6 +22,7 @@ export interface TzSnapshotNodeStackProps extends cdk.StackProps {
     historyMode: configTypes.TzNodeHistoryMode;
     downloadSnapshot: boolean;
     snapshotsUrl: string;
+    octezDownloadUri: string;
 }
 
 export class TzSnapshotNodeStack extends cdk.Stack {
@@ -43,6 +44,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
             historyMode,
             downloadSnapshot,
             snapshotsUrl,
+            octezDownloadUri,
         } = props;
 
         // using default vpc
@@ -146,6 +148,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
               _STACK_ID_: STACK_ID,
               _TZ_HISTORY_MODE_: historyMode,
               _TZ_DOWNLOAD_SNAPSHOT_ : String(downloadSnapshot),
+              _TZ_OCTEZ_DOWNLOAD_URI_ : octezDownloadUri,
               _TZ_NETWORK_: tzNetwork,
               _S3_SYNC_BUCKET_: snapshotsBucket.bucketName,
               _NODE_CF_LOGICAL_ID_: snapshotNode.instance.logicalId,
