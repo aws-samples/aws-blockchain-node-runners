@@ -59,7 +59,7 @@ Create your own copy of `.env` file and edit it:
    # Make sure you are in aws-blockchain-node-runners/lib/tezos
    cd lib/tezos
    pwd
-   cp ./sample-configs/.env-sample-full.env
+   cp ./sample-configs/.env-sample-full .env
    nano .env
 ```
    **NOTE:** You can find more examples inside the `sample-configs` directory.
