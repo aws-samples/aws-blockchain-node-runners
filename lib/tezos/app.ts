@@ -56,6 +56,7 @@ const haNodeStack = new TzHANodesStack(app, "tz-ha-nodes", {
     historyMode: config.baseNodeConfig.historyMode,
     snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
     dataVolume: config.baseNodeConfig.dataVolume,
+    octezDownloadUri: config.baseNodeConfig.octezDownloadUri,
 
     albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
     heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,

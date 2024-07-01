@@ -144,7 +144,7 @@ fi
 
 if [[ "$INSTANCE_TYPE" == "HA" ]]; then
   # su tezos -c "aws s3 sync s3://$S3_SYNC_BUCKET/node ~/.tezos-node/node"
-  su tezos -c "s5cmd sync 's3://$S3_SYNC_BUCKET/node/*' ~/.tezos-node/node"
+  su tezos -c "s5cmd sync 's3://$S3_SYNC_BUCKET/node/*' /home/tezos/.tezos-node/"
 fi
 
 if [[ "$INSTANCE_TYPE" == "SNAPSHOT" ]]; then
