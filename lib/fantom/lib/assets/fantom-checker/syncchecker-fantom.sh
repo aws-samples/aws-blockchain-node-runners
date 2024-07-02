@@ -25,7 +25,7 @@ FANTOM_SYNC_STATS=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --dat
 if [ -n "$FANTOM_SYNC_STATS" ] && [ "$FANTOM_SYNC_STATS" != "false" ]; then
     FANTOM_SYNC_BLOCK=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --datadir=/data --exec "ftm.syncing.currentBlock"')
     FANTOM_HIGHEST_BLOCK=$(su bcuser -c '/home/bcuser/go-opera/build/opera attach --datadir=/data --exec "ftm.syncing.highestBlock"')
-    
+
     FANTOM_BLOCKS_BEHIND="$((FANTOM_HIGHEST_BLOCK-FANTOM_SYNC_BLOCK))"
 
 else
