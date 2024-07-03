@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/allora.ts",
+  "app": "npx ts-node --prefer-ts-exts allora.ts",
   "watch": {
     "include": [
       "**"

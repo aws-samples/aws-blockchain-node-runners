@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import 'dotenv/config';
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { AlloraStack } from './lib/allora-stack';
@@ -15,5 +16,5 @@ new AlloraStack(app, 'allora-single-node', {
   vpcMaxAzs: Number(process.env.AWS_VPC_MAX_AZS || 1),
   vpcNatGateways:  Number(process.env.AWS_VPC_NAT_GATEWAYS || 0),
   vpcSubnetCidrMask: Number(process.env.AWS_VPC_CIDR_MASK),
-  resourceNamePrefix: process.env.AWS_RESOURCE_NAME_PREFIX || 'AlloraWorkerxVpc'
+  resourceNamePrefix: process.env.AWS_RESOURCE_NAME_PREFIX || 'AlloraWorkerx'
 });
