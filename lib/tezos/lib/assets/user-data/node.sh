@@ -131,6 +131,10 @@ su tezos -c "/tmp/fetch-params.sh"
 echo "Configuring node"
 su tezos -c "octez-node config init  --network=$TZ_NETWORK  --history-mode=$TZ_HISTORY_MODE  --net-addr='[::]:9732' --rpc-addr='[::]:8732' --allow-all-rpc [::]:8732"
 
+# Signal completion to CFN
+echo "Signaling completion to CloudFormation. The node will still sync/import data"
+cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
+
 
 # download snapshot if network is mainnet
 if [ "$INSTANCE_TYPE" == "SNAPSHOT"  ] || [ "$INSTANCE_TYPE" == "SINGLE" ]; then
@@ -214,6 +218,5 @@ if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
   aws autoscaling complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id $INSTANCE_ID --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" --auto-scaling-group-name "$AUTOSCALING_GROUP_NAME"  --region $AWS_REGION
 fi
 
-cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
 echo "All Done!!"
 set -e

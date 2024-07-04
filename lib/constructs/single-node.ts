@@ -117,7 +117,7 @@ export class SingleNodeConstruct extends cdkContructs.Construct {
     const creationPolicy: cdk.CfnCreationPolicy = {
       resourceSignal: {
         count: 1,
-        timeout: "PT90M",
+        timeout: "PT15M",
       },
     };
 
