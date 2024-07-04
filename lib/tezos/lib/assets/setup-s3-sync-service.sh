@@ -25,7 +25,7 @@ systemctl start s3-sync.service
 echo "Setting up s3 sync"
 cat >/etc/systemd/system/s3-sync.timer <<EOL
 [Unit]
-Description="Run Sync checker service everydat at 1 AM"
+Description="Run Sync checker service everyday at 1 AM"
 
 [Timer]
 OnCalendar=Mon..Sun *-*-* 1:00:00
