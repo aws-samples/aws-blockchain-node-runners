@@ -82,7 +82,9 @@ Create your own copy of `.env` file and edit it:
    # Make sure you are in aws-blockchain-node-runners/lib/tezos
    npx cdk deploy tz-single-node --json --outputs-file single-node-deploy.json
 ```
-   **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`
+   **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`.
+
+   The EC2 instance will deploy, initialize the node and start the first sync. In Cloudformation the instance will show as successful once the node is running. From that point it still takes a while until the node is synced to the blockchain. You can check the sync status with the REST call below in step 4. If the `curl cannot connect to the node on port 8732, then the node is still importing. Once that's done, the curl command works. 
 
 2. After starting the node you need to wait for the inital syncronization process to finish. It may take from an hour to half a day depending on the the state of the network. You can use Amazon CloudWatch to track the progress. To see them:
 
