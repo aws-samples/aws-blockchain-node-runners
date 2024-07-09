@@ -56,4 +56,79 @@ test('Stack has correct resources', () => {
   template.hasResourceProperties('AWS::EC2::EIPAssociation', {
     InstanceId: Match.anyValue(),
   });
+
+  // Check for S3 Bucket
+  template.resourceCountIs('AWS::S3::Bucket', 1);
+
+  // Check for Bucket Deployment
+  template.hasResourceProperties('Custom::CDKBucketDeployment', {
+    DestinationBucketName: {
+      'Ref': Match.anyValue(),
+    },
+    DestinationBucketKeyPrefix: 'user-data',
+    Prune: true,
+    ServiceToken: {
+      'Fn::GetAtt': [
+        Match.anyValue(),
+        'Arn'
+      ]
+    },
+    SourceBucketNames: [
+      Match.anyValue(),
+    ],
+    SourceObjectKeys: [
+      Match.stringLikeRegexp('.*\\.zip')
+    ]
+  });
+
+  // Check for S3 bucket policy to allow read access to the EC2 instance
+  template.hasResourceProperties('AWS::S3::BucketPolicy', {
+    Bucket: {
+      'Ref': Match.anyValue(),
+    },
+    PolicyDocument: {
+      Statement: Match.arrayWith([
+        Match.objectLike({
+          Action: [
+            "s3:PutBucketPolicy",
+            "s3:GetBucket*",
+            "s3:List*",
+            "s3:DeleteObject*"
+          ],
+          Effect: 'Allow',
+          Resource: [
+            {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Arn',
+              ],
+            },
+            {
+              'Fn::Join': [
+                '',
+                [
+                  {
+                    'Fn::GetAtt': [
+                      Match.anyValue(),
+                      'Arn'
+                    ]
+                  },
+                  '/*'
+                ]
+              ],
+            }
+          ],
+          Principal: {
+            AWS: {
+              'Fn::GetAtt': [
+                Match.anyValue(),
+                'Arn',
+              ],
+            },
+          },
+        }),
+      ]),
+      Version: '2012-10-17'
+    },
+  });
 });

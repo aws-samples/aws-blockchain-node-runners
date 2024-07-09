@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "AWS_REGION=${_AWS_REGION_}" >> /etc/environment
+echo "ASSETS_S3_PATH=${_ASSETS_S3_PATH_}" >> /etc/environment
+
 #############################
 # Prerequisites
 # Pip
