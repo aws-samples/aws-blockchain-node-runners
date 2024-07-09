@@ -1,67 +1,20 @@
-# Sample AWS Blockchain Node Runner app for Sui Nodes
+# Sample AWS Blockchain Node Runner app for Sui Full Node
 
 | Contributed by |
 |:--------------------:|
-| [@wojciechos](https://github.com/wojciechos) |
+| [@yinalaws](https://github.com/yinalaws), [@effraga](https://github.com/effraga) |
 
-[Sui](https://docs.sui.io/documentation/) is a "Layer 2" scaling solution for Ethereum leveraging zero knowledge proofs. This blueprint helps to deploy Sui nodes (Juno) on AWS as RPC nodes. It is meant to be used for development, testing or Proof of Concept purposes.
+## Architecture Overview
 
-## Overview of Deployment Architectures for Single Node setups
+This blueprint has step by step guides to set up a single Sui Full Node.
 
-### Single node setup
 
-![Single Node Deployment](./doc/assets/Architecture-SingleNode.png)
+### Sui Full Node setup
+![SingleNodeSetup](./doc/assets/Architecture-Single.png)
 
-1.	A Sui node deployed in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the [Sequencer](https://docs.sui.io/documentation/architecture_and_concepts/Network_Architecture/sui_architecture_overview/) through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-2.	The Sui node is used by dApps or development tools internally from within the Default VPC. JSON RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
-3. You will need access to a fully-synced Ethereum RPC endpoint before running Juno.
-4. The Sui node sends various monitoring metrics for both EC2 and Sui nodes to Amazon CloudWatch.
+This setup is for PoC or development environments and it supports Devnet, Testnet and Mainnet. It deploys a single EC2 instance with Sui client. The RPC port is exposed only to internal IP range of the VPC, while P2P ports allow external access to keep the client synced.
 
-## Additional Materials
-
-<details>
-
-<summary>Well-Architected Checklist</summary>
-
-This is the Well-Architected checklist for Stacks nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
-
-| Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
-|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
-| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | There are no ports open to public. RPC port 6060 is open only IP addresses from the same VPC. |
-|                         |                                   | Traffic inspection                                                               | AWS WAF could be implemented for traffic inspection. Additional charges will apply.  |
-|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Ubuntu Server 20.04 AMI. You may choose to run hardening scripts on it.  |
-|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
-|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes.  |
-|                         |                                   | Use encrypted Amazon Simple Storage Service (Amazon S3) buckets                  | This solution uses Amazon S3 managed keys (SSE-S3) encryption.  |
-|                         | Data protection in transit        | Use TLS                                                                          | TLS is not used in this solution. Port 6060 is the only open port, but you may create HTTPS listener with self signed certificate if TLS is desired.  |
-|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
-|                         |                                   | Following principle of least privilege access                                    | In all node types, root user is not used (using special user "ubuntu" instead).  |
-|                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions.  |
-| Cost optimization       | Service selection                 | Use cost effective resources                                                     | 1. AMD-based instances are used for Consensus and RPC node to save the costs. Consider compiling Graviton-based binaries to improve costs for compute.<br/>2. Cost-effective EBS gp3 are preferred instead of io2. |
-|                         | Cost awareness                    | Estimate costs                                                                   | Single RPC node with `m6a.2xlarge` EBS gp3 volume about 600 GB with On-Demand pricing will cost around US$323.29 per month in the US East (N. Virginia) region not including network requests for follower nodes. More analysis needed. |
-| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution ues only for a single-node deployment. If the running node failed, you will need to undeploy the existing stack and re-deploy the node again. |
-|                         | Data backup                       | How is data backed up?                                                           | Considering blockchain data is replicated by nodes automatically and Sui nodes sync from start within an hour and a half, we don't use any additional mechanisms to backup the data.  |
-|                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
-| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance, i.e. AWS AMD-based Amazon EC2 instances.  |
-|                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. gp3 Amazon EBS volumes with optimal IOPS and throughput.  |
-|                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the Sui community.  |
-| Operational excellence  | Workload health                   | How is health of workload determined?                                            | We rely on metrics reported to CloudWatch by `/opt/syncchecker.sh` script. |
-| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses AMD-powered instances. There is a potential to use AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2.  |
-</details>
-
-### Hardware Requirements
-
-**Minimum for Sui node**
-
-- Instance type [m6a.large](https://aws.amazon.com/ec2/instance-types/m6a/).
-- 250GB EBS gp3 storage with at least 3000 IOPS.
-
-**Recommended for Sui node**
-
-- Instance type [m6a.2xlarge](https://aws.amazon.com/ec2/instance-types/m6a/).
-- 600GB EBS gp3 storage with at least 3000 IOPS to store and upzip snapshots.
-
-## Setup Instructions
+## Solution Walkthrough
 
 ### Setup Cloud9
 
@@ -75,162 +28,115 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    npm install
 ```
 
-### Deploy Single Node
+**NOTE:** In this tutorial we will set all major configuration through environment variables, but you also can modify parameters in `config/config.ts`.
+
+### Prepare to deploy nodes
 
 1. Make sure you are in the root directory of the cloned repository
 
 2. If you have deleted or don't have the default VPC, create default VPC
 
-    ```bash
+```bash
     aws ec2 create-default-vpc
-    ```
+   ```
 
-   > NOTE:
-   > You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
+   **NOTE:** You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
 
-3. Configure your setup
+   **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`
 
-    Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
-    ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/sui
+3. Configure  your setup
+
+Create your own copy of `.env` file and edit it:
+```bash
+   # Make sure you are in aws-blockchain-node-runners/lib/Sui
    cd lib/sui
-   npm install
    pwd
    cp ./sample-configs/.env-sample-full .env
    nano .env
-    ```
-   > NOTE:
-   > Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
+```
+   **NOTE:** You can find more examples inside the `sample-configs` directory.
 
-4. Deploy common components such as IAM role
 
-   ```bash
+4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
+
+```bash
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/sui
    npx cdk deploy sui-common
-   ```
+```
 
-   > IMPORTANT:
-   > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
-   > ```bash
-   > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
-   > ```
+### Deploy Sui Full-Node
 
-5. [OPTIONAL] You can use Amazon Managed Blockchain (AMB) Access Ethereum node as L1 node. To do that, leave `STARKNET_L1_ENDPOINT` URL empty and, deploy Amazon Managed Blockchain (AMB) Access Ethereum node. Wait about 35-70 minutes for the node to sync.
+1. Deploy JSON_RPC Full Node
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/sui
-   npx cdk deploy sui-ethereum-l1-node --json --outputs-file sui-ethereum-l1-node.json
-   ```
-   To watch the progress, open the [AMB Web UI](https://console.aws.amazon.com/managedblockchain/home), click the name of your target network from the list (Mainnet, Goerly, etc.) and watch the status of the node to change from `Creating` to `Available`.
-
-6. Deploy Sui Full Node
-
-   ```bash
+```bash
    pwd
    # Make sure you are in aws-blockchain-node-runners/lib/sui
    npx cdk deploy sui-single-node --json --outputs-file single-node-deploy.json
-   ```
-   After starting the node you will need to wait for the initial synchronization process to finish. When using snapshot, the node should become available within a couple of hours, but migh take about 3-4 days to sync it from block 0. To check the progress, you may use SSM to connect into EC2 first and watch the log like this:
+```
+   **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`.
 
-   ```bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   echo "INSTANCE_ID="$INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   tail -f /var/log/sui/error.log
-   ```
+   The EC2 instance will deploy, initialize the node and start the first sync. In Cloudformation the instance will show as successful once the node is running. From that point it still takes a while until the node is synced to the blockchain. You can check the sync status with the REST call below in step 4. If the `curl cannot connect to the node on port 8732, then the node is still importing. Once that's done, the curl command works. 
+
+2. After starting the node you need to wait for the inital syncronization process to finish. It may take from an hour to half a day depending on the the state of the network. You can use Amazon CloudWatch to track the progress. To see them:
+
+    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
+    - Open `Dashboards` and select `tz-single-node-<type>-<network>` from the list of dashboards.
+
+4. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Check if the JSON-RPC port is open and working — run the following command from a terminal:
+
+```bash
+   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.singleinstanceid? | select(. != null)')
+   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+
+    # We query if the node is synced to main
+    ## replace <your IP address> with your server IP address
+curl --location --request POST <your IP address>:9000 \
+--header 'Content-Type: application/json' \
+--data-raw '{ "jsonrpc":"2.0", "method":"rpc.discover","id":1}'
+```
+
+The result should start like like this (the actual balance might change):
+
+```{"jsonrpc":"2.0","result":{"openrpc":"1.2.6","info":{"title":"Sui JSON-RPC","description":"Sui JSON-RPC API for interaction with Sui Full node. Make RPC calls using https://fullnode.NETWORK.sui.io:443, where NETWORK is the network you want to use (testnet, devnet, mainnet). By default, local networks use port 9000.","contact":{"name":"Mysten Labs","url":"https://mystenlabs.com","email":"build@mystenlabs.com"},"license":{"name":"Apache-2.0","url":"https://raw.githubusercontent.com/MystenLabs/sui/main/LICENSE"},"version":"1.28.2"},"methods
+```
 
 
-7. Test Sui RPC API
-   Use curl to query from within the node instance:
-   ```bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+### Clearing up and undeploying everything
 
-   curl --location 'http://localhost:6060' \
-   --header 'Content-Type: application/json' \
-   --data '{
-      "jsonrpc":"2.0",
-      "method":"sui_chainId",
-      "params":[],
-      "id":1
-   }'
-   ```
+1. Undeploy RPC Nodes, Sync Nodes and Common components
 
-### Monitoring
-A script on the Sui node publishes current block and blocks behind metrics to CloudWatch metrics every 5 minutes. When the node is fully synced the blocks behind metric should get to 0.To see the metrics:
-
-- Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)
-- Open Dashboards and select `sui-single-node-<network_id>` from the list of dashboards.
-
-## Clear up and undeploy everything
-
-1. Undeploy all Nodes and Common stacks
-
-   ```bash
+```bash
    # Setting the AWS account id and region in case local .env file is lost
-   export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
-   export AWS_REGION=<your_target_AWS_region>
+    export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+    export AWS_REGION=<your_target_AWS_region>
 
    pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/sui
+   # Make sure you are in aws-blockchain-node-runners/lib/Sui
 
-   # Undeploy Single Node
-   npx cdk destroy sui-single-node
+    # Undeploy Single Fullnode
+    cdk destroy sui-single-node
 
-   # Undeploy AMB Etheruem node
-   npx cdk destroy sui-ethereum-l1-node
 
-   # Delete all common components like IAM role and Security Group
-   npx cdk destroy sui-common
-   ```
+    # You need to manually delete an s3 bucket with a name similar to 'sui-snapshots-$accountid-tz-nodes-common' on the console,firstly empty the bucket,secondly delete the bucket,and then execute
+    # Delete all common components like IAM role and Security Group
+    cdk destroy dui-common
+```
 
 2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
 
-## FAQ
+### FAQ
 
-1. How to check the logs of the clients running on my Sui node?
+1. How to check the logs from the EC2 user-data script?
 
    **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 
-   ```bash
+```bash
    pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/sui
+   # Make sure you are in aws-blockchain-node-runners/lib/Sui
 
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   echo "INSTANCE_ID="$INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   tail -f /var/log/sui/error.log
-   ```
-2. How to check the logs from the EC2 user-data script?
-
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/sui
-
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
+   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.single-node-instance-id? | select(. != null)')
    echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
    aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
    sudo cat /var/log/cloud-init-output.log
-   ```
-
-3. How can I restart the Sui service?
-
-   ``` bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo systemctl status sui.service
-   sudo systemctl restart sui.service
-   ```
-4. Where to find the key juno directories?
-
-   - The directory with binaries is `/home/ubuntu/juno-source`.
-   - The data directory of juno agent is `/data`
+```
