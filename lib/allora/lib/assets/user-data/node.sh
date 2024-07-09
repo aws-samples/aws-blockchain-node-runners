@@ -67,3 +67,4 @@ sudo usermod -aG docker $USER
 # Start docker service
 sudo service docker start
 
+echo "Allora user-data script successful"
