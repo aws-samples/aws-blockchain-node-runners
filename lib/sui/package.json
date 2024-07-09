@@ -13,13 +13,5 @@
     "cdk_synth_single_node": "cdk synth sui-single-node",
     "cdk_deploy_single_node": "cdk deploy sui-single-node",
     "cdk_destroy_single_node": "cdk destroy sui-single-node"
-  },
-  "dependencies": {
-    "aws-cdk-lib": "^2.148.0",
-    "cdk-nag": "^2.28.157",
-    "dotenv": "^16.4.5"
-  },
-  "devDependencies": {
-    "@types/node": "^20.14.10"
   }
 }

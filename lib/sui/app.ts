@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-import 'dotenv/config'
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
+import "dotenv/config"
+import "source-map-support/register";
+import * as cdk from "aws-cdk-lib";
 import * as nag from "cdk-nag";
 import * as config from "./lib/config/suiConfig";
 import {SuiCommonStack} from "./lib/common-stack";
 import {SuiSingleNodeStack} from "./lib/single-node-stack";
 
 const app = new cdk.App();
-cdk.Tags.of(app).add("Project", "AWSSui");
+cdk.Tags.of(app).add("Project", "AWS_Sui");
 
 new SuiCommonStack(app, "sui-common", {
-  stackName: `sui-nodes-common`,
   env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+  stackName: "sui-nodes-common",
 });
 
 
