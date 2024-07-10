@@ -9,7 +9,13 @@ import * as path from 'path';
 import * as nag from "cdk-nag";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as configTypes from "../../constructs/config.interface";
+import * as nodeCwDashboard from "./assets/node-cw-dashboard"
+import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 
+interface AlloraStackEnvironment extends cdk.Environment {
+  account: string;
+  region: string;
+}
 
 export interface AlloraStackProps extends cdk.StackProps {
   amiId: string;
@@ -19,19 +25,18 @@ export interface AlloraStackProps extends cdk.StackProps {
   vpcSubnetCidrMask: number;
   resourceNamePrefix: string;
   dataVolume: configTypes.DataVolumeConfig;
+  env: AlloraStackEnvironment
 }
 
 
 export class AlloraStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: AlloraStackProps) {
+  constructor(scope: Construct, id: string, props: AlloraStackProps) {
     super(scope, id, props);
 
-    // Parameters
-    const region = props?.env?.region || 'us-east-1';
-    const amiId = props?.amiId || 'ami-04b70fa74e45c3917';
-    const instanceType = props?.instanceType || 't2.medium';
-    const resourceNamePrefix = props?.resourceNamePrefix || 'AlloraWorkerx';
-    const dataVolume = props?.dataVolume;
+    const {
+      env, amiId, instanceType, resourceNamePrefix, dataVolume
+    } = props;
+    const { region } = env;
 
     
 
@@ -107,7 +112,18 @@ export class AlloraStack extends cdk.Stack {
 
     const instance = singleNode.instance;
 
-    instance.addUserData(ec2UserData)
+    instance.addUserData(ec2UserData.render())
+
+    const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SyncNodeCWDashboardJSON()), {
+      INSTANCE_ID: singleNode.instanceId,
+      INSTANCE_NAME: `${resourceNamePrefix}Instance`,
+      REGION: region,
+  })
+
+  new cw.CfnDashboard(this, 'single-cw-dashboard', {
+      dashboardName: `AlloraStack-${singleNode.instanceId}`,
+      dashboardBody: dashboardString,
+  });
 
     // Elastic IP
     const eip = new ec2.CfnEIP(this, `${resourceNamePrefix}EIP`);
