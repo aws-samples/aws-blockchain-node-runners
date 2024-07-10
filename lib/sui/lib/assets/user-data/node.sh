@@ -137,24 +137,6 @@ sudo mv ./sui-node /usr/local/bin/
 sudo mv ./sui /usr/local/bin/
 sudo mv ./sui-tool /usr/local/bin/
 
-cd $HOME
-git clone https://github.com/MystenLabs/sui.git --branch $NETWORK_ID --single-branch
-cd sui
-# git remote add upstream https://github.com/MystenLabs/sui
-# git fetch upstream
-# git checkout -B testnet --track upstream/testnet
-
-# cargo build -p sui-node -p sui --release
-# sudo mv ~/sui/target/release/sui-node /usr/local/bin/
-# sudo mv ~/sui/target/release/sui /usr/local/bin/
-
-# Downloading sui binaries from Github
-wget https://github.com/MystenLabs/sui/releases/download/mainnet-v1.27.4/sui-mainnet-v1.27.4-ubuntu-x86_64.tgz
-tar -xvzf sui-mainnet-v1.27.4-ubuntu-x86_64.tgz
-sudo mv ./sui-node /usr/local/bin/
-sudo mv ./sui /usr/local/bin/
-
-
 # 5. Update Configs
 echo "[LOG] update configs"
 mkdir -p $HOME/.sui/
@@ -163,7 +145,7 @@ cd $HOME/.sui/
 # Genesis for release channel (testnet|mainnet|devnet)
 wget -O genesis.blob https://github.com/MystenLabs/sui-genesis/raw/main/$NETWORK_ID/genesis.blob
 
-cp $HOME/sui/crates/sui-config/data/fullnode-template.yaml $HOME/.sui/fullnode.yaml
+wget -O $HOME/.sui/fullnode.yaml https://raw.githubusercontent.com/MystenLabs/sui/$NETWORK_ID/crates/sui-config/data/fullnode-template.yaml
 sed -i 's/127.0.0.1/0.0.0.0/'  $HOME/.sui/fullnode.yaml
 sed -i "s|db-path:.*|db-path: $HOME/.sui/db|g" $HOME/.sui/fullnode.yaml
 sed -i "s|genesis-file-location:.*|genesis-file-location: $HOME/.sui/genesis.blob|g" $HOME/.sui/fullnode.yaml
