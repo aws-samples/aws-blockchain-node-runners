@@ -3,9 +3,12 @@ import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import { SingleNodeConstruct, SingleNodeConstructCustomProps } from "../../constructs/single-node"
 import * as fs from 'fs';
 import * as path from 'path';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as nag from "cdk-nag";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as configTypes from "../../constructs/config.interface";
 
 
 export interface AlloraStackProps extends cdk.StackProps {
@@ -15,6 +18,7 @@ export interface AlloraStackProps extends cdk.StackProps {
   vpcNatGateways: number
   vpcSubnetCidrMask: number;
   resourceNamePrefix: string;
+  dataVolume: configTypes.DataVolumeConfig;
 }
 
 
@@ -27,6 +31,7 @@ export class AlloraStack extends cdk.Stack {
     const amiId = props?.amiId || 'ami-04b70fa74e45c3917';
     const instanceType = props?.instanceType || 't2.medium';
     const resourceNamePrefix = props?.resourceNamePrefix || 'AlloraWorkerx';
+    const dataVolume = props?.dataVolume;
 
     
 
@@ -74,25 +79,35 @@ export class AlloraStack extends cdk.Stack {
     const ec2UserData = ec2.UserData.forLinux();
     ec2UserData.addCommands(modifiedUserData);
 
-    // EC2 Instance
-    const instance = new ec2.Instance(this, `${resourceNamePrefix}Instance`, {
-      vpc,
+    // Getting the snapshot bucket name and IAM role ARN from the common stack
+    const importedInstanceRoleArn = cdk.Fn.importValue("EdgeNodeInstanceRoleArn");
+
+    const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
+
+    // Making sure our instance will be able to read the assets
+    bucket.grantRead(instanceRole);
+
+
+    // Define SingleNodeConstructCustomProps
+    const singleNodeProps: SingleNodeConstructCustomProps = {
+      instanceName: `${resourceNamePrefix}Instance`,
       instanceType: new ec2.InstanceType(instanceType),
-      machineImage: ec2.MachineImage.genericLinux({
-        [region]: amiId,
-      }),
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PUBLIC,
-      },
+      dataVolumes: dataVolume ? [ dataVolume ] : [], // Define your data volumes here
+      machineImage: ec2.MachineImage.genericLinux({ [region]: amiId }),
+      role: instanceRole,
+      vpc: vpc,
+      rootDataVolumeDeviceName: '/dev/sda1',
       securityGroup: securityGroup,
-      blockDevices: [{
-        deviceName: '/dev/sda1',
-        volume: ec2.BlockDeviceVolume.ebs(30, {
-          volumeType: ec2.EbsDeviceVolumeType.GP3,
-        }),
-      }],
-      userData: ec2UserData
-    });
+      availabilityZone: vpc.selectSubnets({ subnetType: ec2.SubnetType.PUBLIC }).availabilityZones[0],
+      vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+    };
+
+    // Instantiate SingleNodeConstruct
+    const singleNode = new SingleNodeConstruct(this, `${resourceNamePrefix}SingleNode`, singleNodeProps);
+
+    const instance = singleNode.instance;
+
+    instance.addUserData(ec2UserData)
 
     // Elastic IP
     const eip = new ec2.CfnEIP(this, `${resourceNamePrefix}EIP`);
@@ -100,5 +115,44 @@ export class AlloraStack extends cdk.Stack {
       eip: eip.ref,
       instanceId: instance.instanceId,
     });
+
+    nag.NagSuppressions.addResourceSuppressions(
+      this,
+      [
+          {
+              id: "AwsSolutions-EC23",
+              reason: "Inbound access from any IP is required for this application.",
+          },
+          {
+              id: "AwsSolutions-IAM4",
+              reason: "This IAM role requires broad permissions to function correctly.",
+          },
+          {
+              id: "AwsSolutions-IAM5",
+              reason: "Full access is needed for administrative tasks.",
+          },
+          {
+              id: "AwsSolutions-S1",
+              reason: "Server-side encryption is not required for this bucket.",
+          },
+          {
+              id: "AwsSolutions-EC2",
+              reason: "Unrestricted access is required for the instance to operate correctly.",
+          },
+          {
+              id: "AwsSolutions-AS3",
+              reason: "No notifications needed for this specific application.",
+          },
+          {
+              id: "AwsSolutions-S2",
+              reason: "Access logging is not necessary for this bucket.",
+          },
+          {
+              id: "AwsSolutions-S10",
+              reason: "HTTPS requirement is not needed for this bucket.",
+          },
+      ],
+      true
+  );
   }
 }
