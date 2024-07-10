@@ -2,7 +2,7 @@
 
 | Contributed by |
 |:--------------------:|
-| [@yinalaws](https://github.com/yinalaws), [@effraga](https://github.com/effraga) |
+| [@yinalaws](https://github.com/yinalaws), [@evertonfraga](https://github.com/evertonfraga) |
 
 ## Architecture Overview
 
@@ -10,7 +10,7 @@ This blueprint has step by step guides to set up a single Sui Full Node.
 
 
 ### Sui Full Node setup
-![SingleNodeSetup](./doc/assets/Architecture-Single.png)
+![SingleNodeSetup](./doc/assets/Architecture-SingleNode.png)
 
 This setup is for PoC or development environments and it supports Devnet, Testnet and Mainnet. It deploys a single EC2 instance with Sui client. The RPC port is exposed only to internal IP range of the VPC, while P2P ports allow external access to keep the client synced.
 
@@ -54,8 +54,6 @@ Create your own copy of `.env` file and edit it:
    cp ./sample-configs/.env-sample-full .env
    nano .env
 ```
-   **NOTE:** You can find more examples inside the `sample-configs` directory.
-
 
 4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
 
@@ -74,7 +72,6 @@ Create your own copy of `.env` file and edit it:
    # Make sure you are in aws-blockchain-node-runners/lib/sui
    npx cdk deploy sui-single-node --json --outputs-file single-node-deploy.json
 ```
-   **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`.
 
    The EC2 instance will deploy, initialize the node and start the first sync. In Cloudformation the instance will show as successful once the node is running. From that point it still takes a while until the node is synced to the blockchain. You can check the sync status with the REST call below in step 4. If the `curl cannot connect to the node on port 8732, then the node is still importing. Once that's done, the curl command works. 
 
