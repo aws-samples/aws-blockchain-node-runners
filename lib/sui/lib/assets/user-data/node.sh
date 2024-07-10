@@ -14,6 +14,7 @@ set +e
   echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}"
   echo "NETWORK_ID=${_NETWORK_ID_}"
 
+  echo "HOME=/home/ubuntu"
 } >> /etc/environment
 
 source /etc/environment
@@ -63,14 +64,13 @@ echo "[LOG] install rust"
 sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
 source $HOME/.cargo/env
 
-# 4. Download Sui Binaries
-# echo "[LOG] sui binaries"
-# cd $HOME
-# git clone https://github.com/MystenLabs/sui.git --branch testnet --single-branch
-# cd sui
-# # git remote add upstream https://github.com/MystenLabs/sui
-# # git fetch upstream
-# # git checkout -B testnet --track upstream/testnet
+# 4. Download Sui repository
+cd $HOME
+git clone https://github.com/MystenLabs/sui.git --branch testnet --single-branch
+cd sui
+# git remote add upstream https://github.com/MystenLabs/sui
+# git fetch upstream
+# git checkout -B testnet --track upstream/testnet
 
 # cargo build -p sui-node -p sui --release
 # sudo mv ~/sui/target/release/sui-node /usr/local/bin/

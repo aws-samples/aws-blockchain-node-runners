@@ -98,7 +98,7 @@ export class SuiSingleNodeStack extends cdk.Stack {
             _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
             _DATA_VOLUME_TYPE_: dataVolume.type,
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
-            _NETWORK_ID: suiNetworkId,
+            _NETWORK_ID_: suiNetworkId,
         });
 
         // /var/log/cloud-init.log and
