@@ -85,9 +85,25 @@ export class AlloraStack extends cdk.Stack {
     ec2UserData.addCommands(modifiedUserData);
 
     // Getting the snapshot bucket name and IAM role ARN from the common stack
-    const importedInstanceRoleArn = cdk.Fn.importValue("EdgeNodeInstanceRoleArn");
+    const instanceRole = new iam.Role(this, "node-role", {
+        assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
+        managedPolicies: [
+            iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore"),
+            iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy")
 
-    const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
+        ]
+    });
+
+    instanceRole.addToPolicy(new iam.PolicyStatement({
+        resources: ["*"],
+        actions: ["cloudformation:SignalResource"]
+    }));
+
+
+    new cdk.CfnOutput(this, "Instance Role ARN", {
+        value: instanceRole.roleArn,
+        exportName: "EdgeNodeInstanceRoleArn"
+    });
 
     // Making sure our instance will be able to read the assets
     bucket.grantRead(instanceRole);
@@ -97,7 +113,7 @@ export class AlloraStack extends cdk.Stack {
     const singleNodeProps: SingleNodeConstructCustomProps = {
       instanceName: `${resourceNamePrefix}Instance`,
       instanceType: new ec2.InstanceType(instanceType),
-      dataVolumes: dataVolume ? [ dataVolume ] : [], // Define your data volumes here
+      dataVolumes: [ dataVolume ], // Define your data volumes here
       machineImage: ec2.MachineImage.genericLinux({ [region]: amiId }),
       role: instanceRole,
       vpc: vpc,
@@ -129,7 +145,7 @@ export class AlloraStack extends cdk.Stack {
     const eip = new ec2.CfnEIP(this, `${resourceNamePrefix}EIP`);
     new ec2.CfnEIPAssociation(this, `${resourceNamePrefix}EIPAssociation`, {
       eip: eip.ref,
-      instanceId: instance.instanceId,
+      instanceId: singleNode.instanceId,
     });
 
     nag.NagSuppressions.addResourceSuppressions(
