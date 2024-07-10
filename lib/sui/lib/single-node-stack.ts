@@ -18,7 +18,6 @@ export interface SuiSingleNodeStackProps extends cdk.StackProps {
     instanceCpuType: ec2.AmazonLinuxCpuType;
     suiNetworkId: configTypes.SuiNetworkId;
     dataVolume: configTypes.SuiDataVolumeConfig;
-
 }
 
 export class SuiSingleNodeStack extends cdk.Stack {
@@ -39,8 +38,6 @@ export class SuiSingleNodeStack extends cdk.Stack {
             suiNetworkId,
             dataVolume,
         } = props;
-
-        
 
         // Using default VPC
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
@@ -86,9 +83,8 @@ export class SuiSingleNodeStack extends cdk.Stack {
             },
         });
 
-	// Assuming the SingleNodeConstruct exposes the EC2 instance as a property named 'instance'
+	    // Assuming the SingleNodeConstruct exposes the EC2 instance as a property named 'instance'
         // Set a CreationPolicy with a 30-minute timeout
-
 
         // Parsing user data script and injecting necessary variables
         const nodeStartScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
@@ -102,8 +98,11 @@ export class SuiSingleNodeStack extends cdk.Stack {
             _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
             _DATA_VOLUME_TYPE_: dataVolume.type,
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
-
+            _NETWORK_ID: suiNetworkId,
         });
+
+        // /var/log/cloud-init.log and
+        // /var/log/cloud-init-output.log
         node.instance.addUserData(modifiedInitNodeScript);
 
         // Adding CloudWatch dashboard to the node
