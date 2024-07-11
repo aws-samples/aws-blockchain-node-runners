@@ -29,59 +29,6 @@ case $NETWORK_ID in
         ;;
 esac
 
-download_sui_binaries() {
-  NETWORK_ID=$1
-
-  echo "Fetching tags for ${NETWORK_ID}..."
-
-  # Fetch tags using git ls-remote and filter based on the channel
-  LATEST_TAG=$(git ls-remote --tags --refs https://github.com/MystenLabs/sui.git |
-              awk '{print $2}' |
-              sed 's/^refs\/tags\///' |
-              grep "^${NETWORK_ID}-" |
-              sort -V |
-              tail -n 1)
-
-  if [ -z "$LATEST_TAG" ]; then
-      echo "No matching tag found for ${NETWORK_ID}"
-      exit 1
-  fi
-
-  echo "Latest ${NETWORK_ID} tag: ${LATEST_TAG}"
-
-  # Construct the download URL
-  DOWNLOAD_URL="https://github.com/MystenLabs/sui/releases/download/${LATEST_TAG}/sui-${LATEST_TAG}-ubuntu-x86_64.tgz"
-
-  echo "Downloading from: ${DOWNLOAD_URL}"
-
-  # Download the tar.gz file
-  curl -L -o "sui-${LATEST_TAG}-ubuntu-x86_64.tgz" "${DOWNLOAD_URL}"
-
-  if [ $? -ne 0 ]; then
-      echo "Failed to download the file"
-      exit 1
-  fi
-
-  echo "Download complete. Unpacking..."
-
-  # Unpack the tar.gz file
-  tar -xzvf "sui-${LATEST_TAG}-ubuntu-x86_64.tgz"
-
-  if [ $? -ne 0 ]; then
-      echo "Failed to unpack the file"
-      exit 1
-  fi
-
-  echo "Unpacking complete. Cleaning up..."
-
-  # Remove the tar.gz file
-  rm "sui-${LATEST_TAG}-ubuntu-x86_64.tgz"
-
-  echo "Done! Sui ${NETWORK_ID} release ${LATEST_TAG} has been downloaded and unpacked."
-
-}
-
-
 # via https://github.com/Contribution-DAO/sui-node-setup
 # Modifications made by yinalaws in 2024
 # ASCII art removed for brevity, silenced interactions, added testnet p2p, Ubuntu 24.04 LTS tests
@@ -132,10 +79,63 @@ sudo apt install -y libprotobuf-dev protobuf-compiler
 cd $HOME 
 
 # Executing function that downloads official binaries from github
-download_sui_binaries $NETWORK_ID
-sudo mv ./sui-node /usr/local/bin/
-sudo mv ./sui /usr/local/bin/
-sudo mv ./sui-tool /usr/local/bin/
+
+download_sui_binaries() {
+  echo "Fetching tags for ${!NETWORK_ID}..."
+
+  # test with export
+
+  # Fetch tags using git ls-remote and filter based on the channel
+  LATEST_TAG=$(git ls-remote --tags --refs https://github.com/MystenLabs/sui.git |
+              awk '{print $2}' |
+              sed 's/^refs\/tags\///' |
+              grep "^${!NETWORK_ID}-" |
+              sort -V |
+              tail -n 1)
+
+  if [ -z "$!LATEST_TAG" ]; then
+      echo "No matching tag found for ${!NETWORK_ID}"
+      exit 1
+  fi
+
+  echo "Latest ${!NETWORK_ID} tag: ${!LATEST_TAG}"
+
+  # Construct the download URL
+  DOWNLOAD_URL="https://github.com/MystenLabs/sui/releases/download/${!LATEST_TAG}/sui-${!LATEST_TAG}-ubuntu-x86_64.tgz"
+
+  echo "Downloading from: ${!DOWNLOAD_URL}"
+
+  # Download the tar.gz file
+  curl -L -o "sui-${!LATEST_TAG}-ubuntu-x86_64.tgz" "${!DOWNLOAD_URL}"
+
+  if [ $? -ne 0 ]; then
+      echo "Failed to download the file"
+      exit 1
+  fi
+
+  echo "Download complete. Unpacking..."
+
+  # Unpack the tar.gz file
+  tar -xzvf "sui-${!LATEST_TAG}-ubuntu-x86_64.tgz"
+
+  if [ $? -ne 0 ]; then
+      echo "Failed to unpack the file"
+      exit 1
+  fi
+
+  echo "Unpacking complete. Cleaning up..."
+
+  # Remove the tar.gz file
+  rm "sui-${!LATEST_TAG}-ubuntu-x86_64.tgz"
+
+  echo "Done! Sui ${!NETWORK_ID} release ${!LATEST_TAG} has been downloaded and unpacked."
+
+}
+
+download_sui_binaries
+sudo cp ./sui-node /usr/local/bin/
+sudo cp ./sui /usr/local/bin/
+sudo cp ./sui-tool /usr/local/bin/
 
 # 5. Update Configs
 echo "[LOG] update configs"
