@@ -5,7 +5,9 @@
 # ASCII art removed for brevity, silenced interactions, added testnet p2p, Ubuntu 24.04 LTS tests
 
 echo "[LOG] script start"
+echo "[LOG] User: $(whoami)"
 
+export USER=ubuntu
 set +e
 
 {
@@ -64,6 +66,7 @@ if [[ ":$PATH:" != *":/usr/bin:"* ]]; then
     echo 'export PATH=$PATH:/usr/bin' >> ~/.bashrc
     source ~/.bashrc
 fi
+
 # Install dependencies
 echo "[LOG] Install dependencies"
 sudo apt-get -qq install -y --no-install-recommends tzdata git ca-certificates curl cmake
@@ -76,7 +79,7 @@ echo "Waiting for volumes to be available"
 sleep 60
 
 # Define base mount point directory
-MOUNT_POINT_BASE="/suidisk"
+MOUNT_POINT_BASE="/data"
 
 # Create the base mount point directory if it doesn't exist
 if [ ! -d "$MOUNT_POINT_BASE" ]; then
@@ -210,7 +213,7 @@ wget -O genesis.blob https://github.com/MystenLabs/sui-genesis/raw/main/$NETWORK
 
 wget -O $HOME/.sui/fullnode.yaml https://raw.githubusercontent.com/MystenLabs/sui/$NETWORK_ID/crates/sui-config/data/fullnode-template.yaml
 sed -i 's/127.0.0.1/0.0.0.0/'  $HOME/.sui/fullnode.yaml
-sed -i "s|db-path:.*|db-path: $HOME/.sui/db|g" $HOME/.sui/fullnode.yaml
+sed -i "s|db-path:.*|db-path: $MOUNT_POINT_BASE/sui/db|g" $HOME/.sui/fullnode.yaml
 sed -i "s|genesis-file-location:.*|genesis-file-location: $HOME/.sui/genesis.blob|g" $HOME/.sui/fullnode.yaml
 
 # Define the path to the configuration file
