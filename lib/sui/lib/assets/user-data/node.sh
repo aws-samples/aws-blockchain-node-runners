@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# via https://github.com/Contribution-DAO/sui-node-setup
+# Modifications made by yinalaws in 2024
+# ASCII art removed for brevity, silenced interactions, added testnet p2p, Ubuntu 24.04 LTS tests
+
 echo "[LOG] script start"
 
 set +e
@@ -9,14 +13,13 @@ set +e
   echo "STACK_NAME=${_STACK_NAME_}"
   echo "STACK_ID=${_STACK_ID_}"
   echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}"
-
+  echo "ASSETS_S3_PATH=${_ASSETS_S3_PATH_}"
   echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}"
   echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}"
   echo "NETWORK_ID=${_NETWORK_ID_}"
 
   echo "HOME=/home/ubuntu"
 } >> /etc/environment
-
 source /etc/environment
 
 # Validate the release channel
@@ -29,17 +32,15 @@ case $NETWORK_ID in
         ;;
 esac
 
-# via https://github.com/Contribution-DAO/sui-node-setup
-# Modifications made by yinalaws in 2024
-# ASCII art removed for brevity, silenced interactions, added testnet p2p, Ubuntu 24.04 LTS tests
 
-# 1. Updating packages
+# Updating packages
 echo "[LOG] updating packages"
+export DEBIAN_FRONTEND=noninteractive
 sudo apt-get -qq update && sudo apt upgrade -y
 sudo apt-get -qq install -y build-essential
-sudo apt-get -qq install -y libclang-dev
-sudo apt-get -qq install -y pkg-config libssl-dev
-sudo apt-get install -y libpq-dev # dependency of sui-tool
+sudo apt-get -qq install -y libclang-dev pkg-config libssl-dev
+sudo apt-get -qq install -y awscli jq unzip
+sudo apt-get -qq install -y libpq-dev # dependency of sui-tool
 
 # emitting cfn-signal event
 sudo apt-get -qq install -y python3-pip
@@ -63,22 +64,83 @@ if [[ ":$PATH:" != *":/usr/bin:"* ]]; then
     echo 'export PATH=$PATH:/usr/bin' >> ~/.bashrc
     source ~/.bashrc
 fi
-
-# 2. Install dependencies
+# Install dependencies
 echo "[LOG] Install dependencies"
+sudo apt-get -qq install -y --no-install-recommends tzdata git ca-certificates curl cmake
+sudo apt-get -qq install -y libprotobuf-dev protobuf-compiler
 
-sudo apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y --no-install-recommends tzdata git ca-certificates curl cmake jq
-sudo apt install -y libprotobuf-dev protobuf-compiler
 
-# 3. Install Rust
-# echo "[LOG] install rust"
-# sudo curl https://sh.rustup.rs -sSf | sh -s -- -y
-# source $HOME/.cargo/env
+#### Mounting volume ####
 
-# 4. Download Sui artifacts
+echo "Waiting for volumes to be available"
+sleep 60
+
+# Define base mount point directory
+MOUNT_POINT_BASE="/suidisk"
+
+# Create the base mount point directory if it doesn't exist
+if [ ! -d "$MOUNT_POINT_BASE" ]; then
+    echo "Creating mount point $MOUNT_POINT_BASE"
+    sudo mkdir -p "$MOUNT_POINT_BASE"
+fi
+
+# Specify the volume name
+volume="/dev/nvme1n1"
+
+# Create an ext4 filesystem on the volume
+echo "Creating ext4 filesystem on $volume"
+sudo mkfs -t ext4 -F $volume
+
+# Get the UUID of the volume
+UUID=$(sudo blkid -s UUID -o value $volume)
+
+# Add the volume to /etc/fstab if it's not already there
+if ! grep -q "$UUID" /etc/fstab; then
+    echo "Adding $volume to /etc/fstab"
+    echo "UUID=$UUID $MOUNT_POINT_BASE ext4 defaults,nofail 0 2" | sudo tee -a /etc/fstab
+else
+    echo "Volume $volume is already in /etc/fstab"
+fi
+
+# Mount the volume to the base mount point
+echo "Mounting $volume to $MOUNT_POINT_BASE"
+sudo mount $volume $MOUNT_POINT_BASE
+
+# Change ownership to the 'ubuntu' user
+echo "Changing ownership of $MOUNT_POINT_BASE to ubuntu:ubuntu"
+sudo chown ubuntu:ubuntu -R $MOUNT_POINT_BASE
+
+# Switch to the large disk
+cd $MOUNT_POINT_BASE
+
+echo "Volume $volume is mounted and ready to use at $MOUNT_POINT_BASE"
+
+#### End of mounting EBS ####
+
+
+# Download Assets
+cd /opt # 
+echo "Downloading assets zip file"
+aws s3 cp $ASSETS_S3_PATH ./assets.zip
+unzip -q assets.zip
+
+echo "Install and configure CloudWatch agent"
+wget -q https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+dpkg -i -E amazon-cloudwatch-agent.deb
+
+echo 'Configuring CloudWatch Agent'
+mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
+cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json # TODO: TEST AGAIN - copy from assets
+
+echo "Starting CloudWatch Agent"
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+-a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
+systemctl status amazon-cloudwatch-agent
+
+
+
+# Download Sui artifacts
 cd $HOME 
-
-# Executing function that downloads official binaries from github
 
 download_sui_binaries() {
   echo "Fetching tags for ${!NETWORK_ID}..."
@@ -132,12 +194,13 @@ download_sui_binaries() {
 
 }
 
+# Executing function that downloads official binaries from github
 download_sui_binaries
 sudo cp ./sui-node /usr/local/bin/
 sudo cp ./sui /usr/local/bin/
 sudo cp ./sui-tool /usr/local/bin/
 
-# 5. Update Configs
+# Update Configs
 echo "[LOG] update configs"
 mkdir -p $HOME/.sui/
 cd $HOME/.sui/
@@ -150,9 +213,10 @@ sed -i 's/127.0.0.1/0.0.0.0/'  $HOME/.sui/fullnode.yaml
 sed -i "s|db-path:.*|db-path: $HOME/.sui/db|g" $HOME/.sui/fullnode.yaml
 sed -i "s|genesis-file-location:.*|genesis-file-location: $HOME/.sui/genesis.blob|g" $HOME/.sui/fullnode.yaml
 
-# Testnet p2p peers
+# Define the path to the configuration file
 echo "[LOG] Adding p2p peers to corresponding release channel"
 
+# Check the value of _NETWORK_ID_ and append the appropriate P2P configuration
 case "$NETWORK_ID" in
     "mainnet")
         echo "Adding mainnet peer configuration"
@@ -208,14 +272,7 @@ EOF
         ;;
 esac
 
-
-# Mainnet peer configuration
-
-
-# Devnet peer configuration
-# Don't need to configure peers for devnet
-
-# 6. Make Sui Service
+# Make Sui Service
 echo "[LOG] make Sui service"
 
 sudo tee /etc/systemd/system/suid.service > /dev/null <<EOF
@@ -253,8 +310,6 @@ fi
 echo "[LOG] Sui Version: $(sui -V)"
 
 echo "Sui Version: $(sui -V)"
-
-
 
 # Useful commands (added as comments)
 # Check your node logs: journalctl -fu suid -o cat
