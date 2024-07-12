@@ -10,7 +10,7 @@ This blueprint has step by step guides to set up a single Sui Full Node.
 
 
 ### Sui Full Node setup
-![SingleNodeSetup](./doc/assets/Architecture-Single.png)
+![SingleNodeSetup](./doc/assets/Architecture-SingleNode.png)
 
 This setup is for PoC or development environments and it supports Devnet, Testnet and Mainnet. It deploys a single EC2 instance with Sui client. The RPC port is exposed only to internal IP range of the VPC, while P2P ports allow external access to keep the client synced.
 
