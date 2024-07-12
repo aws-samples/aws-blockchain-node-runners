@@ -21,7 +21,9 @@ sudo apt-get update --yes
 
 # Install pip
 echo "[user-data] Install Pip"
-sudo apt-get install python3-pip --yes
+sudo apt-get install python3-setuptools --yes
+sudo python3 -m easy_install install pip
+python3 -m pip --version
 
 # Install Pipx
 echo "[user-data] Install Pipx"
