@@ -90,7 +90,15 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
    > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
    > ```
 
-3. Deploy Allora Worker Node
+3. Deploy Common Stack
+
+   ```bash
+   pwd
+   # Make sure you are in aws-blockchain-node-runners/lib/allora
+   npx cdk deploy allora-edge-common --json --outputs-file allora-edge-common-deploy.json
+   ```
+
+5. Deploy Allora Worker Node
 
    ```bash
    pwd

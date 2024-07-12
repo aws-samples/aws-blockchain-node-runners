@@ -55,10 +55,10 @@ export class AlloraStack extends cdk.Stack {
 
     // Create VPC
     const vpc = new ec2.Vpc(this, `${resourceNamePrefix}Vpc`, {
-      maxAzs: props?.vpcMaxAzs || 1,
-      natGateways: typeof props?.vpcNatGateways !== 'undefined' ? props?.vpcNatGateways : 0,
+      maxAzs: props.vpcMaxAzs,
+      natGateways: props.vpcNatGateways,
       subnetConfiguration: [{
-        cidrMask: props?.vpcSubnetCidrMask || 24,
+        cidrMask: props.vpcSubnetCidrMask,
         name:`${resourceNamePrefix}PublicSubnet`,
         subnetType: ec2.SubnetType.PUBLIC,
       }]
@@ -84,26 +84,11 @@ export class AlloraStack extends cdk.Stack {
     const ec2UserData = ec2.UserData.forLinux();
     ec2UserData.addCommands(modifiedUserData);
 
+
     // Getting the snapshot bucket name and IAM role ARN from the common stack
-    const instanceRole = new iam.Role(this, "node-role", {
-        assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
-        managedPolicies: [
-            iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore"),
-            iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy")
+    const importedInstanceRoleArn = cdk.Fn.importValue("EdgeNodeInstanceRoleArn");
 
-        ]
-    });
-
-    instanceRole.addToPolicy(new iam.PolicyStatement({
-        resources: ["*"],
-        actions: ["cloudformation:SignalResource"]
-    }));
-
-
-    new cdk.CfnOutput(this, "Instance Role ARN", {
-        value: instanceRole.roleArn,
-        exportName: "EdgeNodeInstanceRoleArn"
-    });
+    const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
     // Making sure our instance will be able to read the assets
     bucket.grantRead(instanceRole);
@@ -134,12 +119,16 @@ export class AlloraStack extends cdk.Stack {
       INSTANCE_ID: singleNode.instanceId,
       INSTANCE_NAME: `${resourceNamePrefix}Instance`,
       REGION: region,
-  })
+    });
 
-  new cw.CfnDashboard(this, 'single-cw-dashboard', {
+    new cw.CfnDashboard(this, 'single-cw-dashboard', {
       dashboardName: `AlloraStack-${singleNode.instanceId}`,
       dashboardBody: dashboardString,
-  });
+    });
+
+    new cdk.CfnOutput(this, "node-instance-id", {
+      value: singleNode.instanceId,
+    });
 
     // Elastic IP
     const eip = new ec2.CfnEIP(this, `${resourceNamePrefix}EIP`);

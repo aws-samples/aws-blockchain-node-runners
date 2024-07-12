@@ -4,6 +4,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as constants from "../constructs/constants";
+import { EdgeCommonStack } from "./lib/common-stack";
 import { AlloraStack } from './lib/allora-stack';
 
 const parseDataVolumeType = (dataVolumeType: string) => {
@@ -22,6 +23,12 @@ const parseDataVolumeType = (dataVolumeType: string) => {
 };
 
 const app = new cdk.App();
+
+new EdgeCommonStack(app, "allora-edge-common", {
+  stackName: `allora-edge-nodes-common`,
+  env: { account: process.env.AWS_ACCOUNT_ID || "xxxxxxxxxxx", region: process.env.AWS_REGION || 'us-east-1' }
+});
+
 new AlloraStack(app, 'allora-single-node', {
   stackName: 'allora-single-node',
   env: { 
