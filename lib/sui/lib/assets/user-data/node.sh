@@ -122,7 +122,7 @@ echo "Volume $volume is mounted and ready to use at $MOUNT_POINT_BASE"
 
 
 # Download Assets
-cd /opt # 
+cd /opt #
 echo "Downloading assets zip file"
 aws s3 cp $ASSETS_S3_PATH ./assets.zip
 unzip -q assets.zip
@@ -143,7 +143,7 @@ systemctl status amazon-cloudwatch-agent
 
 
 # Download Sui artifacts
-cd $HOME 
+cd $HOME
 
 download_sui_binaries() {
   echo "Fetching tags for ${!NETWORK_ID}..."

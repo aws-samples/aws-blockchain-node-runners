@@ -76,7 +76,7 @@ Create your own copy of `.env` file and edit it:
 ```
    **NOTE:** The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`.
 
-   The EC2 instance will deploy, initialize the node and start the first sync. In Cloudformation the instance will show as successful once the node is running. From that point it still takes a while until the node is synced to the blockchain. You can check the sync status with the REST call below in step 4. If the `curl cannot connect to the node on port 9000, then the node is still importing. Once that's done, the curl command works. 
+   The EC2 instance will deploy, initialize the node and start the first sync. In Cloudformation the instance will show as successful once the node is running. From that point it still takes a while until the node is synced to the blockchain. You can check the sync status with the REST call below in step 4. If the `curl cannot connect to the node on port 9000, then the node is still importing. Once that's done, the curl command works.
 
 2. After starting the node you need to wait for the inital syncronization process to finish. It may take from an hour to half a day depending on the the state of the network. You can use Amazon CloudWatch to track the progress. To see them:
 
@@ -152,7 +152,7 @@ The result should start like like this (the actual balance might change):
     pwd
    # Make sure you are in aws-blockchain-node-runners/lib/Sui
    aws ssm start-session --target $INSTANCE_ID
-  
+
 ```
 
 3. Service Tools
@@ -182,7 +182,7 @@ Example:
 state-archive-read-config:
   - object-store-config:
       object-store: "S3"
-      # Use mysten-testnet-archives for testnet 
+      # Use mysten-testnet-archives for testnet
       # Use mysten-mainnet-archives for mainnet
       bucket: "mysten-testnet-archives"
       # Use your AWS account access key id
@@ -209,8 +209,8 @@ sui-tool download-db-snapshot --latest \
     --skip-indexes \
     --no-sign-request
 
- 
-Example:   
+
+Example:  
 sudo sui-tool download-db-snapshot --latest --network testnet --path /data/sui/db/live --num-parallel-downloads 50 --skip-indexes --no-sign-request
 
 ```
@@ -231,5 +231,3 @@ curl --location --request POST 'https://fullnode.<Network_ID>.sui.io:443/' --hea
 ```
 Enter your node's external IP at https://node.sui.zvalid.com/
 ```
-
-
