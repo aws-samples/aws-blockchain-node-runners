@@ -1,0 +1,24 @@
+{
+  "name": "aws-blockchain-node-runners-hubble",
+  "version": "0.1.0",
+  "bin": {
+    "hubble": "bin/hubble.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk",
+    "cdk_deploy_common": "cdk deploy hubble-common",
+    "cdk_synth_single_node": "cdk synth hubble-single-node",
+    "cdk_deploy_single_node": "cdk deploy hubble-single-node",
+    "cdk_destroy_single_node": "cdk destroy hubble-single-node"
+  },
+  "dependencies": {
+    "@types/node": "^20.10.0",
+    "cdk-nag": "^2.28.105"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11"
+  }
+}
