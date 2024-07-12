@@ -23,8 +23,9 @@ export interface SuiNodeSecurityGroupConstructProps {
       });
 
       // Private port
-      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(9000), "Sui API");
-      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(9184), "Sui Metrics");
+      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(8084), "Sui P2P");
+      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9184), "Sui Metrics");
+      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(9000), "JSON-RPC");
       sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(22), "SSH");
 
       this.securityGroup = sg
