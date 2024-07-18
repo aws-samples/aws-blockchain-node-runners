@@ -38,6 +38,9 @@ export class AlloraStack extends cdk.Stack {
     } = props;
     const { region } = env;
 
+    const STACK_NAME = cdk.Stack.of(this).stackName;
+    const STACK_ID = cdk.Stack.of(this).stackId;
+
     
 
     // Create S3 Bucket
@@ -72,17 +75,7 @@ export class AlloraStack extends cdk.Stack {
     });
     securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9010), 'Allow inbound TCP 9010');
 
-     // Read user data script and inject variables
-     const userData = fs.readFileSync(path.join(__dirname, 'assets', 'user-data', 'node.sh')).toString();
-     const modifiedUserData = cdk.Fn.sub(userData, {
-       _AWS_REGION_: region,
-       _ASSETS_S3_PATH_: `s3://${bucket.bucketName}/user-data/node.sh`,
-       // Add other variables as needed
-     });
-
-    // Create UserData for EC2 instance
-    const ec2UserData = ec2.UserData.forLinux();
-    ec2UserData.addCommands(modifiedUserData);
+     
 
 
     // Getting the snapshot bucket name and IAM role ARN from the common stack
@@ -112,6 +105,20 @@ export class AlloraStack extends cdk.Stack {
     const singleNode = new SingleNodeConstruct(this, `${resourceNamePrefix}SingleNode`, singleNodeProps);
 
     const instance = singleNode.instance;
+
+    // Read user data script and inject variables
+    const userData = fs.readFileSync(path.join(__dirname, 'assets', 'user-data', 'node.sh')).toString();
+    const modifiedUserData = cdk.Fn.sub(userData, {
+      _AWS_REGION_: region,
+      _ASSETS_S3_PATH_: `s3://${bucket.bucketName}/user-data/node.sh`,
+      _NODE_CF_LOGICAL_ID_: singleNode.nodeCFLogicalId,
+      _STACK_NAME_: STACK_NAME,
+      _STACK_ID_: STACK_ID,
+    });
+
+   // Create UserData for EC2 instance
+   const ec2UserData = ec2.UserData.forLinux();
+   ec2UserData.addCommands(modifiedUserData);
 
     instance.addUserData(ec2UserData.render())
 

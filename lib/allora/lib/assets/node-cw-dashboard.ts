@@ -138,7 +138,7 @@ export const SyncNodeCWDashboardJSON = () => {
                 "type": "metric",
                 "properties": {
                     "metrics": [
-                        [ "CWAgent", "theta_current_block_height", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                        [ "CWAgent", "allora_current_block_height", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                     ],
                     "sparkline": true,
                     "view": "timeSeries",
@@ -146,7 +146,7 @@ export const SyncNodeCWDashboardJSON = () => {
                     "region": "${REGION}",
                     "stat": "Maximum",
                     "period": 60,
-                    "title": "Theta Client Block Height"
+                    "title": "Allora Client Block Height"
                 }
             },
             {
@@ -165,7 +165,7 @@ export const SyncNodeCWDashboardJSON = () => {
                     "metrics": [
                         [ { "expression": "SELECT COUNT(edge_peer) FROM CWAgent GROUP BY InstanceId", "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                     ],
-                    "title": "Theta Client Peer Count"
+                    "title": "Allora Client Peer Count"
                 }
             },
             {
