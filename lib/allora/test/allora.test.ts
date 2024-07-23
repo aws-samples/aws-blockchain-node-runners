@@ -8,8 +8,7 @@ describe("AlloranodeStack", () => {
     const app = new cdk.App();
     const stack = new AlloraStack(app, 'TestStack', {
       env: { account: 'xxxxxxxxxxx', region: 'us-east-1' },
-      amiId: 'ami-04b70fa74e45c3917',
-      instanceType: 't2.medium',
+      instanceType: 't3.medium',
       vpcMaxAzs: 1,
       vpcNatGateways: 0,
       vpcSubnetCidrMask: 24,
@@ -44,8 +43,10 @@ describe("AlloranodeStack", () => {
 
     // Check for EC2 Instance
     template.hasResourceProperties('AWS::EC2::Instance', {
-      InstanceType: 't2.medium',
-      ImageId: 'ami-04b70fa74e45c3917',
+      InstanceType: 't3.medium',
+      ImageId: {
+        "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amikernel510hvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
+      },
       BlockDeviceMappings: [
         {
           DeviceName: '/dev/sda1',

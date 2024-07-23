@@ -18,7 +18,6 @@ interface AlloraStackEnvironment extends cdk.Environment {
 }
 
 export interface AlloraStackProps extends cdk.StackProps {
-  amiId: string;
   instanceType: string;
   vpcMaxAzs: number;
   vpcNatGateways: number
@@ -34,7 +33,7 @@ export class AlloraStack extends cdk.Stack {
     super(scope, id, props);
 
     const {
-      env, amiId, instanceType, resourceNamePrefix, dataVolume
+      env, instanceType, resourceNamePrefix, dataVolume
     } = props;
     const { region } = env;
 
@@ -92,7 +91,11 @@ export class AlloraStack extends cdk.Stack {
       instanceName: `${resourceNamePrefix}Instance`,
       instanceType: new ec2.InstanceType(instanceType),
       dataVolumes: [ dataVolume ], // Define your data volumes here
-      machineImage: ec2.MachineImage.genericLinux({ [region]: amiId }),
+      machineImage:new ec2.AmazonLinuxImage({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+        kernel:ec2.AmazonLinuxKernel.KERNEL5_X,
+        cpuType: ec2.AmazonLinuxCpuType.X86_64,
+      }),
       role: instanceRole,
       vpc: vpc,
       rootDataVolumeDeviceName: '/dev/sda1',
