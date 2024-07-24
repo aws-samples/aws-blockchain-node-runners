@@ -15,9 +15,12 @@ echo "Updating and installing required system packages"
 yum update -y
 amazon-linux-extras install epel -y
 yum groupinstall "Development Tools" -y
-yum -y install amazon-cloudwatch-agent collectd jq gcc10-10.5.0-1.amzn2.0.2 ncurses-devel telnet aws-cfn-bootstrap
+yum -y install python3-pip amazon-cloudwatch-agent collectd jq gcc10-10.5.0-1.amzn2.0.2 ncurses-devel telnet aws-cfn-bootstrap
 
 cd /opt
+
+#install Allora CLI tool with pip
+pip3 install allocmd --upgrade
 
 #install AWS CLI
 echo 'Installing AWS CLI v2'
