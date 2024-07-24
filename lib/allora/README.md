@@ -2,7 +2,7 @@
 
 | Contributed by |
 |:--------------------:|
-| [@clementupshot](https://github.com/clementupshot), [@allora-rc](https://github.com/allora-rc) |
+| [@clementupshot](https://github.com/clementupshot), [@allora-rc](https://github.com/allora-rc), [@Madisonw](https://github.com/Madisonw)|
 
 [Allora](https://www.allora.network/) is a self-improving decentralized Artificial Intelligence (AI) network. The primary goal of the network is to be the marketplace for intelligence. In other words, Allora aims to incentivize data scientists (workers) to provide high-quality inferences as requested by consumers. Inferences include predictions of arbitrary future events or difficult computations requiring specialized knowledge.
 
@@ -31,26 +31,52 @@ The AWS Cloud Development Kit (CDK) is used to deploy a single Allora Worker Nod
   - Public subnet that has a direct route to the IGW
   - Security Group (SG) with TCP Port 9010 open inbound allowing requests for inferences to be routed to the Allora Worker Node
   - Single Amazon Elastic Compute Cloud (EC2) instance (the Allora Worker Node) assigned to the public subnet
-  - Elastic IP Address (EIP) associated with the EC2 instance to maintain consistent IP addressing across instance restarts
 
 The Allora Worker Node is accessed by the user internally and is not exposed to the Internet to protect the node from unauthorized access. A user can gain access to the EC2 Instance using AWS Session Manager. 
 
 Multiple processes run on the Allora Worker Node (EC2 instance):
 
-  - Docker container with the worker node logic that handles communnication bet
-  - Docker container running the model server that reveal inferences to consumers
+  - Docker container with the worker node logic that handles communication between the worker and the public head nodes
+  - Docker container running the model server that reveals inferences to consumers
 
 Allora Public Head Nodes publish the Allora chain requests (requests for inferences from consumers) to Allora worker nodes. When a worker node is initialized, it starts with an environment variable called BOOT_NODES, which helps handle the connection and communications between worker nodes and the head nodes.
 
-The worker node (docker container) will call the function that invokes custom logic that handles. The request-response is a bidirectional flow from the Allora chain (inference requests from consumers) to the public head nodes to the worker node and finally to the model server that reveals inferences. 
+The worker node (docker container) will call the function that invokes custom logic that handles the actual inference. The request-response is a bidirectional flow from the Allora chain (inference requests from consumers) to the public head nodes to the worker node and finally to the model server that reveals inferences. 
 
+## Additional materials
+
+<details>
+
+<summary>Well-Architected Checklist</summary>
+
+This is the Well-Architected checklist for the Allora worker nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+
+| Pillar                  | Control                           | Question/Check                                                                   | Remarks |
+|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that port 9010 (TCP) is open inbound to support requests for inferences from the Allora Network public head nodes. |
+|                         |                                   | Traffic inspection                                                               | Traffic protection is not used in the solution. [AWS Web Applications Firewall (WAF)](https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html) could be implemented for traffic over HTTP(S), [AWS Shield](https://docs.aws.amazon.com/waf/latest/developerguide/shield-chapter.html) provides Distributed Denial of Service (DDoS) protection. Additional charges will apply. |
+|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Amazon Linux AMI. You may choose to run hardening scripts on it. |
+|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses [AWS Systems Manager for terminal session](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html#start-sys-console). SSH Port 22 is not open inbound. |
+|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes. |
+|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user. |
+|                         |                                   | Following principle of least privilege access                                    | Root user is not used (using special user "ec2-user" instead). |
+|                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions. |
+| Cost optimization       | Service selection                 | Use cost effective resources                                                     | We use a T3 instance as T3 instances are a low cost burstable general purpose instance type that provide a baseline level of CPU performance with the ability to burst CPU usage at any time for as long as required. T3 instances are designed for applications with moderate CPU usage that experience temporary spikes in use. This profile aligns closely with the load profile of Allora Network worker nodes.                                                                                                             |
+| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution does not use an [AWS EC2 Auto Scaling Group](https://aws.amazon.com/ec2/autoscaling/) but one can be implemented.  |
+|                         | Data backup                       | How is data backed up?                                                           | Considering blockchain data is replicated by Allora Cosmos AppChain Validator nodes, we don't use additional mechanisms to backup the data. |
+|                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are not being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
+| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance, i.e. AWS EC2 T3 Medium instance suitable for bursty workloads. |
+|                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. Amazon EBS volumes with optimal IOPS and throughput. |
+|                         | Architecture selection            | How is the best performance architecture selected?                               | A combination of recommendations from the Allora Network community and Allora Labs testing. |
+| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses AMD-powered instances. There is a potential to use AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2. 
+</details>
 
 ## Worker Node System Requirements
 
 - Operating System: Any modern Linux operating system
-- CPU: Minimum of 1/2 core
-- Memory: 2 to 4 GB
-- Storage: SSD or NVMe with at least 5GB of space
+- CPU: Minimum of 2 cores
+- Memory: Minimum of 4GB
+- Storage: SSD or NVMe with minimum of 20GB of space
 
 ## Setup Instructions
 
