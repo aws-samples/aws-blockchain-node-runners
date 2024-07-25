@@ -16,18 +16,18 @@ Create an instance profile called **Cloud9-Developer-Access**
 
 ```bash
 cat > ec2-trust-policy.json <<EOF
-    {
-    "Version": "2012-10-17",
-        "Statement": [
-            {
-            "Effect": "Allow",
-            "Principal": {
-            "Service": "ec2.amazonaws.com"
-            },
-            "Action": "sts:AssumeRole"
-            }
-        ]
-    }
+{
+"Version": "2012-10-17",
+    "Statement": [
+        {
+        "Effect": "Allow",
+        "Principal": {
+        "Service": "ec2.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+        }
+    ]
+}
 EOF
 ```
 

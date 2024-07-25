@@ -7,11 +7,5 @@
     "test": "npx jest",
     "cdk": "npx cdk",
     "scan-cdk": "npx cdk synth"
-  },
-  "dependencies": {
-    "@types/node": "^20.10.0"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.11"
   }
 }
