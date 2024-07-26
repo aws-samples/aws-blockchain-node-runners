@@ -25,6 +25,10 @@ export interface AlloraStackProps extends cdk.StackProps {
   resourceNamePrefix: string;
   dataVolume: configTypes.DataVolumeConfig;
   env: AlloraStackEnvironment
+  alloraWorkerName: string;
+  alloraTopicId: string;
+  alloraEnv: string;
+  alloraNetworkName: string;
 }
 
 
@@ -33,7 +37,14 @@ export class AlloraStack extends cdk.Stack {
     super(scope, id, props);
 
     const {
-      env, instanceType, resourceNamePrefix, dataVolume
+      env, 
+      instanceType, 
+      resourceNamePrefix, 
+      dataVolume, 
+      alloraWorkerName, 
+      alloraTopicId, 
+      alloraEnv, 
+      alloraNetworkName
     } = props;
     const { region } = env;
 
@@ -92,7 +103,7 @@ export class AlloraStack extends cdk.Stack {
       instanceType: new ec2.InstanceType(instanceType),
       dataVolumes: [ dataVolume ], // Define your data volumes here
       machineImage:new ec2.AmazonLinuxImage({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023,
         kernel:ec2.AmazonLinuxKernel.KERNEL5_X,
         cpuType: ec2.AmazonLinuxCpuType.X86_64,
       }),
@@ -117,6 +128,10 @@ export class AlloraStack extends cdk.Stack {
       _NODE_CF_LOGICAL_ID_: singleNode.nodeCFLogicalId,
       _STACK_NAME_: STACK_NAME,
       _STACK_ID_: STACK_ID,
+      _ALLORA_WORKER_NAME_: alloraWorkerName,
+      _ALLORA_TOPIC_ID_: alloraTopicId,
+      _ALLORA_ENV_: alloraEnv,
+      _ALLORA_NETWORK_NAME_ : alloraNetworkName
     });
 
    // Create UserData for EC2 instance

@@ -8,19 +8,41 @@ echo "ASSETS_S3_PATH=${_ASSETS_S3_PATH_}" >> /etc/environment
 echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}" >> /etc/environment
 echo "STACK_NAME=${_STACK_NAME_}" >> /etc/environment
 echo "STACK_ID=${_STACK_ID_}" >> /etc/environment
+echo "ALLORA_WORKER_NAME=${_ALLORA_WORKER_NAME_}" >> /etc/environment
+echo "ALLORA_TOPIC_ID=${_ALLORA_TOPIC_ID_}" >> /etc/environment
+echo "ALLORA_ENV=${_ALLORA_ENV_}" >> /etc/environment
+echo "ALLORA_NETWORK_NAME=${_ALLORA_NETWORK_NAME_}" >> /etc/environment
 
 source /etc/environment
 
 echo "Updating and installing required system packages"
-yum update -y
+sudo yum update -y
 amazon-linux-extras install epel -y
-yum groupinstall "Development Tools" -y
-yum -y install python3-pip amazon-cloudwatch-agent collectd jq gcc10-10.5.0-1.amzn2.0.2 ncurses-devel telnet aws-cfn-bootstrap
-
-cd /opt
+sudo yum groupinstall "Development Tools" -y
+sudo yum -y install python3-pip amazon-cloudwatch-agent collectd jq gcc10-10.5.0-1.amzn2.0.2 ncurses-devel telnet aws-cfn-bootstrap
 
 #install Allora CLI tool with pip
-pip3 install allocmd --upgrade
+sudo pip3 install allocmd --upgrade
+
+# Install Git
+sudo yum install git -y
+
+# Install docker
+sudo yum install docker -y
+
+# Add the current user to the docker permissions group
+sudo usermod -aG docker ec2-user
+
+# Enable docker service at AMI boot time
+sudo systemctl enable docker.service
+
+# Start the docker service
+sudo systemctl start docker.service
+
+# Install docker-compose
+sudo pip3 install docker-compose
+
+allocmd generate worker --name $ALLORA_WORKER_NAME --topic $ALLORA_TOPIC_ID --env $ALLORA_ENV --network $ALLORA_NETWORK_NAME
 
 #install AWS CLI
 echo 'Installing AWS CLI v2'

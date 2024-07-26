@@ -45,5 +45,9 @@ new AlloraStack(app, 'allora-single-node', {
     type: parseDataVolumeType(process.env.EDGE_DATA_VOL_TYPE?.toLowerCase() ? process.env.EDGE_DATA_VOL_TYPE?.toLowerCase() : "gp3"),
     iops: process.env.EDGE_DATA_VOL_IOPS ? parseInt(process.env.EDGE_DATA_VOL_IOPS) : 10000,
     throughput: process.env.EDGE_DATA_VOL_THROUGHPUT ? parseInt(process.env.EDGE_DATA_VOL_THROUGHPUT) : 700
-  }
+  },
+  alloraWorkerName: process.env.ALLORA_WORKER_NAME || 'aws',
+  alloraTopicId: process.env.ALLORA_TOPIC_ID || '3',
+  alloraEnv: process.env.ALLORA_ENV || 'dev',
+  alloraNetworkName: process.env.ALLORA_NETWORK_NAME || 'edgenet',
 });
