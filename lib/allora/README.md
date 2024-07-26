@@ -146,6 +146,9 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
    # Undeploy Single Node
    npx cdk destroy allora-single-node
+
+   # Undeploy Common Stack
+   npx cdk destroy allora-edge-common
    ```
 
 2. Follow these steps to delete the Cloud9 instance in [Cloud9 Setup](../../docs/setup-cloud9.md)
