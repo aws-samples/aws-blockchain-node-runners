@@ -158,3 +158,73 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 aws iam delete-instance-profile --instance-profile-name Cloud9-Developer-Access
 aws iam delete-role --role-name Cloud9-Developer-Access
 ```
+
+### FAQ
+
+1. How to check the logs from the EC2 user-data script?
+
+Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
+
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/allora
+
+export INSTANCE_ID="i-**************"
+echo "INSTANCE_ID=" $INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo cat /var/log/cloud-init-output.log
+```
+2. How to check the worker node connectivity to the Allora Network?
+
+Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
+
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/allora
+
+export INSTANCE_ID="i-**************"
+echo "INSTANCE_ID=" $INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+```
+
+You should be able to query Topic 1 on the Allora Network and see similar output below
+```bash
+$ allorad q emissions topic 1 --node https://allora-rpc.testnet-1.testnet.allora.network
+effective_revenue: "0"
+topic:
+  allow_negative: true
+  alpha_regret: "0.1"
+  creator: allo1lzf3xp0zqg4239mrswd0cclsgt3y8fl7l84hxu
+  default_arg: ETH
+  epoch_last_ended: "183177"
+  epoch_length: "120"
+  ground_truth_lag: "120"
+  id: "1"
+  inference_logic: bafybeifqs2c7ghellof657rygvrh6ht73scto3oznw4i747sqk3ihy7s5m
+  inference_method: allora-inference-function.wasm
+  loss_logic: bafybeid7mmrv5qr4w5un6c64a6kt2y4vce2vylsmfvnjt7z2wodngknway
+  loss_method: loss-calculation-eth.wasm
+  metadata: ETH 10min Prediction
+  p_norm: "3"
+  tolerance: "0.001"
+weight: "0"
+```
+3. How to check the Allora worker containers are running?
+
+Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
+
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/allora
+
+export INSTANCE_ID="i-**************"
+echo "INSTANCE_ID=" $INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+```
+
+```bash
+[ec2-user@ip-192-168-0-224 ~]$ docker ps -a
+CONTAINER ID   IMAGE                                             COMMAND                  CREATED        STATUS                    PORTS     NAMES
+b10c12c51f32   worker-worker                                     "allora-node allora-…"   18 hours ago   Exited (2) 18 hours ago             worker
+05273577ce7a   alloranetwork/allora-inference-base-head:latest   "allora-node allora-…"   18 hours ago   Exited (2) 18 hours ago             head
+```
