@@ -1,3 +1,14 @@
+# AWS CloudShell
+
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager. 
+
+From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
+
+Once ready, you can execute the commands to deploy and test blueprints in the CloudShell.
+
+***
+# AWS Cloud 9 IS NO LONGER USED (the instructions below will be removed soon, use AWS CloudShell instead)
+***
 # AWS Cloud9 Setup
 
 Most steps in this repository will need to be performed from a Linux command prompt. An especially convenient way of doing this is to use AWS Cloud9, a cloud-based Integrated Development Environment (IDE). Cloud9 allows you to edit source files and execute commands from an easy-to-use web interface. It comes pre-configured with many of the tools needed for software development, and because it runs in the AWS Cloud, it can be an especially easy way to access other cloud services. One other handy feature is that your Cloud9 instances automatically stop running after a configurable period of inactivity, which helps reduce costs.

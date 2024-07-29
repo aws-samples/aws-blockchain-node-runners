@@ -70,9 +70,13 @@ This is the Well-Architected checklist for BSC nodes implementation of the AWS B
 
 ## Setup Instructions
 
-### Setup Cloud9
+### Open AWS CloudShell
 
-We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../docs/setup-cloud9.md)
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager. 
+
+From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
+
+Once ready, you can run the commands to deploy and test blueprints in the CloudShell.
 
 ### Clone this repository and install dependencies
 
@@ -88,69 +92,73 @@ npm install
 
 2. If you have deleted or don't have the default VPC, create default VPC
 
-    ```bash
-    aws ec2 create-default-vpc
-    ```
+```bash
+aws ec2 create-default-vpc
+```
 
-   > **NOTE**:
-   > You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
+> **NOTE**: *You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.*
 
 
 3. Configure the CDK app
 
    Create your own copy of `.env` file and edit it to update with your AWS Account ID, AWS Region, and optionally the BSC SNAPSHOTS URI:
 
-   ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/bsc
-   cd lib/bsc
-   pwd
-   cp ./sample-configs/.env-sample-full .env
-   nano .env
-   ```
-   > **IMPORTANT**:
-   > 1. By default we use the latest Geth Fullnode snapshot from [48 Club](https://github.com/48Club/bsc-snapshots/blob/main/data.json) If you want to set your own `BSC_SNAPSHOTS_URI`, check this GitHub: https://github.com/48Club/bsc-snapshots, and use Geth full node link.
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/bsc
+cd lib/bsc
+pwd
+cp ./sample-configs/.env-sample-full .env
+nano .env
+```
+> **IMPORTANT**: *By default we use the latest Geth Fullnode snapshot from [48 Club](https://github.com/48Club/bsc-snapshots/blob/main/data.json) If you want to set your own `BSC_SNAPSHOTS_URI`, check this GitHub: https://github.com/48Club/bsc-snapshots, and use Geth full node link.*
 
 4. Deploy common components such as IAM role
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/bsc
-   npx cdk deploy bsc-common
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/bsc
+npx cdk deploy bsc-common
+```
 
-   > **IMPORTANT**:
-   > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
-   > ```bash
-   > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
+> **IMPORTANT**: *All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:*
+> ```bash
+> cdk bootstrap aws://ACCOUNT-NUMBER/REGION
+> ```
 
 ### Option 1: Single RPC Node
 
 1. The inital deployment a BSC Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BSC Blockchain Network (next step).
 
-   ```bash
-      pwd
-      # Make sure you are in aws-blockchain-node-runners/lib/bsc
-      npx cdk deploy bsc-single-node --json --outputs-file single-node-deploy.json
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/bsc
+npx cdk deploy bsc-single-node --json --outputs-file single-node-deploy.json
+```
 
 2. After the node is initialised from the snapshot you need to wait from another half a day to a day for the inital syncronization process to complete. The time depends on how fresh the snapshot was. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
 
-    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
-    - Open `Dashboards` and select `bsc-single-node-<node_configuration>-<your_bsc_network>-<ec2_instance_id>` from the list of dashboards.
+   - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
+   - Open `Dashboards` and select `bsc-single-node-<node_configuration>-<your_bsc_network>-<ec2_instance_id>` from the list of dashboards.
 
 Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the single RPC node you deployed:
 
-   ```bash
-      INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.singleinstanceid? | select(. != null)')
-      NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text --region us-east-1)
+```bash
+INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.singleinstanceid? | select(. != null)')
+NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text --region us-east-1)
+echo "NODE_INTERNAL_IP=$NODE_INTERNAL_IP"
+```
 
-      curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
-      --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}'
-   ```
+Copy output from the last `echo` command with `NODE_INTERNAL_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `NODE_INTERNAL_IP=<internal_IP>` into the new CloudShell tab. Then query the API:
 
-   It will return `false` if the node is in sync. If `eth_syncing` returns anything other than false it has not finished syncing. Generally, if syncing is still ongoing, `eth_syncing` will return block info that looks as follows:
+``` bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
+--data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}'
+```
 
-   ```javascript
+ It will return `false` if the node is in sync. If `eth_syncing` returns anything other than false it has not finished syncing. Generally, if syncing is still ongoing, `eth_syncing` will return block info that looks as follows:
+
+```javascript
    {
         "jsonrpc": "2.0",
         "id": 1,
@@ -172,51 +180,50 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
                  "syncedStorageBytes": "0x0"
         }
    }
-   ```
+```
 
 3. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Run the following query against the private IP of the single RPC node you deployed:
 
-   ```bash
-      INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.singleinstanceid? | select(. != null)')
-      NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+```bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+# We query token balance of one of the system contracts: https://bscscan.com/address/0x0000000000000000000000000000000000001006
+curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
+--data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
+```
+You will get a response similar to this:
 
-      # We query token balance of one of the system contracts: https://bscscan.com/address/0x0000000000000000000000000000000000001006
-      curl http://$NODE_INTERNAL_IP:8545 -X POST -H "Content-Type: application/json" \
-      --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
-   ```
-   You will get a response similar to this:
-
-   ```json
-      {"jsonrpc":"2.0","id":1,"result":"0x3635c9adc5dea00000"}
-   ```
+```json
+{"jsonrpc":"2.0","id":1,"result":"0x3635c9adc5dea00000"}
+```
 
 ### Option 2: Highly Available RPC Nodes
 
 1. The inital deployment of a BSC Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for your another half a day to a day for your nodes to synchronize with the BSC Blockchain Network, depending on how fresh the snapshot was.
 
-   ```bash
-      pwd
-      # Make sure you are in aws-blockchain-node-runners/lib/bsc
-      npx cdk deploy bsc-ha-nodes --json --outputs-file ha-nodes-deploy.json
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/bsc
+npx cdk deploy bsc-ha-nodes --json --outputs-file ha-nodes-deploy.json
+```
 
 2. Give the new RPC nodes about few hours to initialize and then run the following query against the load balancer behind the RPC node created
 
-   ```bash
-      export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
-      echo $RPC_ALB_URL
-   ```
+```bash
+export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
+echo RPC_ALB_URL=$RPC_ALB_URL
+```
 
-   Periodically check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the load balancer fronting your nodes:
+Periodically check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the load balancer fronting your nodes:
 
-   ```bash
-   curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
-   --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}'
-   ```
+```bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
+--data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}'
+```
 
-   It will return `false` if the node is in sync. If `eth_syncing` returns anything other than false it has not finished syncing. Generally, if syncing is still ongoing, `eth_syncing` will return block info that looks as follows:
+It will return `false` if the node is in sync. If `eth_syncing` returns anything other than false it has not finished syncing. Generally, if syncing is still ongoing, `eth_syncing` will return block info that looks as follows:
 
-   ```javascript
+```javascript
    {
         "jsonrpc": "2.0",
         "id": 1,
@@ -238,29 +245,33 @@ Alternatively, you can manually check [Geth Syncing Status](https://geth.ethereu
                  "syncedStorageBytes": "0x0"
         }
    }
-   ```
+```
 
-**NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
+> **NOTE:** 
+> - *By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.*
 
 3. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Run the following query against the private IP of the single RPC node you deployed:
 
-   ```bash
-      export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
-      echo $RPC_ALB_URL
+```bash
+export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
+echo RPC_ALB_URL=$RPC_ALB_URL
+```
 
-      # We query token balance of one of the system contracts: https://bscscan.com/address/0x0000000000000000000000000000000000001006
-      curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
-      --data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
-   ```
-   You will get a response similar to this:
+```bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+# We query token balance of one of the system contracts: https://bscscan.com/address/0x0000000000000000000000000000000000001006
+curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
+--data '{"method":"eth_getBalance","params":["0x0000000000000000000000000000000000001006", "latest"],"id":1,"jsonrpc":"2.0"}'
+```
+You will get a response similar to this:
 
-   ```json
-      {"jsonrpc":"2.0","id":1,"result":"0x3635c9adc5dea00000"}
-   ```
+```json
+{"jsonrpc":"2.0","id":1,"result":"0x3635c9adc5dea00000"}
+```
 
 ### Clearing up and undeploy everything
 
-1. Undeploy HA Nodes, Single Nodes and Common stacks
+Destroy HA Nodes, Single Nodes and Common stacks
 
 ```bash
 # Setting the AWS account id and region in case local .env file is lost
@@ -270,17 +281,15 @@ export AWS_REGION=<your_target_AWS_region>
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/bsc
 
-# Undeploy Single Node
+# Destroy Single Node
 cdk destroy bsc-single-node
 
-# Undeploy HA Nodes
+# Destroy HA Nodes
 cdk destroy bsc-ha-nodes
 
  # Delete all common components like IAM role and Security Group
 cdk destroy bsc-common
 ```
-
-2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
 
 ### FAQ
 
@@ -288,7 +297,7 @@ cdk destroy bsc-common
 
 Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
 
-   **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+> **NOTE:** *In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)*
 
 ```bash
 pwd
@@ -344,11 +353,11 @@ echo "INSTANCE_ID=" $INSTANCE_ID
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo systemctl restart bsc
 ```
-**NOTE:** You can also try the following command to obtain more information：
-- Check the BSC service status
-  - `sudo systemctl status bsc`
-- View BSC service configuration
-  - `cat /etc/systemd/system/bsc.service`
+> **NOTE:** *You can also try the following command to obtain more information*
+> - *Check the BSC service status*
+>   - `sudo systemctl status bsc`
+> - *View BSC service configuration*
+>   - `cat /etc/systemd/system/bsc.service`
 
 5. Where can I find more infromation about BSC RPC API?
 
