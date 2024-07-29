@@ -5,7 +5,9 @@ sidebar_label: About blueprints
 
 # Node Runners Blueprints
 
-Node Runner Blueprints are TypeScrypt applications built with [AWS Cloud Development Kit](https://aws.amazon.com/cdk/). They are infrastructure as code apps that you can use to deploy to AWS blockchain nodes in different configurations be it solo nodes or highly available setups. Most of the apps will look into `.env` file in its root directory for input params to know which compute, storage and node setup options to use during deployment.
+The Node Runner Blueprints are TypeScript applications built using the [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/). These blueprints implement the infrastructure-as-code (IaC) paradigm, allowing you to deploy your own blockchain nodes on AWS in various configurations, including solo nodes and highly available setups, for development, testing, or proof-of-concept purposes.
+
+Most of the applications in the Node Runner Blueprints suite rely on an `.env` file located in the root directory to retrieve input parameters. These parameters determine the compute resources, storage options, and node setup configurations to be used during the deployment process.
 
 👈 Use navigation bar on the left for the setup guides for different protocols.
 
