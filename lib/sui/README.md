@@ -177,7 +177,7 @@ sudo systemctl start suid
 
 4. Journalctl and Node Status throws errors:
 
-Set up archival fallback to enable your node to fallback to an archive in case of lag, add this block to your fullnode.yaml file as described here https://docs.sui.io/guides/operator/archives#set-up-archival-fallback. Restart Node
+Set up archival fallback to enable your node to fallback to an archive in case of lag, add this block to your fullnode.yaml file as described [here](https://docs.sui.io/guides/operator/archives#set-up-archival-fallback). Restart Node
 Example:
 ```yaml
 state-archive-read-config:
@@ -199,7 +199,7 @@ state-archive-read-config:
     use-for-pruning-watermark: false
 ```
 
-5. Restoring a Full node using snapshots: Restoring using RocksDB snapshots to restore from a RocksDB snapshot, follow these steps (https://docs.sui.io/guides/operator/snapshots):
+5. Restoring a Full node using snapshots: Restoring using RocksDB snapshots to restore from a RocksDB snapshot, follow [these steps](https://docs.sui.io/guides/operator/snapshots):
 ```bash
 # Syntax:
 sui-tool download-db-snapshot --latest \
