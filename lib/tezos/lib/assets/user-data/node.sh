@@ -15,6 +15,7 @@ echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
 echo "AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}" >> /etc/environment
 echo "INSTANCE_TYPE=${_INSTANCE_TYPE_}" >> /etc/environment
 echo "S3_SYNC_BUCKET=${_S3_SYNC_BUCKET_}" >> /etc/environment
+echo "TEZOS_NODE_DIR=/data" >> /etc/environment
 source /etc/environment
 
 arch=$(uname -m)
@@ -112,29 +113,54 @@ if [ "$arch" == "x86_64" ]; then
     mv ./octez-arm64/* /usr/local/bin/
 fi
 
-
-
 find /usr/local/bin/ -name "octez-*" -exec chmod +x {} \;
 groupadd tezos
 adduser -g tezos tezos
-#mkdir -p /var/tezos/node
-#chown -R tezos:tezos /var/tezos
+mkdir -p /data
 
 echo "Changing user to tezos"
-
 
 echo "Installing zcash dependency"
 curl -o  /tmp/fetch-params.sh https://raw.githubusercontent.com/zcash/zcash/713fc761dd9cf4c9087c37b078bdeab98697bad2/zcutil/fetch-params.sh
 chmod +x /tmp/fetch-params.sh
 su tezos -c "/tmp/fetch-params.sh"
 
+echo "Configuring /data volume"
+if [ "$INSTANCE_TYPE" == "SNAPSHOT"  ] || [ "$INSTANCE_TYPE" == "SINGLE" ]; then
+  # Signal completion to CFN
+  echo "Single node. Signaling completion to CloudFormation to make EBS volumes available."
+  cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
+
+  echo "Single node. Wait for one minute for the volume to be available"
+  sleep 60
+fi
+
+if $(lsblk | grep -q nvme1n1); then
+  echo "nvme1n1 is found. Configuring attached storage"
+
+  mkfs -t xfs /dev/nvme1n1
+
+  sleep 10
+  # Define the line to add to fstab
+  uuid=$(lsblk -n -o UUID /dev/nvme1n1)
+  line="UUID=$uuid /data xfs defaults 0 2"
+
+  # Write the line to fstab
+  echo $line | sudo tee -a /etc/fstab
+
+  mount -a
+
+else
+  echo "nvme1n1 is not found. Not doing anything"
+fi
+
+chown -R tezos:tezos /data
+chmod -R 755 /data
+
+lsblk -d
+
 echo "Configuring node"
-su tezos -c "octez-node config init  --network=$TZ_NETWORK  --history-mode=$TZ_HISTORY_MODE  --net-addr='[::]:9732' --rpc-addr='[::]:8732' --allow-all-rpc [::]:8732"
-
-# Signal completion to CFN
-echo "Signaling completion to CloudFormation. The node will still sync/import data"
-cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
-
+su tezos -c "octez-node config init  --network=$TZ_NETWORK  --history-mode=$TZ_HISTORY_MODE --data-dir /data  --net-addr='[::]:9732' --rpc-addr='[::]:8732' --allow-all-rpc [::]:8732"
 
 # download snapshot if network is mainnet
 if [ "$INSTANCE_TYPE" == "SNAPSHOT"  ] || [ "$INSTANCE_TYPE" == "SINGLE" ]; then
@@ -145,10 +171,9 @@ if [ "$INSTANCE_TYPE" == "SNAPSHOT"  ] || [ "$INSTANCE_TYPE" == "SINGLE" ]; then
   fi
 fi
 
-
 if [[ "$INSTANCE_TYPE" == "HA" ]]; then
   # su tezos -c "aws s3 sync s3://$S3_SYNC_BUCKET/node ~/.tezos-node/node"
-  su tezos -c "s5cmd sync 's3://$S3_SYNC_BUCKET/node/*' /home/tezos/.tezos-node/"
+  su tezos -c "s5cmd sync 's3://$S3_SYNC_BUCKET/node/*' /data/"
 fi
 
 if [[ "$INSTANCE_TYPE" == "SNAPSHOT" ]]; then
@@ -167,7 +192,7 @@ Description="Run the octez-node"
 [Service]
 User=tezos
 Group=tezos
-ExecStart=octez-node run
+ExecStart=octez-node run --data-dir=/data
 
 [Install]
 WantedBy=multi-user.target

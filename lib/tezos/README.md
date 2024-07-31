@@ -124,7 +124,7 @@ The result should be like this (the actual balance might change):
 ```bash
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/tezos
-npx cdk deploy snapshot-node --json --outputs-file sync-node-deploy.json
+npx cdk deploy tz-snapshot-node --json --outputs-file sync-node-deploy.json
 ```
 > **NOTE:** *The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`.*
 
