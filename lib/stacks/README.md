@@ -70,7 +70,7 @@ This is the Well-Architected checklist for Stacks nodes implementation of the AW
 
 ### Open AWS CloudShell
 
-To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager. 
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
 
 From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
 
@@ -195,7 +195,7 @@ npx cdk deploy stacks-ha-nodes --json --outputs-file ha-nodes-deploy.json
 export RPC_ABL_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
 echo RPC_ALB_URL=$RPC_ALB_URL
 ```
-   
+
 ```bash
 # IMPORTANT: Run from CloudShell VPC environment tab
 curl http://$RPC_ABL_URL:20443/v2/info' | jq

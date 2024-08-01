@@ -20,7 +20,7 @@ export interface TzHANodesStackProps extends cdk.StackProps {
     tzNetwork: configTypes.TzNetwork;
     historyMode: configTypes.TzNodeHistoryMode;
     downloadSnapshot: boolean;
-    octezDownloadUri: string; 
+    octezDownloadUri: string;
     snapshotsUrl: string;
     dataVolume: configTypes.TzDataVolumeConfig;
     albHealthCheckGracePeriodMin: number;
@@ -68,10 +68,9 @@ export class TzHANodesStack extends cdk.Stack {
             path: path.join(__dirname, "assets")
         });
 
-        const snapshotBucket = s3.Bucket.fromBucketName(this, "snapshots-s3-bucket", cdk.Fn.importValue('TezosSnapshotBucket'))
+        const snapshotBucketName = cdk.Fn.importValue('TezosSnapshotBucket');
 
         asset.bucket.grantRead(instanceRole);
-        snapshotBucket.grantRead(instanceRole);
 
         // parsing user data script and injecting necessary variables
         const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
@@ -89,7 +88,7 @@ export class TzHANodesStack extends cdk.Stack {
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
             _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
-            _S3_SYNC_BUCKET_: cdk.Fn.importValue('TezosSnapshotBucket'),
+            _S3_SYNC_BUCKET_: snapshotBucketName,
             _INSTANCE_TYPE_: "HA"
         });
 

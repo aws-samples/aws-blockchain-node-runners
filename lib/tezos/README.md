@@ -26,7 +26,7 @@ This setup is for small scale PoC or development environments. It deploys a sing
 
 ### Open AWS CloudShell
 
-To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager. 
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
 
 From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
 
@@ -88,7 +88,7 @@ npx cdk deploy tz-single-node --json --outputs-file single-node-deploy.json
 ```
 > **NOTE:** *The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`.*
 
-   The EC2 instance will deploy, initialize the node and start the first sync. In Cloudformation the instance will show as successful once the node is running. From that point it still takes a while until the node is synced to the blockchain. You can check the sync status with the REST call below in step 4. If the `curl cannot connect to the node on port 8732, then the node is still importing. Once that's done, the curl command works. 
+   The EC2 instance will deploy, initialize the node and start the first sync. In Cloudformation the instance will show as successful once the node is running. From that point it still takes a while until the node is synced to the blockchain. You can check the sync status with the REST call below in step 4. If the `curl cannot connect to the node on port 8732, then the node is still importing. Once that's done, the curl command works.
 
 2. After starting the node you need to wait for the inital syncronization process to finish. It may take from an hour to half a day depending on the the state of the network. You can use Amazon CloudWatch to track the progress. To see them:
 
@@ -124,7 +124,7 @@ The result should be like this (the actual balance might change):
 ```bash
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/tezos
-npx cdk deploy snapshot-node --json --outputs-file sync-node-deploy.json
+npx cdk deploy tz-snapshot-node --json --outputs-file sync-node-deploy.json
 ```
 > **NOTE:** *The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`.*
 
@@ -214,4 +214,37 @@ export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.single-node-instan
 echo "INSTANCE_ID=" $INSTANCE_ID
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo cat /var/log/cloud-init-output.log
+```
+2. How can check the status of the node service?
+``` bash
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo systemctl status node
+```
+
+3. How to check the logs of the clients running on my node?
+
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/solana
+
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo su bcuser
+sudo journalctl -o cat -fu node
+```
+
+3. How to check the logs of data backup service on sync node?
+
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/solana
+
+export INSTANCE_ID=$(cat sync-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo su bcuser
+sudo journalctl -o cat -fu s3-sync
 ```

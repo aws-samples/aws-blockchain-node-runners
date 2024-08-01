@@ -2,15 +2,15 @@ import * as cdk from "aws-cdk-lib";
 import * as cdkConstructs from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as s3 from "aws-cdk-lib/aws-s3";
-import { AmazonLinuxGeneration, AmazonLinuxImage } from "aws-cdk-lib/aws-ec2";
 import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as configTypes from "./config/tzConfig.interface";
 import { TzNodeSecurityGroupConstructs } from "./constructs/tz-node-security-group";
 import * as fs from "fs";
 import * as path from "path";
 import * as constants from "../../constructs/constants";
-import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb";
+import * as nodeCwDashboard from "./assets/node-cw-dashboard"
+import * as cw from 'aws-cdk-lib/aws-cloudwatch';
+import { SingleNodeConstruct } from "../../constructs/single-node"
 import * as nag from "cdk-nag";
 import { SnapshotsS3BucketConstruct } from "../../constructs/snapshots-bucket";
 
@@ -23,6 +23,7 @@ export interface TzSnapshotNodeStackProps extends cdk.StackProps {
     downloadSnapshot: boolean;
     snapshotsUrl: string;
     octezDownloadUri: string;
+    dataVolume: configTypes.TzDataVolumeConfig;
 }
 
 export class TzSnapshotNodeStack extends cdk.Stack {
@@ -32,9 +33,9 @@ export class TzSnapshotNodeStack extends cdk.Stack {
         const REGION = cdk.Stack.of(this).region;
         const STACK_NAME = cdk.Stack.of(this).stackName;
         const STACK_ID = cdk.Stack.of(this).stackId;
-        const AWS_ACCOUNT_ID = cdk.Stack.of(this).account
-        const lifecycleHookName = STACK_NAME;
-        const autoScalingGroupName = STACK_NAME;
+        const AWS_ACCOUNT_ID = cdk.Stack.of(this).account;
+        const availabilityZones = cdk.Stack.of(this).availabilityZones;
+        const chosenAvailabilityZone = availabilityZones.slice(0, 1)[0];
 
         const {
             instanceType,
@@ -45,6 +46,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
             downloadSnapshot,
             snapshotsUrl,
             octezDownloadUri,
+            dataVolume,
         } = props;
 
         // using default vpc
@@ -56,14 +58,14 @@ export class TzSnapshotNodeStack extends cdk.Stack {
         // getting the IAM Role ARM from the common stack
         const importedInstanceRoleArn = cdk.Fn.importValue("TzNodeInstanceRoleArn");
 
-        const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
+        const snapshotInstanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
         // making our scripts and configs from the local "assets" directory available for instance to download
         const asset = new s3Assets.Asset(this, "assets", {
             path: path.join(__dirname, "assets")
         });
 
-        asset.bucket.grantRead(instanceRole);
+        asset.bucket.grantRead(snapshotInstanceRole);
 
 
         const snapshotsBucket = new SnapshotsS3BucketConstruct(this, "snapshots-s3-bucket", {
@@ -74,15 +76,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
             service: ec2.GatewayVpcEndpointAwsService.S3,
         });
 
-        const snapshotInstanceRole = new iam.Role(this, `snapshot-instance-role`, {
-            assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
-            managedPolicies: [
-                iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy"),
-            ],
-        });
-
-        asset.bucket.grantRead(snapshotInstanceRole);
-        snapshotInstanceRole.addToPolicy(
+        snapshotInstanceRole.addToPrincipalPolicy(
             new iam.PolicyStatement({
                 resources: [
                     snapshotsBucket.bucketArn,
@@ -112,68 +106,62 @@ export class TzSnapshotNodeStack extends cdk.Stack {
                 actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
             })
         );
-        const snapshotNodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
 
-
-        const snapshotNode = new ec2.Instance(this, "tz-snapshot-node", {
-            instanceName: "tz-snapshot-node",
-            instanceType: instanceType,
+        // Setting up the node using generic Sync Node constract
+        const node = new SingleNodeConstruct(this, "sync-node", {
+            instanceName: STACK_NAME,
+            instanceType,
+            dataVolumes: [dataVolume],
             machineImage: new ec2.AmazonLinux2023ImageSsmParameter({
                 kernel: ec2.AmazonLinux2023Kernel.KERNEL_6_1,
                 cpuType: instanceCpuType,
             }),
-            vpc: vpc,
-            blockDevices: [
-                {
-                  // ROOT VOLUME
-                  deviceName: "/dev/xvda",
-                  volume: ec2.BlockDeviceVolume.ebs(46, {
-                      deleteOnTermination: true,
-                      encrypted: true,
-                      iops: 3000,
-                      volumeType: ec2.EbsDeviceVolumeType.GP3,
-                    }),
-                },
-              ],
-            detailedMonitoring: true,
-            propagateTagsToVolumeOnCreation: true,
+            vpc,
+            availabilityZone: chosenAvailabilityZone,
             role: snapshotInstanceRole,
             securityGroup: instanceSG.securityGroup,
-          });
-
-          const modifiedSnapshotNodeScript = cdk.Fn.sub(snapshotNodeScript, {
-              _AWS_REGION_: REGION,
-              _STACK_NAME_: STACK_NAME,
-              _TZ_SNAPSHOTS_URI_: snapshotsUrl,
-              _STACK_ID_: STACK_ID,
-              _TZ_HISTORY_MODE_: historyMode,
-              _TZ_DOWNLOAD_SNAPSHOT_ : String(downloadSnapshot),
-              _TZ_OCTEZ_DOWNLOAD_URI_ : octezDownloadUri,
-              _TZ_NETWORK_: tzNetwork,
-              _S3_SYNC_BUCKET_: snapshotsBucket.bucketName,
-              _NODE_CF_LOGICAL_ID_: snapshotNode.instance.logicalId,
-              _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
-              _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
-              _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
-              _INSTANCE_TYPE_: "SNAPSHOT",
-          });
-
-          snapshotNode.addUserData(modifiedSnapshotNodeScript);
-
-
-        // Getting logical ID of the instance to send ready signal later once the instance is initialized
-        const snapshotNodeCfn = snapshotNode.node.defaultChild as ec2.CfnInstance;
-
-        // CloudFormation Config: wait for 15 min for the node to start
-        const creationPolicy: cdk.CfnCreationPolicy = {
-            resourceSignal: {
-            count: 1,
-            timeout: "PT90M",
+            vpcSubnets: {
+                subnetType: ec2.SubnetType.PUBLIC,
             },
-        };
+        });
 
+        // Parsing user data script and injecting necessary variables
+        const userData = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
+        const modifiedUserData = cdk.Fn.sub(userData, {
+            _AWS_REGION_: REGION,
+            _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
+            _STACK_NAME_: STACK_NAME,
+            _TZ_SNAPSHOTS_URI_: snapshotsUrl,
+            _STACK_ID_: STACK_ID,
+            _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
+            _TZ_HISTORY_MODE_: historyMode,
+            _TZ_DOWNLOAD_SNAPSHOT_ : String(downloadSnapshot),
+            _TZ_OCTEZ_DOWNLOAD_URI_ : octezDownloadUri,
+            _TZ_NETWORK_: tzNetwork,
+            _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
+            _AUTOSCALING_GROUP_NAME_: constants.NoneValue,
+            _INSTANCE_TYPE_: "SNAPSHOT",
+            _S3_SYNC_BUCKET_: snapshotsBucket.bucketName,
+        });
 
-        snapshotNodeCfn.cfnOptions.creationPolicy = creationPolicy;
+        // Adding modified userdata script to the instance prepared fro us by Single Node constract
+        node.instance.addUserData(modifiedUserData);
+
+        // Adding CloudWatch dashboard to the node
+        const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SyncNodeCWDashboardJSON), {
+            INSTANCE_ID:node.instanceId,
+            INSTANCE_NAME: STACK_NAME,
+            REGION: REGION,
+        })
+
+        new cw.CfnDashboard(this, 'sync-cw-dashboard', {
+            dashboardName: `${STACK_NAME}-${node.instanceId}`,
+            dashboardBody: dashboardString,
+        });
+
+        new cdk.CfnOutput(this, "sync-instance-id", {
+            value: node.instanceId,
+        });
 
         new cdk.CfnOutput(this, "TezosSnapshotBucket", {
             value: snapshotsBucket.bucketName,

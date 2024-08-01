@@ -22,6 +22,7 @@ describe("TZSingleNodeStack", () => {
       historyMode: config.baseNodeConfig.historyMode,
       snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
       dataVolume: config.baseNodeConfig.dataVolume,
+      octezDownloadUri: config.baseNodeConfig.octezDownloadUri,
       downloadSnapshot: true
   });
 

@@ -146,6 +146,25 @@ export const SyncNodeCWDashboardJSON = {
             }
         },
         {
+            "height": 4,
+            "width": 6,
+            "y": 0,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "CWAgent", "tz_minutes_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                ],
+                "sparkline": true,
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Maximum",
+                "period": 60,
+                "title": "Tezos Client Minutes Behind"
+            }
+        },
+        {
             "height": 5,
             "width": 6,
             "y": 5,

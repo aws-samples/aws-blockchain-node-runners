@@ -43,7 +43,8 @@ const snapshotNode = new TzSnapshotNodeStack(app, "tz-snapshot-node", {
     historyMode: config.baseNodeConfig.historyMode,
     snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
     octezDownloadUri: config.baseNodeConfig.octezDownloadUri,
-    downloadSnapshot: config.baseNodeConfig.downloadSnapshot == "true"
+    downloadSnapshot: config.baseNodeConfig.downloadSnapshot == "true",
+    dataVolume: config.baseNodeConfig.dataVolume,
 })
 
 const haNodeStack = new TzHANodesStack(app, "tz-ha-nodes", {
