@@ -20,7 +20,7 @@ export interface TzHANodesStackProps extends cdk.StackProps {
     tzNetwork: configTypes.TzNetwork;
     historyMode: configTypes.TzNodeHistoryMode;
     downloadSnapshot: boolean;
-    octezDownloadUri: string; 
+    octezDownloadUri: string;
     snapshotsUrl: string;
     dataVolume: configTypes.TzDataVolumeConfig;
     albHealthCheckGracePeriodMin: number;

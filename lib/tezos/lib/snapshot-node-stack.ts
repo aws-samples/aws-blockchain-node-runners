@@ -124,7 +124,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
                 subnetType: ec2.SubnetType.PUBLIC,
             },
         });
-        
+
         // Parsing user data script and injecting necessary variables
         const userData = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
         const modifiedUserData = cdk.Fn.sub(userData, {
@@ -143,22 +143,22 @@ export class TzSnapshotNodeStack extends cdk.Stack {
             _INSTANCE_TYPE_: "SNAPSHOT",
             _S3_SYNC_BUCKET_: snapshotsBucket.bucketName,
         });
-        
+
         // Adding modified userdata script to the instance prepared fro us by Single Node constract
         node.instance.addUserData(modifiedUserData);
-        
+
         // Adding CloudWatch dashboard to the node
         const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SyncNodeCWDashboardJSON), {
             INSTANCE_ID:node.instanceId,
             INSTANCE_NAME: STACK_NAME,
             REGION: REGION,
         })
-        
+
         new cw.CfnDashboard(this, 'sync-cw-dashboard', {
             dashboardName: `${STACK_NAME}-${node.instanceId}`,
             dashboardBody: dashboardString,
         });
-        
+
         new cdk.CfnOutput(this, "sync-instance-id", {
             value: node.instanceId,
         });
