@@ -58,14 +58,14 @@ export class TzSnapshotNodeStack extends cdk.Stack {
         // getting the IAM Role ARM from the common stack
         const importedInstanceRoleArn = cdk.Fn.importValue("TzNodeInstanceRoleArn");
 
-        const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
+        const snapshotInstanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
         // making our scripts and configs from the local "assets" directory available for instance to download
         const asset = new s3Assets.Asset(this, "assets", {
             path: path.join(__dirname, "assets")
         });
 
-        asset.bucket.grantRead(instanceRole);
+        asset.bucket.grantRead(snapshotInstanceRole);
 
 
         const snapshotsBucket = new SnapshotsS3BucketConstruct(this, "snapshots-s3-bucket", {
@@ -76,15 +76,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
             service: ec2.GatewayVpcEndpointAwsService.S3,
         });
 
-        const snapshotInstanceRole = new iam.Role(this, `snapshot-instance-role`, {
-            assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
-            managedPolicies: [
-                iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy"),
-            ],
-        });
-
-        asset.bucket.grantRead(snapshotInstanceRole);
-        snapshotInstanceRole.addToPolicy(
+        snapshotInstanceRole.addToPrincipalPolicy(
             new iam.PolicyStatement({
                 resources: [
                     snapshotsBucket.bucketArn,
@@ -126,7 +118,7 @@ export class TzSnapshotNodeStack extends cdk.Stack {
             }),
             vpc,
             availabilityZone: chosenAvailabilityZone,
-            role: instanceRole,
+            role: snapshotInstanceRole,
             securityGroup: instanceSG.securityGroup,
             vpcSubnets: {
                 subnetType: ec2.SubnetType.PUBLIC,

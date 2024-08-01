@@ -23,6 +23,7 @@ describe("TzHANodesStack", () => {
     snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
     dataVolume: config.baseNodeConfig.dataVolume,
     downloadSnapshot: Boolean(config.baseNodeConfig.downloadSnapshot),
+    octezDownloadUri: config.baseNodeConfig.octezDownloadUri,
 
     albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
     heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
