@@ -9,8 +9,6 @@ cat >/etc/systemd/system/s3-sync.service <<EOL
 Description="Sync S3 with node data"
 
 [Service]
-User=tezos
-Group=tezos
 ExecStart=/opt/copy-data-to-s3.sh
 
 [Install]
