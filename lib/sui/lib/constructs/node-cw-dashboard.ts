@@ -134,7 +134,7 @@ export const SyncNodeCWDashboardJSON = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "sui_current_block", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "sui_current_checkpoint_no", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                 ],
                 "sparkline": true,
                 "view": "timeSeries",
@@ -142,7 +142,7 @@ export const SyncNodeCWDashboardJSON = {
                 "region": "${REGION}",
                 "stat": "Maximum",
                 "period": 60,
-                "title": "Sui Client Block Height"
+                "title": "Sui Client Checkpoint Seq No"
             }
         },
         {
@@ -159,9 +159,9 @@ export const SyncNodeCWDashboardJSON = {
                 "stat": "Maximum",
                 "period": 60,
                 "metrics": [
-                    [ "CWAgent", "sui_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
+                    [ "CWAgent", "sui_minutes_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}-${INSTANCE_NAME}" } ]
                 ],
-                "title": "Sui Client Blocks Behind"
+                "title": "Sui Client Minutes Behind"
             }
         },
         {

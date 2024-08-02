@@ -90,7 +90,7 @@ The EC2 instance will deploy, initialize the node and start the first sync. In C
 4. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Check if the JSON-RPC port is open and working — run the following command from a terminal:
 
 ```bash
-INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
 NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text --region us-east-1)
 echo "NODE_INTERNAL_IP=$NODE_INTERNAL_IP"
 ```

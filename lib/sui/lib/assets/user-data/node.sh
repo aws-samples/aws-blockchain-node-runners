@@ -140,8 +140,6 @@ echo "Starting CloudWatch Agent"
 -a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
 systemctl status amazon-cloudwatch-agent
 
-
-
 # Download Sui artifacts
 cd $HOME
 
@@ -313,6 +311,38 @@ fi
 echo "[LOG] Sui Version: $(sui -V)"
 
 echo "Sui Version: $(sui -V)"
+
+cd /opt
+sudo mv /opt/sync-checker/syncchecker-sui.sh /opt/syncchecker.sh
+sudo chmod +x /opt/syncchecker.sh
+
+
+echo "Setting up sync-checker service"
+cat >/etc/systemd/system/sync-checker.service <<EOL
+[Unit]
+Description="Sync checker for the node"
+
+[Service]
+ExecStart=/opt/syncchecker.sh
+EOL
+
+# Run every minute
+echo "Setting up sync-checker timer"
+cat >/etc/systemd/system/sync-checker.timer <<EOL
+[Unit]
+Description="Run Sync checker service every minute"
+
+[Timer]
+OnCalendar=*:*:0/1
+Unit=sync-checker.service
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+echo "Starting sync checker timer"
+systemctl start sync-checker.timer
+systemctl enable sync-checker.timer
 
 # Useful commands (added as comments)
 # Check your node logs: journalctl -fu suid -o cat
