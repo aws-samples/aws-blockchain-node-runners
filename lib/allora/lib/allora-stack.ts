@@ -29,6 +29,10 @@ export interface AlloraStackProps extends cdk.StackProps {
   alloraTopicId: string;
   alloraEnv: string;
   alloraNetworkName: string;
+  alloraAccountName: string;
+  alloraAccountMnemonic: string;
+  alloraAccountPassphrase: string;
+  alloraNodeRpc: string;
 }
 
 
@@ -44,7 +48,11 @@ export class AlloraStack extends cdk.Stack {
       alloraWorkerName, 
       alloraTopicId, 
       alloraEnv, 
-      alloraNetworkName
+      alloraNetworkName,
+      alloraAccountName,
+      alloraAccountMnemonic,
+      alloraAccountPassphrase,
+      alloraNodeRpc
     } = props;
     const { region } = env;
 
@@ -131,7 +139,11 @@ export class AlloraStack extends cdk.Stack {
       _ALLORA_WORKER_NAME_: alloraWorkerName,
       _ALLORA_TOPIC_ID_: alloraTopicId,
       _ALLORA_ENV_: alloraEnv,
-      _ALLORA_NETWORK_NAME_ : alloraNetworkName
+      _ALLORA_NETWORK_NAME_ : alloraNetworkName,
+      _ALLORA_ACCOUNT_NAME_ : alloraAccountName,
+      _ALLORA_ACCOUNT_MNEMONIC_ : alloraAccountMnemonic,
+      _ALLORA_ACCOUNT_PASSPHRASE_ : alloraAccountPassphrase,
+      _ALLORA_NODE_RPC_ : alloraNodeRpc,
     });
 
    // Create UserData for EC2 instance

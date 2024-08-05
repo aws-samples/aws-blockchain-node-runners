@@ -12,6 +12,10 @@ echo "ALLORA_WORKER_NAME=${_ALLORA_WORKER_NAME_}" >> /etc/environment
 echo "ALLORA_TOPIC_ID=${_ALLORA_TOPIC_ID_}" >> /etc/environment
 echo "ALLORA_ENV=${_ALLORA_ENV_}" >> /etc/environment
 echo "ALLORA_NETWORK_NAME=${_ALLORA_NETWORK_NAME_}" >> /etc/environment
+echo "ALLORA_ACCOUNT_NAME=${_ALLORA_ACCOUNT_NAME_}" >> /etc/environment
+echo "ALLORA_ACCOUNT_MNEMONIC=${_ALLORA_ACCOUNT_MNEMONIC_}" >> /etc/environment
+echo "ALLORA_ACCOUNT_PASSPHRASE=${_ALLORA_ACCOUNT_PASSPHRASE_}" >> /etc/environment
+echo "ALLORA_NODE_RPC=${_ALLORA_NODE_RPC_}" >> /etc/environment
 
 source /etc/environment
 
@@ -40,9 +44,10 @@ sudo systemctl enable docker.service
 sudo systemctl start docker.service
 
 # Install docker-compose
-sudo pip3 install docker-compose
+sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose version
 
-allocmd generate worker --name $ALLORA_WORKER_NAME --topic $ALLORA_TOPIC_ID --env $ALLORA_ENV --network $ALLORA_NETWORK_NAME
 
 #install AWS CLI
 echo 'Installing AWS CLI v2'
@@ -53,6 +58,19 @@ rm /usr/bin/aws
 ln /usr/local/bin/aws /usr/bin/aws
 
 cfn-signal -e $? --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
+
+# clone node repo
+cd ~
+git clone https://github.com/allora-network/allora-offchain-node.git node-repo
+cd node-repo
+
+touch .env
+echo "ALLORA_ACCOUNT_NAME=$ALLORA_ACCOUNT_NAME" >> .env
+echo "ALLORA_ACCOUNT_MNEMONIC=$ALLORA_ACCOUNT_MNEMONIC" >> .env
+echo "ALLORA_ACCOUNT_PASSPHRASE=$ALLORA_ACCOUNT_PASSPHRASE" >> .env
+echo "ALLORA_NODE_RPC=$ALLORA_NODE_RPC" >> .env
+
+docker-compose up --build 
 
 echo "----------------------------------------------"
 echo "[user-data] Allora user-data script successful"

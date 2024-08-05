@@ -50,4 +50,8 @@ new AlloraStack(app, 'allora-single-node', {
   alloraTopicId: process.env.ALLORA_TOPIC_ID || '3',
   alloraEnv: process.env.ALLORA_ENV || 'dev',
   alloraNetworkName: process.env.ALLORA_NETWORK_NAME || 'edgenet',
+  alloraAccountName: process.env.ALLORA_ACCOUNT_NAME || 'secret',
+  alloraAccountMnemonic: process.env.ALLORA_ACCOUNT_MNEMONIC || 'secret',
+  alloraAccountPassphrase: process.env.ALLORA_ACCOUNT_PASSPHRASE || 'secret',
+  alloraNodeRpc: process.env.ALLORA_NODE_RPC || 'https://localhost:26657',
 });
