@@ -68,9 +68,13 @@ This is the Well-Architected checklist for Ethereum nodes implementation of the 
 
 ## Setup Instructions
 
-### Setup Cloud9
+### Open AWS CloudShell
 
-We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../docs/setup-cloud9.md)
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
+
+From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
+
+Once ready, you can run the commands to deploy and test blueprints in the CloudShell.
 
 ### Make sure you have access to Ethereum L1 node
 
@@ -175,25 +179,28 @@ BASE_L1_CONSENSUS_ENDPOINT="https://ethereum-sepolia-beacon-api.publicnode.com"
 
 2. Deploy Base RPC Node and wait for it to sync. For Mainnet it might a day when using snapshots or about a week if syncing from block 0. You can use snapshots provided by the Base team by setting `BASE_RESTORE_FROM_SNAPSHOT="true"` in `.env` file.
 
-   ```bash
-      pwd
-      # Make sure you are in aws-blockchain-node-runners/lib/base
-      npx cdk deploy base-ha-nodes --json --outputs-file ha-nodes-deploy.json
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/base
+npx cdk deploy base-ha-nodes --json --outputs-file ha-nodes-deploy.json
+```
 
 2. Give the new RPC **full** nodes about 5 hours to initialize and then run the following query against the load balancer behind the RPC node created.
 
-   ```bash
-      export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
-      echo $RPC_ALB_URL
-   ```
+```bash
+export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
+echo RPC_ALB_URL=$RPC_ALB_URL
+```
 
    Periodically check [Geth Syncing Status](https://geth.ethereum.org/docs/fundamentals/logs#syncing). Run the following query from within the same VPC and against the private IP of the load balancer fronting your nodes:
 
-   ```bash
-   curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
-   --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
-   ```
+   Copy output from the last `echo` command with `RPC_ALB_URL=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `RPC_ALB_URL=<internal_IP>` into the new CloudShell tab. Then query the API:
+
+``` bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+curl http://$RPC_ALB_URL:8545 -X POST -H "Content-Type: application/json" \
+--data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+```
 
 **NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
 
