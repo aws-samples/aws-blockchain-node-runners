@@ -70,6 +70,8 @@ export class EthCommonStack extends cdk.Stack {
                 resources: [
                     snapshotsBucket.bucketArn,
                     snapshotsBucket.arnForObjects("*"),
+                    `arn:aws:s3:::al2023-repos-${region}-*`,
+                    `arn:aws:s3:::al2023-repos-${region}-*/*`,
                     `arn:aws:s3:::amazonlinux-2-repos-${region}`,
                     `arn:aws:s3:::amazonlinux-2-repos-${region}/*`,
                     `arn:aws:s3:::${asset.s3BucketName}`,
