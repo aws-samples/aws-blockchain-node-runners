@@ -47,11 +47,31 @@ new AlloraStack(app, 'allora-single-node', {
     throughput: process.env.EDGE_DATA_VOL_THROUGHPUT ? parseInt(process.env.EDGE_DATA_VOL_THROUGHPUT) : 700
   },
   alloraWorkerName: process.env.ALLORA_WORKER_NAME || 'aws',
-  alloraTopicId: process.env.ALLORA_TOPIC_ID || '3',
   alloraEnv: process.env.ALLORA_ENV || 'dev',
-  alloraNetworkName: process.env.ALLORA_NETWORK_NAME || 'edgenet',
-  alloraAccountName: process.env.ALLORA_ACCOUNT_NAME || 'secret',
-  alloraAccountMnemonic: process.env.ALLORA_ACCOUNT_MNEMONIC || 'secret',
-  alloraAccountPassphrase: process.env.ALLORA_ACCOUNT_PASSPHRASE || 'secret',
-  alloraNodeRpc: process.env.ALLORA_NODE_RPC || 'https://localhost:26657',
+
+  //Wallet config
+  alloraWalletAddressKeyName: process.env.ALLORA_ACCOUNT_NAME || 'secret',
+  alloraWalletAddressRestoreMnemonic: process.env.ALLORA_ACCOUNT_MNEMONIC || 'secret',
+  alloraWalletHomeDir: process.env.ALLORA_WALLET_HOME_DIR || '',
+  alloraWalletGas: process.env.ALLORA_WALLET_GAS || '1000000',
+  alloraWalletGasAdjustment: process.env.ALLORA_WALLET_GAS_ADJUSTMENT || '1.0',
+  alloraWalletNodeRpc: process.env.ALLORA_WALLET_NODE_RPC || 'https://localhost:26657',
+  alloraWalletMaxRetries: process.env.ALLORA_WALLET_MAX_RETRIES || '1',
+  alloraWalletDelay: process.env.ALLORA_WALLET_DELAY || '1',
+  alloraWalletSubmitTx: process.env.ALLORA_WALLET_SUBMIT_TX || 'false',
+
+  //Worker Properties
+  alloraWorkerTopicId: process.env.ALLORA_WORKER_TOPIC_ID || '1',
+  alloraWorkerInferenceEntrypointName: process.env.ALLORA_WORKER_INFERENCE_ENTRYPOINT_NAME || 'api-worker-reputer',
+  alloraWorkerInferenceEndpoint: process.env.ALLORA_WORKER_INFERENCE_ENDPOINT || 'http://source:8000/inference/{Token}',
+  alloraWorkerLoopSeconds: process.env.ALLORA_WORKER_LOOP_SECONDS || '30',
+  alloraWorkerToken: process.env.ALLORA_WORKER_TOKEN || 'ethereum',
+  
+  //Reputer Properties
+  alloraReputerTopicId: process.env.ALLORA_REPUTER_TOPIC_ID || '1',
+  alloraReputerEntrypointName: process.env.ALLORA_REPUTER_ENTRYPOINT_NAME || 'api-worker-reputer',
+  alloraReputerSourceOfTruthEndpoint: process.env.ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT || 'http://source:8888/truth/{Token}/{BlockHeight}',
+  alloraReputerLoopSeconds: process.env.ALLORA_REPUTER_LOOP_SECONDS || '30',
+  alloraReputerToken: process.env.ALLORA_REPUTER_TOKEN || 'ethereum',
+  alloraReputerMinStake: process.env.ALLORA_REPUTER_MIN_STAKE || '100000',
 });

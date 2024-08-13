@@ -26,13 +26,30 @@ export interface AlloraStackProps extends cdk.StackProps {
   dataVolume: configTypes.DataVolumeConfig;
   env: AlloraStackEnvironment
   alloraWorkerName: string;
-  alloraTopicId: string;
   alloraEnv: string;
-  alloraNetworkName: string;
-  alloraAccountName: string;
-  alloraAccountMnemonic: string;
-  alloraAccountPassphrase: string;
-  alloraNodeRpc: string;
+
+  alloraWalletAddressKeyName: string;
+  alloraWalletAddressRestoreMnemonic: string;
+  alloraWalletHomeDir: string;
+  alloraWalletGas: string,
+  alloraWalletGasAdjustment: string;
+  alloraWalletNodeRpc: string;
+  alloraWalletMaxRetries: string;
+  alloraWalletDelay: string;
+  alloraWalletSubmitTx: string;
+
+  alloraWorkerTopicId: string;
+  alloraWorkerInferenceEntrypointName: string;
+  alloraWorkerInferenceEndpoint: string;
+  alloraWorkerLoopSeconds: string;
+  alloraWorkerToken: string;
+
+  alloraReputerTopicId: string;
+  alloraReputerEntrypointName: string;
+  alloraReputerSourceOfTruthEndpoint: string;
+  alloraReputerLoopSeconds: string;
+  alloraReputerToken: string;
+  alloraReputerMinStake: string;
 }
 
 
@@ -46,13 +63,33 @@ export class AlloraStack extends cdk.Stack {
       resourceNamePrefix, 
       dataVolume, 
       alloraWorkerName, 
-      alloraTopicId, 
-      alloraEnv, 
-      alloraNetworkName,
-      alloraAccountName,
-      alloraAccountMnemonic,
-      alloraAccountPassphrase,
-      alloraNodeRpc
+      alloraEnv,
+
+      //wallet props
+      alloraWalletAddressKeyName,
+      alloraWalletAddressRestoreMnemonic,
+      alloraWalletHomeDir,
+      alloraWalletGas,
+      alloraWalletGasAdjustment,
+      alloraWalletNodeRpc,
+      alloraWalletMaxRetries,
+      alloraWalletDelay,
+      alloraWalletSubmitTx,
+
+      //worker props
+      alloraWorkerTopicId,
+      alloraWorkerInferenceEntrypointName,
+      alloraWorkerInferenceEndpoint,
+      alloraWorkerLoopSeconds,
+      alloraWorkerToken,
+
+      //reputer props
+      alloraReputerTopicId,
+      alloraReputerEntrypointName,
+      alloraReputerSourceOfTruthEndpoint,
+      alloraReputerLoopSeconds,
+      alloraReputerToken,
+      alloraReputerMinStake,
     } = props;
     const { region } = env;
 
@@ -137,13 +174,33 @@ export class AlloraStack extends cdk.Stack {
       _STACK_NAME_: STACK_NAME,
       _STACK_ID_: STACK_ID,
       _ALLORA_WORKER_NAME_: alloraWorkerName,
-      _ALLORA_TOPIC_ID_: alloraTopicId,
       _ALLORA_ENV_: alloraEnv,
-      _ALLORA_NETWORK_NAME_ : alloraNetworkName,
-      _ALLORA_ACCOUNT_NAME_ : alloraAccountName,
-      _ALLORA_ACCOUNT_MNEMONIC_ : alloraAccountMnemonic,
-      _ALLORA_ACCOUNT_PASSPHRASE_ : alloraAccountPassphrase,
-      _ALLORA_NODE_RPC_ : alloraNodeRpc,
+
+      //wallet config
+      _ALLORA_WALLET_ADDRESS_KEY_NAME_ : alloraWalletAddressKeyName,
+      _ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC_ : alloraWalletAddressRestoreMnemonic, 
+      _ALLORA_WALLET_HOME_DIR_: alloraWalletHomeDir,
+      _ALLORA_WALLET_GAS_: alloraWalletGas,
+      _ALLORA_WALLET_GAS_ADJUSTMENT_: alloraWalletGasAdjustment,
+      _ALLORA_WALLET_NODE_RPC_: alloraWalletNodeRpc,
+      _ALLORA_WALLET_MAX_RETRIES_: alloraWalletMaxRetries,
+      _ALLORA_WALLET_DELAY_: alloraWalletDelay,
+      _ALLORA_WALLET_SUBMIT_TX_: alloraWalletSubmitTx,
+
+      //worker config
+      _ALLORA_WORKER_TOPIC_ID: alloraWorkerTopicId,
+      _ALLORA_WORKER_INFERENCE_ENTRYPOINT_NAME_: alloraWorkerInferenceEntrypointName,
+      _ALLORA_WORKER_INFERENCE_ENDPOINT_: alloraWorkerInferenceEndpoint,
+      _ALLORA_WORKER_LOOP_SECONDS_: alloraWorkerLoopSeconds,
+      _ALLORA_WORKER_TOKEN_: alloraWorkerToken,
+
+      //reputer config
+      _ALLORA_REPUTER_TOPIC_ID: alloraReputerTopicId,
+      _ALLORA_REPUTER_ENTRYPOINT_NAME_: alloraReputerEntrypointName,
+      _ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT_: alloraReputerSourceOfTruthEndpoint,
+      _ALLORA_REPUTER_LOOP_SECONDS_: alloraReputerLoopSeconds,
+      _ALLORA_REPUTER_TOKEN_: alloraReputerToken,
+      _ALLORA_REPUTER_MIN_STAKE_: alloraReputerMinStake
     });
 
    // Create UserData for EC2 instance
