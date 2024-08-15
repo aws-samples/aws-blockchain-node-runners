@@ -14,6 +14,11 @@ BSC_HIGHEST_BLOCK=$(echo $((${BSC_HIGHEST_BLOCK_HEX})))
 BSC_SYNC_BLOCK=$(echo $((${BSC_SYNC_BLOCK_HEX})))
 BSC_BLOCKS_BEHIND="$((BSC_HIGHEST_BLOCK-BSC_SYNC_BLOCK))"
 
+# Handle negative values if current block is bigger than highest block
+if [[ "$BSC_BLOCKS_BEHIND" -lt "0" ]]; then
+    BSC_BLOCKS_BEHIND=0
+fi
+
 # Sending data to CloudWatch
 TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
