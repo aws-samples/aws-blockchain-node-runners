@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
-echo "Script is stopping the node..."
-
+export CLIENT=geth
+echo "Script is stopping client $CLIENT"
 # Stop the node
 cd /home/bcuser/node
 /usr/local/bin/docker-compose -f /home/bcuser/node/docker-compose.yml down

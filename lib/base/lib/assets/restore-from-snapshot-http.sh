@@ -46,7 +46,7 @@ sleep 60
 
 echo "Starting snapshot decompression ..."
 
-tar -zxvf  $SNAPSHOT_DIR/$SNAPSHOT_FILE_NAME -C /data 2>&1 | tee unzip.log && echo "decompresed successfully..." || echo "decompression failed..." >> snapshots-decompression.log
+tar --use-compress-program=unzstd -xvf  $SNAPSHOT_DIR/$SNAPSHOT_FILE_NAME -C /data 2>&1 | tee unzip.log && echo "decompresed successfully..." || echo "decompression failed..." >> snapshots-decompression.log
 
 echo "Decompresed snapshot, cleaning up..."
 

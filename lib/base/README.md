@@ -146,7 +146,7 @@ npx cdk deploy base-single-node --json --outputs-file single-node-deploy.json
 After deployment you can watch the progress with CloudWatch dashboard (see [Monitoring](#monitoring)) or check the progress manually. For manual access, use SSM to connect into EC2 first and watch the log like this:
 
 ```bash
-export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
 echo "INSTANCE_ID=" $INSTANCE_ID
 export AWS_REGION=us-east-1
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
@@ -159,7 +159,7 @@ jq -r .result.unsafe_l2.timestamp))/60)) minutes
 3. Test Base RPC API
    Use curl to query from within the node instance:
 ```bash
-export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
 echo "INSTANCE_ID=" $INSTANCE_ID
 export AWS_REGION=us-east-1
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
