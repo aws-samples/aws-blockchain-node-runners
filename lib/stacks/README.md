@@ -192,13 +192,13 @@ npx cdk deploy stacks-ha-nodes --json --outputs-file ha-nodes-deploy.json
 2. Give the new RPC nodes about 90 minutes to initialize and then run the following query against the load balancer behind the RPC node created
 
 ```bash
-export RPC_ABL_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
+export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
 echo RPC_ALB_URL=$RPC_ALB_URL
 ```
 
 ```bash
 # IMPORTANT: Run from CloudShell VPC environment tab
-curl http://$RPC_ABL_URL:20443/v2/info | jq
+curl http://$RPC_ALB_URL:20443/v2/info | jq
 ```
 
 The result should show the status of the blockchain.
