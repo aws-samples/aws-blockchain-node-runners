@@ -142,7 +142,7 @@ echo "NODE_INTERNAL_IP=$NODE_INTERNAL_IP"
 
 ``` bash
 # IMPORTANT: Run from CloudShell VPC environment tab
-curl http://$NODE_INTERNAL_IP:20443/v2/info'
+curl http://$NODE_INTERNAL_IP:20443/v2/info
 ```
 
 You should get a response like this:
@@ -198,7 +198,7 @@ echo RPC_ALB_URL=$RPC_ALB_URL
 
 ```bash
 # IMPORTANT: Run from CloudShell VPC environment tab
-curl http://$RPC_ABL_URL:20443/v2/info' | jq
+curl http://$RPC_ABL_URL:20443/v2/info | jq
 ```
 
 The result should show the status of the blockchain.
