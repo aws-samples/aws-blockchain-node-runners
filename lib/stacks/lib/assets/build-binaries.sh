@@ -52,6 +52,7 @@ SOURCE_DIR="$PWD/$STACKS_REPO-$VERSION_TAG"
 
 # Build relevant source code
 cd "$SOURCE_DIR" || return
+cargo update
 cargo build --features monitoring_prom,slog_json --release --workspace
 
 sudo mkdir -p "$START_DIR/bin"

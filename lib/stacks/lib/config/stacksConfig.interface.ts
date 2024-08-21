@@ -27,6 +27,8 @@ export interface StacksBaseNodeConfig extends StacksNetworkConfig, configTypes.B
     stacksNodeConfiguration: StacksNodeConfiguration;
     stacksSignerSecretArn: string;
     stacksMinerSecretArn: string;
+    buildFromSource: boolean;
+    downloadChainstate: boolean;
     dataVolume: StacksVolumeConfig;
 }
 
