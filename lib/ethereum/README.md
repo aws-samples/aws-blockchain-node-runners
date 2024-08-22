@@ -93,39 +93,26 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 Configure  your setup.
 
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Execution Layer Client</title>
-  <style>
-    nav {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <nav>
-    <select id="execution-clients">
-    <option value="">Select an option</option>
-      <option value="lib/ethereum/geth-noderunners-docs.md">Geth Lighthouse</option>
-      <option value="lib/ethereum/lighthouse-erigon-noderunners-docs.md">Erigon Lighthouse</option>
-      <option value="lib/ethereum/prysm-erigon-noderunners-docs.md">Erigon Prysm</option>
-    </select>
-  </nav>
+**Execution Layer Client Options**
 
-  <script>
-    // Add event listener to the dropdown
-    document.getElementById('my-dropdown').addEventListener('change', function() {
-      var selectedValue = this.value;
-      if (selectedValue) {
-        window.location.href = selectedValue;
-      }
-    });
-  </script>
-</body>
-</html>
+<nav>
+  <select id="execution-clients">
+    <option value="">Select an option</option>
+    <option value="lib/ethereum/geth-noderunners-docs.md">Geth Lighthouse</option>
+    <option value="lib/ethereum/lighthouse-erigon-noderunners-docs.md">Erigon Lighthouse</option>
+    <option value="lib/ethereum/prysm-erigon-noderunners-docs.md">Erigon Prysm</option>
+  </select>
+</nav>
+
+<script>
+  // Add event listener to the dropdown
+  document.getElementById('execution-clients').addEventListener('change', function() {
+    var selectedValue = this.value;
+    if (selectedValue) {
+      window.location.href = selectedValue;
+    }
+  });
+</script>
 
 
 Create your own copy of `.env` file and edit it:
