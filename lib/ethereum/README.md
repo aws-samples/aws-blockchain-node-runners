@@ -99,6 +99,15 @@ Configure  your setup.
 | [Erigon Lighthouse](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/lighthouse-erigon-noderunners-docs.md) |
 | [Erigon Prysm](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/prysm-erigon-noderunners-docs.md) |
 
+**Execution and Consensus Layer Client Options**
+
+| Execution Layer Client | Consensus Layer Client | Documentation Link |
+| --- | --- | --- |
+| Geth | Lighthouse | [Geth Lighthouse Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/geth-noderunners-docs.md) |
+| | Erigon | Lighthouse | [Erigon Lighthouse Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/lighthouse-erigon-noderunners-docs.md) |
+
+
+
 Don’t see a client or client combination you would like supported? Open a GitHub [issue](https://github.com/aws-samples/aws-blockchain-node-runners/issues) or [Pull Request](https://github.com/aws-samples/aws-blockchain-node-runners/pulls), we encourage [contribution](https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md) to Node Runners!
 
 4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
