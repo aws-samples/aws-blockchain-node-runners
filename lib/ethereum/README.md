@@ -104,7 +104,8 @@ Configure  your setup.
 | Execution Layer Client | Consensus Layer Client | Documentation Link |
 | --- | --- | --- |
 | Geth | Lighthouse | [Geth Lighthouse Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/geth-noderunners-docs.md) |
-| | Erigon | Lighthouse | [Erigon Lighthouse Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/lighthouse-erigon-noderunners-docs.md) |
+| Erigon | Lighthouse | [Erigon Lighthouse Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/lighthouse-erigon-noderunners-docs.md) |
+| Erigon | Prysm | [Erigon Prysm Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/prysm-erigon-noderunners-docs.md) |
 
 
 
