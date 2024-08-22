@@ -13,10 +13,8 @@ export interface SingleNodeAMBEthereumConstructCustomProps {
 export class SingleNodeAMBEthereumConstruct extends cdkContructs.Construct {
     public nodeId: string;
     public rpcUrl: string;
-    public wssRpcUrl: string;
     public billingToken: string;
     public rpcUrlWithBillingToken: string;
-    public wssRpcUrlWithBillingToken: string;
 
 
     constructor(scope: cdkContructs.Construct, id: string, props: SingleNodeAMBEthereumConstructCustomProps) {
@@ -65,10 +63,8 @@ export class SingleNodeAMBEthereumConstruct extends cdkContructs.Construct {
 
       this.nodeId = createNode.getResponseField('NodeId');
       this.rpcUrl = `https://${this.nodeId}.t.ethereum.managedblockchain.${REGION}.amazonaws.com`;
-      this.wssRpcUrl = `wss://${this.nodeId}.wss.t.ethereum.managedblockchain.${REGION}.amazonaws.com`;
       this.billingToken=createAccessor.getResponseField('BillingToken');
-      this.rpcUrlWithBillingToken = `${this.rpcUrl}/?billingtoken=${this.billingToken}`;
-      this.wssRpcUrlWithBillingToken = `${this.wssRpcUrl}/?billingtoken=${this.billingToken}`;
+      this.rpcUrlWithBillingToken = `${this.rpcUrl}?billingtoken=${this.billingToken}`;
 
       const deleteAccessor = new cr.AwsCustomResource(this, 'deleteAccessor', {
         onDelete: {

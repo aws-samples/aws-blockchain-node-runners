@@ -13,5 +13,11 @@
     "cdk_synth_single_node": "cdk synth scroll-single-node",
     "cdk_deploy_single_node": "cdk deploy scroll-single-node",
     "cdk_destroy_single_node": "cdk destroy scroll-single-node"
+  },
+  "dependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11"
   }
 }

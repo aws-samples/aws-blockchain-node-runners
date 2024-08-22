@@ -1,8 +1,0 @@
-[Unit]
-Description=cfn-hup daemon
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/cfn-hup
-Restart=always
-[Install]
-WantedBy=multi-user.target
