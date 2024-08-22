@@ -93,12 +93,6 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 Configure  your setup.
 
-| Execution and Consensus Layer Client Options |
-| --- |
-| [Geth Lighthouse](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/geth-noderunners-docs.md) |
-| [Erigon Lighthouse](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/lighthouse-erigon-noderunners-docs.md) |
-| [Erigon Prysm](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/prysm-erigon-noderunners-docs.md) |
-
 **Execution and Consensus Layer Client Options**
 
 | Execution Layer Client | Consensus Layer Client | Documentation Link |
