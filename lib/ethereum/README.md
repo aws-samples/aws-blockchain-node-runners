@@ -95,14 +95,11 @@ Configure  your setup.
 
 **Execution Layer Client Options**
 
-<nav>
-  <select id="execution-clients">
-    <option value="">Select an option</option>
-    <option value="lib/ethereum/geth-noderunners-docs.md">Geth Lighthouse</option>
-    <option value="lib/ethereum/lighthouse-erigon-noderunners-docs.md">Erigon Lighthouse</option>
-    <option value="lib/ethereum/prysm-erigon-noderunners-docs.md">Erigon Prysm</option>
-  </select>
-</nav>
+| Option |
+| --- |
+| [Geth Lighthouse](lib/ethereum/geth-noderunners-docs.md) |
+| [Erigon Lighthouse](lib/ethereum/lighthouse-erigon-noderunners-docs.md) |
+| [Erigon Prysm](lib/ethereum/prysm-erigon-noderunners-docs.md) |
 
 <script>
   // Add event listener to the dropdown
