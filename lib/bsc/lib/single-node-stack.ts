@@ -13,14 +13,7 @@ import * as configTypes from "./config/bscConfig.interface";
 import { BscNodeSecurityGroupConstructs } from "./constructs/bsc-node-security-group"
 import * as nag from "cdk-nag";
 
-export interface BscSingleNodeStackProps extends cdk.StackProps {
-    nodeRole: configTypes.BscNodeRole;
-    instanceType: ec2.InstanceType;
-    instanceCpuType: ec2.AmazonLinuxCpuType;
-    bscNetwork: configTypes.BscNetwork;
-    nodeConfiguration: configTypes.BscNodeConfiguration;
-    snapshotsUrl: string;
-    dataVolume: configTypes.BscDataVolumeConfig;
+export interface BscSingleNodeStackProps extends cdk.StackProps, configTypes.BscBaseNodeConfig {
 }
 
 export class BscSingleNodeStack extends cdk.Stack {
@@ -37,12 +30,12 @@ export class BscSingleNodeStack extends cdk.Stack {
         // Getting our config from initialization properties
         const {
             instanceType,
-            nodeRole,
             instanceCpuType,
             bscNetwork,
             nodeConfiguration,
             snapshotsUrl,
             dataVolume,
+            downloadSnapshot,
         } = props;
 
         // Using default VPC
@@ -100,7 +93,7 @@ export class BscSingleNodeStack extends cdk.Stack {
             _BSC_NODE_TYPE_: nodeConfiguration,
             _DATA_VOLUME_TYPE_: dataVolume.type,
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
-            _NODE_ROLE_: nodeRole,
+            _BSC_DOWNLOAD_SNAPSHOT_: downloadSnapshot.toString(),
 
             _BSC_NETWORK_: bscNetwork,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
