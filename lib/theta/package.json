@@ -1,0 +1,12 @@
+{
+  "name": "aws-blockchain-node-runners-theta",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk",
+    "cdk_deploy_common": "cdk deploy edge-common",
+    "cdk_destroy_common": "cdk destroy edge-common"
+  }
+}

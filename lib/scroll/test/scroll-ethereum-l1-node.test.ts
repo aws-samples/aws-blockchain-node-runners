@@ -39,7 +39,7 @@ describe("ScrollAMBEthereumSingleNodeStack", () => {
            "NodeId"
           ]
          },
-         ".t.ethereum.managedblockchain.us-east-1.amazonaws.com?billingtoken=",
+         ".t.ethereum.managedblockchain.us-east-1.amazonaws.com/?billingtoken=",
          {
           "Fn::GetAtt": [
             Match.anyValue(),
