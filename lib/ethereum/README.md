@@ -93,35 +93,13 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 Configure  your setup.
 
-**Execution Layer Client Options**
-
-| Option |
+| Execution and Consensus Layer Client Options |
 | --- |
-| [Geth Lighthouse](lib/ethereum/geth-noderunners-docs.md) |
-| [Erigon Lighthouse](lib/ethereum/lighthouse-erigon-noderunners-docs.md) |
-| [Erigon Prysm](lib/ethereum/prysm-erigon-noderunners-docs.md) |
+| [Geth Lighthouse](../lib/ethereum/geth-noderunners-docs.md) |
+| [Erigon Lighthouse](../lib/ethereum/lighthouse-erigon-noderunners-docs.md) |
+| [Erigon Prysm](../lib/ethereum/prysm-erigon-noderunners-docs.md) |
 
-<script>
-  // Add event listener to the dropdown
-  document.getElementById('execution-clients').addEventListener('change', function() {
-    var selectedValue = this.value;
-    if (selectedValue) {
-      window.location.href = selectedValue;
-    }
-  });
-</script>
-
-
-Create your own copy of `.env` file and edit it:
-```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/ethereum
-   cd lib/ethereum
-   pwd
-   cp ./sample-configs/.env-geth-lighthouse .env
-   nano .env
-```
-   **NOTE:** You can find more examples inside the `sample-configs` directory.
-
+Don’t see a client or client combination you would like supported? Open a GitHub [issue](https://github.com/aws-samples/aws-blockchain-node-runners/issues) or [Pull Request](https://github.com/aws-samples/aws-blockchain-node-runners/pulls), we encourage [contribution](https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md) to Node Runners!
 
 4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
 
