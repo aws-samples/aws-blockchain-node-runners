@@ -49,14 +49,6 @@ echo "Downloading assets zip file"
 aws s3 cp $ASSETS_S3_PATH ./assets.zip --region $AWS_REGION
 unzip -q assets.zip
 
-echo 'Configuring CloudWatch Agent'
-cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
-
-echo "Starting CloudWatch Agent"
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
--a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
-systemctl status amazon-cloudwatch-agent
-
 aws configure set default.s3.max_concurrent_requests 50
 aws configure set default.s3.multipart_chunksize 256MB
 
@@ -198,6 +190,14 @@ if [[ "$BSC_DOWNLOAD_SNAPSHOT" == "true"  ]]; then
 fi
 
 chown bcuser:bcuser -R /data
+
+echo 'Configuring CloudWatch Agent'
+cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
+
+echo "Starting CloudWatch Agent"
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+-a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
+systemctl status amazon-cloudwatch-agent
 
 sudo systemctl daemon-reload
 sudo systemctl enable --now bsc
