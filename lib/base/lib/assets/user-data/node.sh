@@ -66,14 +66,6 @@ echo "Downloading assets zip file"
 aws s3 cp $ASSETS_S3_PATH ./assets.zip
 unzip -q assets.zip
 
-echo 'Configuring CloudWatch Agent'
-cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
-
-echo "Starting CloudWatch Agent"
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
--a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
-systemctl status amazon-cloudwatch-agent
-
 echo 'Uninstalling AWS CLI v1'
 yum remove awscli
 
@@ -294,6 +286,14 @@ lsblk -d
 
 chown -R bcuser:bcuser /data
 chmod -R 755 /data
+
+echo 'Configuring CloudWatch Agent'
+cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
+
+echo "Starting CloudWatch Agent"
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+-a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
+systemctl restart amazon-cloudwatch-agent
 
 if [ "$RESTORE_FROM_SNAPSHOT" == "false" ]; then
   echo "Skipping restoration from snapshot. Starting node"
