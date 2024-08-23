@@ -18,6 +18,7 @@ export interface BscBaseNodeConfig extends configTypes.BaseNodeConfig {
     nodeConfiguration: BscNodeConfiguration;
     snapshotsUrl: string;
     dataVolume: BscDataVolumeConfig;
+    downloadSnapshot: boolean;
 }
 
 export interface BscHAConfig {

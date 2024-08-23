@@ -11,9 +11,9 @@ echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}" >> /etc/environment
 echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}" >> /etc/environment
 echo "BSC_NODE_TYPE=${_BSC_NODE_TYPE_}" >> /etc/environment
 echo "BSC_NETWORK=${_BSC_NETWORK_}" >> /etc/environment
+echo "BSC_DOWNLOAD_SNAPSHOT=${_BSC_DOWNLOAD_SNAPSHOT_}" >> /etc/environment
 echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
 echo "AUTOSCALING_GROUP_NAME=${_AUTOSCALING_GROUP_NAME_}" >> /etc/environment
-echo "NODE_ROLE=${_NODE_ROLE_}" >> /etc/environment
 source /etc/environment
 
 arch=$(uname -m)
@@ -48,14 +48,6 @@ ln /usr/local/bin/aws /usr/bin/aws
 echo "Downloading assets zip file"
 aws s3 cp $ASSETS_S3_PATH ./assets.zip --region $AWS_REGION
 unzip -q assets.zip
-
-echo 'Configuring CloudWatch Agent'
-cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
-
-echo "Starting CloudWatch Agent"
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
--a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
-systemctl status amazon-cloudwatch-agent
 
 aws configure set default.s3.max_concurrent_requests 50
 aws configure set default.s3.multipart_chunksize 256MB
@@ -94,26 +86,6 @@ fi
 wget $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep $BSC_NETWORK |cut -d\" -f4)
 unzip $BSC_NETWORK.zip
 
-# install aria2 a p2p downloader
-
-if [ "$arch" == "x86_64" ]; then
-  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
-  tar jxvf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
-  cd aria2-1.36.0-linux-gnu-64bit-build1/
-  make install
-else
-  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
-  tar jxvf aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
-  cd aria2-1.36.0-linux-gnu-arm-rbpi-build1/
-  make install
-fi
-
-# finish download and archive
-sudo yum install zstd -y
-sudo yum install pv -y
-zstd --version
-pv --version
-
 echo 'Configuring BSC Node service as a system service'
 # Copy startup script to correct location
 if [[ "$BSC_NODE_TYPE" == "full" ]]; then
@@ -149,12 +121,12 @@ chmod +x /opt/syncchecker.sh
 (crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
 crontab -l
 
-if [ "$NODE_ROLE" == "single-node"  ]; then
+if [[ "$LIFECYCLE_HOOK_NAME" == "none" ]]; then
   echo "Single node. Signaling completion to CloudFormation"
   /opt/aws/bin/cfn-signal --stack $STACK_NAME --resource $RESOURCE_ID --region $AWS_REGION
 fi
 
-if [ "$NODE_ROLE" == "single-node"  ]; then
+if [[ "$LIFECYCLE_HOOK_NAME" == "none" ]]; then
   echo "Single node. Wait for one minute for the volume to be available"
   sleep 60
 fi
@@ -189,14 +161,43 @@ fi
 
 lsblk -d
 
-# download snapshot if network is mainnet
-if [ "$BSC_NETWORK" == "mainnet"  ]; then
-  echo "Downloading BSC snapshot"
-  chmod +x /opt/download-snapshot.sh
-  /opt/download-snapshot.sh
+if [[ "$BSC_DOWNLOAD_SNAPSHOT" == "true"  ]]; then
+  # install aria2 a p2p downloader
+
+  if [ "$arch" == "x86_64" ]; then
+    wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
+    tar jxvf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
+    cd aria2-1.36.0-linux-gnu-64bit-build1/
+    make install
+  else
+    wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
+    tar jxvf aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
+    cd aria2-1.36.0-linux-gnu-arm-rbpi-build1/
+    make install
+  fi
+
+  # finish download and archive
+  sudo yum install zstd -y
+  sudo yum install pv -y
+  zstd --version
+  pv --version
+  # download snapshot if network is mainnet
+  if [[ "$BSC_NETWORK" == "mainnet"  ]]; then
+    echo "Downloading BSC snapshot"
+    chmod +x /opt/download-snapshot.sh
+    /opt/download-snapshot.sh
+  fi
 fi
 
 chown bcuser:bcuser -R /data
+
+echo 'Configuring CloudWatch Agent'
+cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
+
+echo "Starting CloudWatch Agent"
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+-a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
+systemctl status amazon-cloudwatch-agent
 
 sudo systemctl daemon-reload
 sudo systemctl enable --now bsc

@@ -2,7 +2,6 @@ import 'dotenv/config'
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import * as config from "./lib/config/bscConfig";
-import * as configTypes from "./lib/config/bscConfig.interface";
 import { BscCommonStack } from "./lib/common-stack";
 import { BscSingleNodeStack } from "./lib/single-node-stack";
 import { BscHANodesStack } from "./lib/ha-nodes-stack";
@@ -20,29 +19,14 @@ new BscSingleNodeStack(app, "bsc-single-node", {
     stackName: `bsc-single-node-${config.baseNodeConfig.nodeConfiguration}-${config.baseNodeConfig.bscNetwork}`,
 
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    nodeRole: <configTypes.BscNodeRole> "single-node",
-    instanceType: config.baseNodeConfig.instanceType,
-    instanceCpuType: config.baseNodeConfig.instanceCpuType,
-    bscNetwork: config.baseNodeConfig.bscNetwork,
-    nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
-    snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
-    dataVolume: config.baseNodeConfig.dataVolume,
+    ...config.baseNodeConfig
 });
 
 new BscHANodesStack(app, "bsc-ha-nodes", {
     stackName: `bsc-ha-nodes-${config.baseNodeConfig.nodeConfiguration}-${config.baseNodeConfig.bscNetwork}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-    nodeRole: <configTypes.BscNodeRole> "rpc-node",
-    instanceType: config.baseNodeConfig.instanceType,
-    instanceCpuType: config.baseNodeConfig.instanceCpuType,
-    bscNetwork: config.baseNodeConfig.bscNetwork,
-    nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
-    snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
-    dataVolume: config.baseNodeConfig.dataVolume,
-
-    albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
-    heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
-    numberOfNodes: config.haNodeConfig.numberOfNodes
+    ...config.baseNodeConfig,
+    ...config.haNodeConfig
 });
 
 // Security Check
