@@ -1,0 +1,5 @@
+- name: Create Wallet
+  hosts:
+    - indy
+  roles:
+    - create_wallet

@@ -1,0 +1,29 @@
+---
+# tasks file for validator_init
+- name: validator initialize
+  ansible.builtin.shell: init_indy_node {{ inventory_hostname }} {{ ansible_facts['ens6']['ipv4']['address'] }} 9701 {{ INDY_CLIENT_IP_ADDRESS }} 9702 {{ lookup('amazon.aws.aws_secret', '{{ inventory_hostname }}-indy-seed', on_denied='warn')}}
+  become: yes
+  register: init_result
+
+- name: print init result
+  ansible.builtin.debug:
+    msg: "{{ init_result.stdout_lines }}"
+
+- name: Store the DID and Verkey into secrets manager
+  community.aws.secretsmanager_secret:
+    name: "{{ inventory_hostname }}-indy-nodeInfo"
+    state: present
+    secret_type: string
+    json_secret:
+      nodeStackName: "{{ init_result.stdout_lines[0] | regex_findall('Node-stack name is (.*)') | first }}"
+      clientStackName: "{{ init_result.stdout_lines[1] | regex_findall('Client-stack name is (.*)') | first }}"
+      generatingkeysForProvidedSeed: "{{ init_result.stdout_lines[2] | regex_findall('Generating keys for provided seed (.*)') | first }}"
+      publicKeyForClientStack: "{{ init_result.stdout_lines[4] | regex_findall('Public key is (.*)')| first }}"
+      verificationKeyForClientStack: "{{ init_result.stdout_lines[5] | regex_findall('Verification key is (.*)')| first }}"
+      publicKeyForNodeStack: "{{ init_result.stdout_lines[7] | regex_findall('Public key is (.*)') | last }}"
+      verificationKeyForNodeStack: "{{ init_result.stdout_lines[8] | regex_findall('Verification key is (.*)') | last }}"
+      blsPublicKey: "{{ init_result.stdout_lines[9] | regex_findall('BLS Public key is (.*)') | first }}"
+      proofOfPossessionForBlsKey: "{{ init_result.stdout_lines[10] | regex_findall('Proof of possession for BLS key is (.*)') | first }}"
+      nodeIpAddress: "{{ ansible_facts['ens6']['ipv4']['address'] }}"
+    overwrite: true
+  delegate_to: localhost

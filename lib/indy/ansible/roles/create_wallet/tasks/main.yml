@@ -1,0 +1,2 @@
+- ansible.builtin.import_tasks: install_indy_cli.yml
+- ansible.builtin.import_tasks: wallet_create.yml

@@ -1,0 +1,5 @@
+- name: Create Genesis FIles
+  hosts:
+    - trustee1  # Run on a representative device
+  roles:
+    - create_genesis_files

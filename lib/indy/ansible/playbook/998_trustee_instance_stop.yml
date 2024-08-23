@@ -1,0 +1,12 @@
+- name: Stop the trustee instances
+  hosts:
+    - localhost
+  gather_facts: false
+  tasks:
+    - name: Stop the trustee instances
+      amazon.aws.ec2_instance:
+        instance_ids: "{{ hostvars[item]['ansible_aws_ssm_instance_id'] }}"
+        # region: '{{ region }}'
+        state: stopped
+        wait: True
+      loop: "{{ groups['trustee'] }}"
