@@ -108,7 +108,7 @@ Base node needs a URL to a Full Ethereum Node to validate blocks it receives. Yo
 # Make sure you are in aws-blockchain-node-runners/lib/base
 cd lib/base
 pwd
-cp ./sample-configs/.env-sample-full .env
+cp ./sample-configs/.env-sample-full-sepolia .env
 nano .env
 ```
 
