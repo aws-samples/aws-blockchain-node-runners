@@ -95,6 +95,12 @@ Configure  your setup.
 
 **Execution and Consensus Layer Client Options**
 
+<details>
+
+<summary>Geth Lighthouse</summary>
+
+<details>
+
 | Execution Layer Client | Consensus Layer Client | Documentation Link |
 | --- | --- | --- |
 | Geth | Lighthouse | [Geth Lighthouse Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/geth-noderunners-docs.md) |
