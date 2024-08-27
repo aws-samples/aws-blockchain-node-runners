@@ -99,6 +99,8 @@ Configure  your setup.
 
 <summary>Geth Lighthouse</summary>
 
+**Configure your Node Runners Ethereum - Geth Lighthouse**
+
 To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Geth / Lighthouse node deployment is as follows, which uses a sample config from the repository:
 ```bash
 # Make sure you are in aws-blockchain-node-runners/lib/ethereum
@@ -111,11 +113,43 @@ nano .env
 
 </details>
 
-| Execution Layer Client | Consensus Layer Client | Documentation Link |
-| --- | --- | --- |
-| Geth | Lighthouse | [Geth Lighthouse Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/geth-noderunners-docs.md) |
-| Erigon | Lighthouse | [Erigon Lighthouse Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/lighthouse-erigon-noderunners-docs.md) |
-| Erigon | Prysm | [Erigon Prysm Documentation](https://github.com/varnarmat/aws-blockchain-node-runners/blob/website/lib/ethereum/prysm-erigon-noderunners-docs.md) |
+<details>
+
+<summary>Erigon Lighthouse</summary>
+
+**Configure your Node Runners Ethereum - Erigon Lighthouse**
+
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Erigon / Prysm node deployment is as follows, which uses a sample config from the repository:
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/ethereum
+cd lib/ethereum
+pwd
+cp ./sample-configs/.env-erigon-lighthouse .env
+nano .env
+```
+> **NOTE:** *You can find more examples inside the `sample-configs` directory, which illustrate other Ethereum client combinations.*
+
+</details>
+
+<details>
+
+<summary>Erigon Prysm</summary>
+
+**Configure your Node Runners Ethereum - Erigon Prysm**
+
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Erigon / Prysm node deployment is as follows, which uses a sample config from the repository:
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/ethereum
+cd lib/ethereum
+pwd
+cp ./sample-configs/.env-erigon-prysm .env
+nano .env
+```
+> **NOTE:** *You can find more examples inside the `sample-configs` directory, which illustrate other Ethereum client combinations.*
+
+</details>
+
+
 
 
 
