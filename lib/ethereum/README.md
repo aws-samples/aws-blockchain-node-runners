@@ -98,6 +98,7 @@ Configure  your setup.
 <details>
 
 <summary>Geth Lighthouse</summary>
+<br>
 
 ### Configure your Node Runners Ethereum - Geth Lighthouse
 
