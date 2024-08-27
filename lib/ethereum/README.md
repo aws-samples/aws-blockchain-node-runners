@@ -93,13 +93,13 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 Configure  your setup.
 
-**Execution and Consensus Layer Client Options**
+### Execution and Consensus Layer Client Options
 
 <details>
 
 <summary>Geth Lighthouse</summary>
 
-**Configure your Node Runners Ethereum - Geth Lighthouse**
+### Configure your Node Runners Ethereum - Geth Lighthouse
 
 To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Geth / Lighthouse node deployment is as follows, which uses a sample config from the repository:
 ```bash
@@ -117,7 +117,7 @@ nano .env
 
 <summary>Erigon Lighthouse</summary>
 
-**Configure your Node Runners Ethereum - Erigon Lighthouse**
+### Configure your Node Runners Ethereum - Erigon Lighthouse
 
 To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Erigon / Prysm node deployment is as follows, which uses a sample config from the repository:
 ```bash
@@ -135,7 +135,7 @@ nano .env
 
 <summary>Erigon Prysm</summary>
 
-**Configure your Node Runners Ethereum - Erigon Prysm**
+### Configure your Node Runners Ethereum - Erigon Prysm
 
 To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Erigon / Prysm node deployment is as follows, which uses a sample config from the repository:
 ```bash
