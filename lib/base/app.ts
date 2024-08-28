@@ -2,6 +2,7 @@
 import 'dotenv/config'
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
+import * as nag from "cdk-nag";
 import * as config from "./lib/config/baseConfig";
 import {BaseCommonStack} from "./lib/common-stack";
 import {BaseSingleNodeStack} from "./lib/single-node-stack";
@@ -48,3 +49,12 @@ new BaseHANodesStack(app, "base-ha-nodes", {
   heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
   numberOfNodes: config.haNodeConfig.numberOfNodes
 });
+
+// Security Check
+cdk.Aspects.of(app).add(
+  new nag.AwsSolutionsChecks({
+      verbose: false,
+      reports: true,
+      logIgnores: false,
+  })
+);

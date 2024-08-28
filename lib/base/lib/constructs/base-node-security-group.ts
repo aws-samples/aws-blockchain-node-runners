@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as cdkConstructs from 'constructs';
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as nag from "cdk-nag";
 
 export interface BaseNodeSecurityGroupConstructProps {
     vpc: cdk.aws_ec2.IVpc;
@@ -35,5 +36,20 @@ export interface BaseNodeSecurityGroupConstructProps {
       sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(13001, 65535), "All outbound connections except 13000");
 
       this.securityGroup = sg
+
+      /**
+      * cdk-nag suppressions
+      */
+
+      nag.NagSuppressions.addResourceSuppressions(
+        this,
+        [
+            {
+                id: "AwsSolutions-EC23",
+                reason: "Ethereum requires wildcard inbound for specific ports",
+            },
+        ],
+        true
+      );
     }
   }
