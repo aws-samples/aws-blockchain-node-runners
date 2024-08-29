@@ -89,9 +89,20 @@ aws ec2 create-default-vpc
 
 > **NOTE:** *The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`*
 
-3. Configure  your setup
+3. With the [Node Runners blueprints for Ethereum](https://github.com/aws-samples/aws-blockchain-node-runners/tree/main/lib/ethereum), you can deploy both single Ethereum nodes and multi-node high-availability configurations on AWS. Furthermore, Node Runners is designed to support client diversity, with configurations available for a variety of client combinations for the Execution Layer (EL) and Consensus Layer (CL).
 
-Create your own copy of `.env` file and edit it:
+Configure  your setup.
+
+### Execution and Consensus Layer Client Options
+
+<details>
+
+<summary>Geth Lighthouse</summary>
+<br/>
+
+**Configure your Node Runners Ethereum - Geth Lighthouse**
+
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Geth / Lighthouse node deployment is as follows, which uses a sample config from the repository:
 ```bash
 # Make sure you are in aws-blockchain-node-runners/lib/ethereum
 cd lib/ethereum
@@ -99,8 +110,88 @@ pwd
 cp ./sample-configs/.env-geth-lighthouse .env
 nano .env
 ```
-> **NOTE:** *You can find more examples inside the `sample-configs` directory.*
+> **NOTE:** *You can find more examples inside the `sample-configs` directory, which illustrate other Ethereum client combinations.*
 
+</details>
+
+<details>
+
+<summary>Erigon Lighthouse</summary>
+<br/>
+
+**Configure your Node Runners Ethereum - Erigon Lighthouse**
+
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Erigon / Prysm node deployment is as follows, which uses a sample config from the repository:
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/ethereum
+cd lib/ethereum
+pwd
+cp ./sample-configs/.env-erigon-lighthouse .env
+nano .env
+```
+> **NOTE:** *You can find more examples inside the `sample-configs` directory, which illustrate other Ethereum client combinations.*
+
+</details>
+
+<details>
+
+<summary>Erigon Prysm</summary>
+<br/>
+
+**Configure your Node Runners Ethereum - Erigon Prysm**
+
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Erigon / Prysm node deployment is as follows, which uses a sample config from the repository:
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/ethereum
+cd lib/ethereum
+pwd
+cp ./sample-configs/.env-erigon-prysm .env
+nano .env
+```
+> **NOTE:** *You can find more examples inside the `sample-configs` directory, which illustrate other Ethereum client combinations.*
+
+</details>
+
+
+<details>
+
+<summary>Nethermind Teku</summary>
+<br/>
+
+**Configure your Node Runners Ethereum - Nethermind Teku**
+
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Geth / Lighthouse node deployment is as follows, which uses a sample config from the repository:
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/ethereum
+cd lib/ethereum
+pwd
+cp ./sample-configs/.env-nethermind-teku .env
+nano .env
+```
+> **NOTE:** *You can find more examples inside the `sample-configs` directory, which illustrate other Ethereum client combinations.*
+
+</details>
+
+<details>
+
+<summary>Besu Teku</summary>
+<br/>
+
+**Configure your Node Runners Ethereum - Besu Teku**
+
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Geth / Lighthouse node deployment is as follows, which uses a sample config from the repository:
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/ethereum
+cd lib/ethereum
+pwd
+cp ./sample-configs/.env-besu-teku .env
+nano .env
+```
+> **NOTE:** *You can find more examples inside the `sample-configs` directory, which illustrate other Ethereum client combinations.*
+
+</details>
+
+Don’t see a client or client combination you would like supported? Open a GitHub [issue](https://github.com/aws-samples/aws-blockchain-node-runners/issues) or [Pull Request](https://github.com/aws-samples/aws-blockchain-node-runners/pulls), we encourage [contribution](https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md) to Node Runners!
 
 4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
 
@@ -126,7 +217,7 @@ npx cdk deploy eth-single-node --json --outputs-file single-node-deploy.json
    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
    - Open `Dashboards` and select `eth-sync-node-<your-eth-client-combination>` from the list of dashboards.
 
-4. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Tun the following query against the private IP of the single RPC node you deployed:
+4. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Turn the following query against the private IP of the single RPC node you deployed:
 
 ```bash
 INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
@@ -211,8 +302,8 @@ The result should be like this (the actual balance might change):
 
 ### Clearing up and undeploying everything
 
-Destroy RPC Nodes, Sync Nodes and Comon components
-
+1. Destroy RPC Nodes, Sync Nodes and Common components
+              
 ```bash
 # Setting the AWS account id and region in case local .env file is lost
  export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
