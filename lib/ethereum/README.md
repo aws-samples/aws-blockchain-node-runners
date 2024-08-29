@@ -98,7 +98,7 @@ Configure  your setup.
 <details>
 
 <summary>Geth Lighthouse</summary>
-<br>
+<br/>
 
 **Configure your Node Runners Ethereum - Geth Lighthouse**
 
@@ -117,7 +117,7 @@ nano .env
 <details>
 
 <summary>Erigon Lighthouse</summary>
-<br>
+<br/>
 
 **Configure your Node Runners Ethereum - Erigon Lighthouse**
 
@@ -136,7 +136,7 @@ nano .env
 <details>
 
 <summary>Erigon Prysm</summary>
-<br>
+<br/>
 
 **Configure your Node Runners Ethereum - Erigon Prysm**
 
@@ -156,7 +156,7 @@ nano .env
 <details>
 
 <summary>Nethermind Teku</summary>
-<br>
+<br/>
 
 **Configure your Node Runners Ethereum - Nethermind Teku**
 
@@ -175,7 +175,7 @@ nano .env
 <details>
 
 <summary>Besu Teku</summary>
-<br>
+<br/>
 
 **Configure your Node Runners Ethereum - Besu Teku**
 
