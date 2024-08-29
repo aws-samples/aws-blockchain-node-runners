@@ -25,9 +25,10 @@ export const baseConfig: configTypes.BscBaseConfig = {
 export const baseNodeConfig: configTypes.BscBaseNodeConfig = {
     instanceType: new ec2.InstanceType(process.env.BSC_INSTANCE_TYPE ? process.env.BSC_INSTANCE_TYPE : "m7g.4xlarge"),
     instanceCpuType: process.env.BSC_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64 ,
-    bscNetwork: <configTypes.BscNetwork>process.env.BSC_CLUSTER || "mainnet",
+    bscNetwork: <configTypes.BscNetwork>process.env.BSC_NETWORK || "mainnet",
     nodeConfiguration: <configTypes.BscNodeConfiguration>process.env.BSC_NODE_CONFIGURATION || "full",
     snapshotsUrl: process.env.BSC_SNAPSHOTS_URL || constants.NoneValue,
+    downloadSnapshot: process.env.BSC_DOWNLOAD_SNAPSHOT?.toLowerCase() === "true" ? true : false,
     dataVolume: {
         sizeGiB: process.env.BSC_DATA_VOL_SIZE ? parseInt(process.env.BSC_DATA_VOL_SIZE) : 4000,
         type: parseDataVolumeType(process.env.BSC_DATA_VOL_TYPE?.toLowerCase() ? process.env.BSC_DATA_VOL_TYPE?.toLowerCase() : "gp3"),

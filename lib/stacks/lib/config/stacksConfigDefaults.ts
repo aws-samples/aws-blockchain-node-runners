@@ -63,6 +63,8 @@ export function stacksNodeConfigDefaults(
         stacksVersion: "latest",
         stacksSignerSecretArn: "none",
         stacksMinerSecretArn: "none",
+        buildFromSource: false,
+        downloadChainstate: true,
         dataVolume: defaultDataVolume,
         // High availability configs defaults.
         albHealthCheckGracePeriodMin: 10,

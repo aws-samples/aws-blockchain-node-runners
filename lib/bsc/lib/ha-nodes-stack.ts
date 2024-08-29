@@ -12,17 +12,7 @@ import * as constants from "../../constructs/constants";
 import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb";
 import * as nag from "cdk-nag";
 
-export interface BscHANodesStackProps extends cdk.StackProps {
-    nodeRole: configTypes.BscNodeRole;
-    instanceType: ec2.InstanceType;
-    instanceCpuType: ec2.AmazonLinuxCpuType;
-    bscNetwork: configTypes.BscNetwork;
-    nodeConfiguration: configTypes.BscNodeConfiguration;
-    snapshotsUrl: string;
-    dataVolume: configTypes.BscDataVolumeConfig;
-    albHealthCheckGracePeriodMin: number;
-    heartBeatDelayMin: number;
-    numberOfNodes: number;
+export interface BscHANodesStackProps extends cdk.StackProps, configTypes.BscBaseNodeConfig, configTypes.BscHAConfig {
 }
 
 export class BscHANodesStack extends cdk.Stack {
@@ -35,13 +25,13 @@ export class BscHANodesStack extends cdk.Stack {
         const autoScalingGroupName = STACK_NAME;
 
         const {
-            nodeRole,
             instanceType,
             instanceCpuType,
             bscNetwork,
             nodeConfiguration,
             snapshotsUrl,
             dataVolume,
+            downloadSnapshot,
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
             numberOfNodes
@@ -79,7 +69,7 @@ export class BscHANodesStack extends cdk.Stack {
             _BSC_NODE_TYPE_: nodeConfiguration,
             _DATA_VOLUME_TYPE_: dataVolume.type,
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
-            _NODE_ROLE_: nodeRole,
+            _BSC_DOWNLOAD_SNAPSHOT_: downloadSnapshot.toString(),
 
             _BSC_NETWORK_: bscNetwork,
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
