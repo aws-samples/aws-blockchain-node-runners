@@ -119,11 +119,8 @@ if [ -f /swapfile ]; then
 fi
 
 # Create a new swap file
-total_mem=$(grep MemTotal /proc/meminfo | awk '{print $2}')
-# Calculate the swap size
-swap_size=$((total_mem / 3))
-# Convert the swap size to MB
-swap_size_mb=$((swap_size / 1024))
+# Set swap size to fixed 5 GB
+swap_size_mb=5120
 unit=M
 fallocate -l $swap_size_mb$unit /swapfile
 chmod 600 /swapfile
