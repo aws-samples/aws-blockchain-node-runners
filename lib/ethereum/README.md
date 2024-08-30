@@ -121,7 +121,7 @@ nano .env
 
 **Configure your Node Runners Ethereum - Erigon Lighthouse**
 
-To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Erigon / Prysm node deployment is as follows, which uses a sample config from the repository:
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Erigon / Lighthouse node deployment is as follows, which uses a sample config from the repository:
 ```bash
 # Make sure you are in aws-blockchain-node-runners/lib/ethereum
 cd lib/ethereum
@@ -160,7 +160,7 @@ nano .env
 
 **Configure your Node Runners Ethereum - Nethermind Teku**
 
-To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Geth / Lighthouse node deployment is as follows, which uses a sample config from the repository:
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Nethermind / Teku node deployment is as follows, which uses a sample config from the repository:
 ```bash
 # Make sure you are in aws-blockchain-node-runners/lib/ethereum
 cd lib/ethereum
@@ -179,7 +179,7 @@ nano .env
 
 **Configure your Node Runners Ethereum - Besu Teku**
 
-To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Geth / Lighthouse node deployment is as follows, which uses a sample config from the repository:
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Besu / Teku node deployment is as follows, which uses a sample config from the repository:
 ```bash
 # Make sure you are in aws-blockchain-node-runners/lib/ethereum
 cd lib/ethereum
