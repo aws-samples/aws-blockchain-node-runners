@@ -27,6 +27,7 @@ export interface AlloraStackProps extends cdk.StackProps {
   env: AlloraStackEnvironment
   alloraWorkerName: string;
   alloraEnv: string;
+  modelRepo: string;
 
   alloraWalletAddressKeyName: string;
   alloraWalletAddressRestoreMnemonic: string;
@@ -64,6 +65,7 @@ export class AlloraStack extends cdk.Stack {
       dataVolume, 
       alloraWorkerName, 
       alloraEnv,
+      modelRepo,
 
       //wallet props
       alloraWalletAddressKeyName,
@@ -175,6 +177,7 @@ export class AlloraStack extends cdk.Stack {
       _STACK_ID_: STACK_ID,
       _ALLORA_WORKER_NAME_: alloraWorkerName,
       _ALLORA_ENV_: alloraEnv,
+      _MODEL_REPO_: modelRepo,
 
       //wallet config
       _ALLORA_WALLET_ADDRESS_KEY_NAME_ : alloraWalletAddressKeyName,
@@ -188,14 +191,14 @@ export class AlloraStack extends cdk.Stack {
       _ALLORA_WALLET_SUBMIT_TX_: alloraWalletSubmitTx,
 
       //worker config
-      _ALLORA_WORKER_TOPIC_ID: alloraWorkerTopicId,
+      _ALLORA_WORKER_TOPIC_ID_: alloraWorkerTopicId,
       _ALLORA_WORKER_INFERENCE_ENTRYPOINT_NAME_: alloraWorkerInferenceEntrypointName,
       _ALLORA_WORKER_INFERENCE_ENDPOINT_: alloraWorkerInferenceEndpoint,
       _ALLORA_WORKER_LOOP_SECONDS_: alloraWorkerLoopSeconds,
       _ALLORA_WORKER_TOKEN_: alloraWorkerToken,
 
       //reputer config
-      _ALLORA_REPUTER_TOPIC_ID: alloraReputerTopicId,
+      _ALLORA_REPUTER_TOPIC_ID_: alloraReputerTopicId,
       _ALLORA_REPUTER_ENTRYPOINT_NAME_: alloraReputerEntrypointName,
       _ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT_: alloraReputerSourceOfTruthEndpoint,
       _ALLORA_REPUTER_LOOP_SECONDS_: alloraReputerLoopSeconds,

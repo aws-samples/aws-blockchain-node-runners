@@ -11,6 +11,7 @@ echo "STACK_ID=${_STACK_ID_}" >> /etc/environment
 
 echo "ALLORA_WORKER_NAME=${_ALLORA_WORKER_NAME_}" >> /etc/environment
 echo "ALLORA_ENV=${_ALLORA_ENV_}" >> /etc/environment
+echo "MODEL_REPO=${_MODEL_REPO_}" >> /etc/environment
 
 
 echo "ALLORA_WALLET_ADDRESS_KEY_NAME=${_ALLORA_WALLET_ADDRESS_KEY_NAME_}" >> /etc/environment
@@ -112,6 +113,14 @@ sed -i "s/_ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT_/$ALLORA_REPUTER_SOURCE_OF_TR
 sed -i "s/_ALLORA_REPUTER_LOOP_SECONDS_/$ALLORA_REPUTER_LOOP_SECONDS/" config.json
 sed -i "s/_ALLORA_REPUTER_TOKEN_/$ALLORA_REPUTER_TOKEN/" config.json
 sed -i "s/_ALLORA_REPUTER_MIN_STAKE_/$ALLORA_REPUTER_MIN_STAKE/" config.json
+
+#pull in model repo
+echo 'Pulling in the model repo '
+echo $MODEL_REPO
+cd ~/node-repo/adapter/api
+rm -rf source
+git clone $MODEL_REPO source
+cd ~/node-repo
 
 docker-compose up --build 
 

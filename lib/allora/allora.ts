@@ -48,6 +48,7 @@ new AlloraStack(app, 'allora-single-node', {
   },
   alloraWorkerName: process.env.ALLORA_WORKER_NAME || 'aws',
   alloraEnv: process.env.ALLORA_ENV || 'dev',
+  modelRepo: process.env.MODEL_REPO || 'https://github.com/allora-network/basic-coin-prediction-node',
 
   //Wallet config
   alloraWalletAddressKeyName: process.env.ALLORA_ACCOUNT_NAME || 'secret',
