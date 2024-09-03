@@ -20,7 +20,7 @@ while (( SNAPSHOT_DOWNLOAD_STATUS != 0 ))
 do
         PIDS=$(pgrep aria2c)
         if [ -z "$PIDS" ]; then
-            aria2c $SNAPSHOT_URL -d $SNAPSHOT_DIR -o $SNAPSHOT_FILE_NAME -l /data/download.log --log-level=notice --allow-overwrite=true --allow-piece-length-change=true
+            aria2c --max-connection-per-server=1 $SNAPSHOT_URL -d $SNAPSHOT_DIR -o $SNAPSHOT_FILE_NAME -l /data/download.log --log-level=notice --allow-overwrite=true --allow-piece-length-change=true
         fi
         SNAPSHOT_DOWNLOAD_STATUS=$?
         pid=$(pidof aria2c)
