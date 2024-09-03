@@ -120,8 +120,16 @@ echo $MODEL_REPO
 cd ~/node-repo/adapter/api
 rm -rf source
 git clone $MODEL_REPO source
-cd ~/node-repo
 
+#build node
+echo 'Building inner node'
+cd source
+docker-compose up --build 
+
+
+#build main worker
+echo 'building main worker'
+cd ~/node-repo
 docker-compose up --build 
 
 echo "----------------------------------------------"

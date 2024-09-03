@@ -128,9 +128,12 @@ export class AlloraStack extends cdk.Stack {
     const securityGroup = new ec2.SecurityGroup(this, `${resourceNamePrefix}SecurityGroup`, {
       vpc,
       allowAllOutbound: true,
-      description: 'Allow inbound TCP 9010',
+      description: 'Allow inbound TCP 9010, 26657, 8000, 8888',
     });
     securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9010), 'Allow inbound TCP 9010');
+    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(26657), 'Allow inbound TCP 26657 (wallet rpc)');
+    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(8000), 'Allow inbound TCP 8000 (inference)');
+    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(8888), 'Allow inbound TCP 8888 (reputer)');
 
      
 
