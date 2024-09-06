@@ -87,7 +87,7 @@ cd node-repo
 git checkout $ALLORA_ENV
 
 cp config.cdk.json.template config.json
-
+cd 
 #wallet config str replace
 sed -i "s/_ALLORA_WALLET_ADDRESS_KEY_NAME_/$ALLORA_WALLET_ADDRESS_KEY_NAME/" config.json
 sed -i "s/_ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC_/$ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC/" config.json
@@ -124,12 +124,16 @@ git clone $MODEL_REPO source
 #build node
 echo 'Building inner node'
 cd source
-docker-compose up --build 
+
+cp ~/node-repo/config.json config.json
+cp .env.example .env
 
 
 #build main worker
 echo 'building main worker'
 cd ~/node-repo
+chmod +x init.config
+./init.config
 docker-compose up --build 
 
 echo "----------------------------------------------"
