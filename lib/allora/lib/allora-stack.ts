@@ -169,8 +169,6 @@ export class AlloraStack extends cdk.Stack {
 
     const instance = singleNode.instance;
 
-    const keyPair = new ec2.KeyPair(this, `${resourceNamePrefix}KeyPair`)
-
     // Read user data script and inject variables
     const userData = fs.readFileSync(path.join(__dirname, 'assets', 'user-data', 'node.sh')).toString();
     const modifiedUserData = cdk.Fn.sub(userData, {

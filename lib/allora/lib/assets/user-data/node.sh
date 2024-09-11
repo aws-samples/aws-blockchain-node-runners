@@ -140,3 +140,7 @@ docker-compose up --build
 echo "----------------------------------------------"
 echo "[user-data] Allora user-data script successful"
 echo "----------------------------------------------"
+
+
+#ping the server for an inference response to $ALLORA_WORKER_INFERENCE_ENDPOINT/inference/$ALLORA_WORKER_TOKEN
+curl "$ALLORA_WORKER_INFERENCE_ENDPOINT/inference/$ALLORA_WORKER_TOKEN"
