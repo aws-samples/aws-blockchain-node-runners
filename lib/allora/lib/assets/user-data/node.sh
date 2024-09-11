@@ -12,13 +12,14 @@ echo "STACK_ID=${_STACK_ID_}" >> /etc/environment
 echo "ALLORA_WORKER_NAME=${_ALLORA_WORKER_NAME_}" >> /etc/environment
 echo "ALLORA_ENV=${_ALLORA_ENV_}" >> /etc/environment
 echo "MODEL_REPO=${_MODEL_REPO_}" >> /etc/environment
+echo -e "MODEL_ENV_VARS='${_MODEL_ENV_VARS_}'" >> /etc/environment
 
 
 echo "ALLORA_WALLET_ADDRESS_KEY_NAME=${_ALLORA_WALLET_ADDRESS_KEY_NAME_}" >> /etc/environment
 echo "ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC=${_ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC_}" >> /etc/environment
 echo "ALLORA_WALLET_HOME_DIR=${_ALLORA_WALLET_HOME_DIR_}" >> /etc/environment
-echo "ALLORA_WALLET_GAS=${_ALLORA_WALLET_GAS_}" >> /etc/environment
 echo "ALLORA_WALLET_GAS_ADJUSTMENT=${_ALLORA_WALLET_GAS_ADJUSTMENT_}" >> /etc/environment
+echo "ALLORA_WALLET_GAS=${_ALLORA_WALLET_GAS_}" >> /etc/environment
 echo "ALLORA_WALLET_NODE_RPC=${_ALLORA_WALLET_NODE_RPC_}" >> /etc/environment
 echo "ALLORA_WALLET_MAX_RETRIES=${_ALLORA_WALLET_MAX_RETRIES_}" >> /etc/environment
 echo "ALLORA_WALLET_DELAY=${_ALLORA_WALLET_DELAY_}" >> /etc/environment
@@ -92,9 +93,9 @@ cd
 sed -i "s/_ALLORA_WALLET_ADDRESS_KEY_NAME_/$ALLORA_WALLET_ADDRESS_KEY_NAME/" config.json
 sed -i "s/_ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC_/$ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC/" config.json
 sed -i "s/_ALLORA_WALLET_HOME_DIR_/$ALLORA_WALLET_HOME_DIR/" config.json
+sed -i "s/_ALLORA_WALLET_GAS_ADJUSTMENT_/$ALLORA_WALLET_GAS_ADJUSTMENT/" config.json #must go before
 sed -i "s/_ALLORA_WALLET_GAS_/$ALLORA_WALLET_GAS/" config.json
-sed -i "s/_ALLORA_WALLET_GAS_ADJUSTMENT_/$ALLORA_WALLET_GAS_ADJUSTMENT/" config.json
-sed -i "s/_ALLORA_WALLET_NODE_RPC_/$ALLORA_WALLET_NODE_RPC/" config.json
+sed -i "s#_ALLORA_WALLET_NODE_RPC_#$ALLORA_WALLET_NODE_RPC#" config.json
 sed -i "s/_ALLORA_WALLET_MAX_RETRIES_/$ALLORA_WALLET_MAX_RETRIES/" config.json
 sed -i "s/_ALLORA_WALLET_DELAY_/$ALLORA_WALLET_DELAY/" config.json
 sed -i "s/_ALLORA_WALLET_SUBMIT_TX_/$ALLORA_WALLET_SUBMIT_TX/" config.json
@@ -102,14 +103,14 @@ sed -i "s/_ALLORA_WALLET_SUBMIT_TX_/$ALLORA_WALLET_SUBMIT_TX/" config.json
 #worker config str replace
 sed -i "s/_ALLORA_WORKER_TOPIC_ID_/$ALLORA_WORKER_TOPIC_ID/" config.json
 sed -i "s/_ALLORA_WORKER_INFERENCE_ENTRYPOINT_NAME_/$ALLORA_WORKER_INFERENCE_ENTRYPOINT_NAME/" config.json
-sed -i "s/_ALLORA_WORKER_INFERENCE_ENDPOINT_/$ALLORA_WORKER_INFERENCE_ENDPOINT/" config.json
+sed -i "s#_ALLORA_WORKER_INFERENCE_ENDPOINT_#$ALLORA_WORKER_INFERENCE_ENDPOINT#" config.json
 sed -i "s/_ALLORA_WORKER_LOOP_SECONDS_/$ALLORA_WORKER_LOOP_SECONDS/" config.json
 sed -i "s/_ALLORA_WORKER_TOKEN_/$ALLORA_WORKER_TOKEN/" config.json
 
 #reputer config str replace
 sed -i "s/_ALLORA_REPUTER_TOPIC_ID_/$ALLORA_REPUTER_TOPIC_ID/" config.json
 sed -i "s/_ALLORA_REPUTER_ENTRYPOINT_NAME_/$ALLORA_REPUTER_ENTRYPOINT_NAME/" config.json
-sed -i "s/_ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT_/$ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT/" config.json
+sed -i "s#_ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT_#$ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT#" config.json
 sed -i "s/_ALLORA_REPUTER_LOOP_SECONDS_/$ALLORA_REPUTER_LOOP_SECONDS/" config.json
 sed -i "s/_ALLORA_REPUTER_TOKEN_/$ALLORA_REPUTER_TOKEN/" config.json
 sed -i "s/_ALLORA_REPUTER_MIN_STAKE_/$ALLORA_REPUTER_MIN_STAKE/" config.json
@@ -126,12 +127,12 @@ echo 'Building inner node'
 cd source
 
 cp ~/node-repo/config.json config.json
-cp .env.example .env
+
+echo -e "$MODEL_ENV_VARS" >> .env
 
 
-#build main worker
-echo 'building main worker'
-cd ~/node-repo
+#build basic worker
+echo 'building basic worker'
 chmod +x init.config
 ./init.config
 docker-compose up --build 

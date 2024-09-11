@@ -49,10 +49,11 @@ new AlloraStack(app, 'allora-single-node', {
   alloraWorkerName: process.env.ALLORA_WORKER_NAME || 'aws',
   alloraEnv: process.env.ALLORA_ENV || 'dev',
   modelRepo: process.env.MODEL_REPO || 'https://github.com/allora-network/basic-coin-prediction-node',
+  modelEnvVars: process.env.MODEL_ENV_VARS || '',
 
   //Wallet config
-  alloraWalletAddressKeyName: process.env.ALLORA_ACCOUNT_NAME || 'secret',
-  alloraWalletAddressRestoreMnemonic: process.env.ALLORA_ACCOUNT_MNEMONIC || 'secret',
+  alloraWalletAddressKeyName: process.env.ALLORA_WALLET_ADDRESS_KEY_NAME || 'secret',
+  alloraWalletAddressRestoreMnemonic: process.env.ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC || 'secret',
   alloraWalletHomeDir: process.env.ALLORA_WALLET_HOME_DIR || '',
   alloraWalletGas: process.env.ALLORA_WALLET_GAS || '1000000',
   alloraWalletGasAdjustment: process.env.ALLORA_WALLET_GAS_ADJUSTMENT || '1.0',

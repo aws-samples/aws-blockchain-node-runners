@@ -28,6 +28,7 @@ export interface AlloraStackProps extends cdk.StackProps {
   alloraWorkerName: string;
   alloraEnv: string;
   modelRepo: string;
+  modelEnvVars: string;
 
   alloraWalletAddressKeyName: string;
   alloraWalletAddressRestoreMnemonic: string;
@@ -66,6 +67,7 @@ export class AlloraStack extends cdk.Stack {
       alloraWorkerName, 
       alloraEnv,
       modelRepo,
+      modelEnvVars,
 
       //wallet props
       alloraWalletAddressKeyName,
@@ -167,6 +169,8 @@ export class AlloraStack extends cdk.Stack {
 
     const instance = singleNode.instance;
 
+    const keyPair = new ec2.KeyPair(this, `${resourceNamePrefix}KeyPair`)
+
     // Read user data script and inject variables
     const userData = fs.readFileSync(path.join(__dirname, 'assets', 'user-data', 'node.sh')).toString();
     const modifiedUserData = cdk.Fn.sub(userData, {
@@ -178,13 +182,14 @@ export class AlloraStack extends cdk.Stack {
       _ALLORA_WORKER_NAME_: alloraWorkerName,
       _ALLORA_ENV_: alloraEnv,
       _MODEL_REPO_: modelRepo,
+      _MODEL_ENV_VARS_: modelEnvVars,
 
       //wallet config
       _ALLORA_WALLET_ADDRESS_KEY_NAME_ : alloraWalletAddressKeyName,
       _ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC_ : alloraWalletAddressRestoreMnemonic, 
       _ALLORA_WALLET_HOME_DIR_: alloraWalletHomeDir,
-      _ALLORA_WALLET_GAS_: alloraWalletGas,
       _ALLORA_WALLET_GAS_ADJUSTMENT_: alloraWalletGasAdjustment,
+      _ALLORA_WALLET_GAS_: alloraWalletGas,
       _ALLORA_WALLET_NODE_RPC_: alloraWalletNodeRpc,
       _ALLORA_WALLET_MAX_RETRIES_: alloraWalletMaxRetries,
       _ALLORA_WALLET_DELAY_: alloraWalletDelay,
