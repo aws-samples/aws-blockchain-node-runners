@@ -158,7 +158,6 @@ export class AlloraStack extends cdk.Stack {
       }),
       role: instanceRole,
       vpc: vpc,
-      rootDataVolumeDeviceName: '/dev/sda1',
       securityGroup: securityGroup,
       availabilityZone: vpc.selectSubnets({ subnetType: ec2.SubnetType.PUBLIC }).availabilityZones[0],
       vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
