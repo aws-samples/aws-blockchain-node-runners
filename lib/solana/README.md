@@ -91,16 +91,20 @@ This is the Well-Architected checklist for Solana nodes implementation of the AW
 
 ## Setup Instructions
 
-### Setup Cloud9
+### Open AWS CloudShell
 
-We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../docs/setup-cloud9.md)
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
+
+From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
+
+Once ready, you can run the commands to deploy and test blueprints in the CloudShell.
 
 ### Clone this repository and install dependencies
 
 ```bash
-   git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
-   cd aws-blockchain-node-runners
-   npm install
+git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
+cd aws-blockchain-node-runners
+npm install
 ```
 
 ### Deploy Single Node
@@ -110,53 +114,60 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 2. If you have deleted or don't have the default VPC, create default VPC
 
 ```bash
-    aws ec2 create-default-vpc
-   ```
+aws ec2 create-default-vpc
+```
 
-   **NOTE:** You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
+> **NOTE:** *You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.*
 
 3. Configure  your setup
 
 Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
 ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/solana
-   cd lib/solana
-   pwd
-   cp ./sample-configs/.env-sample-baserpc .env
-   nano .env
+# Make sure you are in aws-blockchain-node-runners/lib/solana
+cd lib/solana
+pwd
+cp ./sample-configs/.env-sample-baserpc .env
+nano .env
 ```
-   **NOTE:** Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
+> **NOTE:** *Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.*
 
 
 4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/solana
-   npx cdk deploy solana-common
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/solana
+npx cdk deploy solana-common
 ```
 
 5. Deploy Sync Node
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/solana
-   npx cdk deploy solana-single-node --json --outputs-file single-node-deploy.json
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/solana
+npx cdk deploy solana-single-node --json --outputs-file single-node-deploy.json
 ```
 
 6. After starting the node you need to wait for the initial synchronization process to finish. It may take about 30 minutes and you can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `current block` and `slots behind` metrics. When the node is fully synced the `slots behind` metric should go to 0. To see them:
 
-    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
-    - Open `Dashboards` and select `solana-single-node` from the list of dashboards.
+   - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
+   - Open `Dashboards` and select `solana-single-node` from the list of dashboards.
 
 7. Connect with the RPC API exposed by the node:
 
 ```bash
-   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
-    # We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
-    curl http://$NODE_INTERNAL_IP:8899 -X POST -H "Content-Type: application/json" \
-    --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
+INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
+NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+echo "NODE_INTERNAL_IP=$NODE_INTERNAL_IP"
+```
+
+Copy output from the last `echo` command with `NODE_INTERNAL_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `NODE_INTERNAL_IP=<internal_IP>` into the new CloudShell tab. Then query the API:
+
+``` bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+# We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
+curl http://$NODE_INTERNAL_IP:8899 -X POST -H "Content-Type: application/json" \
+ --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
 ```
 
 ### Deploy the HA Nodes
@@ -164,26 +175,29 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 1. Configure and deploy multiple HA Nodes
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/solana
-   npx cdk deploy solana-ha-nodes --json --outputs-file ha-nodes-deploy.json
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/solana
+npx cdk deploy solana-ha-nodes --json --outputs-file ha-nodes-deploy.json
 ```
 
 2. Give the new RPC nodes about 30 minutes to initialize and then run the following query against the load balancer behind the RPC node created
 
 ```bash
-    export RPC_ABL_URL=$(cat ha-nodes-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
-    echo $RPC_ABL_URL
+export RPC_ABL_URL=$(cat ha-nodes-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
+echo RPC_ABL_URL=$RPC_ABL_URL
+```
 
-    # We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
-    curl http://$RPC_ABL_URL:8899 -X POST -H "Content-Type: application/json" \
-    --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
+```bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+# We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
+curl http://$RPC_ABL_URL:8899 -X POST -H "Content-Type: application/json" \
+ --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
 ```
 
 The result should be like this (the actual balance might change):
 
 ```javascript
-   {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.16.15","slot":221433176},"value":12870473061872488},"id":1}
+{"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.16.15","slot":221433176},"value":12870473061872488},"id":1}
 ```
 
    If the nodes are still starting and catching up with the chain, you will see the following response:
@@ -196,104 +210,101 @@ The result should be like this (the actual balance might change):
    </body>
 ```
 
-**NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
+> **NOTE:** *By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.*
 
 ### Clearing up and undeploy everything
 
-1. Undeploy HA Nodes, Single Nodes and Common stacks
+Destroy HA Nodes, Single Nodes and Common stacks
 
 ```bash
-   # Setting the AWS account id and region in case local .env file is lost
-    export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
-    export AWS_REGION=<your_target_AWS_region>
+# Setting the AWS account id and region in case local .env file is lost
+ export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+ export AWS_REGION=<your_target_AWS_region>
 
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/solana
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/solana
 
-   # Undeploy HA Nodes
-    cdk destroy solana-ha-nodes
+# Destroy HA Nodes
+cdk destroy solana-ha-nodes
 
-    # Undeploy Single Node
-    cdk destroy sync-single-node
+# Destroy Single Node
+cdk destroy sync-single-node
 
-    # Delete all common components like IAM role and Security Group
-    cdk destroy solana-common
+# Delete all common components like IAM role and Security Group
+cdk destroy solana-common
 ```
-
-2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
 
 ### FAQ
 
 1. How to check the logs of the clients running on my sync node?
 
-   **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+> **NOTE:** *In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)*
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/solana
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/solana
 
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo su bcuser
-   sudo journalctl -o cat -fu sol
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo su bcuser
+sudo journalctl -o cat -fu sol
 ```
+
 2. How to check the logs from the EC2 user-data script?
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/solana
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/solana
 
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo cat /var/log/cloud-init-output.log
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo cat /var/log/cloud-init-output.log
 ```
 
 3. How can I restart the Solana service?
-
 ``` bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo systemctl status sol
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo systemctl status sol
 ```
+
 4. How to upload a secret to AWS Secrets Manager?
 ```bash
-    # Create key pair
-    sudo ./solana-keygen new --no-passphrase -o /tmp/keypair.json
-    SOLANA_ADDRESS=$(sudo ./solana-keygen pubkey /tmp/keypair.json)
-    # Upload key pair to AWS Secrets Manager"
-    export AWS_REGION=<your_region>
-    sudo aws secretsmanager create-secret --name "solana/"$SOLANA_ADDRESS --description "Solana secret key pair" --secret-string file:///tmp/keypair.json --region $AWS_REGION
-    #Delete key pair from the local file system
-    rm -rf /tmp/keypair.json
-
+# Create key pair
+sudo ./solana-keygen new --no-passphrase -o /tmp/keypair.json
+SOLANA_ADDRESS=$(sudo ./solana-keygen pubkey /tmp/keypair.json)
+# Upload key pair to AWS Secrets Manager"
+export AWS_REGION=<your_region>
+sudo aws secretsmanager create-secret --name "solana/"$SOLANA_ADDRESS --description "Solana secret key pair" --secret-string file:///tmp/keypair.json --region $AWS_REGION
+#Delete key pair from the local file system
+rm -rf /tmp/keypair.json
 ```
 5. How can I add swap space to the instance if my Solana node runs out of RAM during the initial sync?
 
    There are two ways. Using the existing volume or using a new one. If your instance has Instance Store volume attached, it is better to keep your swap on it.
 
-   - Option 1: Dedicated Instance Store volume
+- Option 1: Dedicated Instance Store volume
 
 ```bash
-   sudo mkswap /dev/nvme3n1
-   sudo swapon /dev/nvme3n1
-   # Check the memory space is updated
-   free -g
+sudo mkswap /dev/nvme3n1
+sudo swapon /dev/nvme3n1
+# Check the memory space is updated
+free -g
 ```
 
-   - Option 2: Existing volume (using Data directory as example):
+- Option 2: Existing volume (using Data directory as example):
 
 ```bash
-   sudo mkdir /var/solana/data/swapfile
-   sudo dd if=/dev/zero of=/var/solana/data/swapfile bs=1MiB count=250KiB
-   sudo chmod 0600 /var/solana/data/swapfile
-   sudo mkswap /var/solana/data/swapfile
-   sudo swapon /var/solana/data/swapfile
-   free -g
-   sudo sysctl vm.swappiness=10
-
+sudo mkdir /var/solana/data/swapfile
+sudo dd if=/dev/zero of=/var/solana/data/swapfile bs=1MiB count=250KiB
+sudo chmod 0600 /var/solana/data/swapfile
+sudo mkswap /var/solana/data/swapfile
+sudo swapon /var/solana/data/swapfile
+free -g
+sudo sysctl vm.swappiness=10
 ```
 
 ## Upgrades

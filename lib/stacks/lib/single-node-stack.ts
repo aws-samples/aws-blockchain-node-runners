@@ -34,6 +34,8 @@ export class StacksSingleNodeStack extends cdk.Stack {
             stacksNetwork,
             stacksVersion,
             stacksNodeConfiguration,
+            buildFromSource,
+            downloadChainstate,
             // Stacks networking
             stacksBootstrapNode,
             stacksChainstateArchive,
@@ -123,6 +125,8 @@ export class StacksSingleNodeStack extends cdk.Stack {
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
             _ASG_NAME_: constants.NoneValue,
+            _BUILD_FROM_SOURCE_: buildFromSource.toString(),
+            _DOWNLOAD_CHAINSTATE_: downloadChainstate.toString(),
         });
         node.instance.addUserData(modifiedInitNodeScript);
 
