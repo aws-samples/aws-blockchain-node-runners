@@ -2,7 +2,7 @@
 
 | Contributed by |
 |:--------------------:|
-| [@fsatsuki](https://github.com/fsatsuki) |
+| [@fsatsuki](https://github.com/fsatsuki), [@KatsuyaMatsuoka](https://github.com/KatsuyaMatsuoka) |
 
 [View this page in Japanese (日本語)](./README_ja.md)
 
@@ -12,6 +12,31 @@
 
 This is a sample of building a Hyperledger Indy network on AWS.
 The overall architecture is shown below, processing itself is performed by 4 Stewards (Validator Nodes), and network management is performed with Trustee. It consists of 4 EC2 instances for Steward and 3 EC2 instances for Trustee.
+
+## Well-Architected
+
+<details>
+
+<summary>Review the for pros and cons of this solution.</summary>
+
+### Well-Architected Checklist
+
+This is the Well-Architected checklist for Hyperledger Indy nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+
+| Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
+|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that only ports 9701 and 9702 are open for trustee and steward instances.  |
+|                         |                                   | Traffic inspection                                                               | AWS WAF could be implemented for traffic inspection. Additional charges will apply.  |
+|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Amazon Linux 2 AMI. You may choose to run hardening scripts on it.  |
+|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
+|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes.  |
+|                         |                                   | Use encrypted Amazon Simple Storage Service (Amazon S3) buckets                  | This solution uses Amazon S3 managed keys (SSE-S3) encryption.  |
+|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
+|                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions.  |
+| Cost optimization       | Cost awareness                    | Estimate costs                                                                   | Steward instances are t3.large and trustee instances are t3.medium for optimal cost in the test environment. If you use this solution in production environment, we recommend to change to M instances. |
+| Performance efficiency  | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. gp3 Amazon EBS volumes with optimal IOPS and throughput.  |
+
+</details>
 
 ## Solution Walkthrough
 
@@ -189,7 +214,11 @@ INDY_NETWORK_NAME: sample-network
     ansible-playbook playbook/site.yml
 ```
 
-## Clearing up and undeploying everything
+### Access to Indy Nodes
+
+To use Indy nodes, there is ways to access to the node as an issuer/holder/verifier using the Hyperledger Aries framework. You should implement the Aries Agents using [Aries Framework JavaScript](https://github.com/hyperledger/aries-framework-javascript/tree/main/demo) or [Aries CloudAgent Python](https://github.com/hyperledger/aries-cloudagent-python), etc. So, you can access to the nodes from those agents.
+
+### Clearing up and undeploying everything
 
 1. Remove Indy's seed, nodeInfo, did on the Secrets Manager
 
@@ -213,22 +242,20 @@ INDY_NETWORK_NAME: sample-network
     npx cdk destroy --all
 ```
 
+### Reference information
 
-#### reference information
-
--   [Buidling Indy Network](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/NewNetwork/NewNetwork.md)
--   [Setting up EC2 instances for Indy Node](https://github.com/hyperledger/indy-node/blob/main/docs/source/install-docs/AWS-NodeInstall-20.04.md)
--   [Setting up Indy Node](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/installation-and-configuration.md)
+- [Buidling Indy Network](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/NewNetwork/NewNetwork.md)
+- [Setting up EC2 instances for Indy Node](https://github.com/hyperledger/indy-node/blob/main/docs/source/install-docs/AWS-NodeInstall-20.04.md)
+- [Setting up Indy Node](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/installation-and-configuration.md)
     ​
 
 ### Considerations
 
 Matters to be examined in additional development etc. when using this sample are described.
 
--   Change the instance type to M
-    -   Currently, it is a T instance, but in production environments, it is recommended to change to M
--   Fix the security group for Node NICs attached to Steward (Validator Node)
-    -   Limit source IPs to node IPs of other nodes (currently open within VPC and can also be accessed by clients)
-    -   Fix Node's private IP
--   If necessary, change the subnet to which the node belongs to a public subnet
--   Make Steward and Node separate instances
+- Change the instance type to M
+  - Currently, this solution uses T instances, but in production environments, we recommend to change to M instances
+- Fix the security group for Node NICs attached to Steward (Validator Node)
+  - Limit source IPs to node IPs of other nodes (currently open within VPC and can also be accessed by clients)
+  - Fix Node's private IP
+- If necessary, change the subnet to which the node belongs to a public subnet

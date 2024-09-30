@@ -9,6 +9,31 @@
 Hyperledger Indy のネットワークを AWS 上に構築するサンプルである。
 全体像は下図の通り、処理自体は ４ つの Steward (Validator Node) で行われ、ネットワークの管理は Trustee で行われる。実体は Steward 用の ４ つの EC2 インスタンスと、Trustee 用の 3 つの EC2 インスタンスである。
 
+## Well-Architected
+
+<details>
+
+<summary>Review the for pros and cons of this solution.</summary>
+
+### Well-Architected Checklist
+
+This is the Well-Architected checklist for Hyperledger Indy nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+
+| Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
+|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that only ports 9701 and 9702 are open for trustee and steward instances.  |
+|                         |                                   | Traffic inspection                                                               | AWS WAF could be implemented for traffic inspection. Additional charges will apply.  |
+|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Amazon Linux 2 AMI. You may choose to run hardening scripts on it.  |
+|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
+|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes.  |
+|                         |                                   | Use encrypted Amazon Simple Storage Service (Amazon S3) buckets                  | This solution uses Amazon S3 managed keys (SSE-S3) encryption.  |
+|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
+|                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions.  |
+| Cost optimization       | Cost awareness                    | Estimate costs                                                                   | Steward instances are t3.large and trustee instances are t3.medium for optimal cost in the test environment. If you use this solution in production environment, we recommend to change to M instances. |
+| Performance efficiency  | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. gp3 Amazon EBS volumes with optimal IOPS and throughput.  |
+
+</details>
+
 ## Solution Walkthrough
 
 ### Setup Cloud9
@@ -170,7 +195,11 @@ INDY_NETWORK_NAME: sample-network
   $ ansible-playbook playbook/site.yml
   ```
 
-## すべてを削除する方法
+### Access to Indy Nodes
+
+Indy node を使用するには、Hyperledger Aries フレームワークを使用して Issuer / Holder / Verifier としてノードにアクセスする方法があります。Aries agent は [Aries Framework JavaScript](https://github.com/hyperledger/aries-framework-javascript/tree/main/demo) や [Aries CloudAgent Python](https://github.com/hyperledger/aries-cloudagent-python) などを使用して実装する必要があります。そして、それらの Aries agent から Indy node にアクセスできるようになります。
+
+### すべてを削除する方法
 
 1. Secrets ManagerからIndyのseed, nodeInfo, didを削除する
 
@@ -192,7 +221,8 @@ $ ansible-playbook playbook/999_cleanup.yml
     cdk destroy --all
 ```
 
-## 参考情報
+### 参考情報
+
 - [Indy Network の構築](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/NewNetwork/NewNetwork.md)
 - [Indy Node のための EC2 セットアップ](https://github.com/hyperledger/indy-node/blob/main/docs/source/install-docs/AWS-NodeInstall-20.04.md)
 - [Indy Node のセットアップ](https://github.com/pSchlarb/indy-node/blob/documentationUpdate/docs/source/installation-and-configuration.md)
@@ -201,10 +231,9 @@ $ ansible-playbook playbook/999_cleanup.yml
 
 本サンプルを利用するにあたり追加開発などで検討する事項を記載する。
 
--   インスタンスタイプを M 系に変更
-    -   現状は T 系インスタンスであるが本番環境では M 系などへの変更を推奨
--   Steward (Validator Node) にアタッチされている Node NIC の Security Group を修正
-    -   Source IP を他ノードの Node IP に制限する (現在は VPC 内にオープンになっており、Client からもアクセスできる)
-    -   Node の Private IP を固定
--   必要に応じて Node の属するサブネットを Public Subnet にする
--   Steward と Node を別インスタンスにする
+- インスタンスタイプを M 系に変更
+  - 現状は T 系インスタンスであるが本番環境では M 系などへの変更を推奨
+- Steward (Validator Node) にアタッチされている Node NIC の Security Group を修正
+  - Source IP を他ノードの Node IP に制限する (現在は VPC 内にオープンになっており、Client からもアクセスできる)
+  - Node の Private IP を固定
+- 必要に応じて Node の属するサブネットを Public Subnet にする
