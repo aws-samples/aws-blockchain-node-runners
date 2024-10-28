@@ -12,7 +12,7 @@ BSC_SNAPSHOTS_DIR=/data/
 BSC_SNAPSHOTS_DOWNLOAD_STATUS=-1
 
 if [ "$BSC_SNAPSHOTS_URI" == "none" ]; then
-  BSC_SNAPSHOTS_URI=$(curl https://raw.githubusercontent.com/48Club/bsc-snapshots/main/data.json | jq -r .hash.local.link)
+  BSC_SNAPSHOTS_URI=$(curl https://raw.githubusercontent.com/48Club/bsc-snapshots/main/data.json | jq -r .geth.local.link)
 fi
 
 # take about 1 hour to download the bsc snapshot
