@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://www.googletagmanager.com">
 <script>window.dataLayer=window.dataLayer||[]</script>
 <script>!function(e,t,a,n){e[n]=e[n]||[],e[n].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var g=t.getElementsByTagName(a)[0],m=t.createElement(a);m.async=!0,m.src="https://www.googletagmanager.com/gtm.js?id=GTM-WQ97QTTR",g.parentNode.insertBefore(m,g)}(window,document,"script","dataLayer")</script><link rel="stylesheet" href="/aws-blockchain-node-runners/assets/css/styles.a0e33f45.css">
-<script src="/aws-blockchain-node-runners/assets/js/runtime~main.bb52c42b.js" defer="defer"></script>
+<script src="/aws-blockchain-node-runners/assets/js/runtime~main.3e8a759d.js" defer="defer"></script>
 <script src="/aws-blockchain-node-runners/assets/js/main.bcbea973.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -24,7 +24,7 @@
 <h2 class="anchor anchorWithStickyNavbar_LWe7" id="overview-of-deployment-architectures-for-single-node-setups">Overview of Deployment Architectures for Single Node setups<a href="#overview-of-deployment-architectures-for-single-node-setups" class="hash-link" aria-label="Direct link to Overview of Deployment Architectures for Single Node setups" title="Direct link to Overview of Deployment Architectures for Single Node setups">​</a></h2>
 <h3 class="anchor anchorWithStickyNavbar_LWe7" id="single-node-setup">Single node setup<a href="#single-node-setup" class="hash-link" aria-label="Direct link to Single node setup" title="Direct link to Single node setup">​</a></h3>
 <p>The single node architecture blueprint illustrates the deployment of multiple Base nodes within the AWS Default Virtual Private Cloud (VPC) environment. This configuration is suitable for development, testing, or small-scale proof-of-concept scenarios.</p>
-<p><img decoding="async" loading="lazy" alt="Single Node Deployment" src="/aws-blockchain-node-runners/assets/images/Architecture-SingleNode-v3-9a0f63ec515784479cf14644170081c5.png" width="1051" height="311" class="img_ev3q"></p>
+<p><img decoding="async" loading="lazy" alt="Single Node Deployment" src="/aws-blockchain-node-runners/assets/images/Architecture-SingleNode-v3-1938b0f51bdd14ed35b9686fda68b09f.png" width="1051" height="311" class="img_ev3q"></p>
 <ol>
 <li>The Base node in the <a href="https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html" target="_blank" rel="noopener noreferrer">Default VPC</a> is continuously synchronized with the broader Base blockchain network through the VPC&#x27;s <a href="https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html" target="_blank" rel="noopener noreferrer">Internet Gateway</a>. This ensures the node maintains up-to-date ledger information.</li>
 <li>The Base node is designed to be accessed internally by decentralized applications (dApps) or development tools within the Default VPC. To protect the node from unauthorized access, the JSON-RPC API is not directly exposed to the internet.</li>
