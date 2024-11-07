@@ -22,7 +22,7 @@ echo "ASG_NAME=${_ASG_NAME_}" >> /etc/environment
 source /etc/environment
 
 apt-get -yqq update
-apt-get -yqq install awscli jq unzip python3-pip
+apt-get -yqq install awscli jq unzip python3-pip chrony
 apt install unzip
 
 cd /opt
