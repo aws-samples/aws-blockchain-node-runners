@@ -1,0 +1,105 @@
+{
+  "agent": {
+    "metrics_collection_interval": 60,
+    "run_as_user": "root"
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/besu_init_check.log",
+            "log_group_name": "/var/log/besu-init-check"
+          },
+          {
+            "file_path": "/var/log/cloud-init-output.log",
+            "log_group_name": "/var/log/cloud-init-output"
+          },
+          {
+            "file_path": "/var/log/cfn-init.log",
+            "log_group_name": "/var/log/cfn-init"
+          },
+          {
+            "file_path": "/var/log/cfn-init-cmd.log",
+            "log_group_name": "/var/log/cfn-init-cmd"
+          },
+          {
+            "file_path": "/var/log/cfn-wire.log",
+            "log_group_name": "/var/log/cfn-init-wire"
+          },
+          {
+          "file_path": "/var/log/cloud-init.log",
+            "log_group_name": "/var/log/cloud-init"
+          },
+          {
+            "file_path": "/var/log/messages",
+            "log_group_name": "/var/log/system-messages"
+          },
+          {
+            "file_path": "/var/log/ecs/ecs-agent.log",
+            "log_group_name": "/var/log/ecs-agent"
+          },
+          {
+            "file_path": "/var/log/amazon/ssm/amazon-ssm-agent.log",
+            "log_group_name": "/var/log/ssm/amazon-ssm-agent"
+          },
+          {
+            "file_path": "/var/log/amazon/ssm/errors.log",
+            "log_group_name": "/var/log/ssm/amazon-ssm-errors"
+          }
+        ]
+      }
+    }
+  },
+  "metrics": {
+    "namespace": "__PRIVATECHAIN_NAMESPACE__",
+    "aggregation_dimensions": [
+      ["AutoScalingGroupName"],
+      ["AutoScalingGroupName", "path"]
+
+    ],
+    "append_dimensions": {
+      "AutoScalingGroupName": "${aws:AutoScalingGroupName}",
+      "InstanceId": "${aws:InstanceId}"
+    },
+    "metrics_collected": {
+      "disk": {
+        "measurement": [
+          "used_percent",
+          "inodes_free",
+          "inodes_total",
+          "inodes_used"
+        ],
+        "resources": [
+          "/data/ethereum",
+          "/",
+          "/boot/efi"
+        ],
+        "ignore_file_system_types": ["devtmpfs", "tmpfs"],
+        "drop_device": true
+      },
+      "diskio": {
+        "measurement": [
+          "io_time",
+          "write_bytes",
+          "read_bytes",
+          "writes",
+          "reads"
+        ],
+        "resources": [
+          "*"
+        ]
+      },
+      "mem": {
+        "measurement": [
+          "mem_used_percent"
+        ]
+      },
+      "swap": {
+        "measurement": [
+          "swap_used_percent"
+        ]
+      }
+    }
+  }
+}

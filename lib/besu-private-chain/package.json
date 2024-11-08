@@ -1,0 +1,50 @@
+{
+  "name": "aws-blockchain-node-runners-private-chain",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "npx tsc",
+    "watch": "npx tsc -w",
+    "test": "npx jest",
+    "cdk": "npx cdk",
+    "scan-cdk": "npx cdk synth"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-dlm": "*",
+    "@aws-sdk/client-auto-scaling": "*",
+    "@aws-sdk/client-dynamodb": "*",
+    "@aws-sdk/client-ec2": "*",
+    "@aws-sdk/client-ecs": "*",
+    "@aws-sdk/client-kms": "*",
+    "@aws-sdk/client-route-53": "*",
+    "@aws-sdk/client-s3": "*",
+    "@aws-sdk/client-ssm": "*",
+    "@aws-sdk/util-dynamodb": "*",
+    "aws-cdk-lib": "^2.148.1",
+    "cdk-monitoring-constructs": "^2.0.0",
+    "dotenv": "^16.4.5",
+    "jq": "^1.7.2",
+    "keccak256": "^1.0.6",
+    "rlp": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.80",
+    "@types/bn.js": "^5.1.6",
+    "@types/jest": "^26.0.14",
+    "@types/node": "^20.14.2",
+    "@typescript-eslint/eslint-plugin": "~5.30.0",
+    "@typescript-eslint/parser": "~5.30.0",
+    "assert": "^2.0.0",
+    "aws-sdk": "^2.1657.0",
+    "cdk-nag": "^2.28.135",
+    "constructs": "^10.0.115",
+    "esbuild": "^0.12.9",
+    "eslint": "^8.20.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.6.3",
+    "prettier": "^2.7.1",
+    "ts-jest": "^29.2.0",
+    "typescript": "~5.4.5"
+  }
+}
