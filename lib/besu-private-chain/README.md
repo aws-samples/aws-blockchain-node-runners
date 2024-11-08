@@ -48,12 +48,16 @@ First, create your own copy of `.env` file and edit it:
    # Make sure you are in aws-blockchain-node-runners/lib/besu-private-chain
    pwd
    cp ./.env-sample .env
-   nano .env
-   source .env
 ```
 
 The only required field to edit is your AWS account. The rest are populated with known working defaults.
 For technical users, more detailed configurations are available in `lib/constants`, and `lib/genesis`. 
+
+After you modify `.env`, make sure you run the following commmand to import the variables into your shell session:
+
+```bash
+source .env
+```
 
 ### Upload a Hyperledger Besu Docker Image
 As the node runner is configured to run in an isolated VPC with no internet access, it's up to you to provide the docker image of Besu you would like to use in Amazon Elastic Container Repository (ECR). This node runner was tested to work with Besu 24.7.0 : https://github.com/hyperledger/besu/releases/tag/24.7.0
