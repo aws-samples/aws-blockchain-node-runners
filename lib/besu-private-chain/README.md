@@ -103,7 +103,7 @@ Currently, before or after deployment you will need to generate the keys and upl
 1. Install jq `yum install jq`
 2. Run the script with the following command in the base directory to automatically use KMS to generate public and private keypairs:
 ```bash
-`./scripts/generate-keys.sh`
+./scripts/generate-keys.sh
 ```
  
 Public keys will be auto set in `lib/constants/keys.ts`, and private keys will be automatically uploaded to secrets manager.
