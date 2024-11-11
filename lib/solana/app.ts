@@ -34,23 +34,28 @@ new SolanaSingleNodeStack(app, "solana-single-node", {
     registrationTransactionFundingAccountSecretARN: config.baseNodeConfig.registrationTransactionFundingAccountSecretARN,
 });
 
-new SolanaHANodesStack(app, "solana-ha-nodes", {
-    stackName: `solana-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
-    env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
+if (app.node.tryGetContext('deployHA') === 'true') {
+    if (config.baseNodeConfig.nodeConfiguration !== "consensus") {
+        new SolanaHANodesStack(app, "solana-ha-nodes", {
+            stackName: `solana-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
+            env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
-    instanceType: config.baseNodeConfig.instanceType,
-    instanceCpuType: config.baseNodeConfig.instanceCpuType,
-    solanaCluster: config.baseNodeConfig.solanaCluster,
-    solanaVersion: config.baseNodeConfig.solanaVersion,
-    nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
-    dataVolume: config.baseNodeConfig.dataVolume,
-    accountsVolume: config.baseNodeConfig.accountsVolume,
+            instanceType: config.baseNodeConfig.instanceType,
+            instanceCpuType: config.baseNodeConfig.instanceCpuType,
+            solanaCluster: config.baseNodeConfig.solanaCluster,
+            solanaVersion: config.baseNodeConfig.solanaVersion,
+            nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
+            dataVolume: config.baseNodeConfig.dataVolume,
+            accountsVolume: config.baseNodeConfig.accountsVolume,
 
-    albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
-    heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
-    numberOfNodes: config.haNodeConfig.numberOfNodes,
-});
-
+            albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
+            heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
+            numberOfNodes: config.haNodeConfig.numberOfNodes,
+        });
+    } else {
+        throw new Error("Consensus node configuration is not yet supported for HA setup");
+    }
+}
 
 // Security Check
 cdk.Aspects.of(app).add(
