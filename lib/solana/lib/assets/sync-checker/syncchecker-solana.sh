@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INIT_COMPLETED_FILE=/var/solana/data/init-completed
+INIT_COMPLETED_FILE=/data/solana/data/init-completed
 
 TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)

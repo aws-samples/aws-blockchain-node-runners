@@ -4,7 +4,7 @@
   "scripts": {
     "build": "npx tsc",
     "watch": "npx tsc -w",
-    "test": "npx jest",
+    "test": "npx jest --detectOpenHandles",
     "cdk": "npx cdk",
     "scan-cdk": "npx cdk synth"
   }
