@@ -112,7 +112,7 @@ export class SolanaHANodesStack extends cdk.Stack {
         const healthCheckPath = "/health";
         const rpcNodes = new HANodesConstruct (this, "rpc-nodes", {
             instanceType,
-            dataVolumes: [dataVolume, accountsVolume],
+            dataVolumes: [accountsVolume, dataVolume],
             rootDataVolumeDeviceName: "/dev/sda1",
             machineImage: ec2.MachineImage.fromSsmParameter(ubuntu204stableImageSsmName),
             role: instanceRole,

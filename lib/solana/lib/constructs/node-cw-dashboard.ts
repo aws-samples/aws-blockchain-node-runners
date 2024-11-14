@@ -292,7 +292,7 @@ export const SingleNodeCWDashboardJSON = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "disk_used_percent", "InstanceId", "${INSTANCE_ID}", "device", "nvme1n1", "path", "/var/solana/data", "fstype", "xfs", { "region": "${REGION}", "label": "/home/ubuntu/l2geth-source/l2geth-datadir" } ]
+                    [ "CWAgent", "disk_used_percent", "InstanceId", "${INSTANCE_ID}", "device", "nvme1n1", "path", "/data/solana/data", "fstype", "xfs", { "region": "${REGION}", "label": "/data/solana/data" } ]
                 ],
                 "sparkline": true,
                 "view": "singleValue",
@@ -310,7 +310,7 @@ export const SingleNodeCWDashboardJSON = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "disk_used_percent", "InstanceId", "${INSTANCE_ID}", "device", "nvme2n1",  "path", "/var/solana/accounts", "fstype", "xfs", { "region": "${REGION}", "label": "/home/ubuntu/l2geth-source/l2geth-datadir" } ]
+                    [ "CWAgent", "disk_used_percent", "InstanceId", "${INSTANCE_ID}", "device", "nvme2n1",  "path", "/data/solana/accounts", "fstype", "xfs", { "region": "${REGION}", "label": "/data/solana/accounts" } ]
                 ],
                 "sparkline": true,
                 "view": "singleValue",
