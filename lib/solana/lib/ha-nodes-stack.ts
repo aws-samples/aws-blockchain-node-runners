@@ -53,7 +53,7 @@ export class SolanaHANodesStack extends cdk.Stack {
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
 
         // Setting up the security group for the node from Solana-specific construct
-        const instanceSG = new SolanaNodeSecurityGroupConstruct (this, "security-group", {
+        const instanceSG = new SolanaNodeSecurityGroupConstruct(this, "security-group", {
             vpc: vpc,
         })
 
@@ -73,10 +73,6 @@ export class SolanaHANodesStack extends cdk.Stack {
         // Checking configuration
         if (instanceCpuType === ec2.AmazonLinuxCpuType.ARM_64) {
             throw new Error("ARM_64 is not yet supported");
-        }
-
-        if (nodeConfiguration === "consensus") {
-            throw new Error("Consensus node configuration is not yet supported for HA setup");
         }
 
         // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
@@ -110,9 +106,9 @@ export class SolanaHANodesStack extends cdk.Stack {
 
         // Setting up the nodse using generic High Availability (HA) Node constract
         const healthCheckPath = "/health";
-        const rpcNodes = new HANodesConstruct (this, "rpc-nodes", {
+        const rpcNodes = new HANodesConstruct(this, "rpc-nodes", {
             instanceType,
-            dataVolumes: [dataVolume, accountsVolume],
+            dataVolumes: [accountsVolume, dataVolume],
             rootDataVolumeDeviceName: "/dev/sda1",
             machineImage: ec2.MachineImage.fromSsmParameter(ubuntu204stableImageSsmName),
             role: instanceRole,
