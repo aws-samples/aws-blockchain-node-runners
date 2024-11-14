@@ -1,28 +1,29 @@
 #!/bin/bash
 set +e
-
-echo "AWS_REGION=${_AWS_REGION_}" >> /etc/environment
-echo "ASSETS_S3_PATH=${_ASSETS_S3_PATH_}" >> /etc/environment
-echo "STACK_NAME=${_STACK_NAME_}" >> /etc/environment
-echo "STACK_ID=${_STACK_ID_}" >> /etc/environment
-echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}" >> /etc/environment
-echo "ACCOUNTS_VOLUME_TYPE=${_ACCOUNTS_VOLUME_TYPE_}" >> /etc/environment
-echo "ACCOUNTS_VOLUME_SIZE=${_ACCOUNTS_VOLUME_SIZE_}" >> /etc/environment
-echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}" >> /etc/environment
-echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}" >> /etc/environment
-echo "SOLANA_VERSION=${_SOLANA_VERSION_}" >> /etc/environment
-echo "SOLANA_NODE_TYPE=${_SOLANA_NODE_TYPE_}" >> /etc/environment
-echo "NODE_IDENTITY_SECRET_ARN=${_NODE_IDENTITY_SECRET_ARN_}" >> /etc/environment
-echo "VOTE_ACCOUNT_SECRET_ARN=${_VOTE_ACCOUNT_SECRET_ARN_}" >> /etc/environment
-echo "AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN=${_AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN_}" >> /etc/environment
-echo "REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN=${_REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_}" >> /etc/environment
-echo "SOLANA_CLUSTER=${_SOLANA_CLUSTER_}" >> /etc/environment
-echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}" >> /etc/environment
-echo "ASG_NAME=${_ASG_NAME_}" >> /etc/environment
+{
+  echo "AWS_REGION=${_AWS_REGION_}"
+  echo "ASSETS_S3_PATH=${_ASSETS_S3_PATH_}"
+  echo "STACK_NAME=${_STACK_NAME_}"
+  echo "STACK_ID=${_STACK_ID_}"
+  echo "RESOURCE_ID=${_NODE_CF_LOGICAL_ID_}"
+  echo "ACCOUNTS_VOLUME_TYPE=${_ACCOUNTS_VOLUME_TYPE_}"
+  echo "ACCOUNTS_VOLUME_SIZE=${_ACCOUNTS_VOLUME_SIZE_}"
+  echo "DATA_VOLUME_TYPE=${_DATA_VOLUME_TYPE_}"
+  echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}"
+  echo "SOLANA_VERSION=${_SOLANA_VERSION_}"
+  echo "SOLANA_NODE_TYPE=${_SOLANA_NODE_TYPE_}"
+  echo "NODE_IDENTITY_SECRET_ARN=${_NODE_IDENTITY_SECRET_ARN_}"
+  echo "VOTE_ACCOUNT_SECRET_ARN=${_VOTE_ACCOUNT_SECRET_ARN_}"
+  echo "AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN=${_AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN_}"
+  echo "REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN=${_REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN_}"
+  echo "SOLANA_CLUSTER=${_SOLANA_CLUSTER_}"
+  echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}"
+  echo "ASG_NAME=${_ASG_NAME_}"
+} >> /etc/environment
 source /etc/environment
 
 apt-get -yqq update
-apt-get -yqq install awscli jq unzip python3-pip
+apt-get -yqq install awscli jq unzip python3-pip chrony
 apt install unzip
 
 cd /opt
@@ -111,9 +112,14 @@ sudo bash -c "cat >/etc/security/limits.d/90-solana-nofiles.conf <<EOF
 EOF"
 
 echo 'Preparing fs for Solana installation'
-sudo mkdir /var/solana
-sudo mkdir /var/solana/data
-sudo mkdir /var/solana/accounts
+sudo mkdir /data
+sudo mkdir /data/solana
+sudo mkdir /data/solana/data
+sudo mkdir /data/solana/accounts
+
+echo 'Adding solana user and group'
+sudo groupadd -g 1002 solana
+sudo useradd -u 1002 -g 1002 -m -s /bin/bash solana
 
 if [[ "$STACK_ID" != "none" ]]; then
   echo "Install CloudFormation helper scripts"
@@ -163,7 +169,7 @@ else
   sudo mkfs -t xfs $DATA_VOLUME_ID
   sleep 10
   DATA_VOLUME_UUID=$(lsblk -fn -o UUID  $DATA_VOLUME_ID)
-  DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /var/solana/data xfs defaults 0 2"
+  DATA_VOLUME_FSTAB_CONF="UUID=$DATA_VOLUME_UUID /data/solana/data xfs defaults 0 2"
   echo "DATA_VOLUME_ID="$DATA_VOLUME_ID
   echo "DATA_VOLUME_UUID="$DATA_VOLUME_UUID
   echo "DATA_VOLUME_FSTAB_CONF="$DATA_VOLUME_FSTAB_CONF
@@ -173,28 +179,22 @@ fi
 
 if [[ "$ACCOUNTS_VOLUME_TYPE" == "instance-store" ]]; then
   echo "Accounts volume type is instance store"
-
   if [[ "$DATA_VOLUME_TYPE" != "instance-store" ]]; then
     cd /opt
-
     sudo chmod +x /opt/setup-instance-store-volumes.sh
-
     (crontab -l; echo "@reboot /opt/setup-instance-store-volumes.sh >/tmp/setup-instance-store-volumes.log 2>&1") | crontab -
     crontab -l
-
     sudo /opt/setup-instance-store-volumes.sh
-
   else
-    echo "Data and Accounts volumes are instance stores and should be both configured by now"
+    echo "Data and Accounts are configured by now"
   fi
-
 else
   echo "Accounts volume type is EBS"
   ACCOUNTS_VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$ACCOUNTS_VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
   sudo mkfs -t xfs $ACCOUNTS_VOLUME_ID
   sleep 10
   ACCOUNTS_VOLUME_UUID=$(lsblk -fn -o UUID $ACCOUNTS_VOLUME_ID)
-  ACCOUNTS_VOLUME_FSTAB_CONF="UUID=$ACCOUNTS_VOLUME_UUID /var/solana/accounts xfs defaults 0 2"
+  ACCOUNTS_VOLUME_FSTAB_CONF="UUID=$ACCOUNTS_VOLUME_UUID /data/solana/accounts xfs defaults 0 2"
   echo "ACCOUNTS_VOLUME_ID="$ACCOUNTS_VOLUME_ID
   echo "ACCOUNTS_VOLUME_UUID="$ACCOUNTS_VOLUME_UUID
   echo "ACCOUNTS_VOLUME_FSTAB_CONF="$ACCOUNTS_VOLUME_FSTAB_CONF
@@ -203,17 +203,13 @@ else
   sudo mount -a
 fi
 
-sudo mkdir /var/solana/data/ledger
-
-echo 'Adding solana user and group'
-sudo groupadd -g 1002 solana
-sudo useradd -u 1002 -g 1002 -m -s /bin/bash solana
+sudo mkdir /data/solana/data/ledger
 sudo usermod -aG sudo solana
 
 cd /home/solana
 sudo mkdir ./bin
 
-ln -s /var/solana/data/ledger /home/solana
+ln -s /data/solana/data/ledger /home/solana
 
 echo "Downloading x86 binaries for version v$SOLANA_VERSION"
 sudo wget -q https://github.com/solana-labs/solana/releases/download/v$SOLANA_VERSION/solana-release-x86_64-unknown-linux-gnu.tar.bz2
@@ -244,20 +240,17 @@ if [[ "$SOLANA_NODE_TYPE" == "consensus" ]]; then
         NODE_IDENTITY=$(sudo ./solana-keygen pubkey /home/solana/config/vote-account-keypair.json)
         echo "Store Vote Account Secret to AWS Secrets Manager"
         sudo aws secretsmanager create-secret --name "solana-node/"$NODE_IDENTITY --description "Solana Vote Account Secret created for stack $CF_STACK_NAME" --secret-string file:///home/solana/config/vote-account-keypair.json --region $AWS_REGION
-
         if [[ $AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN == "none" ]]; then
             echo "Create Authorized Withdrawer Account Secret"
             sudo ./solana-keygen new --no-passphrase -o /home/solana/config/authorized-withdrawer-keypair.json
             NODE_IDENTITY=$(sudo ./solana-keygen pubkey /home/solana/config/authorized-withdrawer-keypair.json)
             echo "Store Authorized Withdrawer Account  to AWS Secrets Manager"
             sudo aws secretsmanager create-secret --name "solana-node/"$NODE_IDENTITY --description "Authorized Withdrawer Account Secret created for stack $CF_STACK_NAME" --secret-string file:///home/solana/config/authorized-withdrawer-keypair.json --region $AWS_REGION
-
         else
             echo "Get Authorized Withdrawer Account Secret from AWS Secrets Manager"
             sudo aws secretsmanager get-secret-value --secret-id $AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN --query SecretString --output text --region $AWS_REGION > ~/authorized-withdrawer-keypair.json
             sudo mv ~/authorized-withdrawer-keypair.json /home/solana/config/authorized-withdrawer-keypair.json
         fi
-
         if [[ $REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN != "none" ]]; then
           echo "Get Registration Transaction Funding Account Secret from AWS Secrets Manager"
           sudo aws secretsmanager get-secret-value --secret-id $REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN --query SecretString --output text --region $AWS_REGION > ~/id.json
@@ -265,13 +258,11 @@ if [[ "$SOLANA_NODE_TYPE" == "consensus" ]]; then
           sudo mv ~/id.json /root/.config/solana/id.json
           echo "Creating Vote Account on-chain"
           sudo ./solana create-vote-account /home/solana/config/vote-account-keypair.json /home/solana/config/validator-keypair.json /home/solana/config/authorized-withdrawer-keypair.json
-
           echo "Delete Transaction Funding Account Secret from the local disc"
           sudo rm  /root/.config/solana/id.json
         else
           echo "Vote Account not created. Please create it manually: https://docs.solana.com/running-validator/validator-start#create-vote-account"
         fi
-
         echo "Delete Authorized Withdrawer Account from the local disc"
         sudo rm /home/solana/config/authorized-withdrawer-keypair.json
     else
@@ -279,7 +270,6 @@ if [[ "$SOLANA_NODE_TYPE" == "consensus" ]]; then
         sudo aws secretsmanager get-secret-value --secret-id $VOTE_ACCOUNT_SECRET_ARN --query SecretString --output text --region $AWS_REGION > ~/vote-account-keypair.json
         sudo mv ~/vote-account-keypair.json /home/solana/config/vote-account-keypair.json
     fi
-
 mv /opt/solana/node-consensus-template.sh /home/solana/bin/validator.sh
 fi
 
@@ -297,54 +287,29 @@ sed -i "s/__KNOWN_VALIDATORS__/$KNOWN_VALIDATORS/g" /home/solana/bin/validator.s
 sed -i "s/__ENTRY_POINTS__/$ENTRY_POINTS/g" /home/solana/bin/validator.sh
 sudo chmod +x /home/solana/bin/validator.sh
 
-sudo chown -R solana:solana /var/solana
+sudo chown -R solana:solana /data/solana
 sudo chown -R solana:solana /home/solana
 
 echo "Starting solana as a service"
-sudo bash -c 'cat > /etc/systemd/system/sol.service <<EOF
-[Unit]
-Description=Solana Validator
-After=network.target
-StartLimitIntervalSec=0
-[Service]
-Type=simple
-Restart=always
-RestartSec=1
-User=solana
-LimitNOFILE=1000000
-LogRateLimitIntervalSec=0
-Environment="PATH=/bin:/usr/bin:/home/solana/bin"
-ExecStart=/home/solana/bin/validator.sh
-[Install]
-WantedBy=multi-user.target
-EOF'
 
+sudo mv /opt/systemd/node.service /etc/systemd/system/node.service
 sudo systemctl daemon-reload
-sudo systemctl enable --now sol
-
-echo 'Configuring logrotate to rotate Solana logs'
-
-sudo bash -c 'sudo cat > logrotate.sol <<EOF
-/home/sol/solana-validator.log {
-  rotate 7
-  daily
-  missingok
-  postrotate
-    systemctl kill -s USR1 sol.service
-  endscript
-}
-EOF'
-
-sudo cp logrotate.sol /etc/logrotate.d/sol
-sudo systemctl restart logrotate.service
+sudo systemctl enable --now node
 
 echo "Configuring syncchecker script"
-cd /opt
 sudo mv /opt/sync-checker/syncchecker-solana.sh /opt/syncchecker.sh
 sudo chmod +x /opt/syncchecker.sh
 
-(crontab -l; echo "*/1 * * * * /opt/syncchecker.sh >/tmp/syncchecker.log 2>&1") | crontab -
-crontab -l
+echo "Setting up sync-checker service"
+sudo mv /opt/systemd/sync-checker.service /etc/systemd/system/sync-checker.service
+
+# Run every 5 minutes
+echo "Setting up sync-checker timer"
+sudo mv /opt/systemd/sync-checker.timer /etc/systemd/system/sync-checker.timer
+
+echo "Starting sync checker timer"
+systemctl start sync-checker.timer
+systemctl enable sync-checker.timer
 
 if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
   echo "Signaling ASG lifecycle hook to complete"

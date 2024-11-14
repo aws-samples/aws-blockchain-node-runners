@@ -84,9 +84,9 @@ This is the Well-Architected checklist for Solana nodes implementation of the AW
 
 | Usage pattern  | Ideal configuration  | Primary option on AWS  | Data Transfer Estimates | Config reference |
 |---|---|---|---|---|
-| 1/ Consensus node | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 10K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput, Data volume: EBS gp3 10K IOPS, 700 MB/s throughput | Proportional to the amount at stake. Between 200TB to 400TB/month  | [.env-sample-consensus](./sample-configs/.env-sample-consensus) |
-| 2/ Base RPC node (no secondary indexes) | 32 vCPU, 256 GB RAM, Accounts volume: 1TB, 5K IOPS, 700 MB/s throughput, Data volume: 3TB, 12K IOPS, 700 MB/s throughput   | r6a.8xlarge, Accounts volume: EBS gp3 1TB, 5K IOPS, 700 MB/s throughput Data volume: EBS gp3 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-baserpc](./sample-configs/.env-sample-baserpc) |
-| 3/ Extended RPC node (with all secondary indexes) | 64 vCPU, 1 TB RAM, Accounts volume: 1TB, 7K IOPS, 700 MB/s throughput, Data volume: 3TB, 16K IOPS, 700 MB/s throughput    | x2idn.16xlarge, Accounts: instance storage (ephemeral NVMe volumes) 1.9 TB, Data volume: 3TB, 12K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-extendedrpc](./sample-configs/.env-sample-extendedrpc) |
+| 1/ Consensus node | 48 vCPU, 384 GiB RAM, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput   | r7a.12xlarge, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput | Proportional to the amount at stake. Between 200TB to 400TB/month  | [.env-sample-consensus](./sample-configs/.env-sample-consensus) |
+| 2/ Base RPC node (no secondary indexes) | 48 vCPU, 384 GiB RAM, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput   | r7a.12xlarge, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-baserpc](./sample-configs/.env-sample-baserpc) |
+| 3/ Extended RPC node (with all secondary indexes) | 96 vCPU, 768 GiB RAM, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput  | r7a.24xlarge, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput | 150-200TB/month (no staking) | [.env-sample-extendedrpc](./sample-configs/.env-sample-extendedrpc) |
 </details>
 
 ## Setup Instructions
@@ -248,7 +248,7 @@ export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? 
 echo "INSTANCE_ID=" $INSTANCE_ID
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo su bcuser
-sudo journalctl -o cat -fu sol
+sudo journalctl -o cat -fu node
 ```
 
 2. How to check the logs from the EC2 user-data script?
@@ -268,7 +268,7 @@ sudo cat /var/log/cloud-init-output.log
 export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
 echo "INSTANCE_ID=" $INSTANCE_ID
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-sudo systemctl status sol
+sudo systemctl status node
 ```
 
 4. How to upload a secret to AWS Secrets Manager?
@@ -298,11 +298,11 @@ free -g
 - Option 2: Existing volume (using Data directory as example):
 
 ```bash
-sudo mkdir /var/solana/data/swapfile
-sudo dd if=/dev/zero of=/var/solana/data/swapfile bs=1MiB count=250KiB
-sudo chmod 0600 /var/solana/data/swapfile
-sudo mkswap /var/solana/data/swapfile
-sudo swapon /var/solana/data/swapfile
+sudo mkdir /data/solana/data/swapfile
+sudo dd if=/dev/zero of=/data/solana/data/swapfile bs=1MiB count=250KiB
+sudo chmod 0600 /data/solana/data/swapfile
+sudo mkswap /data/solana/data/swapfile
+sudo swapon /data/solana/data/swapfile
 free -g
 sudo sysctl vm.swappiness=10
 ```

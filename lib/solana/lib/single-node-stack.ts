@@ -5,13 +5,13 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as path from "path";
 import * as fs from "fs";
-import * as nodeCwDashboard from "./assets/node-cw-dashboard"
 import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 import * as nag from "cdk-nag";
 import { SingleNodeConstruct } from "../../constructs/single-node"
 import * as configTypes from "./config/solanaConfig.interface";
 import * as constants from "../../constructs/constants";
 import { SolanaNodeSecurityGroupConstruct } from "./constructs/solana-node-security-group"
+import { SingleNodeCWDashboardJSON } from "./constructs/node-cw-dashboard"
 
 export interface SolanaSingleNodeStackProps extends cdk.StackProps {
     instanceType: ec2.InstanceType;
@@ -85,7 +85,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         const node = new SingleNodeConstruct(this, "sync-node", {
             instanceName: STACK_NAME,
             instanceType,
-            dataVolumes: [dataVolume, accountsVolume],
+            dataVolumes: [accountsVolume, dataVolume],
             rootDataVolumeDeviceName: "/dev/sda1",
             machineImage: ec2.MachineImage.fromSsmParameter(ubuntu204stableImageSsmName),
             vpc,
@@ -125,7 +125,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         node.instance.addUserData(modifiedInitNodeScript);
 
         // Adding CloudWatch dashboard to the node
-        const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SingleNodeCWDashboardJSON), {
+        const dashboardString = cdk.Fn.sub(JSON.stringify(SingleNodeCWDashboardJSON), {
             INSTANCE_ID:node.instanceId,
             INSTANCE_NAME: STACK_NAME,
             REGION: REGION,
