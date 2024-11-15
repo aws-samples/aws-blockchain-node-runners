@@ -128,6 +128,17 @@ const config = {
         darkTheme: darkCodeTheme,
         additionalLanguages: ['bash', 'diff', 'json'],
       },
+      colorMode: {
+        defaultMode: 'dark',
+        disableSwitch: false,
+        respectPrefersColorScheme: false,
+      },
+      themeConfig: {
+        // Declare some <meta> tags
+        metadata: [
+          {name: 'keywords', content: 'blockchain, aws, cloud'},
+        ],
+      },
     }),
 };
 
