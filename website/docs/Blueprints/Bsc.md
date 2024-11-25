@@ -1,5 +1,5 @@
 ---
-sidebar_label: BSC
+sidebar_label: BNB
 ---
 #
 
