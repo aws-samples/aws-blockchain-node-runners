@@ -1,12 +1,12 @@
-# Sample AWS Blockchain Node Runner app for BNB Smart Chain(BSC) Nodes
+# Sample AWS Blockchain Node Runner app for BNB Chain Nodes
 
 | Contributed by |
 |:--------------------:|
 | [@StayHungryStayFoolish](https://github.com/StayHungryStayFoolish), [@frbrkoala](https://github.com/frbrkoala) |
 
-BNB Smart Chain (BNB), is a blockchain that supports EVM-compatible smart contracts and protocols. It utilizes the [Proof of Stake Authority(PoSA)](https://docs.bnbchain.org/docs/learn/intro#proof-of-staked-authority) consensus mechanism, which is a hybrid consensus mechanism based on a combination of [Proof of Authority (PoA)](https://en.wikipedia.org/wiki/Proof_of_authority) and [Delegated Proof of Stake (DPoS)](https://bitcoinwiki.org/wiki/DPoS).
+BNB Chain, is a blockchain that supports EVM-compatible smart contracts and protocols. It utilizes the [Proof of Stake Authority(PoSA)](https://docs.bnbchain.org/docs/learn/intro#proof-of-staked-authority) consensus mechanism, which is a hybrid consensus mechanism based on a combination of [Proof of Authority (PoA)](https://en.wikipedia.org/wiki/Proof_of_authority) and [Delegated Proof of Stake (DPoS)](https://bitcoinwiki.org/wiki/DPoS).
 
-This blueprint is designed to assist in deploying a single node or a Highly Available (HA) [BNB Smart Chain (BNB) Fullnode](https://docs.bnbchain.org/docs/validator/fullnode/) on AWS. It is intended for use in development, testing, or Proof of Concept purposes.
+This blueprint is designed to assist in deploying a single node or a Highly Available (HA) [BNB Chain Fullnode](https://docs.bnbchain.org/docs/validator/fullnode/) on AWS. It is intended for use in development, testing, or Proof of Concept purposes.
 
 ## Overview of Deployment Architectures
 
@@ -359,7 +359,7 @@ sudo systemctl restart bsc
 > - *View BNB service configuration*
 >   - `cat /etc/systemd/system/bsc.service`
 
-5. Where can I find more infromation about BSC RPC API?
+5. Where can I find more infromation about BNB RPC API?
 
 Please refer to more [JSON-RPC API METHODS](https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods). The following are some commonly used API methods:
    - eth_blockNumber
