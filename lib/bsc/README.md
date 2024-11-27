@@ -13,19 +13,19 @@ This blueprint is designed to assist in deploying a single node or a Highly Avai
 ### Single Node setup
 ![Single Nodes Deployment](./doc/assets/Architecture-Single-BNB-Node-Runners.drawio.png)
 
-1. The AWS Cloud Development Kit (CDK) is used to deploy a single node. The CDK application stores assets like scripts and config files in S3 bucket to copy them to the EC2 instance when launching a BNB Node.
-2. A single RPC BNB Fullnode is deployed within in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on BNB Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-3. The BNB node is accessed by dApps or development tools internally. JSON RPC API is not exposed to the Internet to protect the node from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
-4. The BNB node send various monitoring metrics for both EC2 and BNB client to Amazon CloudWatch.
+1. The AWS Cloud Development Kit (CDK) is used to deploy a single node. The CDK application stores assets like scripts and config files in S3 bucket to copy them to the EC2 instance when launching a BNB Chain Node.
+2. A single RPC BNB Chain Fullnode is deployed within in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) and continuously synchronizes with the rest of nodes on BNB Chain Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+3. The BNB Chain node is accessed by dApps or development tools internally. JSON RPC API is not exposed to the Internet to protect the node from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
+4. The BNB Chain node send various monitoring metrics for both EC2 and BNB Chain client to Amazon CloudWatch.
 
 ### Highly Available setup
 
 ![Highly Available Nodes Deployment](./doc/assets/Architecture-HA-BNB-Node-Runners.drawio.png)
 
-1. The CDK is used to deploy highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and othether script and configuration files required when launching EC2 as the BNB Node.
-2. A set of RPC BNB Fullnodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on BNB Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-3. The BNB nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
-4. The BNB nodes send various monitoring metrics for both EC2 and BNB nodes to Amazon CloudWatch.
+1. The CDK is used to deploy highly available (HA) architecture. An S3 bucket is utilized to store [User data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html) and othether script and configuration files required when launching EC2 as the BNB Chain Node.
+2. A set of RPC BNB Chain Fullnodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on BNB Chain Blockchain Network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+3. The BNB Chain nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
+4. The BNB Chain nodes send various monitoring metrics for both EC2 and BNB Chain nodes to Amazon CloudWatch.
 
 ## Additional materials
 
@@ -33,11 +33,11 @@ This blueprint is designed to assist in deploying a single node or a Highly Avai
 
 <summary>Well-Architected Checklist</summary>
 
-This is the Well-Architected checklist for BNB nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+This is the Well-Architected checklist for BNB Chain nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
 
 | Pillar                  | Control                           | Question/Check                                                                   | Remarks |
 |:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that ports 30303 (TCP/UDP) for BNB are open to public to support P2P protocols. |
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that ports 30303 (TCP/UDP) for BNB Chain are open to public to support P2P protocols. |
 |                         |                                   | Traffic inspection                                                               | Traffic protection is not used in the solution. [AWS Web Applications Firewall (WAF)](https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html) could be implemented for traffic over HTTP(S), [AWS Shield](https://docs.aws.amazon.com/waf/latest/developerguide/shield-chapter.html) provides Distributed Denial of Service (DDoS) protection. Additional charges will apply. |
 |                         | Compute protection                | Reduce attack surface                                                            | This solution uses Amazon Linux2 AMI(`Amazon Linux2 AMI(HVM)-Kernel 5.10`). You may choose to run hardening scripts on it. |
 |                         |                                   | Enable people to perform actions at a distance                                   | This solution uses [AWS Systems Manager for terminal session](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html#start-sys-console), not ssh ports. |
@@ -48,12 +48,12 @@ This is the Well-Architected checklist for BNB nodes implementation of the AWS B
 |                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions. |
 | Cost optimization       | Service selection                 | Use cost effective resources                                                     | 1/ We use Graviton-based binaries to improve costs for compute. We recommend using the `m7g.4xlarge` EC2 instance type to optimize computational costs.  2/ Cost-effective EBS gp3 are used instead of io2. |
 |                         | Cost awareness                    | Estimate costs                                                                   | Single RPC node with `m7g.4xlarge` EBS gp3 volumes about 4000 GB(1000 IOPS, 700 MBps/s throughput) with On-Demand pricing will cost around US$854.54 per month in the US East (N. Virginia) region. More cost-optimal option with 3 year EC2 Instance Savings plan the cost goes down to $594.15 USD. To create your own estimate use [AWS Pricing Calculator](https://calculator.aws/#/)                                                                                          |
-| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution uses AWS Application Load Balancer with RPC nodes for high availability. Newly provisioned BNB nodes triggered by Auto Scaling get up and running in about 300 minutes.  |
-|                         | Data backup                       | How is data backed up?                                                           | Considering blockchain data is replicated by nodes automatically and BNB nodes sync from start within an hour, we don't use any additional mechanisms to backup the data. |
+| Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution uses AWS Application Load Balancer with RPC nodes for high availability. Newly provisioned BNB Chain nodes triggered by Auto Scaling get up and running in about 300 minutes.  |
+|                         | Data backup                       | How is data backed up?                                                           | Considering blockchain data is replicated by nodes automatically and BNB Chain nodes sync from start within an hour, we don't use any additional mechanisms to backup the data. |
 |                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
 | Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance, i.e. AWS Graviton-based Amazon EC2 instances. |
 |                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. gp3 Amazon EBS volumes with optimal IOPS and throughput. |
-|                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the BNB community and our own testing. |
+|                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the BNB Chain community and our own testing. |
 | Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health of workload is determined via AWS Application Load Balancer Target Group Health Checks, on port 8845. |
 | Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses Graviton-powered instances. There is a potential to use AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2. |
 </details>
@@ -127,7 +127,7 @@ npx cdk deploy bsc-common
 
 ### Option 1: Single RPC Node
 
-1. The inital deployment a BNB Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BNB Blockchain Network (next step).
+1. The inital deployment a BNB Chain Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for the node to synchronize with the BNB Chain Blockchain Network (next step).
 
 ```bash
 pwd
@@ -198,7 +198,7 @@ You will get a response similar to this:
 
 ### Option 2: Highly Available RPC Nodes
 
-1. The inital deployment of a BNB Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for your another half a day to a day for your nodes to synchronize with the BNB Blockchain Network, depending on how fresh the snapshot was.
+1. The inital deployment of a BNB Chain Fullnode and downloading its snapshot typically takes about 2-3 hours. The Full node uses snapshots data, and downloading and decompressing the data takes time. You can grab a cup of coffee☕️ and patiently wait during this process. After deployment, you'll need to wait for your another half a day to a day for your nodes to synchronize with the BNB Chain Blockchain Network, depending on how fresh the snapshot was.
 
 ```bash
 pwd
@@ -323,7 +323,7 @@ aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo cat /var/log/cloud-init-output.log
 ```
 
-3. How can I check the BNB service log on EC2?
+3. How can I check the BNB Chain service log on EC2?
 
 Please enter the [AWS Management Console - EC2 Instances](https://us-east-2.console.aws.amazon.com/ec2/home?region=us-east-2#Instances:instanceState=running), choose the correct region, copy the instance ID you need to query.
 
@@ -354,12 +354,12 @@ aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo systemctl restart bsc
 ```
 > **NOTE:** *You can also try the following command to obtain more information*
-> - *Check the BNB service status*
+> - *Check the BNB Chain service status*
 >   - `sudo systemctl status bsc`
-> - *View BNB service configuration*
+> - *View BNB Chain service configuration*
 >   - `cat /etc/systemd/system/bsc.service`
 
-5. Where can I find more infromation about BNB RPC API?
+5. Where can I find more infromation about BNB Chain RPC API?
 
 Please refer to more [JSON-RPC API METHODS](https://ethereum.org/en/developers/docs/apis/json-rpc/#json-rpc-methods). The following are some commonly used API methods:
    - eth_blockNumber
