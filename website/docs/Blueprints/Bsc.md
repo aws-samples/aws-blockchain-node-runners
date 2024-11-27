@@ -1,5 +1,5 @@
 ---
-sidebar_label: BNB
+sidebar_label: BNB Chain
 ---
 #
 
