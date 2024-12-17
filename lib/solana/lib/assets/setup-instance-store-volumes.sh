@@ -40,8 +40,6 @@ if [ -n "$DATA_VOLUME_ID" ]; then
 
     sudo mount -a
 
-    sudo mkdir /data/solana/data/ledger
-    sudo chown -R solana:solana /data/solana
   else
     echo "Data volume is mounted, nothing changed"
   fi

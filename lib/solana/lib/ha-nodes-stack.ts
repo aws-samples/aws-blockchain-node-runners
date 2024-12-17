@@ -70,13 +70,12 @@ export class SolanaHANodesStack extends cdk.Stack {
         // Making sure our instance will be able to read the assets
         asset.bucket.grantRead(instanceRole);
 
-        // Checking configuration
-        if (instanceCpuType === ec2.AmazonLinuxCpuType.ARM_64) {
-            throw new Error("ARM_64 is not yet supported");
-        }
-
         // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
-        const ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
+        let ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
+        // Setting up the node using generic Single Node constract
+        if (instanceCpuType === ec2.AmazonLinuxCpuType.ARM_64) {
+            ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/arm64/hvm/ebs-gp2/ami-id"
+        }
 
         // Parsing user data script and injecting necessary variables
         const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();

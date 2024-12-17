@@ -36,7 +36,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         const STACK_NAME = cdk.Stack.of(this).stackName;
         const STACK_ID = cdk.Stack.of(this).stackId;
         const availabilityZones = cdk.Stack.of(this).availabilityZones;
-        const chosenAvailabilityZone = availabilityZones.slice(0, 1)[0];
+        const chosenAvailabilityZone = availabilityZones.slice(0, 2)[1];
 
         // Getting our config from initialization properties
         const {
@@ -74,13 +74,12 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         // Making sure our instance will be able to read the assets
         asset.bucket.grantRead(instanceRole);
 
+        // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
+        let ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
         // Setting up the node using generic Single Node constract
         if (instanceCpuType === ec2.AmazonLinuxCpuType.ARM_64) {
-            throw new Error("ARM_64 is not yet supported");
+            ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/arm64/hvm/ebs-gp2/ami-id"
         }
-
-        // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
-        const ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
 
         const node = new SingleNodeConstruct(this, "sync-node", {
             instanceName: STACK_NAME,

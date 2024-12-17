@@ -14,7 +14,7 @@ ulimit -n 1000000
 TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 export EC2_INTERNAL_IP=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
-/home/solana/bin/solana-validator \
+/home/solana/bin/agave-validator \
 --ledger /data/solana/data/ledger \
 --identity /home/solana/config/validator-keypair.json \
 --vote-account /home/solana/config/vote-account-keypair.json \
