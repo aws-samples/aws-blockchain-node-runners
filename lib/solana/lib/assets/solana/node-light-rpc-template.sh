@@ -36,4 +36,5 @@ __ENTRY_POINTS__ \
 --limit-ledger-size \
 --accounts /data/solana/accounts \
 --incremental-snapshot-interval-slots 0 \
+--no-port-check \
 --log -

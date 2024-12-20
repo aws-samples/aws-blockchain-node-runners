@@ -41,4 +41,5 @@ __ENTRY_POINTS__ \
 --account-index-exclude-key kinXdEcpDQeHPEuQnqmUgtYykqKGVFq6CeVX5iAHJq6 \
 --account-index-exclude-key TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA \
 --incremental-snapshot-interval-slots 0 \
+--no-port-check \
 --log -

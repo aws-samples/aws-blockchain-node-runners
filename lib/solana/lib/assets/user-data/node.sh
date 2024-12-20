@@ -23,26 +23,35 @@ set +e
 source /etc/environment
 
 apt-get -yqq update
-apt-get -yqq install awscli jq unzip python3-pip chrony
+apt-get -yqq install jq unzip python3-pip chrony
 apt install unzip
 
 cd /opt
+
+echo "Install and configure CloudWatch agent"
+arch=$(uname -m)
+if [ "$arch" == "x86_64" ]; then
+  CW_AGENT_BINARY_URI=https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+  AWS_CLI_BINARY_URI=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+else
+  CW_AGENT_BINARY_URI=https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb
+  AWS_CLI_BINARY_URI=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
+fi
+
+
+echo "Intalling AWS CLI"
+curl "$AWS_CLI_BINARY_URI" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 
 echo "Downloading assets zip file"
 aws s3 cp $ASSETS_S3_PATH ./assets.zip --region $AWS_REGION
 unzip -q assets.zip
 
-echo "Install and configure CloudWatch agent"
-if [ "$arch" == "x86_64" ]; then
-  CW_AGENT_BINARY_URI=https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-else
-  CW_AGENT_BINARY_URI=https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb
-fi
-
+echo 'Install & configure CloudWatch Agent'
 wget -q $CW_AGENT_BINARY_URI
 dpkg -i -E amazon-cloudwatch-agent.deb
 
-echo 'Configuring CloudWatch Agent'
 mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
 cp /opt/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
 
@@ -110,12 +119,12 @@ sysctl -p /etc/sysctl.d/20-solana-mmaps.conf
 sysctl -p /etc/sysctl.d/20-solana-udp-buffers.conf
 sysctl -p /etc/sysctl.d/20-solana-additionals.conf
 
-systemctl daemon-reload
-
 bash -c "cat >/etc/security/limits.d/90-solana-nofiles.conf <<EOF
 # Increase process file descriptor count limit
 * - nofile 1000000
 EOF"
+
+systemctl daemon-reload
 
 echo 'Preparing fs for Solana installation'
 mkdir /data
@@ -131,7 +140,7 @@ usermod -aG solana solana
 if [[ "$STACK_ID" != "none" ]]; then
   echo "Install CloudFormation helper scripts"
   mkdir -p /opt/aws/
-  pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
+  pip3 install --break-system-packages https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
   ln -s /usr/local/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
 
   echo "Configuring CloudFormation helper scripts"
@@ -140,7 +149,7 @@ if [[ "$STACK_ID" != "none" ]]; then
   sed -i "s;__AWS_STACK_ID__;\"$STACK_ID\";g" /etc/cfn/cfn-hup.conf
   sed -i "s;__AWS_REGION__;\"$AWS_REGION\";g" /etc/cfn/cfn-hup.conf
 
-  mkdir -p /etc/cfn/hooks.d/
+  mkdir -p /etc/cfn/hooks.d/system  
   mv /opt/cfn-hup/cfn-auto-reloader.conf /etc/cfn/hooks.d/cfn-auto-reloader.conf
   sed -i "s;__AWS_STACK_NAME__;\"$STACK_NAME\";g" /etc/cfn/hooks.d/cfn-auto-reloader.conf
   sed -i "s;__AWS_REGION__;\"$AWS_REGION\";g" /etc/cfn/hooks.d/cfn-auto-reloader.conf

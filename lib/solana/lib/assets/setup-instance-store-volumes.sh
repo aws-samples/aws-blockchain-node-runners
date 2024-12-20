@@ -51,6 +51,11 @@ if [ -n "$ACCOUNTS_VOLUME_ID" ]; then
     echo "Checking fstab for Accounts volume"
 
     sudo mkfs.xfs -f $ACCOUNTS_VOLUME_ID
+    if [ "$?" == 1 ]; then
+      echo "Volume $ACCOUNTS_VOLUME_ID is busy, trying /dev/nvme3n1"
+      export ACCOUNTS_VOLUME_ID=/dev/nvme3n1
+      sudo mkfs.xfs -f $ACCOUNTS_VOLUME_ID
+    fi
     sleep 10
     ACCOUNTS_VOLUME_UUID=$(lsblk -fn -o UUID $ACCOUNTS_VOLUME_ID)
     ACCOUNTS_VOLUME_FSTAB_CONF="UUID=$ACCOUNTS_VOLUME_UUID /data/solana/accounts xfs defaults 0 2"

@@ -4,7 +4,7 @@
 |:--------------------:|
 | [@frbrkoala](https://github.com/frbrkoala) |
 
-Solana nodes on AWS can be deployed in 3 different configurations: Consensus, base RPC and extended RPC with secondary indexes. In addition, you can choose to deploy those configurations as a single node or a highly available (HA) nodes setup. See below the details on single node and HA deployment setups.
+Solana nodes on AWS can be deployed in 2 different configurations: base RPC and extended RPC with secondary indexes. In addition, you can choose to deploy those configurations as a single node or a highly available (HA) nodes setup and use x86 or ARM-powered EC2 instances (powered by Graviton 4). See below the details on single node and HA deployment setups.
 
 ## Overview of Deployment Architectures for Single and HA setups
 
@@ -84,9 +84,8 @@ This is the Well-Architected checklist for Solana nodes implementation of the AW
 
 | Usage pattern  | Ideal configuration  | Primary option on AWS  | Data Transfer Estimates | Config reference |
 |---|---|---|---|---|
-| 1/ Consensus node | 48 vCPU, 384 GiB RAM, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput   | r7a.12xlarge, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput | Proportional to the amount at stake. Between 200TB to 400TB/month  | [.env-sample-consensus](./sample-configs/.env-sample-consensus) |
-| 2/ Base RPC node (no secondary indexes) | 48 vCPU, 384 GiB RAM, Accounts volume: EBS gp3, 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: EBS gp3, 2TB, 9K IOPS, 700 MB/s throughput   | r7a.12xlarge, Accounts volume: EBS gp3, 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: EBS gp3, 2TB, 9K IOPS, 700 MB/s throughput | 13-15TB/month (no staking) | [.env-sample-baserpc](./sample-configs/.env-sample-baserpc) |
-| 3/ Extended RPC node (with all secondary indexes) | 96 vCPU, 768 GiB RAM, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput  | r7a.24xlarge, Accounts volume: EBS io2, 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: EBS gp3, 2TB, 9K IOPS, 700 MB/s throughput | 13-15TB/month (no staking) | [.env-sample-extendedrpc](./sample-configs/.env-sample-extendedrpc) |
+| 1/ Base RPC node (no secondary indexes) | 48 vCPU, 384 GiB RAM, Accounts volume: EBS gp3, 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: EBS gp3, 2TB, 9K IOPS, 700 MB/s throughput   | r7a.12xlarge, Accounts volume: EBS gp3, 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: EBS gp3, 2TB, 9K IOPS, 700 MB/s throughput | 13-15TB/month (no staking) | [.env-sample-baserpc-x86](./sample-configs/.env-sample-baserpc-x86) |
+| 2/ Extended RPC node (with all secondary indexes) | 96 vCPU, 768 GiB RAM, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput  | I8g.18xlarge, Accounts volume: Instance Store, Data volume: Instance Store | 20-38TB/month (no staking) | [.env-sample-extendedrpc-arm](./sample-configs/.env-sample-extendedrpc-arm) |
 </details>
 
 ## Setup Instructions
@@ -126,10 +125,10 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 # Make sure you are in aws-blockchain-node-runners/lib/solana
 cd lib/solana
 pwd
-cp ./sample-configs/.env-sample-baserpc .env
+cp ./sample-configs/.env-sample-baserpc-arm .env
 nano .env
 ```
-> **NOTE:** *You can find more examples inside `sample-configs` directory.*
+> **NOTE:** *You can find more examples inside `sample-configs` directory: ARM-powered and x86-powered setups, base and extended RPC configurations.*
 
 
 4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots

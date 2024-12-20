@@ -71,10 +71,10 @@ export class SolanaHANodesStack extends cdk.Stack {
         asset.bucket.grantRead(instanceRole);
 
         // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
-        let ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
+        let ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id"
         // Setting up the node using generic Single Node constract
         if (instanceCpuType === ec2.AmazonLinuxCpuType.ARM_64) {
-            ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/arm64/hvm/ebs-gp2/ami-id"
+            ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/24.04/stable/current/arm64/hvm/ebs-gp3/ami-id"
         }
 
         // Parsing user data script and injecting necessary variables
