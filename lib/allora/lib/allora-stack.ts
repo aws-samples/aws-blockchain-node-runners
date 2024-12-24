@@ -35,6 +35,15 @@ export interface AlloraStackProps extends cdk.StackProps {
   alloraWalletHomeDir: string;
   alloraWalletGas: string,
   alloraWalletGasAdjustment: string;
+
+  alloraWalletGasPrices: string;
+  alloraWalletGasPriceInterval: string;
+  alloraWalletRetryDelay: string;
+  alloraWalletBlockDurationEstimated: string;
+  alloraWalletWindowCorrectionFactor: string;
+  alloraWalletMaxFees: string;
+  alloraWalletAccountSequenceRetryDelay: string;
+
   alloraWalletNodeRpc: string;
   alloraWalletMaxRetries: string;
   alloraWalletDelay: string;
@@ -52,6 +61,9 @@ export interface AlloraStackProps extends cdk.StackProps {
   alloraReputerLoopSeconds: string;
   alloraReputerToken: string;
   alloraReputerMinStake: string;
+
+  alloraReputerLossFunctionService: string;
+  alloraReputerLossMethodOptionsLossMethod: string;
 }
 
 
@@ -75,6 +87,15 @@ export class AlloraStack extends cdk.Stack {
       alloraWalletHomeDir,
       alloraWalletGas,
       alloraWalletGasAdjustment,
+
+      alloraWalletGasPrices,
+      alloraWalletGasPriceInterval,
+      alloraWalletRetryDelay,
+      alloraWalletBlockDurationEstimated,
+      alloraWalletWindowCorrectionFactor,
+      alloraWalletMaxFees,
+      alloraWalletAccountSequenceRetryDelay,
+
       alloraWalletNodeRpc,
       alloraWalletMaxRetries,
       alloraWalletDelay,
@@ -91,6 +112,10 @@ export class AlloraStack extends cdk.Stack {
       alloraReputerTopicId,
       alloraReputerEntrypointName,
       alloraReputerSourceOfTruthEndpoint,
+
+      alloraReputerLossFunctionService,
+      alloraReputerLossMethodOptionsLossMethod,
+
       alloraReputerLoopSeconds,
       alloraReputerToken,
       alloraReputerMinStake,
@@ -187,6 +212,15 @@ export class AlloraStack extends cdk.Stack {
       _ALLORA_WALLET_HOME_DIR_: alloraWalletHomeDir,
       _ALLORA_WALLET_GAS_ADJUSTMENT_: alloraWalletGasAdjustment,
       _ALLORA_WALLET_GAS_: alloraWalletGas,
+
+      _ALLORA_WALLET_GAS_PRICES_: alloraWalletGasPrices,
+      _ALLORA_WALLET_GAS_PRICE_INTERVAL_: alloraWalletGasPriceInterval,
+      _ALLORA_WALLET_RETRY_DELAY_: alloraWalletRetryDelay,
+      _ALLORA_WALLET_BLOCK_DURATION_ESTIMATED_: alloraWalletBlockDurationEstimated,
+      _ALLORA_WALLET_WINDOW_CORRECTION_FACTOR_: alloraWalletWindowCorrectionFactor,
+      _ALLORA_WALLET_MAX_FEES_: alloraWalletMaxFees,
+      _ALLORA_WALLET_ACCOUNT_SEQUENCE_RETRY_DELAY_: alloraWalletAccountSequenceRetryDelay,
+      
       _ALLORA_WALLET_NODE_RPC_: alloraWalletNodeRpc,
       _ALLORA_WALLET_MAX_RETRIES_: alloraWalletMaxRetries,
       _ALLORA_WALLET_DELAY_: alloraWalletDelay,
@@ -203,9 +237,15 @@ export class AlloraStack extends cdk.Stack {
       _ALLORA_REPUTER_TOPIC_ID_: alloraReputerTopicId,
       _ALLORA_REPUTER_ENTRYPOINT_NAME_: alloraReputerEntrypointName,
       _ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT_: alloraReputerSourceOfTruthEndpoint,
+
+      _ALLORA_REPUTER_LOSS_FUNCTION_SERVICE_: alloraReputerLossFunctionService,
+      _ALLORA_REPUTER_LOSS_METHOD_OPTIONS_LOSS_METHOD_: alloraReputerLossMethodOptionsLossMethod,
+
       _ALLORA_REPUTER_LOOP_SECONDS_: alloraReputerLoopSeconds,
       _ALLORA_REPUTER_TOKEN_: alloraReputerToken,
-      _ALLORA_REPUTER_MIN_STAKE_: alloraReputerMinStake
+      _ALLORA_REPUTER_MIN_STAKE_: alloraReputerMinStake,
+
+      
     });
 
    // Create UserData for EC2 instance

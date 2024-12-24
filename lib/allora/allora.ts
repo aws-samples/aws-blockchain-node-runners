@@ -57,10 +57,19 @@ new AlloraStack(app, 'allora-single-node', {
   alloraWalletHomeDir: process.env.ALLORA_WALLET_HOME_DIR || '',
   alloraWalletGas: process.env.ALLORA_WALLET_GAS || '1000000',
   alloraWalletGasAdjustment: process.env.ALLORA_WALLET_GAS_ADJUSTMENT || '1.0',
+
+  alloraWalletGasPrices: process.env.ALLORA_WALLET_GAS_PRICES || 'auto',
+  alloraWalletGasPriceInterval: process.env.ALLORA_WALLET_GAS_PRICE_INTERVAL || '60',
+  alloraWalletRetryDelay: process.env.ALLORA_WALLET_RETRY_DELAY || '3',
+  alloraWalletBlockDurationEstimated: process.env.ALLORA_WALLET_BLOCK_DURATION_ESTIMATED || '10',
+  alloraWalletWindowCorrectionFactor: process.env.ALLORA_WALLET_WINDOW_CORRECTION_FACTOR || '0.8',
+  alloraWalletAccountSequenceRetryDelay: process.env.ALLORA_WALLET_ACCOUNT_SEQUENCE_RETRY_DELAY || '5',
+
   alloraWalletNodeRpc: process.env.ALLORA_WALLET_NODE_RPC || 'https://localhost:26657',
   alloraWalletMaxRetries: process.env.ALLORA_WALLET_MAX_RETRIES || '1',
   alloraWalletDelay: process.env.ALLORA_WALLET_DELAY || '1',
   alloraWalletSubmitTx: process.env.ALLORA_WALLET_SUBMIT_TX || 'false',
+  alloraWalletMaxFees: process.env.ALLORA_WALLET_MAX_FEES || '500000',
 
   //Worker Properties
   alloraWorkerTopicId: process.env.ALLORA_WORKER_TOPIC_ID || '1',
@@ -73,6 +82,10 @@ new AlloraStack(app, 'allora-single-node', {
   alloraReputerTopicId: process.env.ALLORA_REPUTER_TOPIC_ID || '1',
   alloraReputerEntrypointName: process.env.ALLORA_REPUTER_ENTRYPOINT_NAME || 'api-worker-reputer',
   alloraReputerSourceOfTruthEndpoint: process.env.ALLORA_REPUTER_SOURCE_OF_TRUTH_ENDPOINT || 'http://source:8888/truth/{Token}/{BlockHeight}',
+
+  alloraReputerLossFunctionService: process.env.ALLORA_REPUTER_LOSS_FUNCTION_SERVICE || 'http://localhost:5000',
+  alloraReputerLossMethodOptionsLossMethod: process.env.ALLORA_REPUTER_LOSS_METHOD_OPTIONS_LOSS_METHOD || 'sqe',
+
   alloraReputerLoopSeconds: process.env.ALLORA_REPUTER_LOOP_SECONDS || '30',
   alloraReputerToken: process.env.ALLORA_REPUTER_TOKEN || 'ethereum',
   alloraReputerMinStake: process.env.ALLORA_REPUTER_MIN_STAKE || '100000',
