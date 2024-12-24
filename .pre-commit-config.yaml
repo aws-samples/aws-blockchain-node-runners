@@ -11,3 +11,7 @@ repos:
       - id: detect-aws-credentials
         args: ['--allow-missing-credentials']
       - id: forbid-submodules
+  - repo: https://github.com/iamthefij/docker-pre-commit
+    rev: master
+    hooks:
+      - id: docker-compose-check

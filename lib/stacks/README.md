@@ -68,16 +68,20 @@ This is the Well-Architected checklist for Stacks nodes implementation of the AW
 
 ## Setup Instructions
 
-### Setup Cloud9
+### Open AWS CloudShell
 
-We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../docs/setup-cloud9.md)
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
+
+From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
+
+Once ready, you can run the commands to deploy and test blueprints in the CloudShell.
 
 ### Clone this repository and install dependencies
 
 ```bash
-   git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
-   cd aws-blockchain-node-runners
-   npm install
+git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
+cd aws-blockchain-node-runners
+npm install
 ```
 
 ### Deploy Single Node
@@ -87,38 +91,38 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 2. If you have deleted or don't have the default VPC, create default VPC
 
 ```bash
-    aws ec2 create-default-vpc
-   ```
+aws ec2 create-default-vpc
+```
 
-   **NOTE:** You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
+> **NOTE:** *You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.*
 
 3. Configure  your setup
 
 Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
 ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/stacks
-   cd lib/stacks
-   pwd
-   cp ./sample-configs/.env-sample-follower .env
-   nano .env
+# Make sure you are in aws-blockchain-node-runners/lib/stacks
+cd lib/stacks
+pwd
+cp ./sample-configs/.env-sample-follower .env
+nano .env
 ```
-   **NOTE:** Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
+> **NOTE:** *Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.*
 
 
 4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/stacks
-   npx cdk deploy stacks-common
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/stacks
+npx cdk deploy stacks-common
 ```
 
-5. Deploy Sync Node
+5. Deploy Single Node
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/stacks
-   npx cdk deploy stacks-single-node --json --outputs-file single-node-deploy.json
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/stacks
+npx cdk deploy stacks-single-node --json --outputs-file single-node-deploy.json
 ```
 
 6. After starting the node you need to wait for the initial synchronization process to finish. It may take about 90 minutes and you can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `stacks_tip_height` and `burn_block_height` metrics. When the node is fully synced the `stacks_tip_height` metric will start to display. To see them:
@@ -129,43 +133,50 @@ Create your own copy of `.env` file and edit it to update with your AWS Account 
 7. Connect with the RPC API exposed by the node:
 
 ```bash
-   INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
-   curl http://$NODE_INTERNAL_IP:20443/v2/info'
+INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
+NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+echo "NODE_INTERNAL_IP=$NODE_INTERNAL_IP"
+```
+
+   Copy output from the last `echo` command with `NODE_INTERNAL_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `NODE_INTERNAL_IP=<internal_IP>` into the new CloudShell tab. Then query the API:
+
+``` bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+curl http://$NODE_INTERNAL_IP:20443/v2/info
 ```
 
 You should get a response like this:
 
 ```JSON
-{
-    "peer_version": 402653193,
-    "pox_consensus": "27dbe5fc464fd0b9e1da43691d8fac55d4ff2760",
-    "burn_block_height": 832605,
-    "stable_pox_consensus": "2a4365ecb6c1d9aed5308a5bbdf817ab134fe4fb",
-    "stable_burn_block_height": 832598,
-    "server_version": "stacks-node 0.0.1 (:+, release build, linux [x86_64])",
-    "network_id": 1,
-    "parent_network_id": 3652501241,
-    "stacks_tip_height": 141155,
-    "stacks_tip": "7ef7a91b012784ab5f19ce9f1c5665821b2a365e25527da07df76d210d9805e4",
-    "stacks_tip_consensus_hash": "dcbfa607058859324b95466cc52a77ae8d0692cd",
-    "genesis_chainstate_hash": "74237aa39aa50a83de11a4f53e9d3bb7d43461d1de9873f402e5453ae60bc59b",
-    "unanchored_tip": null,
-    "unanchored_seq": null,
-    "exit_at_block_height": null,
-    "node_public_key": "0246622dd66e1db792982e02ab933a056832e8bc5e9e6efc70f35576a16ca39966",
-    "node_public_key_hash": "93ef5fad09be740ce5e279b9b83ac910cd8a5cd4",
-    "affirmations": {
-        "heaviest": "pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
-        "stacks_tip": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
-        "sortition_tip": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
-        "tentative_best": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp"
-    },
-    "last_pox_anchor": {
-        "anchor_block_hash": "95c86834f315efb220a1105ff3fe9543a099d28ee6fe996d758ca2dc8cbc8e57",
-        "anchor_block_txid": "88afd29afb8fd122512ab8951c2cf488f394b61a9c4fcb77ba3f3ba15c6500a8"
-    }
-}
+   {
+      "peer_version": 402653193,
+      "pox_consensus": "27dbe5fc464fd0b9e1da43691d8fac55d4ff2760",
+      "burn_block_height": 832605,
+      "stable_pox_consensus": "2a4365ecb6c1d9aed5308a5bbdf817ab134fe4fb",
+      "stable_burn_block_height": 832598,
+      "server_version": "stacks-node 0.0.1 (:+, release build, linux [x86_64])",
+      "network_id": 1,
+      "parent_network_id": 3652501241,
+      "stacks_tip_height": 141155,
+      "stacks_tip": "7ef7a91b012784ab5f19ce9f1c5665821b2a365e25527da07df76d210d9805e4",
+      "stacks_tip_consensus_hash": "dcbfa607058859324b95466cc52a77ae8d0692cd",
+      "genesis_chainstate_hash": "74237aa39aa50a83de11a4f53e9d3bb7d43461d1de9873f402e5453ae60bc59b",
+      "unanchored_tip": null,
+      "unanchored_seq": null,
+      "exit_at_block_height": null,
+      "node_public_key": "0246622dd66e1db792982e02ab933a056832e8bc5e9e6efc70f35576a16ca39966",
+      "node_public_key_hash": "93ef5fad09be740ce5e279b9b83ac910cd8a5cd4",
+      "affirmations": {
+         "heaviest": "pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+         "stacks_tip": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+         "sortition_tip": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+         "tentative_best": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp"
+      },
+      "last_pox_anchor": {
+         "anchor_block_hash": "95c86834f315efb220a1105ff3fe9543a099d28ee6fe996d758ca2dc8cbc8e57",
+         "anchor_block_txid": "88afd29afb8fd122512ab8951c2cf488f394b61a9c4fcb77ba3f3ba15c6500a8"
+      }
+   }
 ```
 
 ### Deploy the HA Nodes
@@ -173,92 +184,93 @@ You should get a response like this:
 1. Configure and deploy multiple HA Nodes
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/stacks
-   npx cdk deploy stacks-ha-nodes --json --outputs-file ha-nodes-deploy.json
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/stacks
+npx cdk deploy stacks-ha-nodes --json --outputs-file ha-nodes-deploy.json
 ```
 
 2. Give the new RPC nodes about 90 minutes to initialize and then run the following query against the load balancer behind the RPC node created
 
 ```bash
-    export RPC_ABL_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
-    echo $RPC_ABL_URL
+export RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
+echo RPC_ALB_URL=$RPC_ALB_URL
+```
 
-    curl http://$RPC_ABL_URL:20443/v2/info' | jq
+```bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+curl http://$RPC_ALB_URL:20443/v2/info | jq
 ```
 
 The result should show the status of the blockchain.
 
-**NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
+> **NOTE:** *By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.*
 
 ### Clearing up and undeploy everything
 
-1. Undeploy HA Nodes, Single Nodes and Common stacks
+Destroy HA Nodes, Single Nodes and Common stacks
 
 ```bash
-   # Setting the AWS account id and region in case local .env file is lost
-   export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
-   export AWS_REGION=<your_target_AWS_region>
+# Setting the AWS account id and region in case local .env file is lost
+export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+export AWS_REGION=<your_target_AWS_region>
 
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/stacks
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/stacks
 
-   # Undeploy HA Nodes
-   cdk destroy stacks-ha-nodes
+# Destroy HA Nodes
+cdk destroy stacks-ha-nodes
 
-   # Undeploy Single Node
-   cdk destroy stacks-single-node
+# Destroy Single Node
+cdk destroy stacks-single-node
 
-   # Delete all common components like IAM role and Security Group
-   cdk destroy stacks-common
+# Delete all common components like IAM role and Security Group
+cdk destroy stacks-common
 ```
-
-2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
 
 ### FAQ
 
 1. How to check the logs of the clients running on my sync node?
 
-   **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+> **NOTE:** *In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)*
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/stacks
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/stacks
 
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid?|select(. != null)' )
-   export AWS_REGION=$(cat single-node-deploy.json | jq -r '..|.region?|select(. != null)' )
-   echo "INSTANCE_ID=$INSTANCE_ID"
-   echo "AWS_REGION=$AWS_REGION"
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo su -
-   tail -f /var/log/stacks/stacks.log
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid?|select(. != null)' )
+export AWS_REGION=$(cat single-node-deploy.json | jq -r '..|.region?|select(. != null)' )
+echo "INSTANCE_ID=$INSTANCE_ID"
+echo "AWS_REGION=$AWS_REGION"
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo su -
+tail -f /var/log/stacks/stacks.log
 ```
 
 2. How to check the logs from the EC2 user-data script?
 
 ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/stacks
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/stacks
 
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid?|select(. != null)' )
-   export AWS_REGION=$(cat single-node-deploy.json | jq -r '..|.region?|select(. != null)' )
-   echo "INSTANCE_ID=$INSTANCE_ID"
-   echo "AWS_REGION=$AWS_REGION"
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo cat /var/log/cloud-init-output.log
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid?|select(. != null)' )
+export AWS_REGION=$(cat single-node-deploy.json | jq -r '..|.region?|select(. != null)' )
+echo "INSTANCE_ID=$INSTANCE_ID"
+echo "AWS_REGION=$AWS_REGION"
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo cat /var/log/cloud-init-output.log
 ```
 
 3. How can I restart the Stacks service?
 
 ``` bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid?|select(. != null)' )
-   export AWS_REGION=$(cat single-node-deploy.json | jq -r '..|.region?|select(. != null)' )
-   echo "INSTANCE_ID=$INSTANCE_ID"
-   echo "AWS_REGION=$AWS_REGION"
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo systemctl status stacks
-   # Then if the status is bad run the following:
-   sudo systemctl restart stacks
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid?|select(. != null)' )
+export AWS_REGION=$(cat single-node-deploy.json | jq -r '..|.region?|select(. != null)' )
+echo "INSTANCE_ID=$INSTANCE_ID"
+echo "AWS_REGION=$AWS_REGION"
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo systemctl status stacks
+# Then if the status is bad run the following:
+sudo systemctl restart stacks
 ```
 
 ## Upgrades

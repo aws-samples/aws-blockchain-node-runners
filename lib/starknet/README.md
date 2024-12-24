@@ -63,16 +63,20 @@ This is the Well-Architected checklist for Stacks nodes implementation of the AW
 
 ## Setup Instructions
 
-### Setup Cloud9
+### Open AWS CloudShell
 
-We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../docs/setup-cloud9.md)
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
+
+From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
+
+Once ready, you can run the commands to deploy and test blueprints in the CloudShell.
 
 ### Clone this repository and install dependencies
 
 ```bash
-   git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
-   cd aws-blockchain-node-runners
-   npm install
+git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
+cd aws-blockchain-node-runners
+npm install
 ```
 
 ### Deploy Single Node
@@ -81,85 +85,82 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 
 2. If you have deleted or don't have the default VPC, create default VPC
 
-    ```bash
-    aws ec2 create-default-vpc
-    ```
+```bash
+aws ec2 create-default-vpc
+```
 
-   > NOTE:
-   > You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.
+> **NOTE:** *You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.*
 
 3. Configure your setup
 
     Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
-    ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/starknet
-   cd lib/starknet
-   npm install
-   pwd
-   cp ./sample-configs/.env-sample-full .env
-   nano .env
-    ```
-   > NOTE:
-   > Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/starknet
+cd lib/starknet
+npm install
+pwd
+cp ./sample-configs/.env-sample-full .env
+nano .env
+```
+> **NOTE:** *Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.*
 
 4. Deploy common components such as IAM role
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/starknet
-   npx cdk deploy starknet-common
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/starknet
+npx cdk deploy starknet-common
+```
 
-   > IMPORTANT:
-   > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
-   > ```bash
-   > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
-   > ```
+> **IMPORTANT:** *All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:*
+> ```bash
+> cdk bootstrap aws://ACCOUNT-NUMBER/REGION
+> ```
 
-5. [OPTIONAL] You can use Amazon Managed Blockchain (AMB) Access Ethereum node as L1 node. To do that, leave `STARKNET_L1_ENDPOINT` URL empty and, deploy Amazon Managed Blockchain (AMB) Access Ethereum node. Wait about 35-70 minutes for the node to sync.
+5. **[OPTIONAL]** You can use Amazon Managed Blockchain (AMB) Access Ethereum node as L1 node. To do that, leave `STARKNET_L1_ENDPOINT` URL empty and, deploy Amazon Managed Blockchain (AMB) Access Ethereum node. Wait about 35-70 minutes for the node to sync.
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/starknet
-   npx cdk deploy starknet-ethereum-l1-node --json --outputs-file starknet-ethereum-l1-node.json
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/starknet
+npx cdk deploy starknet-ethereum-l1-node --json --outputs-file starknet-ethereum-l1-node.json
+```
    To watch the progress, open the [AMB Web UI](https://console.aws.amazon.com/managedblockchain/home), click the name of your target network from the list (Mainnet, Goerly, etc.) and watch the status of the node to change from `Creating` to `Available`.
 
 6. Deploy Starknet Full Node
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/starknet
-   npx cdk deploy starknet-single-node --json --outputs-file single-node-deploy.json
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/starknet
+npx cdk deploy starknet-single-node --json --outputs-file single-node-deploy.json
+```
    After starting the node you will need to wait for the initial synchronization process to finish. When using snapshot, the node should become available within a couple of hours, but migh take about 3-4 days to sync it from block 0. To check the progress, you may use SSM to connect into EC2 first and watch the log like this:
 
-   ```bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   echo "INSTANCE_ID="$INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   tail -f /var/log/starknet/error.log
-   ```
+```bash
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
+echo "INSTANCE_ID="$INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+tail -f /var/log/starknet/error.log
+```
 
 
 7. Test Starknet RPC API
    Use curl to query from within the node instance:
-   ```bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+```bash
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 
-   curl --location 'http://localhost:6060' \
-   --header 'Content-Type: application/json' \
-   --data '{
+curl --location 'http://localhost:6060' \
+--header 'Content-Type: application/json' \
+--data '{
       "jsonrpc":"2.0",
       "method":"starknet_chainId",
       "params":[],
       "id":1
    }'
-   ```
+```
 
 ### Monitoring
 A script on the Starknet node publishes current block and blocks behind metrics to CloudWatch metrics every 5 minutes. When the node is fully synced the blocks behind metric should get to 0.To see the metrics:
@@ -169,67 +170,65 @@ A script on the Starknet node publishes current block and blocks behind metrics 
 
 ## Clear up and undeploy everything
 
-1. Undeploy all Nodes and Common stacks
+Destroy all Nodes and Common stacks
 
-   ```bash
-   # Setting the AWS account id and region in case local .env file is lost
-   export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
-   export AWS_REGION=<your_target_AWS_region>
+```bash
+# Setting the AWS account id and region in case local .env file is lost
+export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+export AWS_REGION=<your_target_AWS_region>
 
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/starknet
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/starknet
 
-   # Undeploy Single Node
-   npx cdk destroy starknet-single-node
+# Destroy Single Node
+npx cdk destroy starknet-single-node
 
-   # Undeploy AMB Etheruem node
-   npx cdk destroy starknet-ethereum-l1-node
+# Destroy AMB Etheruem node
+npx cdk destroy starknet-ethereum-l1-node
 
-   # Delete all common components like IAM role and Security Group
-   npx cdk destroy starknet-common
-   ```
-
-2. Follow steps to delete the Cloud9 instance in [Cloud9 Setup](../../doc/setup-cloud9.md)
+# Delete all common components like IAM role and Security Group
+npx cdk destroy starknet-common
+```
 
 ## FAQ
 
 1. How to check the logs of the clients running on my Starknet node?
 
-   **Note:** In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
+> **NOTE:** *In this tutorial we chose not to use SSH and use Session Manager instead. That allows you to log all sessions in AWS CloudTrail to see who logged into the server and when. If you receive an error similar to `SessionManagerPlugin is not found`, [install Session Manager plugin for AWS CLI](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)*
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/starknet
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/starknet
 
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   echo "INSTANCE_ID="$INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   tail -f /var/log/starknet/error.log
-   ```
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
+echo "INSTANCE_ID="$INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+tail -f /var/log/starknet/error.log
+```
 2. How to check the logs from the EC2 user-data script?
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/starknet
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/starknet
 
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo cat /var/log/cloud-init-output.log
-   ```
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo cat /var/log/cloud-init-output.log
+```
 
 3. How can I restart the Starknet service?
 
-   ``` bash
-   export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
-   echo "INSTANCE_ID=" $INSTANCE_ID
-   export AWS_REGION=us-east-1
-   aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-   sudo systemctl status starknet.service
-   sudo systemctl restart starknet.service
-   ```
+``` bash
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
+echo "INSTANCE_ID=" $INSTANCE_ID
+export AWS_REGION=us-east-1
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo systemctl status starknet.service
+sudo systemctl restart starknet.service
+```
 4. Where to find the key juno directories?
 
    - The directory with binaries is `/home/ubuntu/juno-source`.

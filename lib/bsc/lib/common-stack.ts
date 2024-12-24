@@ -4,7 +4,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as nag from "cdk-nag";
 
 export interface BscCommonStackProps extends cdk.StackProps {
-
 }
 
 export class BscCommonStack extends cdk.Stack {

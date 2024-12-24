@@ -40,6 +40,8 @@ export const baseNodeConfig: configTypes.StacksBaseNodeConfig = {
     stacksNetwork: stacksNetwork,
     stacksVersion: process.env.STACKS_VERSION || defaults.stacksVersion,
     stacksNodeConfiguration: <configTypes.StacksNodeConfiguration> process.env.STACKS_NODE_CONFIGURATION || defaults.stacksNodeConfiguration,
+    buildFromSource: process.env.STACKS_BUILD_FROM_SOURCE?.toLowerCase() === "true" ? true : defaults.buildFromSource,
+    downloadChainstate: process.env.STACKS_DOWNLOAD_CHAINSTATE?.toLowerCase() === "false" ? false : defaults.downloadChainstate,
     stacksBootstrapNode: process.env.STACKS_BOOTSTRAP_NODE || defaults.stacksBootstrapNode,
     stacksChainstateArchive: process.env.STACKS_CHAINSTATE_ARCHIVE || defaults.stacksChainstateArchive,
     stacksP2pPort: process.env.STACKS_P2P_PORT ? parseInt(process.env.STACKS_P2P_PORT) : defaults.stacksP2pPort,

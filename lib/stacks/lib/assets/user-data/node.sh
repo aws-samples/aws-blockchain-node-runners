@@ -34,6 +34,8 @@ CLOUD_ASSETS_PATH=/var/tmp/assets
   echo "DATA_VOLUME_SIZE=${_DATA_VOLUME_SIZE_}"
   echo "ASG_NAME=${_ASG_NAME_}"
   echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}"
+  echo "BUILD_FROM_SOURCE=${_BUILD_FROM_SOURCE_}"
+  echo "DOWNLOAD_CHAINSTATE=${_DOWNLOAD_CHAINSTATE_}"
   # Place shared environment variables here.
   echo "DATA_VOLUME_PATH=$DATA_VOLUME_PATH"
   echo "CLOUD_ASSETS_PATH=$CLOUD_ASSETS_PATH"
@@ -149,26 +151,33 @@ lsblk
 
 # Build Binaries & Download Chainstate -----------------------------------------
 
-(
-  # Impropperly using the data volume path temporarily because it will have the
-  # space required to store the compressed chainstate.
-  sudo mkdir -p $DATA_VOLUME_PATH/tmp
-  wget -q "$STACKS_CHAINSTATE_ARCHIVE" \
-    -O "$DATA_VOLUME_PATH/tmp/chainstate.tar.gz"
-  tar -vxf "$DATA_VOLUME_PATH/tmp/chainstate.tar.gz" \
-    -C "$DATA_VOLUME_PATH"
-  rm -rf "$DATA_VOLUME_PATH/tmp"
-) &
+if [[ "$DOWNLOAD_CHAINSTATE" = "true" ]]; then
+  (
+    # Impropperly using the data volume path temporarily because it will have the
+    # space required to store the compressed chainstate.
+    sudo mkdir -p $DATA_VOLUME_PATH/tmp
+    wget -q "$STACKS_CHAINSTATE_ARCHIVE" \
+      -O "$DATA_VOLUME_PATH/tmp/chainstate.tar.gz"
+    tar -vxf "$DATA_VOLUME_PATH/tmp/chainstate.tar.gz" \
+      -C "$DATA_VOLUME_PATH"
+    rm -rf "$DATA_VOLUME_PATH/tmp"
+  ) &
+fi
 
-(
-  # build-binaries.sh will ensure that the working directory the script is called from
-  # has a ./src and a ./bin directory and will populate the ./src with the source code
-  # and the ./bin with the compiled binaries.
+if [[ "$BUILD_FROM_SOURCE" = "true" ]]; then
+  (
+    # build-binaries.sh will ensure that the working directory the script is called from
+    # has a ./src and a ./bin directory and will populate the ./src with the source code
+    # and the ./bin with the compiled binaries.
+    cd /usr/local || return
+    "$CLOUD_ASSETS_PATH"/build-binaries.sh
+  ) &
+else
   cd /usr/local || return
-  "$CLOUD_ASSETS_PATH"/build-binaries.sh
-) &
+  "$CLOUD_ASSETS_PATH"/download-binaries.sh
+fi
 
-wait # Wait for both background processes to finish
+wait # Wait for download or build or both to finish in background, if they were started
 
 # No new directories are made at this point; ensure that the stacks
 # user has all necessary permissions.

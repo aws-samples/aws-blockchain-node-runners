@@ -31,6 +31,8 @@ export class StacksHANodesStack extends cdk.Stack {
             stacksNetwork,
             stacksVersion,
             stacksNodeConfiguration,
+            buildFromSource,
+            downloadChainstate,
             // Stacks networking
             stacksBootstrapNode,
             stacksChainstateArchive,
@@ -109,6 +111,8 @@ export class StacksHANodesStack extends cdk.Stack {
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
             _ASG_NAME_: autoScalingGroupName,
+            _BUILD_FROM_SOURCE_: buildFromSource.toString(),
+            _DOWNLOAD_CHAINSTATE_: downloadChainstate.toString(),
         });
 
         // Path on the rpc port that will return a successful status code when the node

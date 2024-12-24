@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-sidebar_label: SetupCloud9
+sidebar_label: Setup
 slug: /setup-cloud9.md
 ---
 #

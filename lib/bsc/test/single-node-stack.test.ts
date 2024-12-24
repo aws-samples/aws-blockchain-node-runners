@@ -3,7 +3,6 @@ import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
 import * as config from "../lib/config/bscConfig";
-import * as configTypes from "../lib/config/bscConfig.interface";
 import { BscSingleNodeStack } from "../lib/single-node-stack";
 
 describe("BSCSingleNodeStack", () => {
@@ -15,13 +14,7 @@ describe("BSCSingleNodeStack", () => {
       stackName: `bsc-single-node`,
 
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-      nodeRole: <configTypes.BscNodeRole> "single-node",
-      instanceType: config.baseNodeConfig.instanceType,
-      instanceCpuType: config.baseNodeConfig.instanceCpuType,
-      bscNetwork: config.baseNodeConfig.bscNetwork,
-      nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
-      snapshotsUrl:config.baseNodeConfig.snapshotsUrl,
-      dataVolume: config.baseNodeConfig.dataVolume,
+      ...config.baseNodeConfig
   });
 
     // Prepare the stack for assertions.
