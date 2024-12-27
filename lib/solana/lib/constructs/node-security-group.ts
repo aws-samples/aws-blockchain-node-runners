@@ -3,14 +3,14 @@ import * as cdkContructs from 'constructs';
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as nag from "cdk-nag";
 
-export interface SolanaNodeSecurityGroupConstructProps {
+export interface NodeSecurityGroupConstructProps {
     vpc: cdk.aws_ec2.IVpc;
   }
 
-  export class SolanaNodeSecurityGroupConstruct extends cdkContructs.Construct {
+  export class NodeSecurityGroupConstruct extends cdkContructs.Construct {
     public securityGroup: cdk.aws_ec2.ISecurityGroup;
 
-    constructor(scope: cdkContructs.Construct, id: string, props: SolanaNodeSecurityGroupConstructProps) {
+    constructor(scope: cdkContructs.Construct, id: string, props: NodeSecurityGroupConstructProps) {
       super(scope, id);
 
       const {
@@ -24,12 +24,12 @@ export interface SolanaNodeSecurityGroupConstructProps {
       });
 
       // Public ports
-      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcpRange(8800, 8814), "P2P protocols (gossip, turbine, repair, etc)");
-      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(8800, 8814), "P2P protocols (gossip, turbine, repair, etc)");
+      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcpRange(8800, 8814), "allow all TCP P2P protocols (gossip, turbine, repair, etc)");
+      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(8800, 8814), "allow all UDP P2P protocols (gossip, turbine, repair, etc)");
 
       // Private ports restricted only to the VPC IP range
-      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8899), "RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)");
-      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8900), "RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)");
+      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8899), "allow internal RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)");
+      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8900), "allow internal RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)");
 
       this.securityGroup = sg
 

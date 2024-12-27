@@ -1,15 +1,15 @@
 [Unit]
-Description=Solana Validator
+Description=Blockchain Node
 After=network.target
 StartLimitIntervalSec=0
 [Service]
 Type=simple
 Restart=always
 RestartSec=1
-User=solana
+User=bcuser
 LimitNOFILE=1000000
 LogRateLimitIntervalSec=0
-Environment="PATH=/bin:/usr/bin:/home/solana/bin"
-ExecStart=/home/solana/bin/validator.sh
+Environment="PATH=/bin:/usr/bin:/home/bcuser/bin"
+ExecStart=/home/bcuser/bin/node-service.sh
 [Install]
 WantedBy=multi-user.target
