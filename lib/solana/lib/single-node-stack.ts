@@ -8,9 +8,9 @@ import * as fs from "fs";
 import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 import * as nag from "cdk-nag";
 import { SingleNodeConstruct } from "../../constructs/single-node"
-import * as configTypes from "./config/solanaConfig.interface";
+import * as configTypes from "./config/node-config.interface";
 import * as constants from "../../constructs/constants";
-import { SolanaNodeSecurityGroupConstruct } from "./constructs/solana-node-security-group"
+import { NodeSecurityGroupConstruct } from "./constructs/node-security-group"
 import { SingleNodeCWDashboardJSON } from "./constructs/node-cw-dashboard"
 
 export interface SolanaSingleNodeStackProps extends cdk.StackProps {
@@ -36,7 +36,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         const STACK_NAME = cdk.Stack.of(this).stackName;
         const STACK_ID = cdk.Stack.of(this).stackId;
         const availabilityZones = cdk.Stack.of(this).availabilityZones;
-        const chosenAvailabilityZone = availabilityZones.slice(0, 1)[0];
+        const chosenAvailabilityZone = availabilityZones.slice(0, 2)[1];
 
         // Getting our config from initialization properties
         const {
@@ -57,7 +57,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
 
         // Setting up the security group for the node from Solana-specific construct
-        const instanceSG = new SolanaNodeSecurityGroupConstruct (this, "security-group", {
+        const instanceSG = new NodeSecurityGroupConstruct (this, "security-group", {
             vpc: vpc,
         })
 
@@ -74,20 +74,19 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         // Making sure our instance will be able to read the assets
         asset.bucket.grantRead(instanceRole);
 
+        // Use Ubuntu 24.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
+        let ubuntuStableImageSsmName = "/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id"
         // Setting up the node using generic Single Node constract
         if (instanceCpuType === ec2.AmazonLinuxCpuType.ARM_64) {
-            throw new Error("ARM_64 is not yet supported");
+            ubuntuStableImageSsmName = "/aws/service/canonical/ubuntu/server/24.04/stable/current/arm64/hvm/ebs-gp3/ami-id"
         }
-
-        // Use Ubuntu 20.04 LTS image for amd64. Find more: https://discourse.ubuntu.com/t/finding-ubuntu-images-with-the-aws-ssm-parameter-store/15507
-        const ubuntu204stableImageSsmName = "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id"
 
         const node = new SingleNodeConstruct(this, "sync-node", {
             instanceName: STACK_NAME,
             instanceType,
             dataVolumes: [accountsVolume, dataVolume],
             rootDataVolumeDeviceName: "/dev/sda1",
-            machineImage: ec2.MachineImage.fromSsmParameter(ubuntu204stableImageSsmName),
+            machineImage: ec2.MachineImage.fromSsmParameter(ubuntuStableImageSsmName),
             vpc,
             availabilityZone: chosenAvailabilityZone,
             role: instanceRole,
@@ -98,7 +97,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
         });
 
         // Parsing user data script and injecting necessary variables
-        const nodeStartScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
+        const nodeStartScript = fs.readFileSync(path.join(__dirname, "assets", "user-data-ubuntu.sh")).toString();
         const accountsVolumeSizeBytes = accountsVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
         const dataVolumeSizeBytes = dataVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
 

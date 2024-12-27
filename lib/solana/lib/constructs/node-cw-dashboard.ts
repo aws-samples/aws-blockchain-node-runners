@@ -292,12 +292,12 @@ export const SingleNodeCWDashboardJSON = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "disk_used_percent", "InstanceId", "${INSTANCE_ID}", "device", "nvme1n1", "path", "/data/solana/data", "fstype", "xfs", { "region": "${REGION}", "label": "/data/solana/data" } ]
+                    [ { "expression": "SELECT AVG(disk_used_percent) FROM CWAgent WHERE path = '/data/data' AND InstanceId = '${INSTANCE_ID}'", "label": "/data/data", "id": "q1" } ]
                 ],
                 "sparkline": true,
                 "view": "singleValue",
                 "region": "${REGION}",
-                "title": "nvme1n1 Disk Used (%)",
+                "title": "Data Disk Used (%)",
                 "period": 60,
                 "stat": "Average"
             }
@@ -310,12 +310,12 @@ export const SingleNodeCWDashboardJSON = {
             "type": "metric",
             "properties": {
                 "metrics": [
-                    [ "CWAgent", "disk_used_percent", "InstanceId", "${INSTANCE_ID}", "device", "nvme2n1",  "path", "/data/solana/accounts", "fstype", "xfs", { "region": "${REGION}", "label": "/data/solana/accounts" } ]
+                    [ { "expression": "SELECT AVG(disk_used_percent) FROM CWAgent WHERE path = '/data/accounts' AND InstanceId = '${INSTANCE_ID}'", "label": "/data/accounts", "id": "q1" } ]
                 ],
                 "sparkline": true,
                 "view": "singleValue",
                 "region": "${REGION}",
-                "title": "nvme2n1 Disk Used (%)",
+                "title": "Accounts Disk Used (%)",
                 "period": 60,
                 "stat": "Average"
             }
