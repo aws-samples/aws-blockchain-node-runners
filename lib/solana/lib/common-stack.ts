@@ -3,7 +3,7 @@ import * as cdkConstructs from "constructs";
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as nag from "cdk-nag";
 
-export interface SolanaCommonStackProps extends cdk.StackProps {
+export interface CommonStackProps extends cdk.StackProps {
 
 }
 
@@ -11,7 +11,7 @@ export class SolanaCommonStack extends cdk.Stack {
     AWS_STACKNAME = cdk.Stack.of(this).stackName;
     AWS_ACCOUNT_ID = cdk.Stack.of(this).account;
 
-    constructor(scope: cdkConstructs.Construct, id: string, props: SolanaCommonStackProps) {
+    constructor(scope: cdkConstructs.Construct, id: string, props: CommonStackProps) {
         super(scope, id, props);
 
         const region = cdk.Stack.of(this).region;
@@ -43,6 +43,15 @@ export class SolanaCommonStack extends cdk.Stack {
                     `arn:aws:s3:::cloudformation-examples/*`,
                 ],
                 actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
+            })
+        );
+
+        instanceRole.addToPolicy(
+            new iam.PolicyStatement({
+                resources: [
+                    `arn:aws:cloudwatch::${this.AWS_ACCOUNT_ID}:dashboard/solana-*`,
+                ],
+                actions: ["cloudwatch:PutDashboard", "cloudwatch:GetDashboard"],
             })
         );
 

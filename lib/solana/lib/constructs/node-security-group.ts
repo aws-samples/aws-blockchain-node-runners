@@ -3,14 +3,14 @@ import * as cdkContructs from 'constructs';
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as nag from "cdk-nag";
 
-export interface SolanaNodeSecurityGroupConstructProps {
+export interface NodeSecurityGroupConstructProps {
     vpc: cdk.aws_ec2.IVpc;
   }
 
-  export class SolanaNodeSecurityGroupConstruct extends cdkContructs.Construct {
+  export class NodeSecurityGroupConstruct extends cdkContructs.Construct {
     public securityGroup: cdk.aws_ec2.ISecurityGroup;
 
-    constructor(scope: cdkContructs.Construct, id: string, props: SolanaNodeSecurityGroupConstructProps) {
+    constructor(scope: cdkContructs.Construct, id: string, props: NodeSecurityGroupConstructProps) {
       super(scope, id);
 
       const {
@@ -20,20 +20,11 @@ export interface SolanaNodeSecurityGroupConstructProps {
       const sg = new ec2.SecurityGroup(this, `rpc-node-security-group`, {
         vpc,
         description: "Security Group for Blockchain nodes",
-        allowAllOutbound: false,
+        allowAllOutbound: true,
       });
 
-      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.HTTP, "allow HTTP");
-      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.HTTPS, "allow HTTPS");
-      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(123), "allow NTP");
-      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(8899), "allow Solana RPC");
-      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(8001), "allow TCP Solana P2P");
-      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(8801), "allow TCP Solana P2P");
-      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(8000,8014), "allow UDP Solana P2P");
-      sg.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(8800,8814), "allow UDP Solana P2P");
-
       // Public ports
-      sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcpRange(8800, 8814), "allow internal TCP P2P protocols (gossip, turbine, repair, etc)");
+      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcpRange(8800, 8814), "allow all TCP P2P protocols (gossip, turbine, repair, etc)");
       sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(8800, 8814), "allow all UDP P2P protocols (gossip, turbine, repair, etc)");
 
       // Private ports restricted only to the VPC IP range
