@@ -1,5 +1,5 @@
 [Unit]
-Description="Sync checker for the tezos node"
+Description="Sync checker for blockchain node"
 
 [Service]
 ExecStart=/opt/syncchecker.sh

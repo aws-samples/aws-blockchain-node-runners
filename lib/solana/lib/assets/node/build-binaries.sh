@@ -1,6 +1,12 @@
 #!/bin/bash
 
-source /etc/environment
+if [ -n "$1" ]; then
+  export SOLANA_VERSION=$1
+else
+  echo "Error: No Solana version is provided"
+  echo "Usage: node/build-binaries.sh <solana_version>"
+  exit 1
+fi
 
 echo "Install rustc, cargo and rustfmt."
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rust-installer.sh
@@ -33,5 +39,8 @@ echo "Check agave-validator version"
 ./bin/agave-validator --version
 
 echo "Modifying path"
-mv $PWD/bin/* /home/solana/bin
-echo export PATH=/home/solana/bin:$PATH >> /home/solana/.profile
+if [ ! -d "/home/bcuser/bin" ]; then
+  mkdir -p /home/bcuser/bin
+fi
+mv $PWD/bin/* /home/bcuser/bin
+echo export PATH=/home/bcuser/bin:$PATH >> /home/bcuser/.profile

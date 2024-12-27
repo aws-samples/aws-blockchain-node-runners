@@ -4,7 +4,7 @@
 |:--------------------:|
 | [@frbrkoala](https://github.com/frbrkoala) |
 
-Solana nodes on AWS can be deployed in 2 different configurations: base RPC and extended RPC with secondary indexes. In addition, you can choose to deploy those configurations as a single node or a highly available (HA) nodes setup and use x86 or ARM-powered EC2 instances (powered by Graviton 4). See below the details on single node and HA deployment setups.
+Solana nodes on AWS can be deployed in 2 different configurations: base RPC and extended RPC with secondary indexes. In addition, you can choose to deploy those configurations as a single node or a highly available (HA) nodes setup and use x86- or ARM-powered EC2 instances. See below the details on single node and HA deployment setups.
 
 ## Overview of Deployment Architectures for Single and HA setups
 
@@ -14,8 +14,8 @@ Solana nodes on AWS can be deployed in 2 different configurations: base RPC and 
 
 1.	A Solana node deployed in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on [Solana Clusters](https://docs.solana.com/clusters) through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 2.	The Solana node is used by dApps or development tools internally from within the Default VPC. JSON RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
-3.	The Solana node uses all required secrets locally, but stores a copy in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) as secure backup.
-4.	The Solana node sends various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch.
+3.	The Solana node uses all required secrets locally, but optionally can store a copy in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) as secure backup.
+4.	The Solana node sends various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch. It also updates the dashboard with correct storage device names to display respective metrics properly.
 
 ### HA setup
 
@@ -23,7 +23,7 @@ Solana nodes on AWS can be deployed in 2 different configurations: base RPC and 
 
 1.	A set of Base or Extended RPC Solana nodes are deployed within the [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on [Solana Clusters](https://docs.solana.com/clusters) through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html). **Note that HA setup is not suitable for Consensus nodes.**
 2.	The Solana nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). JSON RPC API is not exposed to the Internet to protect nodes from unauthorized access. dApps need to handle user authentication and API protection, like [in this example for dApps on AWS](https://aws.amazon.com/blogs/architecture/dapp-authentication-with-amazon-cognito-and-web3-proxy-with-amazon-api-gateway/).
-3.	The Solana nodes use all required secrets locally, but store a copy in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) as secure backup.
+3.	The Solana nodes use all required secrets locally, but optionally can store a copy in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) as secure backup.
 4.	The Solana nodes send various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch.
 
 ## Additional materials
@@ -32,7 +32,7 @@ Solana nodes on AWS can be deployed in 2 different configurations: base RPC and 
 
 <summary>Managing Secrets</summary>
 
-During the startup, if a node can't find the necessary identity file on the attached Root EBS volume, it generates a new one and stores it in AWS Secrets Manager. For a single-node deployment, the ARN of a secret can be provided within the `.env` configuration file with configuration and the node will pick it up.
+Upon initialization, if a node fails to locate the requisite identity file on the associated Root EBS volume, it automatically generates a new one. We no longer store secrets in AWS Secrets Manager by default. In the case of a single-node deployment, the Amazon Resource Name (ARN) of the secret can be specified within the .env configuration file. The node will then retrieve and utilize this information during its startup process.
 
 Base RPC and Extended RPC nodes use only 1 secret:
 
@@ -56,12 +56,12 @@ This is the Well-Architected checklist for Solana nodes implementation of the AW
 
 | Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
 |:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
-| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that ports 8801 to 8812 (TCP/UDP) for Solana are open to public to support P2P protocols. We have to rely on the protection mechanisms built into the Solana validators software to protect those ports.  |
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that ports 8801 to 8814 (TCP/UDP) for Solana are open to public to support P2P protocols. We have to rely on the protection mechanisms built into the Solana validators software to protect those ports.  |
 |                         |                                   | Traffic inspection                                                               | Traffic protection is not used in the solution. AWS Web Applications Firewall (WAF) could be implemented for traffic inspection. Additional charges will apply.  |
-|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Ubuntu 20.04 AMI. You may choose to run hardening scripts on it.  |
+|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Ubuntu 24.04 AMI. You may choose to run hardening scripts on it.  |
 |                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
 |                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | This solution uses encrypted Amazon EBS volumes.  |
-|                         |                                   | Use encrypted Amazon Simple Storage Service (Amazon S3) buckets                  | This solution uses Amazon S3 managed keys (SSE-S3) encryption.  |
+|                         |                                   | Use encrypted Amazon Simple Storage Service (Amazon S3) buckets                  | This solution does not uses Amazon S3  |
 |                         | Data protection in transit        | Use TLS                                                                          | The AWS Application Load balancer currently uses HTTP listener. Create HTTPS listener with self signed certificate if TLS is desired.  |
 |                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
 |                         |                                   | Following principle of least privilege access                                    | In all node types, root user is not used (using special user "solana" instead).  |
@@ -75,7 +75,7 @@ This is the Well-Architected checklist for Solana nodes implementation of the AW
 |                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. gp3 Amazon EBS volumes with optimal IOPS and throughput.  |
 |                         | Architecture selection            | How is the best performance architecture selected?                               | We used a combination of recommendations from the Solana community and our own testing.  |
 | Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health of workload is determined via AWS Application Load Balancer Target Group Health Checks, on port 8899.  |
-| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses AMD-powered instances. There is a potential to use AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2.  |
+| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses AMD- and ARM-powered instances. You can choose to use AWS Graviton-based Amazon EC2 instances offer the best performance per watt of energy use in Amazon EC2.  |
 </details>
 
 <details>
@@ -106,7 +106,7 @@ cd aws-blockchain-node-runners
 npm install
 ```
 
-### Deploy Single Node
+### Configure your setup
 
 1. Make sure you are in the root directory of the cloned repository
 
@@ -122,37 +122,34 @@ aws ec2 create-default-vpc
 
 Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
 ```bash
-# Make sure you are in aws-blockchain-node-runners/lib/solana
 cd lib/solana
-pwd
 cp ./sample-configs/.env-sample-baserpc-arm .env
 nano .env
 ```
 > **NOTE:** *You can find more examples inside `sample-configs` directory: ARM-powered and x86-powered setups, base and extended RPC configurations.*
 
 
-4. Deploy common components such as IAM role, and Amazon S3 bucket to store data snapshots
+4. Deploy common components such as IAM role:
 
 ```bash
-pwd
-# Make sure you are in aws-blockchain-node-runners/lib/solana
 npx cdk deploy solana-common
 ```
 
-5. Deploy Sync Node
+
+### Deploy a Single Node
+
+1. Deploy the node
 
 ```bash
-pwd
-# Make sure you are in aws-blockchain-node-runners/lib/solana
 npx cdk deploy solana-single-node --json --outputs-file single-node-deploy.json
 ```
 
-6. After starting the node you need to wait for the initial synchronization process to finish. It may take about 30 minutes and you can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `current block` and `slots behind` metrics. When the node is fully synced the `slots behind` metric should go to 0. To see them:
+2. After starting the node you need to wait for the initial synchronization process to finish. It may take from 1 to 4 hours and you can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `current block` and `slots behind` metrics. When the node is fully synced the `slots behind` metric should go to 0. To see them:
 
    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
    - Open `Dashboards` and select `solana-single-node` from the list of dashboards.
 
-7. Connect with the RPC API exposed by the node:
+3. Connect with the RPC API exposed by the node:
 
 ```bash
 INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
@@ -160,7 +157,7 @@ NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --quer
 echo "NODE_INTERNAL_IP=$NODE_INTERNAL_IP"
 ```
 
-Copy output from the last `echo` command with `NODE_INTERNAL_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `NODE_INTERNAL_IP=<internal_IP>` into the new CloudShell tab. Then query the API:
+- Copy output from the last `echo` command with `NODE_INTERNAL_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `NODE_INTERNAL_IP=<internal_IP>` into the new CloudShell tab. Then query the API:
 
 ``` bash
 # IMPORTANT: Run from CloudShell VPC environment tab
@@ -169,9 +166,9 @@ curl http://$NODE_INTERNAL_IP:8899 -X POST -H "Content-Type: application/json" \
  --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
 ```
 
-### Deploy the HA Nodes
+### Deploy HA Nodes
 
-1. Configure and deploy multiple HA Nodes
+1. Deploy multiple HA Nodes
 
 ```bash
 pwd
@@ -179,27 +176,29 @@ pwd
 npx cdk deploy solana-ha-nodes --json --outputs-file ha-nodes-deploy.json
 ```
 
-2. Give the new RPC nodes about 30 minutes to initialize and then run the following query against the load balancer behind the RPC node created
+2. Give the new RPC nodes 1 to 4 hours to initialize and then run the following query against the load balancer behind the RPC node created
 
 ```bash
 export RPC_ABL_URL=$(cat ha-nodes-deploy.json | jq -r '..|.ALBURL? | select(. != null)')
 echo RPC_ABL_URL=$RPC_ABL_URL
 ```
 
+- Copy output from the last `echo` command with `RPC_ABL_URL=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `RPC_ABL_URL=<internal_IP>` into the new CloudShell tab. Then query the API:
+
+
 ```bash
-# IMPORTANT: Run from CloudShell VPC environment tab
-# We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
 curl http://$RPC_ABL_URL:8899 -X POST -H "Content-Type: application/json" \
  --data '{ "jsonrpc": "2.0", "id": 1, "method": "getBalance", "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]}'
 ```
 
-The result should be like this (the actual balance might change):
+- The result should be like this (the actual balance might change):
 
 ```javascript
+// We query token balance this account: https://solanabeach.io/address/9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
 {"jsonrpc":"2.0","result":{"context":{"apiVersion":"1.16.15","slot":221433176},"value":12870473061872488},"id":1}
 ```
 
-   If the nodes are still starting and catching up with the chain, you will see the following response:
+- If the nodes are still starting and catching up with the chain, you will see the following response:
 
 ```HTML
    <html>
@@ -297,11 +296,11 @@ free -g
 - Option 2: Existing volume (using Data directory as example):
 
 ```bash
-sudo mkdir /data/solana/data/swapfile
-sudo dd if=/dev/zero of=/data/solana/data/swapfile bs=1MiB count=250KiB
-sudo chmod 0600 /data/solana/data/swapfile
-sudo mkswap /data/solana/data/swapfile
-sudo swapon /data/solana/data/swapfile
+sudo mkdir /data/data/swapfile
+sudo dd if=/dev/zero of=/data/data/swapfile bs=1MiB count=250KiB
+sudo chmod 0600 /data/data/swapfile
+sudo mkswap /data/data/swapfile
+sudo swapon /data/data/swapfile
 free -g
 sudo sysctl vm.swappiness=10
 ```

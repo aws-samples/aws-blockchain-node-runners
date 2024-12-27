@@ -2,7 +2,7 @@ import { Match, Template } from "aws-cdk-lib/assertions";
 import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
-import * as config from "../lib/config/solanaConfig";
+import * as config from "../lib/config/node-config";
 import { SolanaCommonStack } from "../lib/common-stack";
 
 describe("SolanaCommonStack", () => {

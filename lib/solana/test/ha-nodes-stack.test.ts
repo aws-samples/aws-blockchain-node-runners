@@ -2,7 +2,7 @@ import { Match, Template } from "aws-cdk-lib/assertions";
 import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
-import * as config from "../lib/config/solanaConfig";
+import * as config from "../lib/config/node-config";
 import { SolanaHANodesStack } from "../lib/ha-nodes-stack";
 
 describe("SolanaHANodesStack", () => {
@@ -36,36 +36,87 @@ describe("SolanaHANodesStack", () => {
       VpcId: Match.anyValue(),
       SecurityGroupEgress: [
         {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "Allow all outbound traffic by default",
-         "IpProtocol": "-1"
-        }
+          "CidrIp": "0.0.0.0/0",
+          "Description": "allow HTTP",
+          "FromPort": 80,
+          "IpProtocol": "tcp",
+          "ToPort": 80
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "allow HTTPS",
+          "FromPort": 443,
+          "IpProtocol": "tcp",
+          "ToPort": 443
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "allow NTP",
+          "FromPort": 123,
+          "IpProtocol": "tcp",
+          "ToPort": 123
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "allow Solana RPC",
+          "FromPort": 8899,
+          "IpProtocol": "tcp",
+          "ToPort": 8899
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "allow UDP Solana P2P",
+          "FromPort": 8000,
+          "IpProtocol": "udp",
+          "ToPort": 8014
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "allow TCP Solana P2P",
+          "FromPort": 8000,
+          "IpProtocol": "tcp",
+          "ToPort": 8014
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "allow UDP Solana P2P",
+          "FromPort": 8800,
+          "IpProtocol": "udp",
+          "ToPort": 8814
+         },
+         {
+          "CidrIp": "0.0.0.0/0",
+          "Description": "allow TCP Solana P2P",
+          "FromPort": 8800,
+          "IpProtocol": "tcp",
+          "ToPort": 8814
+         }
        ],
        SecurityGroupIngress: [
          {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols (gossip, turbine, repair, etc)",
+          "Description": "allow all TCP P2P protocols (gossip, turbine, repair, etc)",
           "FromPort": 8800,
           "IpProtocol": "tcp",
           "ToPort": 8814
          },
          {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols (gossip, turbine, repair, etc)",
+          "Description": "allow all UDP P2P protocols (gossip, turbine, repair, etc)",
           "FromPort": 8800,
           "IpProtocol": "udp",
           "ToPort": 8814
          },
          {
           "CidrIp": "1.2.3.4/5",
-          "Description": "RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)",
+          "Description": "allow internal RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)",
           "FromPort": 8899,
           "IpProtocol": "tcp",
           "ToPort": 8899
          },
          {
           "CidrIp": "1.2.3.4/5",
-          "Description": "RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)",
+          "Description": "allow internal RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)",
           "FromPort": 8900,
           "IpProtocol": "tcp",
           "ToPort": 8900
@@ -115,9 +166,9 @@ describe("SolanaHANodesStack", () => {
            "Ebs": {
             "DeleteOnTermination": true,
             "Encrypted": true,
-            "Iops": 12000,
+            "Iops": 6000,
             "Throughput": 700,
-            "VolumeSize": 2000,
+            "VolumeSize": 500,
             "VolumeType": "gp3"
            }
           },
@@ -126,9 +177,9 @@ describe("SolanaHANodesStack", () => {
            "Ebs": {
             "DeleteOnTermination": true,
             "Encrypted": true,
-            "Iops": 6000,
+            "Iops": 12000,
             "Throughput": 700,
-            "VolumeSize": 500,
+            "VolumeSize": 2000,
             "VolumeType": "gp3"
            }
           },
@@ -166,7 +217,7 @@ describe("SolanaHANodesStack", () => {
 
     // Has Auto Scaling Security Group.
     template.hasResourceProperties("AWS::EC2::SecurityGroup", {
-      GroupDescription: Match.anyValue(),
+      GroupDescription: "Security Group for Load Balancer",
       SecurityGroupEgress: [
       {
         "CidrIp": "0.0.0.0/0",
