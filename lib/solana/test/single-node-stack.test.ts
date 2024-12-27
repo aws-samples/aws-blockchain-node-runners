@@ -2,7 +2,7 @@ import { Match, Template } from "aws-cdk-lib/assertions";
 import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
-import * as config from "../lib/config/solanaConfig";
+import * as config from "../lib/config/node-config";
 import { SolanaSingleNodeStack } from "../lib/single-node-stack";
 
 describe("SolanaSingleNodeStack", () => {
@@ -36,36 +36,36 @@ describe("SolanaSingleNodeStack", () => {
       VpcId: Match.anyValue(),
       SecurityGroupEgress: [
         {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "Allow all outbound traffic by default",
-         "IpProtocol": "-1"
-        }
+          "CidrIp": "0.0.0.0/0",
+          "Description": "Allow all outbound traffic by default",
+          "IpProtocol": "-1"
+         }
        ],
        SecurityGroupIngress: [
         {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols (gossip, turbine, repair, etc)",
+          "Description": "allow all TCP P2P protocols (gossip, turbine, repair, etc)",
           "FromPort": 8800,
           "IpProtocol": "tcp",
           "ToPort": 8814
          },
          {
           "CidrIp": "0.0.0.0/0",
-          "Description": "P2P protocols (gossip, turbine, repair, etc)",
+          "Description": "allow all UDP P2P protocols (gossip, turbine, repair, etc)",
           "FromPort": 8800,
           "IpProtocol": "udp",
           "ToPort": 8814
          },
          {
           "CidrIp": "1.2.3.4/5",
-          "Description": "RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)",
+          "Description": "allow internal RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)",
           "FromPort": 8899,
           "IpProtocol": "tcp",
           "ToPort": 8899
          },
          {
           "CidrIp": "1.2.3.4/5",
-          "Description": "RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)",
+          "Description": "allow internal RPC port WebSocket (user access needs to be restricted. Allowed access only from internal IPs)",
           "FromPort": 8900,
           "IpProtocol": "tcp",
           "ToPort": 8900
