@@ -33,10 +33,8 @@ apt-get -yqq install jq unzip python3-pip chrony
 
 if [ "$ARCH" == "x86_64" ]; then
   CW_AGENT_BINARY_URI=https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-  AWS_CLI_BINARY_URI=https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
 else
   CW_AGENT_BINARY_URI=https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb
-  AWS_CLI_BINARY_URI=https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
 fi
 
 cd /opt || exit 1
@@ -44,9 +42,7 @@ cd /opt || exit 1
 ARCH=$(uname -m)
 
 echo "Intalling AWS CLI"
-curl "$AWS_CLI_BINARY_URI" -o "awscliv2.zip"
-unzip awscliv2.zip
-/opt/aws/install
+snap install aws-cli --classic
 
 echo "Downloading assets zip file"
 aws s3 cp $ASSETS_S3_PATH ./assets.zip --region $AWS_REGION
