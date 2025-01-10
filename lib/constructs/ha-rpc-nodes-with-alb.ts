@@ -75,18 +75,22 @@ export class HANodesConstruct extends cdkContructs.Construct {
       }
 
       if (dataVolume.type !== constants.InstanceStoreageDeviceVolumeType){
-          blockDevices.push(
-              {
-                  deviceName: constants.VolumeDeviceNames[arrayIndex],
-                  volume: autoscaling.BlockDeviceVolume.ebs(dataVolume.sizeGiB, {
-                      deleteOnTermination: true,
-                      throughput: dataVolume.throughput,
-                      encrypted: true,
-                      iops: dataVolume.iops,
-                      volumeType: autoscaling.EbsDeviceVolumeType[dataVolume.type.toUpperCase() as keyof typeof autoscaling.EbsDeviceVolumeType],
-                  }),
-              }
-          )
+          const volumeType = dataVolume.type.toUpperCase();
+          const ebsConfig: any = {
+              deleteOnTermination: true,
+              encrypted: true,
+              iops: dataVolume.iops,
+              volumeType: autoscaling.EbsDeviceVolumeType[dataVolume.type.toUpperCase() as keyof typeof autoscaling.EbsDeviceVolumeType],
+          };
+
+          if (volumeType == 'GP3'){
+              ebsConfig.throughput = dataVolume.throughput;
+          }
+
+          blockDevices.push({
+              deviceName: constants.VolumeDeviceNames[arrayIndex],
+              volume: autoscaling.BlockDeviceVolume.ebs(dataVolume.sizeGiB, ebsConfig)
+          })
       }
    });
 
