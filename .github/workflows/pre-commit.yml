@@ -7,9 +7,6 @@ on:
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
-    permissions:
-        actions: read
-        contents: write
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
