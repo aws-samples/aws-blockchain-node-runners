@@ -6,7 +6,7 @@
 
 This blueprint deploys a ready-to-test private blockchain network powered by [Hyperledger Besu](https://github.com/hyperledger/besu/) with [IBFT consensus](https://arxiv.org/abs/2002.03613). It is accessible by applications via [AWS PrivateLink](https://aws.amazon.com/privatelink/) and [Network Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html) (NLB).
 
-High-level features include: 
+High-level features include:
 - Automated blockchain node recovery based on deep health check.
 - Automated key management after initial setup.
 - Deployment of software changes without downtime.

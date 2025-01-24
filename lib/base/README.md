@@ -208,7 +208,7 @@ We currently don't recommend running **archive** nodes in HA setup, because it t
 :::
 
 ### Monitoring
-Every 5 minutes a script on the deployed node publishes to CloudWatch service the metrics for current block for L1/L2 clients as well as blocks behind metric for L1 and minutes behind for L2. When the node is fully synced the blocks behind metric should get to 4 and minutes behind should get down to 0. 
+Every 5 minutes a script on the deployed node publishes to CloudWatch service the metrics for current block for L1/L2 clients as well as blocks behind metric for L1 and minutes behind for L2. When the node is fully synced the blocks behind metric should get to 4 and minutes behind should get down to 0.
 
 - To see the metrics for **single node only**:
    - Navigate to CloudWatch service (make sure you are in the region you have specified for AWS_REGION)

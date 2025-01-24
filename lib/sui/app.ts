@@ -3,7 +3,7 @@ import "dotenv/config"
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import * as nag from "cdk-nag";
-import * as config from "./lib/config/suiConfig";
+import * as config from "./lib/config/node-config";
 import {SuiCommonStack} from "./lib/common-stack";
 import {SuiSingleNodeStack} from "./lib/single-node-stack";
 

@@ -9,7 +9,7 @@ import * as nodeCwDashboard from "./constructs/node-cw-dashboard"
 import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 import * as nag from "cdk-nag";
 import { SingleNodeConstruct } from "../../constructs/single-node"
-import * as configTypes from "./config/suiConfig.interface";
+import * as configTypes from "./config/node-config.interface";
 import * as constants from "../../constructs/constants";
 import { SuiNodeSecurityGroupConstruct } from "./constructs/sui-node-security-group";
 
@@ -113,7 +113,7 @@ export class SuiSingleNodeStack extends cdk.Stack {
         })
 
         new cw.CfnDashboard(this, 'sui-cw-dashboard', {
-            dashboardName: STACK_NAME,
+            dashboardName: `${STACK_NAME}-${node.instanceId}`,
             dashboardBody: dashboardString,
         });
 

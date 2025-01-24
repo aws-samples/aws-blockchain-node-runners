@@ -32,7 +32,8 @@ get_all_empty_nvme_disks () {
   local unmounted_nvme_disks=()
   local sorted_unmounted_nvme_disks
 
-  all_not_mounted_nvme_disks=$(lsblk -lnb | awk '{if ($7=="") {print $1}}' | grep nvme)
+  #The disk will only be mounted when the nvme disk is larger than 100GB to avoid storing blockchain node data directly on the root EBS disk (which is 46GB by default)
+  all_not_mounted_nvme_disks=$(lsblk -lnb | awk '{if ($7 == "" && $4 > 100000000) {print $1}}' | grep nvme)
   all_mounted_nvme_partitions=$(mount | awk '{print $1}' | grep /dev/nvme)
   for disk in ${all_not_mounted_nvme_disks[*]}; do
     if [[ ! "${all_mounted_nvme_partitions[*]}" =~ $disk ]]; then
@@ -94,11 +95,11 @@ fi
     if [ -n "$VOLUME_SIZE" ]; then
       VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
       echo "Data volume size defined, use respective volume id: $VOLUME_ID"
-    else 
+    else
       VOLUME_ID=$(get_next_empty_nvme_disk)
       echo "Data volume size undefined, trying volume id: $VOLUME_ID"
     fi
-    
+
     make_fs $FILE_SYSTEM "$VOLUME_ID"
 
     sleep 10

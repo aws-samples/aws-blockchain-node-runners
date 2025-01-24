@@ -173,9 +173,9 @@ describe("FantomHANodesStack", () => {
       {
         "CidrIp": "1.2.3.4/5",
         "Description": "Blockchain Node RPC",
-        "FromPort": 8545,
+        "FromPort": 18545,
         "IpProtocol": "tcp",
-        "ToPort": 8545
+        "ToPort": 18545
       }
       ],
       VpcId: Match.anyValue(),
@@ -221,7 +221,7 @@ describe("FantomHANodesStack", () => {
         }
        ],
        LoadBalancerArn: Match.anyValue(),
-       Port: 8545,
+       Port: 18545,
        Protocol: "HTTP"
     })
 
@@ -230,12 +230,12 @@ describe("FantomHANodesStack", () => {
       HealthCheckEnabled: true,
       HealthCheckIntervalSeconds: 30,
       HealthCheckPath: "/",
-      HealthCheckPort: "8545",
+      HealthCheckPort: "18545",
       HealthyThresholdCount: 3,
       Matcher: {
       HttpCode: "200-299"
       },
-      Port: 8545,
+      Port: 18545,
       Protocol: "HTTP",
       TargetGroupAttributes: [
       {
