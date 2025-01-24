@@ -95,11 +95,11 @@ fi
     if [ -n "$VOLUME_SIZE" ]; then
       VOLUME_ID=/dev/$(lsblk -lnb | awk -v VOLUME_SIZE_BYTES="$VOLUME_SIZE" '{if ($4== VOLUME_SIZE_BYTES) {print $1}}')
       echo "Data volume size defined, use respective volume id: $VOLUME_ID"
-    else 
+    else
       VOLUME_ID=$(get_next_empty_nvme_disk)
       echo "Data volume size undefined, trying volume id: $VOLUME_ID"
     fi
-    
+
     make_fs $FILE_SYSTEM "$VOLUME_ID"
 
     sleep 10
