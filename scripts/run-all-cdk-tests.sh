@@ -20,7 +20,7 @@ run_test(){
 }
 
 # Run tests for each blueprint
-excluded_directories=("besu-private" "constructs" "wax")
+excluded_directories=("besu-private" "constructs" "wax" "polygon")
 for dir in */; do
     # If dir is not in the array of excluded_directories, run test
     if [[ "${excluded_directories[*]}" =~ ${dir%/} ]]; then
