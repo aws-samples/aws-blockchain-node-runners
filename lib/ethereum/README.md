@@ -303,7 +303,7 @@ The result should be like this (the actual balance might change):
 ### Clearing up and undeploying everything
 
 1. Destroy RPC Nodes, Sync Nodes and Common components
-              
+
 ```bash
 # Setting the AWS account id and region in case local .env file is lost
  export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
