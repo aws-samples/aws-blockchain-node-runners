@@ -9,6 +9,9 @@ jobs:
   blueprints-cdk-tests:
     name: Run CDK tests for all blueprints
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     defaults:
       run:
         shell: bash
