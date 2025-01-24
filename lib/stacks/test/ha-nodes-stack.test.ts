@@ -98,7 +98,6 @@ describe("StacksHANodesStack", () => {
             "DeleteOnTermination": true,
             "Encrypted": true,
             "Iops": TEST_STACKS_DATA_VOL_IOPS,
-            "Throughput": TEST_STACKS_DATA_VOL_THROUGHPUT,
             "VolumeSize": TEST_STACKS_DATA_VOL_SIZE,
             "VolumeType": TEST_STACKS_DATA_VOL_TYPE
            }
