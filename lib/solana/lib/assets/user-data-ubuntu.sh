@@ -31,6 +31,8 @@ INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.2
 apt-get -yqq update
 apt-get -yqq install jq unzip python3-pip chrony
 
+ARCH=$(uname -m)
+
 if [ "$ARCH" == "x86_64" ]; then
   CW_AGENT_BINARY_URI=https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 else
@@ -38,8 +40,6 @@ else
 fi
 
 cd /opt || exit 1
-
-ARCH=$(uname -m)
 
 echo "Intalling AWS CLI"
 snap install aws-cli --classic
