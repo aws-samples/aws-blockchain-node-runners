@@ -6,6 +6,7 @@ chmod 600 /etc/cdk_environment
 
 {
   echo "AWS_REGION=${_REGION_}"
+  echo "ETH_SNAPSHOT_TYPE=${_ETH_SNAPSHOT_TYPE_}"
   echo "SNAPSHOT_S3_PATH=${_SNAPSHOT_S3_PATH_}"
   echo "ETH_CLIENT_COMBINATION=${_ETH_CLIENT_COMBINATION_}"
   echo "ETH_NETWORK=${_ETH_NETWORK_}"
@@ -190,8 +191,10 @@ if [ "$NODE_ROLE" == "sync-node" ] || [ "$NODE_ROLE" == "single-node"  ]; then
   if [ "$AUTOSTART_CONTAINER" == "false" ]; then
     echo "Single node. Autostart disabled. Start docker-compose manually!"
   else
-    echo "Single node. Autostart enabled. Starting docker compose"
-    docker compose -f /home/bcuser/docker-compose.yml up -d
+    if [ "$ETH_SNAPSHOT_TYPE" == "none" ]; then
+      echo "Snapshot is not provided. Autostart enabled. Starting docker compose"
+      docker compose -f /home/bcuser/docker-compose.yml up -d
+    fi
   fi
 fi
 
@@ -200,10 +203,12 @@ if [ "$NODE_ROLE" == "sync-node" ]; then
   chmod 766 /opt/instance/storage/copy-data-to-s3.sh
 fi
 
-if [ "$NODE_ROLE" == "rpc-node" ]; then
-  echo "RPC node. Starting copy data script"
-  chmod 766 /opt/instance/storage/copy-data-from-s3.sh
-  echo "/opt/instance/storage/copy-data-from-s3.sh" | at now +3 minutes
+if [ "$NODE_ROLE" == "rpc-node" ] || [ "$NODE_ROLE" == "single-node"  ]; then
+  if [ "$ETH_SNAPSHOT_TYPE" == "s3" ]; then
+    echo "RPC node. Snapshot on S3. Starting copy data script"
+    chmod 766 /opt/instance/storage/copy-data-from-s3.sh
+    echo "/opt/instance/storage/copy-data-from-s3.sh" | at now +3 minutes
+  fi
 fi
 
 echo "All Done!!"
