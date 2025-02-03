@@ -71,7 +71,7 @@ export class EthRpcNodesStack extends cdk.Stack {
         // Getting the snapshot bucket name and IAM role ARN from the common stack
         const importedInstanceRoleArn = cdk.Fn.importValue("NodeInstanceRoleArn");
         let snapshotBucketName;
-        
+
         if (snapshotType === "s3") {
             snapshotBucketName = cdk.Fn.importValue("NodeSnapshotBucketName");
         }

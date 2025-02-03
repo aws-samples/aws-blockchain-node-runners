@@ -63,7 +63,7 @@ export class EthCommonStack extends cdk.Stack {
                     actions: ["s3:ListBucket", "s3:*Object"],
                 })
             );
-    
+
             const s3VPCEndpoint = vpc.addGatewayEndpoint("s3-vpc-endpoint", {
                 service: ec2.GatewayVpcEndpointAwsService.S3,
             });

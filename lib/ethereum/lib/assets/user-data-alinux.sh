@@ -134,7 +134,7 @@ sed -i 's,__ETH_CONSENSUS_CHECKPOINT_SYNC_URL__,'"$ETH_CONSENSUS_CHECKPOINT_SYNC
 chown -R bcuser:bcuser /home/bcuser/docker-compose.yml
 
 echo "Configuring and starting sync-checker"
-/opt/sync-checker/setup.sh "/opt/sync-checker/$SYNC_CHECKER_FILE_NAME" 
+/opt/sync-checker/setup.sh "/opt/sync-checker/$SYNC_CHECKER_FILE_NAME"
 
 # If in Single Node stack (have Stack ID), configuring ClodFormation helpers to signal the completion of deployment"
 if [[ "$STACK_ID" != "none" ]]; then

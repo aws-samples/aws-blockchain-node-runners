@@ -18,7 +18,7 @@ services:
             --http.api "admin,eth,web3,txpool,net,debug,trace,reth"
             --ws
             --ws.port 8546
-            
+
         volumes:
             - /secrets:/root/jwt
             - /data/execution/data:/root/.local/share/reth
@@ -26,6 +26,7 @@ services:
         stop_grace_period: 8m
         security_opt:
             - no-new-privileges:true
+        read_only: true
         ports:
             # Map the p2p port(30303), RPC HTTP port(8545), RPC WS port (8546), and engine port (8551)
             - "8545:8545"
