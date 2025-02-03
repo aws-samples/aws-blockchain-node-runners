@@ -1,7 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as cdkContructs from 'constructs';
 import * as ec2 from "aws-cdk-lib/aws-ec2";
-import * as configTypes from "../config/ethConfig.interface"
+import * as configTypes from "../config/node-config.interface"
 import * as nag from "cdk-nag";
 
 export interface EthNodeSecurityGroupConstructProps {
@@ -29,13 +29,14 @@ export interface EthNodeSecurityGroupConstructProps {
       // Public ports
       sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(30303), "P2P");
       sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(30303), "P2P");
-      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(30304), "P2P");
-      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(30304), "P2P");
-      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9000), "CL Client P2P");
-      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(9000), "CL Client P2P");
       if (clientCombination.startsWith("erigon")){
         sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(42069), "Erigon Snap sync (Bittorrent)");
         sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(42069), "Erigon Snap sync (Bittorrent)");
+        sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(9000), "CL Client P2P");
+        sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9001), "CL Client P2P");
+      } else {
+        sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9000), "CL Client P2P");
+        sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udp(9000), "CL Client P2P");
       }
 
       // Private ports restricted only to the VPC IP range

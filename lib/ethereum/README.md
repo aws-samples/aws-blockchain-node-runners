@@ -59,7 +59,7 @@ This is the Well-Architected checklist for Ethereum nodes implementation of the 
 
 ### Open AWS CloudShell
 
-To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, and S3.
 
 From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
 
@@ -73,9 +73,7 @@ cd aws-blockchain-node-runners
 npm install
 ```
 
-> **NOTE:** *In this tutorial we will set all major configuration through environment variables, but you also can modify parameters in `config/config.ts`.*
-
-### Prepare to deploy nodes
+### Prepare AWS account to deploy nodes
 
 1. Make sure you are in the root directory of the cloned repository
 
@@ -89,11 +87,11 @@ aws ec2 create-default-vpc
 
 > **NOTE:** *The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`*
 
-3. With the [Node Runners blueprints for Ethereum](https://github.com/aws-samples/aws-blockchain-node-runners/tree/main/lib/ethereum), you can deploy both single Ethereum nodes and multi-node high-availability configurations on AWS. Furthermore, Node Runners is designed to support client diversity, with configurations available for a variety of client combinations for the Execution Layer (EL) and Consensus Layer (CL).
+### Configure your setup
 
-Configure  your setup.
+#### Execution and Consensus Layer Client Options
 
-### Execution and Consensus Layer Client Options
+With the [Node Runners blueprints for Ethereum](https://github.com/aws-samples/aws-blockchain-node-runners/tree/main/lib/ethereum), you can deploy both single Ethereum nodes and multi-node high-availability configurations on AWS. Furthermore, Node Runners is designed to support client diversity, with configurations available for a variety of client combinations for the Execution Layer (EL) and Consensus Layer (CL).
 
 <details>
 
@@ -135,17 +133,17 @@ nano .env
 
 <details>
 
-<summary>Erigon Prysm</summary>
+<summary>Reth Lighthouse</summary>
 <br/>
 
-**Configure your Node Runners Ethereum - Erigon Prysm**
+**Configure your Node Runners Ethereum - Reth Lighthouse**
 
-To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Erigon / Prysm node deployment is as follows, which uses a sample config from the repository:
+To specify the Ethereum client combination you wish to deploy, create your own copy of `.env` file and edit it using your preferred text editor. The contents of your file for a Reth / Lighthouse node deployment is as follows, which uses a sample config from the repository:
 ```bash
 # Make sure you are in aws-blockchain-node-runners/lib/ethereum
 cd lib/ethereum
 pwd
-cp ./sample-configs/.env-erigon-prysm .env
+cp ./sample-configs/.env-erigon-lighthouse .env
 nano .env
 ```
 > **NOTE:** *You can find more examples inside the `sample-configs` directory, which illustrate other Ethereum client combinations.*
@@ -201,9 +199,32 @@ pwd
 npx cdk deploy eth-common
 ```
 
-### Option 1: Single RPC Node
+### [OPTIONAL] (required only when ETH_SNAPSHOT_TYPE="s3") Deploy Sync Node
 
-1. Deploy Single RPC Node
+Sync node will sync with the network and periodically create data snapshots on S3 to speed up RPC nodes setup when `ETH_SNAPSHOT_TYPE="s3"`. It has no effect if `ETH_SNAPSHOT_TYPE="none"`.
+
+1. Deploy `eth-sync-node` stack
+
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/ethereum
+npx cdk deploy eth-sync-node --json --outputs-file sync-node-deploy.json
+```
+
+2. After starting the node you need to wait for the inital syncronization process to finish. It may take from half a day to about 6-10 days depending on the client combination and the state of the network. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
+
+    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
+    - Open `Dashboards` and select `eth-sync-node-<your-eth-client-combination>` from the list of dashboards.
+
+Once synchronization process is over, the script will automatically stop both clients and copy all the contents of the `/data` directory to your snapshot S3 bucket. That may take from 30 minutes to about 2 hours. During the process on the dashboard you will see lower CPU and RAM utilization but high data disc throughput and outbound network traffic. The script will automatically start the clients after the process is done.
+
+> **Note:** *The snapshot backup process will automatically run ever day at midnight time of the time zone were the sync node runs. To change the schedule, modify `crontab` of the root user on the node's EC2 instance.*
+
+### Deploy Standalone RPC Node
+
+> **NOTE:** *If `ETH_SNAPSHOT_TYPE="s3"` make sure you [deployed the Sync Node first](#optional-required-only-when-eth_snapshot_types3-deploy-sync-node).*
+
+1. Deploy `eth-single-node` stack
 
 ```bash
 pwd
@@ -212,12 +233,12 @@ npx cdk deploy eth-single-node --json --outputs-file single-node-deploy.json
 ```
 > **NOTE:** *The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`*
 
-2. After starting the node you need to wait for the inital syncronization process to finish. It may take from half a day to about 6-10 days depending on the client combination and the state of the network. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
+2. If you haven't used `ETH_SNAPSHOT_TYPE="s3"` with Sync Node, then your node will start syncing by itself. In that case, after starting the node you need to wait for the inital syncronization process to finish. It may take from half a day to about 6-10 days depending on the client combination and the state of the network. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
 
    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
-   - Open `Dashboards` and select `eth-sync-node-<your-eth-client-combination>` from the list of dashboards.
+   - Open `Dashboards` and select `eth-single-node-<your-eth-client-combination>` from the list of dashboards.
 
-4. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Turn the following query against the private IP of the single RPC node you deployed:
+3. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Turn the following query against the private IP of the single RPC node you deployed:
 
 ```bash
 INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
@@ -240,27 +261,17 @@ The result should be like this (the actual balance might change):
 {"jsonrpc":"2.0","id":1,"result":"0xe791d050f91d9949d344d"}
 ```
 
-### Option 2: Highly Available RPC Nodes
+### Deploy Highly Available RPC Nodes
+
+> **NOTE:** *If `ETH_SNAPSHOT_TYPE="s3"` make sure you [deployed the Sync Node first](#optional-required-only-when-eth_snapshot_types3-deploy-sync-node).*
+
+>  **NOTE:** *The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`*
 
 1. Deploy Sync Node
 
-```bash
-pwd
-# Make sure you are in aws-blockchain-node-runners/lib/ethereum
-npx cdk deploy eth-sync-node --json --outputs-file sync-node-deploy.json
-```
-**NOTE:** *The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`*
+Use instructions from earlier: [Deploy Sync Node](#optional-required-only-when-eth_snapshot_types3-deploy-sync-node)
 
-2. After starting the node you need to wait for the inital syncronization process to finish. It may take from half a day to about 6-10 days depending on the client combination and the state of the network. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `sync distance` for consensus client and `blocks behind` for execution client. When the node is fully synced those two metrics shold show 0. To see them:
-
-    - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
-    - Open `Dashboards` and select `eth-sync-node-<your-eth-client-combination>` from the list of dashboards.
-
-Once synchronization process is over, the script will automatically stop both clients and copy all the contents of the `/data` directory to your snapshot S3 bucket. That may take from 30 minutes to about 2 hours. During the process on the dashboard you will see lower CPU and RAM utilization but high data disc throughput and outbound network traffic. The script will automatically start the clients after the process is done.
-
-> **Note:** *The snapshot backup process will automatically run ever day at midnight time of the time zone were the sync node runs. To change the schedule, modify `crontab` of the root user on the node's EC2 instance.*
-
-3. Configure and deploy 2 RPC Nodes
+2. Deploy `eth-rpc-nodes` stack
 
 ```bash
 pwd
@@ -268,7 +279,7 @@ pwd
 npx cdk deploy eth-rpc-nodes --json --outputs-file rpc-node-deploy.json
 ```
 
-4. Give the new RPC nodes about 30 minutes (up to 2 hours for Erigon) to initialize and then run the following query against the load balancer behind the RPC node created
+3. Give the new RPC nodes about 30 minutes (up to 2 hours for Erigon) to initialize and then run the following query against the load balancer in front of your nods:
 
 ```bash
 export ETH_RPC_ABL_URL=$(cat rpc-node-deploy.json | jq -r '..|.alburl? | select(. != null)')
@@ -288,7 +299,7 @@ The result should be like this (the actual balance might change):
 {"jsonrpc":"2.0","id":1,"result":"0xe791d050f91d9949d344d"}
 ```
 
-   If the nodes are still starting and catching up with the chain, you will see the following repsonse:
+   If the nodes are still starting and catching up with the chain, you will see the following response:
 
 ```HTML
    <html>
@@ -298,7 +309,7 @@ The result should be like this (the actual balance might change):
    </body>
 ```
 
-> **NOTE:** By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.
+> **NOTE:** *By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.*
 
 ### Clearing up and undeploying everything
 

@@ -2,12 +2,12 @@
 version: "3"
 services:
     geth_node:
-        image: ethereum/client-go:v1.13.14
+        image: ethereum/client-go:v1.14.12
         container_name: execution
         restart: always
         command:
             [
-                "--mainnet",
+                "--__ETH_NETWORK__",
                 "--metrics",
                 "--pprof",
                 "--authrpc.addr=0.0.0.0",
@@ -17,6 +17,8 @@ services:
                 "--http",
                 "--http.api=admin,eth,web3,txpool,net,debug,engine",
                 "--http.addr=0.0.0.0",
+                "--ws",
+                "--db.engine=pebble",
                 "--datadir=/var/lib/geth/data",
                 "--maxpeers=20",
                 "--cache=${CACHE_MB:-60000}",
@@ -38,17 +40,17 @@ services:
             - "30303:30303/udp"
 
     lighthouse_node:
-        image: sigp/lighthouse:v5.1.2
+        image: sigp/lighthouse:v6.0.1
         container_name: consensus
         restart: always
         command:
             [
                 "lighthouse",
                 "beacon",
-                "--network=mainnet",
+                "--network=__ETH_NETWORK__",
                 "--execution-endpoint=http://geth_node:8551",
                 "--execution-jwt=/var/lib/lighthouse/secrets/jwtsecret",
-                "--checkpoint-sync-url=https://sync-mainnet.beaconcha.in",
+                "--checkpoint-sync-url=__ETH_CONSENSUS_CHECKPOINT_SYNC_URL__",
                 "--http",
                 "--http-port=5052",
                 "--http-address=0.0.0.0",

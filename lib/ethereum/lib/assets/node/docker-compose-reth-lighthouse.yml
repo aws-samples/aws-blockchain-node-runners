@@ -1,0 +1,72 @@
+---
+version: "3"
+services:
+    execution_node:
+        image: ghcr.io/paradigmxyz/reth
+        container_name: execution
+        restart: always
+        pid: host
+        command: >
+            node
+            --chain __ETH_NETWORK__
+            --authrpc.addr 0.0.0.0
+            --authrpc.port 8551
+            --authrpc.jwtsecret /root/jwt/jwtsecret
+            --datadir /root/.local/share/reth
+            --http --http.addr 0.0.0.0 --http.port 8545
+            --log.file.max-files 0
+            --http.api "admin,eth,web3,txpool,net,debug,trace,reth"
+            --ws
+            --ws.port 8546
+
+        volumes:
+            - /secrets:/root/jwt
+            - /data/execution/data:/root/.local/share/reth
+        stop_signal: SIGTERM
+        stop_grace_period: 8m
+        security_opt:
+            - no-new-privileges:true
+        read_only: true
+        ports:
+            # Map the p2p port(30303), RPC HTTP port(8545), RPC WS port (8546), and engine port (8551)
+            - "8545:8545"
+            - "8546:8546"
+            - "8551:8551"
+            - "30303:30303/tcp"
+            - "30303:30303/udp"
+
+    consensus_node:
+        image: sigp/lighthouse:v6.0.1
+        container_name: consensus
+        restart: always
+        command:
+            [
+                "lighthouse",
+                "beacon",
+                "--network=__ETH_NETWORK__",
+                "--execution-endpoint=http://execution_node:8551",
+                "--execution-jwt=/var/lib/lighthouse/secrets/jwtsecret",
+                "--checkpoint-sync-url=__ETH_CONSENSUS_CHECKPOINT_SYNC_URL__",
+                "--http",
+                "--http-port=5052",
+                "--http-address=0.0.0.0",
+                "--metrics",
+                "--datadir=/var/lib/lighthouse/data",
+                "--disable-deposit-contract-sync",
+            ]
+        depends_on:
+            - execution_node
+        volumes:
+            - /secrets:/var/lib/lighthouse/secrets
+            - /data/consensus/data:/var/lib/lighthouse/data
+        stop_signal: SIGTERM
+        stop_grace_period: 5m
+        security_opt:
+            - no-new-privileges:true
+        read_only: true
+        ports:
+            - 5052:5052/tcp
+            - 5053:5053/tcp
+            - 5054:5054/tcp # metrics endpoint
+            - 9000:9000/tcp
+            - 9000:9000/udp

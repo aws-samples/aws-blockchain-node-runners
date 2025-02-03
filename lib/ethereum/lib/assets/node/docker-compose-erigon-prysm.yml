@@ -2,12 +2,12 @@
 version: "3"
 services:
   erigon_node:
-    image: thorax/erigon:2.59.0-__IMAGE_ARCH__
+    image: erigontech/erigon:v2.61.0
     container_name: execution
     restart: always
     command:
       [
-        "--chain=mainnet",
+        "--chain=__ETH_NETWORK__",
         "--torrent.download.rate=1gb",
         "--datadir=/var/lib/erigon/data",
         "--authrpc.addr=0.0.0.0",
@@ -33,48 +33,49 @@ services:
     read_only: true
     ports:
       # Map the p2p port(30303), RPC HTTP port(8545), and engine port (8551)
-      - "6060:6060"
-      - "8545:8545"
-      - "8546:8546"
-      - "8551:8551"
-      - "9093:9093"
-      - "9094:9094"
-      - "30303:30303/tcp"
-      - "30303:30303/udp"
+      - "9090:9090" # TCP gRPC Private Execution
+      - "8545:8545" # TCP HTTP & WebSockets & GraphQL Private Execution
+      - "8551:8551" # TCP Engine API (JWT auth) Private Execution
+      - "9093:9093" # Execution
+      - "9094:9094" # Execution
+      - "42069:42069/tcp" # TCP & UDP Snap sync Public (Bittorrent)
+      - "42069:42069/udp" # TCP & UDP Snap sync Public (Bittorrent)
+      - "30303:30303/tcp" # eth/68 peering Public Execution
+      - "30303:30303/udp" # eth/68 peering Public Execution
 
-  lighthouse_node:
-    image: sigp/lighthouse:v5.1.2
+  prysm_node:
+    image: rocketpool/prysm:v5.2.0
     container_name: consensus
     restart: always
     command:
       [
-        "lighthouse",
-        "beacon",
-        "--network=mainnet",
+        "/app/cmd/beacon-chain/beacon-chain",
+        "--__ETH_NETWORK__",
+        "--checkpoint-sync-url=__ETH_CONSENSUS_CHECKPOINT_SYNC_URL__",
         "--execution-endpoint=http://erigon_node:8551",
-        "--execution-jwt=/var/lib/lighthouse/secrets/jwtsecret",
-        "--checkpoint-sync-url=https://sync-mainnet.beaconcha.in",
-        "--http",
-        "--http-port=5052",
-        "--http-address=0.0.0.0",
-        "--metrics",
-        "--datadir=/var/lib/lighthouse/data",
-        "--disable-deposit-contract-sync"
+        "--jwt-secret=/secrets/jwtsecret",
+        "--datadir=/data",
+        "--p2p-tcp-port=9000",
+        "--p2p-udp-port=9000",
+        "--grpc-gateway-host=0.0.0.0",
+        "--grpc-gateway-port=5052",
+        "--rpc-host=0.0.0.0",
+        "--rpc-port=5051",
+        "--accept-terms-of-use"
       ]
     depends_on:
       - erigon_node
     user: 1002:1002
     volumes:
-      - /secrets:/var/lib/lighthouse/secrets
-      - /data/consensus/data:/var/lib/lighthouse/data
+      - /secrets:/secrets
+      - /data/consensus/data:/data
     stop_signal: SIGTERM
     stop_grace_period: 5m
     security_opt:
       - no-new-privileges:true
     read_only: true
     ports:
+      - 5051:5051/tcp
       - 5052:5052/tcp
-      - 5053:5053/tcp
-      - 5054:5054/tcp # metrics endpoint
       - 9000:9000/tcp
       - 9000:9000/udp

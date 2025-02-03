@@ -1,5 +1,5 @@
 import * as ec2 from "aws-cdk-lib/aws-ec2";
-import * as configTypes from "./ethConfig.interface";
+import * as configTypes from "./node-config.interface";
 import * as constants from "../../../constructs/constants";
 
 
@@ -20,8 +20,13 @@ const parseDataVolumeType = (dataVolumeType: string) => {
 
 export const baseConfig: configTypes.EthBaseConfig = {
     accountId: process.env.AWS_ACCOUNT_ID || "xxxxxxxxxxx",          // Set your target AWS Account ID
-    region: process.env.AWS_REGION || "us-east-2",               // Set your target AWS Region
+    region: process.env.AWS_REGION || "us-east-1",               // Set your target AWS Region
     clientCombination: <configTypes.EthClientCombination>process.env.ETH_CLIENT_COMBINATION || "geth-lighthouse", // Set the pair of EL-CL clients : "geth-lighthouse", "erigon-lighthouse", "nethermind-teku", "besu-teku"
+    consensusCheckpointSyncURL: process.env.ETH_CONSENSUS_CHECKPOINT_SYNC_URL || "https://beaconstate.info", // Set the URL for the consensus checkpoint sync. Default: "https://beaconstate.info"
+    network: <configTypes.EthNetwork>process.env.ETH_NETWORK || "mainnet", // Set the network to be used. Default: "mainnet"
+    snapshotType: <configTypes.SnapshotType>process.env.ETH_SNAPSHOT_TYPE || constants.NoneValue, // Set the snapshot type to be used. Default: "none"
+    consensusSnapshotURL: process.env.ETH_CONSENSUS_SNAPSHOT_URL || constants.NoneValue, // Set the URL for the consensus snapshot. Default: "none"
+    executionSnapshotURL: process.env.ETH_EXECUTION_SNAPSHOT_URL || constants.NoneValue // Set the URL for the execution snapshot. Default: "none"
 };
 
 export const syncNodeConfig: configTypes.EthSyncNodeConfig = {

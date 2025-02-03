@@ -1,33 +1,43 @@
 ---
 version: "3.4"
 services:
-    besu_node:
+    nethermind_node:
         environment:
-            - "JAVA_OPTS=-Xmx8g"
-        image: hyperledger/besu:24.3.0
+            - "DOTNET_BUNDLE_EXTRACT_BASE_DIR=/var/lib/nethermind/data"
+        image: nethermind/nethermind:1.25.4
         container_name: execution
         restart: always
-        command:
-            [
-                "--network=mainnet",
-                "--data-path=/var/lib/besu/data",
-                "--sync-mode=X_SNAP",
-                "--data-storage-format=BONSAI",
-                "--host-allowlist=*",
-                "--rpc-http-enabled",
-                "--rpc-http-cors-origins=*",
-                "--rpc-http-api=ETH,NET,CLIQUE,DEBUG,MINER,NET,PERM,ADMIN,EEA,TXPOOL,PRIV,WEB3",
-                "--engine-jwt-secret=/var/lib/besu/secrets/jwtsecret",
-                "--engine-host-allowlist=*",
-                "--engine-rpc-enabled=true",
-                "--Xplugin-rocksdb-high-spec-enabled",
+        command: [
+                "--config",
+                "__ETH_NETWORK__",
+                "--datadir",
+                "/var/lib/nethermind/data",
+                "--Sync.SnapSync",
+                "true",
+                "--JsonRpc.JwtSecretFile",
+                "/var/lib/nethermind/secrets/jwtsecret",
+                "--JsonRpc.Enabled",
+                "true",
+                "--JsonRpc.Host",
+                "0.0.0.0",
+                "--JsonRpc.Port",
+                "8545",
+                "--JsonRpc.EnginePort",
+                "8551",
+                "--JsonRpc.EngineHost",
+                "0.0.0.0",
+                "--Metrics.ExposePort",
+                "6060",
+                "--HealthChecks.Enabled",
+                "true",
             ]
-        user: ethereum:ethereum
+        user: bcuser:bcuser
         volumes:
-            - /secrets:/var/lib/besu/secrets
-            - /data/execution/data:/var/lib/besu/data
-        # Use SIGINT instead of SIGTERM to prevent SIGSEGV error during shutdown
-        stop_signal: SIGINT
+            - /secrets:/var/lib/nethermind/secrets
+            - /data/execution/data:/var/lib/nethermind/data
+            # https://github.com/NethermindEth/nethermind/issues/3510
+            - /data/execution/others:/nethermind/Nethermind
+        stop_signal: SIGTERM
         stop_grace_period: 5m
         security_opt:
             - no-new-privileges:true
@@ -49,16 +59,16 @@ services:
         command:
             [
                 "--data-base-path=/var/lib/teku/data",
-                "--ee-endpoint=http://besu_node:8551",
-                "--initial-state=https://beaconstate.info/eth/v2/debug/beacon/states/finalized",
+                "--ee-endpoint=http://nethermind_node:8551",
+                "--checkpoint-sync-url=__ETH_CONSENSUS_CHECKPOINT_SYNC_URL__",
                 "--ee-jwt-secret-file=/var/lib/teku/secrets/jwtsecret",
                 "--p2p-port=9000",
                 "--metrics-enabled=true",
                 "--rest-api-enabled=true",
             ]
         depends_on:
-            - besu_node
-        user: ethereum:ethereum
+            - nethermind_node
+        user: bcuser:bcuser
         volumes:
             - /secrets:/var/lib/teku/secrets
             - /data/consensus/data:/var/lib/teku/data
