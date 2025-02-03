@@ -6,16 +6,22 @@ import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as nag from "cdk-nag";
 import * as path from "path";
 import * as fs from "fs";
-import * as configTypes from "./config/ethConfig.interface";
+import * as configTypes from "./config/node-config.interface";
+import * as constants from "../../constructs/constants";
 import { EthNodeSecurityGroupConstruct } from "./constructs/eth-node-security-group"
 import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb"
 
 export interface EthRpcNodesStackProps extends cdk.StackProps {
     ethClientCombination: configTypes.EthClientCombination;
+    network: configTypes.EthNetwork;
+    snapshotType: configTypes.SnapshotType;
+    consensusSnapshotURL: string;
+    executionSnapshotURL: string;
+    consensusCheckpointSyncURL: string;
     nodeRole: configTypes.EthNodeRole;
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
-    dataVolumes: configTypes.EthDataVolumeConfig[],
+    dataVolume: configTypes.EthDataVolumeConfig,
     numberOfNodes: number;
     albHealthCheckGracePeriodMin: number;
     heartBeatDelayMin: number;
@@ -35,9 +41,14 @@ export class EthRpcNodesStack extends cdk.Stack {
         const {
             instanceType,
             ethClientCombination,
+            network,
+            snapshotType,
+            consensusSnapshotURL,
+            executionSnapshotURL,
+            consensusCheckpointSyncURL,
             nodeRole,
             instanceCpuType,
-            dataVolumes,
+            dataVolume,
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
             numberOfNodes,
@@ -59,20 +70,31 @@ export class EthRpcNodesStack extends cdk.Stack {
 
         // Getting the snapshot bucket name and IAM role ARN from the common stack
         const importedInstanceRoleArn = cdk.Fn.importValue("NodeInstanceRoleArn");
-        const snapshotBucketName = cdk.Fn.importValue("NodeSnapshotBucketName");
+        let snapshotBucketName;
+        
+        if (snapshotType === "s3") {
+            snapshotBucketName = cdk.Fn.importValue("NodeSnapshotBucketName");
+        }
 
         const instanceRole = iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 
         // Parsing user data script and injecting necessary variables
-        const userData = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
+        const userData = fs.readFileSync(path.join(__dirname, "assets", "user-data-alinux.sh")).toString();
 
         const modifiedUserData = cdk.Fn.sub(userData, {
             _REGION_: REGION,
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
-            _SNAPSHOT_S3_PATH_: `s3://${snapshotBucketName}/${ethClientCombination}`,
+            _SNAPSHOT_S3_PATH_: snapshotBucketName ? `s3://${snapshotBucketName}/${ethClientCombination}` : constants.NoneValue,
             _ETH_CLIENT_COMBINATION_: ethClientCombination,
+            _ETH_NETWORK_: network,
+            _ETH_SNAPSHOT_TYPE_: snapshotType,
+            _ETH_CONSENSUS_SNAPSHOT_URL_: consensusSnapshotURL,
+            _ETH_EXECUTION_SNAPSHOT_URL_: executionSnapshotURL,
+            _ETH_CONSENSUS_CHECKPOINT_SYNC_URL_: consensusCheckpointSyncURL,
             _STACK_NAME_: STACK_NAME,
             _FORMAT_DISK_: "true",
+            _DATA_VOLUME_TYPE_: dataVolume.type,
+            _DATA_VOLUME_SIZE_: dataVolume.sizeGiB.toString(),
             _NODE_ROLE_: nodeRole,
             _AUTOSTART_CONTAINER_: "true",
             _NODE_CF_LOGICAL_ID_: "",
@@ -83,12 +105,12 @@ export class EthRpcNodesStack extends cdk.Stack {
         // Setting up the nodse using generic High Availability (HA) Node constract
         const rpcNodes = new HANodesConstruct (this, "rpc-nodes", {
             instanceType,
-            dataVolumes,
+            dataVolumes: [dataVolume],
             machineImage: new ec2.AmazonLinuxImage({
-                generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-                cpuType: instanceCpuType,
-                kernel: ec2.AmazonLinuxKernel.KERNEL5_X,
-            }),
+                            generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023,
+                            kernel:ec2.AmazonLinuxKernel.KERNEL6_1,
+                            cpuType: instanceCpuType,
+                        }),
             role: instanceRole,
             vpc,
             securityGroup: instanceSG.securityGroup,

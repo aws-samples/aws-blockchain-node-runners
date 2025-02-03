@@ -2,7 +2,7 @@ import { Match, Template } from "aws-cdk-lib/assertions";
 import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
-import * as config from "../lib/config/ethConfig";
+import * as config from "../lib/config/node-config";
 import { EthCommonStack } from "../lib/common-stack";
 
 describe("EthCommonStack", () => {
@@ -13,6 +13,7 @@ describe("EthCommonStack", () => {
     const ethCommonStack = new EthCommonStack(app, "eth-common", {
         env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
         stackName: `eth-nodes-common`,
+        snapshotType: config.baseConfig.snapshotType,
     });
 
     // Prepare the stack for assertions.
@@ -20,7 +21,7 @@ describe("EthCommonStack", () => {
 
     // Has Snapshot S3 bucket.
     template.hasResourceProperties("AWS::S3::Bucket", {
-      BucketName: Match.stringLikeRegexp("eth-snapshots*"),
+      BucketName: Match.stringLikeRegexp("eth-*"),
       AccessControl: "Private",
       BucketEncryption: {
         ServerSideEncryptionConfiguration: [

@@ -5,9 +5,12 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as nag from "cdk-nag";
 import * as s3Assets from "aws-cdk-lib/aws-s3-assets";
 import * as path from "path";
+import * as configTypes from "./config/node-config.interface";
 import { SnapshotsS3BucketConstruct } from "../../constructs/snapshots-bucket";
 
-export interface EthCommonStackProps extends cdk.StackProps {}
+export interface EthCommonStackProps extends cdk.StackProps {
+    snapshotType: configTypes.SnapshotType;
+}
 
 export class EthCommonStack extends cdk.Stack {
     AWS_STACKNAME = cdk.Stack.of(this).stackName;
@@ -21,14 +24,6 @@ export class EthCommonStack extends cdk.Stack {
         const region = cdk.Stack.of(this).region;
         const asset = new s3Assets.Asset(this, "assets", {
             path: path.join(__dirname, "assets"),
-        });
-
-        const snapshotsBucket = new SnapshotsS3BucketConstruct(this, `snapshots-s3-bucket`, {
-            bucketName: `eth-snapshots-${this.AWS_STACKNAME}-${this.AWS_ACCOUNT_ID}-${this.AWS_REGION}`,
-        });
-
-        const s3VPCEndpoint = vpc.addGatewayEndpoint("s3-vpc-endpoint", {
-            service: ec2.GatewayVpcEndpointAwsService.S3,
         });
 
         const instanceRole = new iam.Role(this, `node-role`, {
@@ -56,52 +51,63 @@ export class EthCommonStack extends cdk.Stack {
             })
         );
 
-        instanceRole.addToPolicy(
-            new iam.PolicyStatement({
-                resources: [snapshotsBucket.bucketArn, snapshotsBucket.arnForObjects("*")],
-                actions: ["s3:ListBucket", "s3:*Object"],
-            })
-        );
+        // If we manage snapshots ourselves with S3, create bucket, S3 endpoint, and add access rights
+        if (props.snapshotType === "s3") {
+            const snapshotsBucket = new SnapshotsS3BucketConstruct(this, `snapshots-s3-bucket`, {
+                bucketName: `${this.AWS_STACKNAME}-${this.AWS_ACCOUNT_ID}-${this.AWS_REGION}`,
+            });
 
-        // Limiting access through this VPC endpoint only to our sync bucket and Amazon linux repo bucket
-        s3VPCEndpoint.addToPolicy(
-            new iam.PolicyStatement({
-                principals: [new iam.AnyPrincipal()],
-                resources: [
-                    snapshotsBucket.bucketArn,
-                    snapshotsBucket.arnForObjects("*"),
-                    `arn:aws:s3:::al2023-repos-${region}-*`,
-                    `arn:aws:s3:::al2023-repos-${region}-*/*`,
-                    `arn:aws:s3:::amazonlinux-2-repos-${region}`,
-                    `arn:aws:s3:::amazonlinux-2-repos-${region}/*`,
-                    `arn:aws:s3:::${asset.s3BucketName}`,
-                    `arn:aws:s3:::${asset.s3BucketName}/*`,
-                    "arn:aws:s3:::cloudformation-examples",
-                    "arn:aws:s3:::cloudformation-examples/*",
-                    "arn:aws:s3:::amazoncloudwatch-agent",
-                    "arn:aws:s3:::amazoncloudwatch-agent/*"
-                ],
-                actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
-            })
-        );
+            instanceRole.addToPolicy(
+                new iam.PolicyStatement({
+                    resources: [snapshotsBucket.bucketArn, snapshotsBucket.arnForObjects("*")],
+                    actions: ["s3:ListBucket", "s3:*Object"],
+                })
+            );
+    
+            const s3VPCEndpoint = vpc.addGatewayEndpoint("s3-vpc-endpoint", {
+                service: ec2.GatewayVpcEndpointAwsService.S3,
+            });
 
-        s3VPCEndpoint.addToPolicy(
-            new iam.PolicyStatement({
-                principals: [new iam.AnyPrincipal()],
-                resources: ["arn:aws:s3:::docker-images-prod", "arn:aws:s3:::docker-images-prod/*"],
-                actions: ["*"],
-                sid: "Allow access to docker images",
-            })
-        );
+            // Limiting access through this VPC endpoint only to our sync bucket and Amazon linux repo bucket
+            s3VPCEndpoint.addToPolicy(
+                new iam.PolicyStatement({
+                    principals: [new iam.AnyPrincipal()],
+                    resources: [
+                        snapshotsBucket.bucketArn,
+                        snapshotsBucket.arnForObjects("*"),
+                        `arn:aws:s3:::al2023-repos-${region}-*`,
+                        `arn:aws:s3:::al2023-repos-${region}-*/*`,
+                        `arn:aws:s3:::amazonlinux-2-repos-${region}`,
+                        `arn:aws:s3:::amazonlinux-2-repos-${region}/*`,
+                        `arn:aws:s3:::${asset.s3BucketName}`,
+                        `arn:aws:s3:::${asset.s3BucketName}/*`,
+                        "arn:aws:s3:::cloudformation-examples",
+                        "arn:aws:s3:::cloudformation-examples/*",
+                        "arn:aws:s3:::amazoncloudwatch-agent",
+                        "arn:aws:s3:::amazoncloudwatch-agent/*"
+                    ],
+                    actions: ["s3:ListBucket", "s3:*Object", "s3:GetBucket*"],
+                })
+            );
+
+            s3VPCEndpoint.addToPolicy(
+                new iam.PolicyStatement({
+                    principals: [new iam.AnyPrincipal()],
+                    resources: ["arn:aws:s3:::docker-images-prod", "arn:aws:s3:::docker-images-prod/*"],
+                    actions: ["*"],
+                    sid: "Allow access to docker images",
+                })
+            );
+
+            new cdk.CfnOutput(this, "Snapshot Bucket Name", {
+                value: snapshotsBucket.bucketName,
+                exportName: "NodeSnapshotBucketName",
+            });
+        }
 
         new cdk.CfnOutput(this, "Instance Role ARN", {
             value: instanceRole.roleArn,
             exportName: "NodeInstanceRoleArn",
-        });
-
-        new cdk.CfnOutput(this, "Snapshot Bucket Name", {
-            value: snapshotsBucket.bucketName,
-            exportName: "NodeSnapshotBucketName",
         });
 
         /**

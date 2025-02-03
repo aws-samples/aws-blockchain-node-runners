@@ -1,4 +1,4 @@
-export const NodeCWDashboardJSON = {
+export const SingleNodeCWDashboardJSON = {
     "widgets": [
         {
             "height": 5,
