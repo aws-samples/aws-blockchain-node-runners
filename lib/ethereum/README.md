@@ -222,7 +222,7 @@ Once synchronization process is over, the script will automatically stop both cl
 
 ### Deploy Standalone RPC Node
 
-> **NOTE:** *If `ETH_SNAPSHOT_TYPE="s3"` make sure you [deployed the Sync Node first](#deploy-sync-node-required-only-when-eth_snapshot_types3).*
+> **NOTE:** *If `ETH_SNAPSHOT_TYPE="s3"` make sure you [deployed the Sync Node first](#optional-required-only-when-eth_snapshot_types3-deploy-sync-node).*
 
 1. Deploy `eth-single-node` stack
 
@@ -263,13 +263,13 @@ The result should be like this (the actual balance might change):
 
 ### Deploy Highly Available RPC Nodes
 
-> **NOTE:** *If `ETH_SNAPSHOT_TYPE="s3"` make sure you [deployed the Sync Node first](#deploy-sync-node-required-only-when-eth_snapshot_types3).*
+> **NOTE:** *If `ETH_SNAPSHOT_TYPE="s3"` make sure you [deployed the Sync Node first](#optional-required-only-when-eth_snapshot_types3-deploy-sync-node).*
 
 >  **NOTE:** *The default VPC must have at least two public subnets in different Availability Zones, and public subnet must set `Auto-assign public IPv4 address` to `YES`*
 
 1. Deploy Sync Node
 
-Use instructions from earlier: [Deploy Sync Node](#deploy-sync-node-required-only-when-eth_snapshot_types3)
+Use instructions from earlier: [Deploy Sync Node](#optional-required-only-when-eth_snapshot_types3-deploy-sync-node)
 
 2. Deploy `eth-rpc-nodes` stack
 
