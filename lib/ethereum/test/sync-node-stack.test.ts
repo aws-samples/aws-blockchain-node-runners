@@ -2,9 +2,9 @@ import { Match, Template } from "aws-cdk-lib/assertions";
 import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
-import * as config from "../lib/config/ethConfig";
+import * as config from "../lib/config/node-config";
 import { EthSingleNodeStack } from "../lib/single-node-stack";
-import { EthNodeRole } from "../lib/config/ethConfig.interface";
+import { EthNodeRole } from "../lib/config/node-config.interface";
 
 describe("EthSyncNodeStack", () => {
   test("synthesizes the way we expect", () => {
@@ -16,10 +16,15 @@ describe("EthSyncNodeStack", () => {
 
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
       ethClientCombination: config.baseConfig.clientCombination,
+      network: config.baseConfig.network,
+      snapshotType: config.baseConfig.snapshotType,
+      consensusSnapshotURL: config.baseConfig.consensusSnapshotURL,
+      executionSnapshotURL: config.baseConfig.executionSnapshotURL,
+      consensusCheckpointSyncURL: config.baseConfig.consensusCheckpointSyncURL,
       nodeRole: <EthNodeRole> "sync-node",
       instanceType: config.syncNodeConfig.instanceType,
       instanceCpuType: config.syncNodeConfig.instanceCpuType,
-      dataVolumes: config.syncNodeConfig.dataVolumes,
+      dataVolume: config.syncNodeConfig.dataVolumes[0],
   });
 
     // Prepare the stack for assertions.
@@ -50,20 +55,6 @@ describe("EthSyncNodeStack", () => {
          "FromPort": 30303,
          "IpProtocol": "udp",
          "ToPort": 30303
-        },
-        {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "P2P",
-         "FromPort": 30304,
-         "IpProtocol": "tcp",
-         "ToPort": 30304
-        },
-        {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "P2P",
-         "FromPort": 30304,
-         "IpProtocol": "udp",
-         "ToPort": 30304
         },
         {
          "CidrIp": "0.0.0.0/0",
