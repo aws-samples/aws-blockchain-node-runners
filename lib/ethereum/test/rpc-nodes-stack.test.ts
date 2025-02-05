@@ -2,27 +2,32 @@ import { Match, Template } from "aws-cdk-lib/assertions";
 import * as cdk from "aws-cdk-lib";
 import * as dotenv from 'dotenv';
 dotenv.config({ path: './test/.env-test' });
-import * as config from "../lib/config/ethConfig";
+import * as config from "../lib/config/node-config";
 import { EthRpcNodesStack } from "../lib/rpc-nodes-stack";
-import { EthNodeRole } from "../lib/config/ethConfig.interface";
+import { EthNodeRole } from "../lib/config/node-config.interface";
 
 describe("EthRpcNodesStack", () => {
   test("synthesizes the way we expect", () => {
     const app = new cdk.App();
 
     // Create the EthRpcNodesStack.
-    const ethRpcNodesStack = new EthRpcNodesStack(app, "eth-sync-node", {
+    const ethRpcNodesStack = new EthRpcNodesStack(app, "eth-rpc-nodes", {
       stackName: `eth-rpc-nodes-${config.baseConfig.clientCombination}`,
 
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
       ethClientCombination: config.baseConfig.clientCombination,
+      network: config.baseConfig.network,
+      snapshotType: config.baseConfig.snapshotType,
+      consensusSnapshotURL: config.baseConfig.consensusSnapshotURL,
+      executionSnapshotURL: config.baseConfig.executionSnapshotURL,
+      consensusCheckpointSyncURL: config.baseConfig.consensusCheckpointSyncURL,
       nodeRole: <EthNodeRole> "single-node",
       instanceType: config.rpcNodeConfig.instanceType,
       instanceCpuType: config.rpcNodeConfig.instanceCpuType,
       numberOfNodes: config.rpcNodeConfig.numberOfNodes,
       albHealthCheckGracePeriodMin: config.rpcNodeConfig.albHealthCheckGracePeriodMin,
       heartBeatDelayMin: config.rpcNodeConfig.heartBeatDelayMin,
-      dataVolumes: config.syncNodeConfig.dataVolumes,
+      dataVolume: config.syncNodeConfig.dataVolumes[0],
   });
 
     // Prepare the stack for assertions.
@@ -53,20 +58,6 @@ describe("EthRpcNodesStack", () => {
          "FromPort": 30303,
          "IpProtocol": "udp",
          "ToPort": 30303
-        },
-        {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "P2P",
-         "FromPort": 30304,
-         "IpProtocol": "tcp",
-         "ToPort": 30304
-        },
-        {
-         "CidrIp": "0.0.0.0/0",
-         "Description": "P2P",
-         "FromPort": 30304,
-         "IpProtocol": "udp",
-         "ToPort": 30304
         },
         {
          "CidrIp": "0.0.0.0/0",

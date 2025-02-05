@@ -1,5 +1,5 @@
 #!/bin/bash
-source /etc/environment
+source /etc/cdk_environment
 
 # Consensus client stats
 CONSENSUS_CLIENT_SYNC_STATUS=$(curl -s http://localhost:5052/eth/v1/node/syncing | jq -r ".data")
@@ -55,10 +55,10 @@ aws cloudwatch put-metric-data --metric-name elc_blocks_behind --namespace CWAge
 if [[ "$NODE_ROLE" == "sync-node" ]]; then
     if [ ! -f "/data/snapshotted" ]; then
         if [ "$EXECUTION_CLIENT_SYNC_STATS" == "false"  ] && [ "$CONSENSUS_CLIENT_IS_SYNCING" == "false" ] && [ "$CONSENSUS_CLIENT_IS_OPTIMISTIC" == "false"  ]; then
-                sudo /opt/copy-data-to-s3.sh
+                sudo /opt/instance/storage/copy-data-to-s3.sh
 
                 # Take a snapshot once a day at midnight
-                (sudo crontab -u root -l; echo '0 0 * * * /opt/copy-data-to-s3.sh' ) | sudo crontab -u root -
+                (sudo crontab -u root -l; echo '0 0 * * * /opt/instance/storage/copy-data-to-s3.sh' ) | sudo crontab -u root -
                 sudo crontab -l
         fi
     fi
