@@ -1,6 +1,7 @@
 import { Match, Template } from "aws-cdk-lib/assertions";
 import * as cdk from "aws-cdk-lib";
 import * as dotenv from "dotenv";
+dotenv.config({ path: './test/.env-test' });
 import * as config from "../lib/config/XRPConfig";
 import { XRPCommonStack } from "../lib/common-stack";
 import { XRPSingleNodeStack } from "../lib/single-node-stack";
@@ -8,7 +9,6 @@ import { XRPSingleNodeStack } from "../lib/single-node-stack";
 
 describe("XRPSingleNodeStack", () => {
     test("synthesizes the way we expect", () => {
-        dotenv.config({ path: './test/.env-test' });
         const app = new cdk.App();
         const xrpCommonStack = new XRPCommonStack(app, "xrp-common", {
             env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
