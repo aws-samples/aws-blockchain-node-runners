@@ -10,6 +10,12 @@ run_test(){
     local workdir=$1
     cd "$workdir" || exit 1
     echo "Running tests for $workdir"
+    if [ -f "jest.config.js" ]; then
+            echo "Using jest configuration at ${workdir}jest.config.js"
+            npx jest --config jest.config.js
+    else
+        npx jest
+    fi
     npm run test
     if [ $? -ne 0 ]; then
         echo "Tests failed for $workdir"
