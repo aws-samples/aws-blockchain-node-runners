@@ -15,4 +15,3 @@ export interface HAXRPBaseNodeConfig extends XRPBaseNodeConfig {
     heartBeatDelayMin: number;
     numberOfNodes: number;
 }
-
