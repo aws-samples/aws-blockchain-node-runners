@@ -38,3 +38,4 @@ ha-nodes-deploy*.json
 .env
 .idea
 .vscode
+.venv

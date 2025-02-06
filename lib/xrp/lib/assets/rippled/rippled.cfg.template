@@ -1,0 +1,31 @@
+[server]
+port_peer
+port_rpc_admin_local
+port_ws_admin_local
+[port_rpc_admin_local]
+[port_peer]
+[port_ws_admin_local]
+
+[node_db]
+[database_path]
+/var/lib/rippled/db
+# This needs to be an absolute directory reference, not a relative one.
+# Modify this value as required.
+[debug_logfile]
+/var/log/rippled/debug.log
+[ips]
+[network_id]
+[validators_file]
+validators.txt
+
+# Turn down default logging to save disk space in the long run.
+# Valid values here are trace, debug, info, warning, error, and fatal
+[rpc_startup]
+{ "command": "log_level", "severity": "warning" }
+# If ssl_verify is 1, certificates will be validated.
+# To allow the use of self-signed certificates for development or internal use,
+# set to ssl_verify to 0.
+[ssl_verify]
+1
+[crawl]
+1

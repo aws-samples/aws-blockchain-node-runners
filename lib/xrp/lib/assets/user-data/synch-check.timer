@@ -1,0 +1,10 @@
+[Unit]
+Description="Run Sync check service every 1 min"
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1min
+Unit=synch-check.service
+
+[Install]
+WantedBy=timers.target
