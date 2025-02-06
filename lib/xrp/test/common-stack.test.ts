@@ -4,16 +4,16 @@ import * as dotenv from "dotenv";
 import * as config from "../lib/config/XRPConfig";
 import { XRPCommonStack } from "../lib/common-stack";
 
-dotenv.config({ path: './test/.env-test' });
+dotenv.config({ path: "./test/.env-test" });
 
-describe("SolanaCommonStack", () => {
+describe("XRPCommonStack", () => {
     test("synthesizes the way we expect", () => {
         const app = new cdk.App();
 
-        // Create the SolanaCommonStack.
+        // Create the XRPCommonStack.
         const xrpCommonStack = new XRPCommonStack(app, "xrp-common", {
             env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
-            stackName: `xrp-nodes-common`,
+            stackName: `xrp-nodes-common`
         });
 
         // Prepare the stack for assertions.
@@ -70,7 +70,7 @@ describe("SolanaCommonStack", () => {
                     ]
                 }
             ]
-        })
+        });
 
     });
 });

@@ -42,7 +42,7 @@ export class XRPHANodesStack extends cdk.Stack {
         // Using default VPC
         const vpc = ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
 
-        // Setting up the security group for the node from Solana-specific construct
+        // Setting up the security group for the node from xrp-specific construct
         const instanceSG = new XRPNodeSecurityGroupConstruct(this, "security-group", {
             vpc: vpc
         });

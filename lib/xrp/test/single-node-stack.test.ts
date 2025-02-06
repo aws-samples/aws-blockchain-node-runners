@@ -7,7 +7,7 @@ import { XRPSingleNodeStack } from "../lib/single-node-stack";
 
 dotenv.config({ path: './test/.env-test' });
 
-describe("SolanaSingleNodeStack", () => {
+describe("XRPSingleNodeStack", () => {
     test("synthesizes the way we expect", () => {
         const app = new cdk.App();
         const xrpCommonStack = new XRPCommonStack(app, "xrp-common", {
