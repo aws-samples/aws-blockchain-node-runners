@@ -9,8 +9,6 @@ import { HANodesConstruct } from "../../constructs/ha-rpc-nodes-with-alb";
 import * as constants from "../../constructs/constants";
 import { XRPSingleNodeStackProps } from "./single-node-stack";
 import { XRPNodeSecurityGroupConstruct } from "./constructs/xrp-node-security-group";
-import { SingleNodeCWDashboardJSON } from "./constructs/node-cw-dashboard";
-import * as cw from 'aws-cdk-lib/aws-cloudwatch';
 
 export interface XRPHANodesStackProps extends XRPSingleNodeStackProps {
     albHealthCheckGracePeriodMin: number;
@@ -36,14 +34,9 @@ export class XRPHANodesStack extends cdk.Stack {
             dataVolume: dataVolume,
             stackName,
             hubNetworkID,
-            // hubNetworkIP,
-            // validatorListSites,
-            // validatorListKeys,
-            // onlineDelete,
-            // advisoryDelete,
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
-            numberOfNodes,
+            numberOfNodes
         } = props;
 
         // Using default VPC
@@ -51,18 +44,15 @@ export class XRPHANodesStack extends cdk.Stack {
 
         // Setting up the security group for the node from Solana-specific construct
         const instanceSG = new XRPNodeSecurityGroupConstruct(this, "security-group", {
-            vpc: vpc,
+            vpc: vpc
         });
 
         // Making our scripts and configis from the local "assets" directory available for instance to download
         const asset = new s3Assets.Asset(this, "assets", {
-            path: path.join(__dirname, "assets"),
+            path: path.join(__dirname, "assets")
         });
 
-        // Getting the IAM role ARN from the common stack
-        const importedInstanceRoleArn = cdk.Fn.importValue("SolanaNodeInstanceRoleArn");
-
-        const instanceRole = props.instanceRole; //iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
+        const instanceRole = props.instanceRole;
 
         // Making sure our instance will be able to read the assets
         asset.bucket.grantRead(instanceRole);
@@ -90,7 +80,7 @@ export class XRPHANodesStack extends cdk.Stack {
                         .replace("_HUB_NETWORK_ID_", hubNetworkID)
                         .replace("_LIFECYCLE_HOOK_NAME_", lifecycleHookName)
                         .replace("_ASG_NAME_", autoScalingGroupName);
-                },
+                }
             })
         );
 
@@ -101,7 +91,7 @@ export class XRPHANodesStack extends cdk.Stack {
             rootDataVolumeDeviceName: "/dev/xvda",
             machineImage: new ec2.AmazonLinuxImage({
                 generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-                cpuType: ec2.AmazonLinuxCpuType.X86_64,
+                cpuType: ec2.AmazonLinuxCpuType.X86_64
             }),
             vpc,
             role: instanceRole,
@@ -113,16 +103,13 @@ export class XRPHANodesStack extends cdk.Stack {
             heartBeatDelayMin,
             lifecycleHookName: lifecycleHookName,
             autoScalingGroupName: autoScalingGroupName,
-            rpcPortForALB: 6005,
+            rpcPortForALB: 6005
         });
 
-        
-
-        
 
         // Making sure we output the URL of our Applicaiton Load Balancer
         new cdk.CfnOutput(this, "alb-url", {
-            value: nodeASG.loadBalancerDnsName,
+            value: nodeASG.loadBalancerDnsName
         });
 
         // Adding suppressions to the stack
@@ -131,20 +118,20 @@ export class XRPHANodesStack extends cdk.Stack {
             [
                 {
                     id: "AwsSolutions-AS3",
-                    reason: "No notifications needed",
+                    reason: "No notifications needed"
                 },
                 {
                     id: "AwsSolutions-S1",
-                    reason: "No access log needed for ALB logs bucket",
+                    reason: "No access log needed for ALB logs bucket"
                 },
                 {
                     id: "AwsSolutions-EC28",
-                    reason: "Using basic monitoring to save costs",
+                    reason: "Using basic monitoring to save costs"
                 },
                 {
                     id: "AwsSolutions-IAM5",
-                    reason: "Need read access to the S3 bucket with assets",
-                },
+                    reason: "Need read access to the S3 bucket with assets"
+                }
             ],
             true
         );

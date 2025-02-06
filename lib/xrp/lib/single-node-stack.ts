@@ -12,7 +12,6 @@ import { XRPNodeSecurityGroupConstruct } from "./constructs/xrp-node-security-gr
 import { SingleNodeCWDashboardJSON } from "./constructs/node-cw-dashboard";
 import { DataVolumeConfig } from "../../constructs/config.interface";
 import * as constants from "../../constructs/constants";
-import { parseRippledConfig } from "./config/createIniFile";
 
 
 export interface XRPSingleNodeStackProps extends cdk.StackProps {
@@ -57,9 +56,6 @@ export class XRPSingleNodeStack extends cdk.Stack {
         const asset = new s3Assets.Asset(this, "assets", {
             path: path.join(__dirname, "assets")
         });
-
-        // Getting the IAM role ARN from the common stack
-        const importedInstanceRoleArn = cdk.Fn.importValue("XRPNodeInstanceRoleArn");
 
         const instanceRole = props.instanceRole; //iam.Role.fromRoleArn(this, "iam-role", importedInstanceRoleArn);
 

@@ -1,8 +1,7 @@
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as configTypes from "../../../constructs/config.interface";
 import * as constants from "../../../constructs/constants";
-import * as xrp from "./XRPConfig.interface"
-import { BaseNodeConfig } from "../../../constructs/config.interface";
+import * as xrp from "./XRPConfig.interface";
 
 
 const parseDataVolumeType = (dataVolumeType: string) => {
@@ -36,13 +35,7 @@ export const baseNodeConfig: xrp.XRPBaseNodeConfig = {
         iops: process.env.DATA_VOL_IOPS ? parseInt(process.env.DATA_VOL_IOPS): 12000,
         throughput: process.env.DATA_VOL_THROUGHPUT ? parseInt(process.env.DATA_VOL_THROUGHPUT): 700,
     },
-    // hubNetworkIP: process.env.HUB_NETWORK_IP || "s.altnet.rippletest.net 51235", //testnet
-    hubNetworkID: process.env.HUB_NETWORK_ID || "testnet",
-    // onlineDelete: process.env.ONLINE_DELETE || "512",
-    // advisoryDelete: process.env.ADVISORY_DELETE || "1",
-    // validatorListSites: process.env.VALIDATOR_LIST_SITES || "https://vl.altnet.rippletest.net", //testnet
-    // validatorListKeys: process.env.VALIDATOR_LIST_KEYS || "https://vl.altnet.rippletest.net" //testnet
-
+    hubNetworkID: process.env.HUB_NETWORK_ID || "testnet"
 };
 
 
