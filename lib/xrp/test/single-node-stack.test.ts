@@ -5,10 +5,10 @@ import * as config from "../lib/config/XRPConfig";
 import { XRPCommonStack } from "../lib/common-stack";
 import { XRPSingleNodeStack } from "../lib/single-node-stack";
 
-dotenv.config({ path: './test/.env-test' });
 
 describe("XRPSingleNodeStack", () => {
     test("synthesizes the way we expect", () => {
+        dotenv.config({ path: './test/.env-test' });
         const app = new cdk.App();
         const xrpCommonStack = new XRPCommonStack(app, "xrp-common", {
             env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
