@@ -13,7 +13,7 @@ class RippledConfig:
     """Class to handle Rippled configuration settings"""
     assets_path: Path
     xrp_network: str
-    
+
     def __init__(self, assets_path: str):
         self.assets_path = Path(assets_path) / "rippled"
         self.xrp_network = os.environ.get("XRP_NETWORK", "mainnet")
@@ -28,7 +28,7 @@ class RippledConfig:
 
         ripple_cfg.read_string(self._read_template_file("rippled.cfg.template"))
         validator_cfg.read_string(self._read_template_file("validators.txt.template"))
-        
+
         return ripple_cfg, validator_cfg
 
     def _read_template_file(self, filename: str) -> str:
@@ -50,11 +50,11 @@ class RippledConfig:
         parser.optionxform = str
         return parser
 
-    def apply_network_configuration(self, ripple_cfg: configparser.ConfigParser, 
+    def apply_network_configuration(self, ripple_cfg: configparser.ConfigParser,
                                   validator_cfg: configparser.ConfigParser) -> None:
         """Apply network-specific configuration settings"""
         network_config = self.network_defaults[self.xrp_network]
-        
+
         if self.xrp_network == "mainnet":
             self._configure_mainnet(ripple_cfg, validator_cfg, network_config)
         elif self.xrp_network == "testnet":
@@ -112,7 +112,7 @@ def main():
     try:
         assets_path = sys.argv[1]
         config_handler = RippledConfig(assets_path)
-        
+
         ripple_cfg, validator_cfg = config_handler.load_config_files()
         config_handler.apply_network_configuration(ripple_cfg, validator_cfg)
 

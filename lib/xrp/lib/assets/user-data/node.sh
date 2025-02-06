@@ -120,7 +120,7 @@ install_rippled() {
         log_info "rippled package already installed, checking for updates..."
         sudo yum update -y rippled
     fi
-    
+
     log_info "build out and write rippled.cfg and validaotrs.txt"
     python3 ${ASSETS_DIR}/rippled/configBuilder.py ${ASSETS_DIR}
 

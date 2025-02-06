@@ -144,4 +144,3 @@ HUB_NETWORK_ID="testnet"
 ```
 
    b. lib/xrp/lib/assets/rippled/rippledconfig.py file. Here you can setup listners an network configuration for the network specified in part "a"
-   

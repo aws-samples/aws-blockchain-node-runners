@@ -85,7 +85,7 @@ get_metadata() {
         retry_count=$((retry_count + 1))
         sleep ${RETRY_DELAY}
     done
-    
+
     log_error "Failed to retrieve metadata from ${endpoint} after ${MAX_RETRIES} attempts"
     return 1
 }
@@ -94,18 +94,18 @@ get_metadata() {
 check_dependencies() {
     log_info "Checking dependencies..."
     local missing_deps=()
-    
+
     for cmd in aws jq curl; do
         if ! command -v "${cmd}" >/dev/null 2>&1; then
             missing_deps+=("${cmd}")
         fi
     done
-    
+
     if [[ ${#missing_deps[@]} -gt 0 ]]; then
         log_error "Missing required dependencies: ${missing_deps[*]}"
         return 1
     fi
-    
+
     log_info "All dependencies satisfied"
     return 0
 }
@@ -129,7 +129,7 @@ get_current_sequence() {
         retry_count=$((retry_count + 1))
         sleep ${RETRY_DELAY}
     done
-    
+
     log_error "Failed to get current sequence after ${MAX_RETRIES} attempts"
     return 1
 }
@@ -138,7 +138,7 @@ get_current_sequence() {
 send_to_cloudwatch() {
     local sequence=$1
     local retry_count=0
-    
+
     while [[ ${retry_count} -lt ${MAX_RETRIES} ]]; do
         if aws cloudwatch put-metric-data \
             --namespace "${NAMESPACE}" \
@@ -154,7 +154,7 @@ send_to_cloudwatch() {
         retry_count=$((retry_count + 1))
         sleep ${RETRY_DELAY}
     done
-    
+
     log_error "Failed to send metrics to CloudWatch after ${MAX_RETRIES} attempts"
     return 1
 }
@@ -171,38 +171,38 @@ init_environment() {
 # Main function
 main() {
     local sequence
-    
+
     log_info "Starting XRP sequence check"
-    
+
     # Ensure only one instance is running
     exec {LOCK_FD}>"${LOCKFILE}"
     if ! flock -n "${LOCK_FD}"; then
         log_error "Another instance is already running"
         return 1
     fi
-    
+
     # Check dependencies first
     if ! check_dependencies; then
         return 1
     fi
-    
+
     # Initialize environment variables
     if ! init_environment; then
         return 1
     fi
-    
+
     # Get current sequence
     if ! sequence=$(get_current_sequence); then
         return 1
     fi
-    
+
     log_info "Retrieved sequence: ${sequence}"
-    
+
     # Send to CloudWatch
     if ! send_to_cloudwatch "${sequence}"; then
         return 1
     fi
-    
+
     log_info "XRP sequence check completed successfully"
     return 0
 }
