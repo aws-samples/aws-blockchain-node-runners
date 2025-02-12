@@ -31,7 +31,7 @@ new EdgeCommonStack(app, "allora-edge-common", {
 
 new AlloraStack(app, 'allora-single-node', {
   stackName: 'allora-single-node',
-  env: { 
+  env: {
     account: process.env.AWS_ACCOUNT_ID || "xxxxxxxxxxx",
     region: process.env.AWS_REGION || 'us-east-1',
   },
@@ -77,7 +77,7 @@ new AlloraStack(app, 'allora-single-node', {
   alloraWorkerInferenceEndpoint: process.env.ALLORA_WORKER_INFERENCE_ENDPOINT || 'http://source:8000/inference/{Token}',
   alloraWorkerLoopSeconds: process.env.ALLORA_WORKER_LOOP_SECONDS || '30',
   alloraWorkerToken: process.env.ALLORA_WORKER_TOKEN || 'ethereum',
-  
+
   //Reputer Properties
   alloraReputerTopicId: process.env.ALLORA_REPUTER_TOPIC_ID || '1',
   alloraReputerEntrypointName: process.env.ALLORA_REPUTER_ENTRYPOINT_NAME || 'api-worker-reputer',

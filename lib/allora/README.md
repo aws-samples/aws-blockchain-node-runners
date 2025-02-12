@@ -25,14 +25,14 @@ This blueprint is designed to assist in deploying a single Allora [Worker Node](
 ![Single Worker Node Deployment](./doc/assets/Architecture-Single-Allora-Worker-Node.png)
 
 The AWS Cloud Development Kit (CDK) is used to deploy a single Allora Worker Node. The CDK application deploys the following infrastructure:
-   
+
   - Virtual Private Cloud (VPC)
   - Internet Gateway (IGW) to allow inbound requests for inferences from consumers and outbound responses from the worker node revealing inferences
   - Public subnet that has a direct route to the IGW
   - Security Group (SG) with TCP Port 9010 open inbound allowing requests for inferences to be routed to the Allora Worker Node
   - Single Amazon Elastic Compute Cloud (EC2) instance (the Allora Worker Node) assigned to the public subnet
 
-The Allora Worker Node is accessed by the user internally and is not exposed to the Internet to protect the node from unauthorized access. A user can gain access to the EC2 Instance using AWS Session Manager. 
+The Allora Worker Node is accessed by the user internally and is not exposed to the Internet to protect the node from unauthorized access. A user can gain access to the EC2 Instance using AWS Session Manager.
 
 Multiple processes run on the Allora Worker Node (EC2 instance):
 
@@ -41,7 +41,7 @@ Multiple processes run on the Allora Worker Node (EC2 instance):
 
 Allora Public Head Nodes publish the Allora chain requests (requests for inferences from consumers) to Allora worker nodes. When a worker node is initialized, it starts with an environment variable called BOOT_NODES, which helps handle the connection and communications between worker nodes and the head nodes.
 
-The worker node (docker container) will call the function that invokes custom logic that handles the actual inference. The request-response is a bidirectional flow from the Allora chain (inference requests from consumers) to the public head nodes to the worker node and finally to the model server that reveals inferences. 
+The worker node (docker container) will call the function that invokes custom logic that handles the actual inference. The request-response is a bidirectional flow from the Allora chain (inference requests from consumers) to the public head nodes to the worker node and finally to the model server that reveals inferences.
 
 ## Additional materials
 
@@ -68,7 +68,7 @@ This is the Well-Architected checklist for the Allora worker nodes implementatio
 | Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance, i.e. AWS EC2 T3 Medium instance suitable for bursty workloads. |
 |                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance, i.e. Amazon EBS volumes with optimal IOPS and throughput. |
 |                         | Architecture selection            | How is the best performance architecture selected?                               | A combination of recommendations from the Allora Network community and Allora Labs testing. |
-| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses AMD-powered instances. There is a potential to use AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2. 
+| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | The solution uses AMD-powered instances. There is a potential to use AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2.
 </details>
 
 ## Worker Node System Requirements

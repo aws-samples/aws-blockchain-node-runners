@@ -72,11 +72,11 @@ export class AlloraStack extends cdk.Stack {
     super(scope, id, props);
 
     const {
-      env, 
-      instanceType, 
-      resourceNamePrefix, 
-      dataVolume, 
-      alloraWorkerName, 
+      env,
+      instanceType,
+      resourceNamePrefix,
+      dataVolume,
+      alloraWorkerName,
       alloraEnv,
       modelRepo,
       modelEnvVars,
@@ -125,7 +125,7 @@ export class AlloraStack extends cdk.Stack {
     const STACK_NAME = cdk.Stack.of(this).stackName;
     const STACK_ID = cdk.Stack.of(this).stackId;
 
-    
+
 
     // Create S3 Bucket
     const bucket = new s3.Bucket(this, `${resourceNamePrefix}Bucket`, {
@@ -159,7 +159,7 @@ export class AlloraStack extends cdk.Stack {
     });
     securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(9010), 'Allow inbound TCP 9010');
 
-     
+
 
 
     // Getting the snapshot bucket name and IAM role ARN from the common stack
@@ -208,7 +208,7 @@ export class AlloraStack extends cdk.Stack {
 
       //wallet config
       _ALLORA_WALLET_ADDRESS_KEY_NAME_ : alloraWalletAddressKeyName,
-      _ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC_ : alloraWalletAddressRestoreMnemonic, 
+      _ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC_ : alloraWalletAddressRestoreMnemonic,
       _ALLORA_WALLET_HOME_DIR_: alloraWalletHomeDir,
       _ALLORA_WALLET_GAS_ADJUSTMENT_: alloraWalletGasAdjustment,
       _ALLORA_WALLET_GAS_: alloraWalletGas,
@@ -220,7 +220,7 @@ export class AlloraStack extends cdk.Stack {
       _ALLORA_WALLET_WINDOW_CORRECTION_FACTOR_: alloraWalletWindowCorrectionFactor,
       _ALLORA_WALLET_MAX_FEES_: alloraWalletMaxFees,
       _ALLORA_WALLET_ACCOUNT_SEQUENCE_RETRY_DELAY_: alloraWalletAccountSequenceRetryDelay,
-      
+
       _ALLORA_WALLET_NODE_RPC_: alloraWalletNodeRpc,
       _ALLORA_WALLET_MAX_RETRIES_: alloraWalletMaxRetries,
       _ALLORA_WALLET_DELAY_: alloraWalletDelay,
@@ -245,7 +245,7 @@ export class AlloraStack extends cdk.Stack {
       _ALLORA_REPUTER_TOKEN_: alloraReputerToken,
       _ALLORA_REPUTER_MIN_STAKE_: alloraReputerMinStake,
 
-      
+
     });
 
    // Create UserData for EC2 instance

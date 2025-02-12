@@ -9,5 +9,8 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.2.2"
   }
 }

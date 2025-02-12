@@ -106,7 +106,7 @@ cd node-repo
 git checkout $ALLORA_ENV
 
 cp config.cdk.json.template config.json
-cd 
+cd
 #wallet config str replace
 sed -i "s/_ALLORA_WALLET_ADDRESS_KEY_NAME_/$ALLORA_WALLET_ADDRESS_KEY_NAME/" config.json
 sed -i "s/_ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC_/$ALLORA_WALLET_ADDRESS_RESTORE_MNEMONIC/" config.json
@@ -171,7 +171,7 @@ echo -e "$MODEL_ENV_VARS" >> .env
 echo 'building basic worker'
 chmod +x init.config
 ./init.config
-docker-compose up --build 
+docker-compose up --build
 
 echo "----------------------------------------------"
 echo "[user-data] Allora user-data script successful"
