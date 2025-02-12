@@ -7,18 +7,51 @@ describe("AlloranodeStack", () => {
   test('Stack has correct resources', () => {
     const app = new cdk.App();
     const stack = new AlloraStack(app, 'TestStack', {
-      env: { account: 'xxxxxxxxxxx', region: 'us-east-1' },
+      env: { account: '123456789', region: 'us-east-1' },
       instanceType: 't3.medium',
       vpcMaxAzs: 1,
       vpcNatGateways: 0,
       vpcSubnetCidrMask: 24,
-      resourceNamePrefix: 'AlloraWorkerTest',
+      resourceNamePrefix: 'AlloraWorkerx',
       dataVolume: {
         sizeGiB: 256,
         type: ec2.EbsDeviceVolumeType.GP3,
-        iops: 10000,
-        throughput: 700
-      }
+        iops: 3000,
+        throughput: 125
+      },
+      alloraWorkerName: 'aws',
+      alloraEnv: 'dev',
+      modelRepo: 'https://github.com/allora-network/basic-coin-prediction-node',
+      modelEnvVars: '{}',
+      alloraWalletAddressKeyName: 'xxxxxxxxxxx',
+      alloraWalletAddressRestoreMnemonic: 'xxxxxxxxxxx',
+      alloraWalletHomeDir: '',
+      alloraWalletGas: '1000000',
+      alloraWalletGasAdjustment: '1.0',
+      alloraWalletGasPrices: '0.1,0.2',
+      alloraWalletGasPriceInterval: '60',
+      alloraWalletRetryDelay: '5',
+      alloraWalletBlockDurationEstimated: '6',
+      alloraWalletWindowCorrectionFactor: '0.8',
+      alloraWalletMaxFees: '500',
+      alloraWalletAccountSequenceRetryDelay: '2',
+      alloraWalletNodeRpc: 'https://localhost:26657',
+      alloraWalletMaxRetries: '1',
+      alloraWalletDelay: '1',
+      alloraWalletSubmitTx: 'false',
+      alloraWorkerTopicId: '1',
+      alloraWorkerInferenceEntrypointName: 'api-worker-reputer',
+      alloraWorkerInferenceEndpoint: 'http://source:8000/inference/{Token}',
+      alloraWorkerLoopSeconds: '30',
+      alloraWorkerToken: 'ethereum',
+      alloraReputerTopicId: '1',
+      alloraReputerEntrypointName: 'api-worker-reputer',
+      alloraReputerSourceOfTruthEndpoint: 'http://source:8888/truth/{Token}/{BlockHeight}',
+      alloraReputerLoopSeconds: '30',
+      alloraReputerToken: 'ethereum',
+      alloraReputerMinStake: '100000',
+      alloraReputerLossFunctionService: 'loss-service',
+      alloraReputerLossMethodOptionsLossMethod: 'mse'
     });
 
     const template = Template.fromStack(stack);
@@ -45,11 +78,11 @@ describe("AlloranodeStack", () => {
     template.hasResourceProperties('AWS::EC2::Instance', {
       InstanceType: 't3.medium',
       ImageId: {
-        "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamzn2amikernel510hvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter"
+        "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestal2023amikernel61x8664C96584B6F00A464EAD1953AFF4B05118Parameter"
       },
       BlockDeviceMappings: [
         {
-          DeviceName: '/dev/sda1',
+          DeviceName: '/dev/xvda',
           Ebs: {
             VolumeSize: 46,
             VolumeType: 'gp3',
@@ -145,7 +178,7 @@ describe("AlloranodeStack", () => {
     template.hasResourceProperties("AWS::CloudWatch::Dashboard", {
       DashboardBody: Match.anyValue(),
       DashboardName: {
-        "Fn::Join": ["", ["AlloraStack-",{ "Ref": Match.anyValue() }]]
+        "Fn::Join": ["", ["AlloraStack-", { "Ref": Match.anyValue() }]]
       }
     })
   });
