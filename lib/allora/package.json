@@ -1,0 +1,16 @@
+{
+  "name": "allora",
+  "version": "0.1.0",
+  "bin": {
+    "allora": "allora.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.2.2"
+  }
+}
