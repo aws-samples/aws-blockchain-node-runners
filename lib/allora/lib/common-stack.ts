@@ -1,18 +1,17 @@
 import * as cdk from "aws-cdk-lib";
 import * as cdkConstructs from "constructs";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import * as nag from "cdk-nag";
 
-export interface EdgeCommonStackProps extends cdk.StackProps {
+export interface AlloraCommonStackProps extends cdk.StackProps {
 
 }
 
-export class EdgeCommonStack extends cdk.Stack {
+export class AlloraCommonStack extends cdk.Stack {
     AWS_STACK_NAME = cdk.Stack.of(this).stackName;
     AWS_ACCOUNT_ID = cdk.Stack.of(this).account;
 
-    constructor(scope: cdkConstructs.Construct, id: string, props: EdgeCommonStackProps) {
+    constructor(scope: cdkConstructs.Construct, id: string, props: AlloraCommonStackProps) {
         super(scope, id, props);
 
         const instanceRole = new iam.Role(this, "node-role", {

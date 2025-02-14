@@ -80,16 +80,20 @@ This is the Well-Architected checklist for the Allora worker nodes implementatio
 
 ## Setup Instructions
 
-### Setup Cloud9
+### Open AWS CloudShell
 
-We will use AWS Cloud9 to execute the subsequent commands. Follow the instructions in [Cloud9 Setup](../../docs/setup-cloud9.md).
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
+
+From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
+
+Once ready, you can run the commands to deploy and test blueprints in the CloudShell.
 
 ### Clone this repository and install dependencies
 
 ```bash
-   git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
-   cd aws-blockchain-node-runners
-   npm install
+git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
+cd aws-blockchain-node-runners
+npm install
 ```
 
 ### Deploy single worker node
@@ -99,67 +103,67 @@ We will use AWS Cloud9 to execute the subsequent commands. Follow the instructio
 2. Configure your setup
 
     Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
-    ```bash
-   # Make sure you are in aws-blockchain-node-runners/lib/allora
-   cd lib/allora
-   npm install
-   pwd
-   cp ./sample-configs/.env-sample-full .env
-   nano .env
-    ```
-   > NOTE:
-   > Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
+```bash
+# Make sure you are in aws-blockchain-node-runners/lib/allora
+cd lib/allora
+npm install
+pwd
+cp ./sample-configs/.env-sample-full .env
+nano .env
+```
+> NOTE:
+> Example configuration parameters are set in the local `.env-sample` file. You can find more examples inside `sample-configs` directory.
 
-   > IMPORTANT:
-   > All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
-   > ```bash
-   > cdk bootstrap aws://ACCOUNT-NUMBER/REGION
-   > ```
+> IMPORTANT:
+> All AWS CDK v2 deployments use dedicated AWS resources to hold data during deployment. Therefore, your AWS account and Region must be [bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) to create these resources before you can deploy. If you haven't already bootstrapped, issue the following command:
+> ```bash
+> cdk bootstrap aws://ACCOUNT-NUMBER/REGION
+> ```
 
 3. Deploy Common Stack
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/allora
-   npx cdk deploy allora-edge-common --json --outputs-file allora-edge-common-deploy.json
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/allora
+npx cdk deploy allora-common
+```
 
-5. Deploy Allora Worker Node
+4. Deploy Allora Worker Node
 
-   ```bash
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/allora
-   npx cdk deploy allora-single-node --json --outputs-file single-node-deploy.json
-   ```
+```bash
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/allora
+npx cdk deploy allora-single-node --json --outputs-file single-node-deploy.json
+```
+
+5. Test your node
+
+```bash
+INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
+NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+echo "NODE_INTERNAL_IP=$NODE_INTERNAL_IP"
+TOKEN="ETH"
+
+curl http://$NODE_INTERNAL_IP:8000/inference/$TOKEN
+```
 
 ## Clear up and undeploy everything
 
 1. Undeploy worker node and common components
 
-   ```bash
-   # Setting the AWS account id and region in case local .env file is lost
-   export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
-   export AWS_REGION=<your_target_AWS_region>
-
-   pwd
-   # Make sure you are in aws-blockchain-node-runners/lib/allora
-
-   # Undeploy Single Node
-   npx cdk destroy allora-single-node
-
-   # Undeploy Common Stack
-   npx cdk destroy allora-edge-nodes-common
-   ```
-
-2. Follow these steps to delete the Cloud9 instance in [Cloud9 Setup](../../docs/setup-cloud9.md)
-
-   Navigate to the AWS Cloud9 service in your Management Console, then select the environment you have created. On the top right, click **Delete** button and  follow the instructions.
-
-3. Delete the instance profile and IAM role
-
 ```bash
-aws iam delete-instance-profile --instance-profile-name Cloud9-Developer-Access
-aws iam delete-role --role-name Cloud9-Developer-Access
+# Setting the AWS account id and region in case local .env file is lost
+export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
+export AWS_REGION=<your_target_AWS_region>
+
+pwd
+# Make sure you are in aws-blockchain-node-runners/lib/allora
+
+# Undeploy Single Node
+npx cdk destroy allora-single-node
+
+# Undeploy Common Stack
+npx cdk destroy allora-common
 ```
 
 ### FAQ
