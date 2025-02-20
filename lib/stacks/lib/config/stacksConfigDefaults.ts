@@ -32,13 +32,13 @@ export function stacksNodeConfigDefaults(
     const defaultStacksNetworkConfig: configTypes.StacksNetworkConfig = stacksNetwork === "mainnet"
         ? {
             stacksNetwork: "mainnet",
-            stacksBootstrapNode: "02196f005965cebe6ddc3901b7b1cc1aa7a88f305bb8c5893456b8f9a605923893@seed.mainnet.hiro.so:20444,02539449ad94e6e6392d8c1deb2b4e61f80ae2a18964349bc14336d8b903c46a8c@cet.stacksnodes.org:20444,02ececc8ce79b8adf813f13a0255f8ae58d4357309ba0cedd523d9f1a306fcfb79@sgt.stacksnodes.org:20444,0303144ba518fe7a0fb56a8a7d488f950307a4330f146e1e1458fc63fb33defe96@est.stacksnodes.org:20444",
+            stacksBootstrapNode: "02da7a464ac770ae8337a343670778b93410f2f3fef6bea98dd1c3e9224459d36b@seed-0.mainnet.stacks.co:20444,02afeae522aab5f8c99a00ddf75fbcb4a641e052dd48836408d9cf437344b63516@seed-1.mainnet.stacks.co:20444,03652212ea76be0ed4cd83a25c06e57819993029a7b9999f7d63c36340b34a4e62@seed-2.mainnet.stacks.co:20444",
             stacksChainstateArchive: "https://archive.hiro.so/mainnet/stacks-blockchain/mainnet-stacks-blockchain-latest.tar.gz",
             stacksP2pPort: 20444,
             stacksRpcPort: 20443,
-            bitcoinPeerHost: "bitcoind.stacks.co",
-            bitcoinRpcUsername: "blockstack",
-            bitcoinRpcPassword: "blockstacksystem",
+            bitcoinPeerHost: "bitcoin.mainnet.stacks.org",
+            bitcoinRpcUsername: "stacks",
+            bitcoinRpcPassword: "foundation",
             bitcoinP2pPort: 8333,
             bitcoinRpcPort: 8332,
         }
@@ -48,9 +48,9 @@ export function stacksNodeConfigDefaults(
             stacksChainstateArchive: "https://archive.hiro.so/testnet/stacks-blockchain/testnet-stacks-blockchain-latest.tar.gz",
             stacksP2pPort: 20444,
             stacksRpcPort: 20443,
-            bitcoinPeerHost: "bitcoind.testnet.stacks.co",
-            bitcoinRpcUsername: "blockstack",
-            bitcoinRpcPassword: "blockstacksystem",
+            bitcoinPeerHost: "bitcoin.testnet.stacks.org",
+            bitcoinRpcUsername: "stacks",
+            bitcoinRpcPassword: "foundation",
             bitcoinP2pPort: 18333,
             bitcoinRpcPort: 18332,
         }
