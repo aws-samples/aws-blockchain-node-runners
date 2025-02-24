@@ -1,0 +1,13 @@
+{
+  "name": "allora",
+  "version": "0.1.0",
+  "bin": {
+    "run": "app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  }
+}
