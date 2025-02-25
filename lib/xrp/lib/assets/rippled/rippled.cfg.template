@@ -2,6 +2,8 @@
 port_peer
 port_rpc_admin_local
 port_ws_admin_local
+port_ws_public
+[port_ws_public]
 [port_rpc_admin_local]
 [port_peer]
 [port_ws_admin_local]

@@ -59,7 +59,7 @@ aws ec2 create-default-vpc
 Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
 ```bash
 cd lib/xrp
-cp ./sample-configs/.env-xrp-testnet .env
+cp ./sample-configs/.env-sample-testnet .env
 nano .env
 ```
 > **NOTE:** *You can find more examples inside `sample-configs` *
@@ -99,7 +99,7 @@ npx cdk deploy XRP-ha-nodes --json --outputs-file ha-nodes-deploy.json
 
 > **NOTE:** *By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.*
 
-### Clearing up and undeploy everything
+### Cleaning up and undeploying everything
 
 Destroy HA Nodes, Single Nodes and Common stacks
 
@@ -129,7 +129,7 @@ cdk destroy XRP-common
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/xrp
 
-export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '.["XRP-single-node"].nodeinstanceid')
 echo "INSTANCE_ID=" $INSTANCE_ID
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo cat /var/log/cloud-init-output.log
@@ -138,9 +138,10 @@ sudo cat /var/log/user-data.log
 2. How can I change rippled (XRP) configuration?  
    There are two places of configuration for the xrp nodes:
 
-   a. .env file. Here is where you specify the xrp network you want. This is the key into the config hash in part b
-```bash
-HUB_NETWORK_ID="testnet"
-```
+   a. `.env` file. Here is where you specify the xrp network you want. This is the key for the config in part b
 
-   b. lib/xrp/lib/assets/rippled/rippledconfig.py file. Here you can setup listners an network configuration for the network specified in part "a"
+      ```bash
+      HUB_NETWORK_ID="testnet"
+      ```
+
+   b. `lib/xrp/lib/assets/rippled/rippledconfig.py` file. Here you can setup listeners and network configuration for the network specified in part "a"

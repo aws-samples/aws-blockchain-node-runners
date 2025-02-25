@@ -20,6 +20,11 @@ xrp_defaults = {
             "admin": "127.0.0.1",
             "protocol": "ws,wss",
         },
+        "port_ws_public": {
+            "port": "6005",
+            "ip": "0.0.0.0",
+            "protocol": "ws,wss,http",
+        },
     },
     "db_defaults": {
         "node_db": {
@@ -31,7 +36,7 @@ xrp_defaults = {
     },
     "network_defaults": {
         "mainnet": {
-            "network_id": "mainnet",
+            "network_id": "main",
             "ssl_verify": "1",
             "validator_list_sites": ["https://vl.ripple.com"],
             "validator_list_keys": [
