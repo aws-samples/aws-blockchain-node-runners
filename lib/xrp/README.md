@@ -85,6 +85,37 @@ npx cdk deploy XRP-single-node --json --outputs-file single-node-deploy.json
     - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
     - Open `Dashboards` and select dashboard that starts with `XRP-single-node` from the list of dashboards.
 
+3. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Run the following query against the private IP of the single RPC node you deployed:
+
+```bash
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '.["XRP-single-node"].nodeinstanceid')
+ NODE_INTERNAL_IP=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].PrivateIpAddress' --output text)
+echo "NODE_INTERNAL_IP=$NODE_INTERNAL_IP"
+```
+
+Copy output from the last `echo` command with `NODE_INTERNAL_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `NODE_INTERNAL_IP=<internal_IP>` into the new CloudShell tab. 
+
+Then query the RPC API to receive the latest block height:
+
+``` bash
+# IMPORTANT: Run from CloudShell VPC environment tab
+curl -X POST -H "Content-Type: application/json" http://$NODE_INTERNAL_IP:6005/ -d '{
+ "method": "ledger_current",
+ "params": [{}]
+}'
+```
+You will get a response similar to this:
+
+```json
+{"result":{"ledger_current_index":5147254,"status":"success"}}
+```
+
+Note: If the node is still syncing, you will receive the following response:
+
+```json
+{"result":{"error":"noNetwork","error_code":17,"error_message":"Not synced to the network.","request":{"command":"ledger_current"},"status":"error"}}
+```
+
 ### Deploy HA Nodes
 
 1. Deploy multiple HA Nodes
