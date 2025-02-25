@@ -51,7 +51,7 @@ This is the Well-Architected checklist for XRP nodes implementation of the AWS B
 | Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance.  |
 |                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance. |
 | Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health of workload is determined via AWS Application Load Balancer Target Group Health Checks, on port 8545.  |
-| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | This solution uses I3 instance class which is Storage Optimized instances for high transaction and low latency.  |
+| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | Amazon EC2 I3 instances support the Sustainability Pillar of the AWS Well-Architected Framework by offering high-performance, storage-optimized computing that enables more efficient resource utilization, potentially reducing overall energy consumption and hardware requirements for data-intensive workloads.  |
 
 </details>
 
