@@ -143,6 +143,7 @@ Then query the load balancer to retrieve the current block height:
 curl -X POST -H "Content-Type: application/json" http://$XRP_RPC_ALB_URL:6005/ -d '{
   "method": "ledger_current",
   "params": [{}]
+  }'
   ```
 
 You will get a response similar to this:
