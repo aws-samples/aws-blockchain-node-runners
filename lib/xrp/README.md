@@ -10,7 +10,7 @@ XRP node deployment on AWS. All nodes are configure as ["Stock Servers"](https:/
 
 ### Single node setup
 
-![Single Node Deployment](./assets/Architecture-Single%20node.drawio.png)
+![Single Node Deployment](./doc/assets/Architecture-Single%20node.drawio.png)
 
 1.	A XRP node deployed in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on the configured xrp network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 2.	The XRP node is used by dApps or development tools internally from within the Default VPC. RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
@@ -18,7 +18,7 @@ XRP node deployment on AWS. All nodes are configure as ["Stock Servers"](https:/
 
 ### HA setup
 
-![Highly Available Nodes Deployment](./assets/Architecture-HA%20Nodes.drawio.png)
+![Highly Available Nodes Deployment](./doc/assets/assets/Architecture-HA%20Nodes.drawio.png)
 
 1.	A set of XRP nodes are deployed within an [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizing with the rest of nodes on the configured xrp network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
 2.	The XRP nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). RPC API is not exposed to the Internet to protect nodes from unauthorized access.
