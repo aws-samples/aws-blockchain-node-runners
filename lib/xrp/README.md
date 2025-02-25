@@ -126,7 +126,30 @@ pwd
 npx cdk deploy XRP-ha-nodes --json --outputs-file ha-nodes-deploy.json
 ```
 
-2. Give the new  nodes time to initialize
+2. Give the new nodes time to initialize
+
+3. To perform an RPC request to your load balancer, run the following command to retrieve the ALB URL:
+
+```bash
+export XRP_RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(. != null)')
+echo XRP_RPC_ALB_URL=$XRP_RPC_ALB_URL
+```
+
+Copy output from the last `echo` command with `XRP_RPC_ALB_URL=<alb_url>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `XRP_RPC_ALB_URL=<alb_url>` into the VPC CloudShell tab. 
+
+Then query the load balancer to retrieve the current block height:
+
+```bash
+curl -X POST -H "Content-Type: application/json" http://$XRP_RPC_ALB_URL:6005/ -d '{
+  "method": "ledger_current",
+  "params": [{}]
+  ```
+
+You will get a response similar to this:
+
+```json
+{"result":{"ledger_current_index":5147300,"status":"success"}}
+```
 
 > **NOTE:** *By default and for security reasons the load balancer is available only from within the default VPC in the region where it is deployed. It is not available from the Internet and is not open for external connections. Before opening it up please make sure you protect your RPC APIs.*
 
