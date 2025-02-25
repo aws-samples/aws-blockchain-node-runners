@@ -123,7 +123,7 @@ aws ec2 create-default-vpc
 Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
 ```bash
 cd lib/solana
-cp ./sample-configs/.env-sample-baserpc-arm .env
+cp ./sample-configs/.env-sample-baserpc-x86 .env
 nano .env
 ```
 > **NOTE:** *You can find more examples inside `sample-configs` directory: ARM-powered and x86-powered setups, base and extended RPC configurations.*
