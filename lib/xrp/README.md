@@ -124,7 +124,7 @@ export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '.["XRP-single-node"].n
 echo "NODE_INTERNAL_IP=$NODE_INTERNAL_IP"
 ```
 
-Copy output from the last `echo` command with `NODE_INTERNAL_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `NODE_INTERNAL_IP=<internal_IP>` into the new CloudShell tab. 
+Copy output from the last `echo` command with `NODE_INTERNAL_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `NODE_INTERNAL_IP=<internal_IP>` into the new CloudShell tab.
 
 Then query the RPC API to receive the latest block height:
 
@@ -166,7 +166,7 @@ export XRP_RPC_ALB_URL=$(cat ha-nodes-deploy.json | jq -r '..|.alburl? | select(
 echo XRP_RPC_ALB_URL=$XRP_RPC_ALB_URL
 ```
 
-Copy output from the last `echo` command with `XRP_RPC_ALB_URL=<alb_url>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `XRP_RPC_ALB_URL=<alb_url>` into the VPC CloudShell tab. 
+Copy output from the last `echo` command with `XRP_RPC_ALB_URL=<alb_url>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `XRP_RPC_ALB_URL=<alb_url>` into the VPC CloudShell tab.
 
 Then query the load balancer to retrieve the current block height:
 
