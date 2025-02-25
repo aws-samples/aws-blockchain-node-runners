@@ -45,13 +45,13 @@ This is the Well-Architected checklist for XRP nodes implementation of the AWS B
 |                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | This solution uses AWS Identity and Access Management (AWS IAM) role instead of IAM user.  |
 |                         |                                   | Following principle of least privilege access                                    | Privileges are scoped down.  |
 |                         | Application security              | Security focused development practices                                           | cdk-nag is being used with appropriate suppressions.  |
-| Cost optimization       | Service selection                 | Use cost effective resources                                                     | AWS Graviton-based Amazon EC2 instances are being used, which are cost effective compared to Intel/AMD instances.  |
+| Cost optimization       | Service selection                 | Use cost effective resources                                                     | Cost efficient I3 instances are being used, which are ideal for high transaction and low latecy workloads.  |
 | Reliability             | Resiliency implementation         | Withstand component failures                                                     | This solution uses AWS Application Load Balancer with RPC nodes for high availability. |
 |                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
-| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance, i.e. AWS Graviton-based Amazon EC2 instances.  |
+| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance.  |
 |                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance. |
 | Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health of workload is determined via AWS Application Load Balancer Target Group Health Checks, on port 8545.  |
-| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | This solution uses AWS Graviton-based Amazon EC2 instances which offer the best performance per watt of energy use in Amazon EC2.  |
+| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | This solution uses I3 instance class which is Storage Optimized instances for high transaction and low latency.  |
 
 </details>
 
