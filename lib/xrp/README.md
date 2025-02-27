@@ -190,10 +190,6 @@ You will get a response similar to this:
 Destroy HA Nodes, Single Nodes and Common stacks
 
 ```bash
-# Setting the AWS account id and region in case local .env file is lost
- export AWS_ACCOUNT_ID=<your_target_AWS_account_id>
- export AWS_REGION=<your_target_AWS_region>
-
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/xrp
 
