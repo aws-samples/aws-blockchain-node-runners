@@ -116,7 +116,7 @@ npx cdk deploy XRP-single-node --json --outputs-file single-node-deploy.json
     - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
     - Open `Dashboards` and select dashboard that starts with `XRP-single-node` from the list of dashboards.
 
-3. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Run the following query against the private IP of the single RPC node you deployed:
+3. Once the initial synchronization is done, you should be able to access the RPC API of that node from within the same VPC. The RPC port is not exposed to the Internet. Run the following command to retrieve the private IP of the single RPC node you deployed:
 
 ```bash
 export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '.["XRP-single-node"].nodeinstanceid')
