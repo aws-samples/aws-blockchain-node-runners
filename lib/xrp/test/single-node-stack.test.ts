@@ -83,7 +83,7 @@ describe("XRPSingleNodeStack", () => {
             ],
             IamInstanceProfile: Match.anyValue(),
             ImageId: Match.anyValue(),
-            InstanceType: "r7a.12xlarge",
+            InstanceType: "r7a.2xlarge",
             Monitoring: true,
             PropagateTagsToVolumeOnCreation: true,
             SecurityGroupIds: Match.anyValue(),

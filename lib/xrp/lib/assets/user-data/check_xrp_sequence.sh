@@ -26,7 +26,8 @@ set -euo pipefail
 MAX_RETRIES=3
 RETRY_DELAY=5
 NAMESPACE="CWAgent"
-METRIC_NAME="XRP_Sequence"
+CURRENT_METRIC_NAME="XRP_Current_Sequence"
+DELTA_METRIC_NAME="XRP_Delta_Sequence"
 LOCKFILE="/tmp/check_xrp_sequence.lock"
 LOCK_FD=200
 
@@ -117,6 +118,29 @@ get_current_sequence() {
 
     while [[ ${retry_count} -lt ${MAX_RETRIES} ]]; do
         if seq=$(curl -s -f -H 'Content-Type: application/json' \
+            -d '{"method":"ledger_current","params":[{}]}' \
+            http://localhost:5005/ | \
+            jq -e '.result.ledger_current_index // 0'); then
+            if [[ "${seq}" != "0" ]]; then
+                echo "${seq}"
+                return 0
+            fi
+        fi
+        log_warning "Failed to get sequence, attempt $((retry_count + 1))/${MAX_RETRIES}"
+        retry_count=$((retry_count + 1))
+        sleep ${RETRY_DELAY}
+    done
+
+    log_error "Failed to get current sequence after ${MAX_RETRIES} attempts"
+    return 1
+}
+
+get_validated_sequence() {
+    local retry_count=0
+    local seq
+
+    while [[ ${retry_count} -lt ${MAX_RETRIES} ]]; do
+        if seq=$(curl -s -f -H 'Content-Type: application/json' \
             -d '{"method":"server_info","params":[{}]}' \
             http://localhost:5005/ | \
             jq -e '.result.info.validated_ledger.seq // 0'); then
@@ -137,12 +161,13 @@ get_current_sequence() {
 # Function to send metric to CloudWatch with retries
 send_to_cloudwatch() {
     local sequence=$1
+    local metric_name=$2
     local retry_count=0
 
     while [[ ${retry_count} -lt ${MAX_RETRIES} ]]; do
         if aws cloudwatch put-metric-data \
             --namespace "${NAMESPACE}" \
-            --metric-name "${METRIC_NAME}" \
+            --metric-name "${metric_name}" \
             --value "${sequence}" \
             --region "${REGION}" \
             --dimensions "InstanceId=${INSTANCE_ID}" \
@@ -192,14 +217,26 @@ main() {
     fi
 
     # Get current sequence
-    if ! sequence=$(get_current_sequence); then
+    if ! current_sequence=$(get_current_sequence); then
         return 1
     fi
 
-    log_info "Retrieved sequence: ${sequence}"
+        # Get current sequence
+    if ! validated_sequence=$(get_validated_sequence); then
+        return 1
+    fi
+
+    log_info "Retrieved current sequence: ${current_sequence}"
+    log_info "Retrieved validated sequence: ${validated_sequence}"
 
     # Send to CloudWatch
-    if ! send_to_cloudwatch "${sequence}"; then
+    if ! send_to_cloudwatch "${current_sequence}" "${CURRENT_METRIC_NAME}"; then
+        return 1
+    fi
+
+    # Send to CloudWatch
+    delta_sequence=$((current_sequence - validated_sequence))
+    if ! send_to_cloudwatch "${delta_sequence}" "${DELTA_METRIC_NAME}"; then
         return 1
     fi
 

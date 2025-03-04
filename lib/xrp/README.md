@@ -2,7 +2,7 @@
 
 |          Contributed by          |
 |:--------------------------------:|
-| Pedro Aceves <br/>acevespa@amazon.com |
+| [Pedro Aceves](https://github.com/acevesp)|
 
 XRP node deployment on AWS. All nodes are configure as ["Stock Servers"](https://xrpl.org/docs/infrastructure/configuration/server-modes/run-rippled-as-a-stock-server)
 
@@ -27,7 +27,7 @@ XRP node deployment on AWS. All nodes are configure as ["Stock Servers"](https:/
 ## Well-Architected
 
 <details>
-<summary>Review the for pros and cons of this solution.</summary>
+<summary>Review pros and cons of this solution.</summary>
 
 ### Well-Architected Checklist
 
@@ -50,7 +50,7 @@ This is the Well-Architected checklist for XRP nodes implementation of the AWS B
 |                         | Resource monitoring               | How are workload resources monitored?                                            | Resources are being monitored using Amazon CloudWatch dashboards. Amazon CloudWatch custom metrics are being pushed via CloudWatch Agent.  |
 | Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on best price-performance.  |
 |                         | Storage selection                 | How is storage solution selected?                                                | Storage solution is selected based on best price-performance. |
-| Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health of workload is determined via AWS Application Load Balancer Target Group Health Checks, on port 8545.  |
+| Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health of workload is determined via AWS Application Load Balancer Target Group Health Checks, on port 6005.  |
 | Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | Amazon EC2 R7a instances support the Sustainability Pillar of the AWS Well-Architected Framework by offering memory optimization that enables more efficient resource utilization, potentially reducing overall energy consumption and hardware requirements for data-intensive workloads.  |
 
 </details>
@@ -59,7 +59,7 @@ This is the Well-Architected checklist for XRP nodes implementation of the AWS B
 
 ### Open AWS CloudShell
 
-To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, and KMS.
 
 From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
 
@@ -93,7 +93,7 @@ cd lib/xrp
 cp ./sample-configs/.env-sample-testnet .env
 nano .env
 ```
-> **NOTE:** *You can find more examples inside `sample-configs` *
+> **NOTE:** *You can find more examples inside `sample-configs`*
 
 
 4. Deploy common components such as IAM role:
@@ -194,13 +194,13 @@ pwd
 # Make sure you are in aws-blockchain-node-runners/lib/xrp
 
 # Destroy HA Nodes
-cdk destroy XRP-ha-nodes
+npx cdk destroy XRP-ha-nodes
 
 # Destroy Single Node
-cdk destroy XRP-single-node
+npx cdk destroy XRP-single-node
 
 # Delete all common components like IAM role and Security Group
-cdk destroy XRP-common
+npx cdk destroy XRP-common
 ```
 
 ### FAQ
