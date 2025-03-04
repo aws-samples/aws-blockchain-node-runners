@@ -16,7 +16,7 @@ If you'd like propose a Node Runner Blueprint for your node, see [Adding new Nod
 - `lib/constructs` - [CDK constructs](https://docs.aws.amazon.com/cdk/v2/guide/constructs.html) used in Node Runner Blueprints
 - `lib/your-chain` - Node Runner Blueprint for a specific chain
 - `website` - Content for the project web site built with [Docusaurus](https://docusaurus.io/)
-- `website/docs` - Place for the new blueprint deployment instructions. (If you are adding a new blueprint, use on of the existing examples to refer to the `README.md` file within your Node Runner Blueprint directory inside `lib`).
+- `website/docs` - Place for the new blueprint deployment instructions. (If you are adding a new blueprint, use one of the existing examples to refer to the `README.md` file within your Node Runner Blueprint directory inside `lib`).
 
 ### License
 This repository uses MIT License. See more in [LICENSE](./LICENSE).

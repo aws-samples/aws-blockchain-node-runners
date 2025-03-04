@@ -1,0 +1,7 @@
+[Unit]
+Description="XRP ledger sync status; gets current seq this ledger is on"
+After=rippled.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/check_xrp_sequence.sh
