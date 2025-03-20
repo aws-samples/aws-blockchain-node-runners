@@ -1,0 +1,13 @@
+[Unit]
+Description=ipables and Traffic Control Rules
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/instance/network/net-rules-start.sh _LIMIT_OUT_TRAFFIC_MBPS_
+ExecStop=/opt/instance/network/net-rules-stop.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF

@@ -22,6 +22,7 @@ export interface SolanaBaseNodeConfig extends configTypes.BaseNodeConfig {
     voteAccountSecretARN: string;
     authorizedWithdrawerAccountSecretARN: string;
     registrationTransactionFundingAccountSecretARN: string;
+    limitOutTrafficMbps: number;
 }
 
 export interface SolanaHAConfig {

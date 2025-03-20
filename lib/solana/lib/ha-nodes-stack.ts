@@ -23,6 +23,8 @@ export interface SolanaHANodesStackProps extends cdk.StackProps {
     albHealthCheckGracePeriodMin: number;
     heartBeatDelayMin: number;
     numberOfNodes: number;
+
+    limitOutTrafficMbps: number;
 }
 
 export class SolanaHANodesStack extends cdk.Stack {
@@ -47,6 +49,7 @@ export class SolanaHANodesStack extends cdk.Stack {
             albHealthCheckGracePeriodMin,
             heartBeatDelayMin,
             numberOfNodes,
+            limitOutTrafficMbps,
         } = props;
 
         // Using default VPC
@@ -101,6 +104,7 @@ export class SolanaHANodesStack extends cdk.Stack {
             _SOLANA_CLUSTER_: solanaCluster,
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
             _ASG_NAME_: autoScalingGroupName,
+            _LIMIT_OUT_TRAFFIC_: limitOutTrafficMbps.toString(),
         });
 
         // Setting up the nodse using generic High Availability (HA) Node constract
