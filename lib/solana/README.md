@@ -226,7 +226,7 @@ pwd
 cdk destroy solana-ha-nodes
 
 # Destroy Single Node
-cdk destroy sync-single-node
+cdk destroy solana-single-node
 
 # Delete all common components like IAM role and Security Group
 cdk destroy solana-common
