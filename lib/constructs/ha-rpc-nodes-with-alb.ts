@@ -120,10 +120,10 @@ export class HANodesConstruct extends cdkContructs.Construct {
       maxCapacity: 4,
       vpcSubnets: vpcSubnets,
       defaultInstanceWarmup: cdk.Duration.minutes(1),
-      healthCheck: autoscaling.HealthCheck.elb({
-          // Should give enough time for the node to catch up
-          grace: cdk.Duration.minutes(albHealthCheckGracePeriodMin),
-      }),
+      healthChecks: autoscaling.HealthChecks.withAdditionalChecks({
+        additionalTypes: [autoscaling.AdditionalHealthCheckType.ELB],
+        gracePeriod: cdk.Duration.minutes(albHealthCheckGracePeriodMin)
+      })
   });
 
   rpcNodesAsg.addLifecycleHook("lifecycle-hook", {
