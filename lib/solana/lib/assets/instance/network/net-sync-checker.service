@@ -1,0 +1,5 @@
+[Unit]
+Description="Net sync checker for blockchain node"
+
+[Service]
+ExecStart=/opt/instance/network/net-syncchecker.sh

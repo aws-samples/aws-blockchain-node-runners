@@ -26,6 +26,16 @@ Solana nodes on AWS can be deployed in 2 different configurations: base RPC and 
 3.	The Solana nodes use all required secrets locally, but optionally can store a copy in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) as secure backup.
 4.	The Solana nodes send various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch.
 
+### Optimizing Data Transfer Costs
+
+Solana Agave clients generate significant outbound traffic, ranging from 80 to 200+ TiB monthly in recent years. To manage associated costs, the blueprint includes an outbound traffic optimization feature that automatically monitors and adjusts bandwidth usage.
+
+The system works by tracking the node's "Slots Behind" metric after the initial sync is done. When this metric reaches zero, indicating the node is fully synced, the system applies a user-defined bandwidth limit specified in the `SOLANA_LIMIT_OUT_TRAFFIC_MBPS` variable of your `.env` file. If the slots behind metric exceeds 100, the limit is temporarily removed until the node catches up. While the default outbound bandwidth limit is set to 20 Mbit/s (~6.5 TiB/month), testing has shown that nodes can maintain synchronization even at speeds as low as 15 Mbit/s. Inbound bandwidth remains unrestricted.
+
+To maintain operational efficiency, the system excludes internal network traffic from these restrictions. Traffic within standard internal IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16) remains unrestricted, ensuring that AWS applications using internal IPs function normally. This optimization can reduce data transfer costs by over 90%.
+
+It's important to note that while this feature is highly effective for RPC nodes, it should not be implemented on consensus nodes. Restricting outbound traffic on consensus nodes can compromise performance and is not recommended for optimal network participation.
+
 ## Additional materials
 
 <details>
@@ -84,8 +94,8 @@ This is the Well-Architected checklist for Solana nodes implementation of the AW
 
 | Usage pattern  | Ideal configuration  | Primary option on AWS  | Data Transfer Estimates | Config reference |
 |---|---|---|---|---|
-| 1/ Base RPC node (no secondary indexes) | 48 vCPU, 384 GiB RAM, Accounts volume: EBS gp3, 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: EBS gp3, 2TB, 9K IOPS, 700 MB/s throughput   | r7a.12xlarge, Accounts volume: EBS gp3, 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: EBS gp3, 2TB, 9K IOPS, 700 MB/s throughput | 13-15TB/month (no staking) | [.env-sample-baserpc-x86](./sample-configs/.env-sample-baserpc-x86) |
-| 2/ Extended RPC node (with all secondary indexes) | 96 vCPU, 768 GiB RAM, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput  | I8g.18xlarge, Accounts volume: Instance Store, Data volume: Instance Store | 20-38TB/month (no staking) | [.env-sample-extendedrpc-arm](./sample-configs/.env-sample-extendedrpc-arm) |
+| 1/ Base RPC node (no secondary indexes) | 48 vCPU, 384 GiB RAM, Accounts volume: EBS gp3, 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: EBS gp3, 2TB, 9K IOPS, 700 MB/s throughput   | r7a.12xlarge, Accounts volume: EBS gp3, 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: EBS gp3, 2TB, 9K IOPS, 700 MB/s throughput | 100-200TB/month (no staking) | [.env-sample-baserpc-x86](./sample-configs/.env-sample-baserpc-x86) |
+| 2/ Extended RPC node (with all secondary indexes) | 96 vCPU, 768 GiB RAM, Accounts volume: 500GiB, 7K IOPS, 700 MB/s throughput, Data volume: 2TB, 9K IOPS, 700 MB/s throughput  | r7a.24xlarge, Accounts volume: EBS io2, 500GiB, 10K IOPS, Data volume: EBS io2, 2000GiB, 30K IOPS | 100-200TB/month (no staking) | [.env-sample-extendedrpc-arm](./sample-configs/.env-sample-extendedrpc-arm) |
 </details>
 
 ## Setup Instructions
@@ -303,6 +313,37 @@ sudo mkswap /data/data/swapfile
 sudo swapon /data/data/swapfile
 free -g
 sudo sysctl vm.swappiness=10
+```
+
+6. How can I check network throttling configuration currently applied to the instance?
+
+```bash
+# Check iptables manage table
+iptables -t mangle -L -n -v
+
+# Set network interface ID
+INTERFACE=$(ip -br addr show | grep -v '^lo' | awk '{print $1}' | head -n1)
+
+# Check  traffic control (tc) tool configuration
+tc qdisc show
+
+# Watch current traffic
+tc -s qdisc ls dev $INTERFACE
+
+# Monitor bandwidth in real-time
+iftop -i $INTERFACE
+```
+
+7. How to manually remove all iptables and tc rules?
+
+```bash
+# Remove tc rules
+tc qdisc del dev $INTERFACE root
+
+# Remove iptables rules
+iptables -t mangle -D OUTPUT -j MARKING
+iptables -t mangle -F MARKING
+iptables -t mangle -X MARKING
 ```
 
 ## Upgrades

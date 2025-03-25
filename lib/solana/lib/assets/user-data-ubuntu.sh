@@ -22,6 +22,7 @@ chmod 600 /etc/cdk_environment
   echo "SOLANA_CLUSTER=${_SOLANA_CLUSTER_}"
   echo "LIFECYCLE_HOOK_NAME=${_LIFECYCLE_HOOK_NAME_}"
   echo "ASG_NAME=${_ASG_NAME_}"
+  echo "LIMIT_OUT_TRAFFIC_MBPS=${_LIMIT_OUT_TRAFFIC_MBPS_}"
 } >> /etc/cdk_environment
 source /etc/cdk_environment
 
@@ -126,6 +127,11 @@ echo "Starting CloudWatch Agent"
 systemctl restart amazon-cloudwatch-agent
 
 systemctl daemon-reload
+
+if [[ "$LIMIT_OUT_TRAFFIC_MBPS" -gt 0 ]]; then
+  echo "Limiting out traffic"
+  /opt/instance/network/setup.sh
+fi
 
 echo "Starting up the node service"
 systemctl enable --now node

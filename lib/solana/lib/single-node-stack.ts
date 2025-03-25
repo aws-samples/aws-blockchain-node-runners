@@ -25,6 +25,7 @@ export interface SolanaSingleNodeStackProps extends cdk.StackProps {
     voteAccountSecretARN: string;
     authorizedWithdrawerAccountSecretARN: string;
     registrationTransactionFundingAccountSecretARN: string;
+    limitOutTrafficMbps: number;
 }
 
 export class SolanaSingleNodeStack extends cdk.Stack {
@@ -51,6 +52,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
             voteAccountSecretARN,
             authorizedWithdrawerAccountSecretARN,
             registrationTransactionFundingAccountSecretARN,
+            limitOutTrafficMbps,
         } = props;
 
         // Using default VPC
@@ -120,6 +122,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
             _SOLANA_CLUSTER_: solanaCluster,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
             _ASG_NAME_: constants.NoneValue,
+            _LIMIT_OUT_TRAFFIC_MBPS_: limitOutTrafficMbps.toString(),
         });
         node.instance.addUserData(modifiedInitNodeScript);
 
