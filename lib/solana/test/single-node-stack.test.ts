@@ -14,17 +14,7 @@ describe("SolanaSingleNodeStack", () => {
       stackName: `solana-single-node-${config.baseNodeConfig.nodeConfiguration}`,
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
-      instanceType: config.baseNodeConfig.instanceType,
-      instanceCpuType: config.baseNodeConfig.instanceCpuType,
-      solanaCluster: config.baseNodeConfig.solanaCluster,
-      solanaVersion: config.baseNodeConfig.solanaVersion,
-      nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
-      dataVolume: config.baseNodeConfig.dataVolume,
-      accountsVolume: config.baseNodeConfig.accountsVolume,
-      solanaNodeIdentitySecretARN: config.baseNodeConfig.solanaNodeIdentitySecretARN,
-      voteAccountSecretARN: config.baseNodeConfig.voteAccountSecretARN,
-      authorizedWithdrawerAccountSecretARN: config.baseNodeConfig.authorizedWithdrawerAccountSecretARN,
-      registrationTransactionFundingAccountSecretARN: config.baseNodeConfig.registrationTransactionFundingAccountSecretARN,
+      ...config.baseNodeConfig
   });
 
     // Prepare the stack for assertions.

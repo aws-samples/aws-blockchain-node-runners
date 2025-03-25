@@ -14,17 +14,8 @@ describe("SolanaHANodesStack", () => {
     stackName: `solana-ha-nodes-${config.baseNodeConfig.nodeConfiguration}`,
     env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
-    instanceType: config.baseNodeConfig.instanceType,
-    instanceCpuType: config.baseNodeConfig.instanceCpuType,
-    solanaCluster: config.baseNodeConfig.solanaCluster,
-    solanaVersion: config.baseNodeConfig.solanaVersion,
-    nodeConfiguration: config.baseNodeConfig.nodeConfiguration,
-    dataVolume: config.baseNodeConfig.dataVolume,
-    accountsVolume: config.baseNodeConfig.accountsVolume,
-
-    albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
-    heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
-    numberOfNodes: config.haNodeConfig.numberOfNodes,
+    ...config.baseNodeConfig,
+    ...config.haNodeConfig,
   });
 
     // Prepare the stack for assertions.
