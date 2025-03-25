@@ -128,7 +128,7 @@ systemctl restart amazon-cloudwatch-agent
 
 systemctl daemon-reload
 
-if [[ "$LIMIT_OUT_TRAFFIC_MBPS" == "true" ]]; then
+if [[ "$LIMIT_OUT_TRAFFIC_MBPS" -gt 0 ]]; then
   echo "Limiting out traffic"
   /opt/instance/network/setup.sh
 fi

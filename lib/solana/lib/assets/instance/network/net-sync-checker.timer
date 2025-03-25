@@ -1,8 +1,8 @@
 [Unit]
-Description="Run Network Sync checker service every 5 min"
+Description="Run Network Sync checker service every 1 min"
 
 [Timer]
-OnCalendar=*:*:0/5
+OnCalendar=*:*:0/1
 Unit=net-sync-checker.service
 
 [Install]

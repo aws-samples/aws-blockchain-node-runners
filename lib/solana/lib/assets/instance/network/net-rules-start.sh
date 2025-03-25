@@ -6,8 +6,7 @@ if [ -n "$1" ]; then
 else
   echo "Warning: Specify max value for outbound data traffic in Mbps."
   echo "Usage: net-rules.sh <max_bandwidth_mbps>"
-  echo "Default is 26"
-  LIMIT_OUT_TRAFFIC_MBPS=26
+  exit 1;
 fi
 
 # Step 1: Create an iptables rule to mark packets going to public IPs

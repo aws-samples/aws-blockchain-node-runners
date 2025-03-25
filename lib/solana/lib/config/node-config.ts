@@ -52,7 +52,7 @@ export const baseNodeConfig: configTypes.SolanaBaseNodeConfig = {
     voteAccountSecretARN: process.env.SOLANA_VOTE_ACCOUNT_SECRET_ARN || "none",
     authorizedWithdrawerAccountSecretARN: process.env.SOLANA_AUTHORIZED_WITHDRAWER_ACCOUNT_SECRET_ARN || "none",
     registrationTransactionFundingAccountSecretARN: process.env.SOLANA_REGISTRATION_TRANSACTION_FUNDING_ACCOUNT_SECRET_ARN || "none",
-    limitOutTrafficMbps: process.env.SOLANA_LIMIT_OUT_TRAFFIC_MBPS ? parseInt(process.env.SOLANA_LIMIT_OUT_TRAFFIC_MBPS) : 25,
+    limitOutTrafficMbps: process.env.SOLANA_LIMIT_OUT_TRAFFIC_MBPS ? parseInt(process.env.SOLANA_LIMIT_OUT_TRAFFIC_MBPS) : 20,
 };
 
 export const haNodeConfig: configTypes.SolanaHAConfig = {

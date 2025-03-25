@@ -6,7 +6,7 @@ if [ -n "$1" ]; then
 else
   echo "Warning: Specify max value for outbound data traffic in Mbps."
   echo "Usage: instance/network/setup.sh <max_bandwidth_mbps>"
-  LIMIT_OUT_TRAFFIC_MBPS=26
+  exit 1;
 fi
 
 INTERFACE=$(ip -br addr show | grep -v '^lo' | awk '{print $1}' | head -n1)

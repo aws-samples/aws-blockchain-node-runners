@@ -104,7 +104,7 @@ export class SolanaHANodesStack extends cdk.Stack {
             _SOLANA_CLUSTER_: solanaCluster,
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
             _ASG_NAME_: autoScalingGroupName,
-            _LIMIT_OUT_TRAFFIC_: limitOutTrafficMbps.toString(),
+            _LIMIT_OUT_TRAFFIC_MBPS_: limitOutTrafficMbps.toString(),
         });
 
         // Setting up the nodse using generic High Availability (HA) Node constract

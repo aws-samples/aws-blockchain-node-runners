@@ -122,7 +122,7 @@ export class SolanaSingleNodeStack extends cdk.Stack {
             _SOLANA_CLUSTER_: solanaCluster,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
             _ASG_NAME_: constants.NoneValue,
-            _LIMIT_OUT_TRAFFIC_: limitOutTrafficMbps.toString(),
+            _LIMIT_OUT_TRAFFIC_MBPS_: limitOutTrafficMbps.toString(),
         });
         node.instance.addUserData(modifiedInitNodeScript);
 

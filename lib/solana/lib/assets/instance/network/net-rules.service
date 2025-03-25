@@ -1,5 +1,5 @@
 [Unit]
-Description=ipables and Traffic Control Rules
+Description="ipables and Traffic Control Rules"
 After=network.target
 
 [Service]
@@ -10,4 +10,3 @@ ExecStop=/opt/instance/network/net-rules-stop.sh
 
 [Install]
 WantedBy=multi-user.target
-EOF
