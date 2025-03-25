@@ -236,7 +236,7 @@ pwd
 cdk destroy solana-ha-nodes
 
 # Destroy Single Node
-cdk destroy sync-single-node
+cdk destroy solana-single-node
 
 # Delete all common components like IAM role and Security Group
 cdk destroy solana-common
@@ -252,10 +252,9 @@ cdk destroy solana-common
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/solana
 
-export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
 echo "INSTANCE_ID=" $INSTANCE_ID
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
-sudo su bcuser
 sudo journalctl -o cat -fu node
 ```
 
@@ -265,7 +264,7 @@ sudo journalctl -o cat -fu node
 pwd
 # Make sure you are in aws-blockchain-node-runners/lib/solana
 
-export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
 echo "INSTANCE_ID=" $INSTANCE_ID
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo cat /var/log/cloud-init-output.log
@@ -273,9 +272,10 @@ sudo cat /var/log/cloud-init-output.log
 
 3. How can I restart the Solana service?
 ``` bash
-export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.node-instance-id? | select(. != null)')
+export INSTANCE_ID=$(cat single-node-deploy.json | jq -r '..|.nodeinstanceid? | select(. != null)')
 echo "INSTANCE_ID=" $INSTANCE_ID
 aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+sudo systemctl restart node
 sudo systemctl status node
 ```
 
