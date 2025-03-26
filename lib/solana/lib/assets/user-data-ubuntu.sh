@@ -130,7 +130,7 @@ systemctl daemon-reload
 
 if [[ "$LIMIT_OUT_TRAFFIC_MBPS" -gt 0 ]]; then
   echo "Limiting out traffic"
-  /opt/instance/network/setup.sh
+  /opt/instance/network/setup.sh $LIMIT_OUT_TRAFFIC_MBPS
 fi
 
 echo "Starting up the node service"
