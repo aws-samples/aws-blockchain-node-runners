@@ -295,18 +295,26 @@ curl --user "$BTC_RPC_AUTH" \
 
 Keep your node healthy by monitoring logs and configurations:
 
-- Check recent logs:
+- Check recent Bitcoin logs:
   ```
   sudo docker logs -f --tail 100 bitcoind
   ```
+
+- Check first 100 Bitcoin logs:
+  ```
+
+  sudo docker logs bitcoind | head -n 100
+  ```
+
 - View the configuration file:
   ```
-  cat /home/bitcoin/.bitcoin/bitcoin.conf
+  sudo docker exec -it cat /home/bitcoin/.bitcoin/bitcoin.conf
   ```
 - View user data logs:
   ```
   sudo cat /var/log/cloud-init-output.log
   ```
+  
 
 ---
 
