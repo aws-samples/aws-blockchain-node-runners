@@ -75,7 +75,7 @@ npx cdk deploy HABitcoinCoreNodeStack
 By deploying as an **outbound-only node**, data transfer costs are significantly reduced since the node does not serve blockchain data to external peers. With its outbound connections, the node(s) are able to maintain full blockchain synchronization.
 
 ---
-### Accessing and Using RPC with a Single Node Bitcoin Core Instance 
+### Accessing and Using bitcoin-cli on a Bitcoin Core Instance 
 
 To interact with your Bitcoin Core instance, you'll need to use AWS Systems Manager, as direct SSH access is not available. 
 
@@ -104,9 +104,9 @@ sudo docker exec -it bitcoind bitcoin-cli getblockchaininfo
    - You can use similar commands to execute other RPC methods supported by Bitcoin Core.
 
 ---
-### Secure RPC with AWS Secrets Manager
+### Secure RPC Access with AWS Secrets Manager
 
-To securely interact with the Bitcoin Core RPC endpoint from a private subnet within your isolated VPC environment, AWS Secrets Manager is leveraged for credential storage and retrieval.
+For a client to securely interact with the Bitcoin Core RPC endpoint from a private subnet within your isolated VPC environment, AWS Secrets Manager is leveraged for credential storage and retrieval. 
 
 **Important**: Ensure that you execute the following commands from within a private subnet in the Bitcoin Core Node VPC. A VPC CloudShell environment is suitable for testing purposes.
 
