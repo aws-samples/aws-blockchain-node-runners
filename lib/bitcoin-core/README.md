@@ -307,7 +307,7 @@ Keep your node healthy by monitoring logs and configurations:
 
 - View the configuration file:
   ```
-  sudo docker exec -it cat /home/bitcoin/.bitcoin/bitcoin.conf
+  sudo docker exec -it bitcoind cat /root/.bitcoin/bitcoin.conf
   ```
 - View user data logs:
   ```
