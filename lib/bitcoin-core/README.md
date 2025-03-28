@@ -1,5 +1,9 @@
 ## Sample AWS Blockchain Node Runner app for Bitcoin Nodes
 
+|          Contributed by          |
+|:--------------------------------:|
+| [Simon Goldberg](https://github.com/racket2000)|
+
 ### Overview
 
 This guide walks you through deploying a Bitcoin Core mainnet node in a **Virtual Private Cloud (VPC)** using **Docker**, leveraging **AWS Secrets Manager** for secure credential handling. This configuration ensures robust security and performance while optimizing data transfer costs.
