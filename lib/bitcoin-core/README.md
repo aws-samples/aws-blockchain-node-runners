@@ -18,7 +18,7 @@ First, clone the repository from GitHub to get the necessary files and configura
 
 ```
 git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
-cd aws-blockchain-node-runners/lib/bitcoin
+cd aws-blockchain-node-runners/lib/bitcoin-core
 ```
 
 #### Installing Dependencies
