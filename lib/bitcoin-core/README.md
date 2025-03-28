@@ -302,7 +302,6 @@ Keep your node healthy by monitoring logs and configurations:
 
 - Check first 100 Bitcoin logs:
   ```
-
   sudo docker logs bitcoind | head -n 100
   ```
 
