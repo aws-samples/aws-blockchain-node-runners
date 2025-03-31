@@ -60,12 +60,12 @@ npx cdk deploy HABitcoinCoreNodeStack
 
 - A **Bitcoin node** deployed in a **public subnet** continuously synchronizes with the Bitcoin network using outbound connections through a **NAT Gateway**.
 - Outbound communication flows through an **Internet Gateway (IGW)**, but the node itself does not have a **public IP address** or **Elastic IP (EIP)**.
-- The **NAT Gateway** translates the node's private IP into a public IP for outbound connections, but inbound connections are blocked. This ensures that the node functions as an **outbound-only node**, increasing security and reducing data transfer costs.
+- The **NAT Gateway** translates the node's private IP into a public IP for outbound connections, but inbound connections are blocked. This ensures that the node functions as an **outbound-only node** (i.e., it does not accept inbound peer connections), increasing security and reducing data transfer costs.
 
 #### High Availability (HA) Setup
 
 - Deploying **multiple Bitcoin nodes** in an **Auto Scaling Group** enhances fault tolerance and availability.
-- The nodes communicate internally through **private IP addresses** and synchronize through a shared **Application Load Balancer (ALB)**.
+- The nodes communicate internally through **private IP addresses** and synchronize through a shared **Application Load Balancer (ALB)**. Note: The Bitcoin Core nodes in the HA setup do not share state (e.g., wallet, mempool)
 - HA nodes maintain synchronization through the **NAT Gateway** without exposing the RPC endpoint to the public internet.
 
 ---
@@ -78,6 +78,8 @@ By deploying as an **outbound-only node**, data transfer costs are significantly
 ### Accessing and Using bitcoin-cli on a Bitcoin Core Instance 
 
 To interact with your Bitcoin Core instance, you'll need to use AWS Systems Manager, as direct SSH access is not available. 
+
+Bitcoin Core supports cookie-based authentication by default, so interacting with the `bitcoin-cli` from the node itself does not require credentials.
 
 Follow these steps to make an RPC call:
 
