@@ -326,6 +326,20 @@ Keep your node healthy by monitoring logs and configurations:
 
 ---
 
+### Cleaning up
+To destroy the single node and HA configurations, you can run the following commands:
+
+```
+#Delete Single Node Infra
+cdk destroy SingleNodeBitcoinCoreStack
+
+#Delete HA Infra
+cdk destroy HABitcoinCoreNodeStack
+```
+
+
+---
+
 ### Conclusion
 
 Deploying and managing a Bitcoin node on AWS requires careful configuration to ensure security, cost efficiency, and high availability. By following the best practices outlined in this guide, you can maintain a robust and secure node while minimizing costs. Stay proactive with monitoring and regularly update credentials to keep your node running smoothly.
