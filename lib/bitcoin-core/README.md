@@ -76,9 +76,9 @@ npx cdk deploy HABitcoinCoreNodeStack
 By deploying as an **outbound-only node**, data transfer costs are significantly reduced since the node does not serve blockchain data to external peers. With its outbound connections, the node(s) are able to maintain full blockchain synchronization.
 
 ---
-### Accessing and Using bitcoin-cli on a Bitcoin Core Instance 
+### Accessing and Using bitcoin-cli on a Bitcoin Core Instance
 
-To interact with your Bitcoin Core instance, you'll need to use AWS Systems Manager, as direct SSH access is not available. 
+To interact with your Bitcoin Core instance, you'll need to use AWS Systems Manager, as direct SSH access is not available.
 
 Bitcoin Core supports cookie-based authentication by default, so interacting with the `bitcoin-cli` from the node itself does not require credentials.
 
@@ -109,7 +109,7 @@ sudo docker exec -it bitcoind bitcoin-cli getblockchaininfo
 ---
 ### Secure RPC Access with AWS Secrets Manager
 
-For a client to securely interact with the Bitcoin Core RPC endpoint from a private subnet within your isolated VPC environment, AWS Secrets Manager is leveraged for credential storage and retrieval. 
+For a client to securely interact with the Bitcoin Core RPC endpoint from a private subnet within your isolated VPC environment, AWS Secrets Manager is leveraged for credential storage and retrieval.
 
 **Important**: Ensure that you execute the following commands from within a private subnet in the Bitcoin Core Node VPC. A VPC CloudShell environment is suitable for testing purposes.
 
@@ -121,7 +121,7 @@ export BTC_RPC_AUTH=$(aws secretsmanager get-secret-value --secret-id bitcoin_rp
 ```
 
 #### Single node RPC Call using credentials
-To make an RPC call to a single Bitcoin node, use the following command. Replace <Bitcoin-Node-Private-IP> with the actual private IP address of your Bitcoin node: `<Bitcoin-Node-Private-IP>`. 
+To make an RPC call to a single Bitcoin node, use the following command. Replace <Bitcoin-Node-Private-IP> with the actual private IP address of your Bitcoin node: `<Bitcoin-Node-Private-IP>`.
 
 ```
 curl --user "$BTC_RPC_AUTH" \
@@ -269,7 +269,7 @@ To maintain security, rotate RPC credentials periodically using the `generateRPC
 node generateRPCAuth.js
 ```
 
-This will update the value of your credentials in Secrets Manager. 
+This will update the value of your credentials in Secrets Manager.
 
 **Replacing the Credentials and Restarting the Node to Apply Updates**
 
@@ -316,7 +316,7 @@ Keep your node healthy by monitoring logs and configurations:
   ```
   sudo cat /var/log/cloud-init-output.log
   ```
-  
+
 
 ---
 
@@ -344,4 +344,3 @@ cdk destroy HABitcoinCoreNodeStack
 ### Conclusion
 
 Deploying and managing a Bitcoin node on AWS requires careful configuration to ensure security, cost efficiency, and high availability. By following the best practices outlined in this guide, you can maintain a robust and secure node while minimizing costs. Stay proactive with monitoring and regularly update credentials to keep your node running smoothly.
-
