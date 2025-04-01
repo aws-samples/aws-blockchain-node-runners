@@ -65,7 +65,8 @@ npx cdk deploy HABitcoinCoreNodeStack
 #### High Availability (HA) Setup
 
 - Deploying **multiple Bitcoin nodes** in an **Auto Scaling Group** enhances fault tolerance and availability.
-- The nodes communicate internally through **private IP addresses** and synchronize through a shared **Application Load Balancer (ALB)**. Note: The Bitcoin Core nodes in the HA setup do not share state (e.g., wallet, mempool)
+- The nodes communicate internally through **private IP addresses** and synchronize through a shared **Application Load Balancer (ALB)**.  The ALB implements session persistence using a "stickiness cookie". This ensures that subsequent requests from the same client are consistently routed to the same node, maintaining session continuity. The stickiness duration is set to 90 minutes but can be configured for up to 7 days.
+  Note: The Bitcoin Core nodes in the HA setup do not share state (e.g., wallet, mempool)
 - HA nodes maintain synchronization through the **NAT Gateway** without exposing the RPC endpoint to the public internet.
 
 ---
