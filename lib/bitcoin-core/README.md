@@ -117,7 +117,7 @@ export BTC_RPC_AUTH=$(aws secretsmanager get-secret-value --secret-id bitcoin_rp
 ```
 
 #### Single node RPC Call using credentials
-To make an RPC call to a single Bitcoin node, use the following command. Replace [Bitcoin-Node-Private-IP] with the actual private IP address of your Bitcoin node:
+To make an RPC call to a single Bitcoin node, use the following command. Replace `[Bitcoin-Node-Private-IP]` with the actual private IP address of your Bitcoin node:
 
 ```
 curl --user "$BTC_RPC_AUTH" \
@@ -127,7 +127,7 @@ curl --user "$BTC_RPC_AUTH" \
 
 #### High Availability (HA) RPC Call using credentials
 
-For high availability setups utilizing an Application Load Balancer (ALB), use the following command. Replace [Load-Balancer-DNS-Name] with your ALB's DNS name:
+For high availability setups utilizing an Application Load Balancer (ALB), use the following command. Replace `[Load-Balancer-DNS-Name]` with your ALB's DNS name:
 
 ```
 curl --user "$BTC_RPC_AUTH" \
@@ -269,7 +269,7 @@ This will update the value of your credentials in Secrets Manager.
 
 **Replacing the Credentials and Restarting the Node to Apply Updates**
 
-- Replace the old `rpcauth` value from the `bitcoin.conf` file with the new one. Make sure that you change the placeholder value for [new rpcauth string with escape char]:
+- Replace the old `rpcauth` value from the `bitcoin.conf` file with the new one. Make sure that you change the placeholder value for `[new rpcauth string with escape char]`:
 
   ```
   sudo docker exec -it bitcoind sh -c "sed -i 's/^rpcauth=.*/rpcauth=[new rpcauth string with escape char]/' /root/.bitcoin/bitcoin.conf"
