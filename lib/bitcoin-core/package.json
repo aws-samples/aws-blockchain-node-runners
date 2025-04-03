@@ -11,14 +11,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.775.0",
-    "aws-cdk": "^2.1006.0",
-    "aws-cdk-lib": "^2.185.0",
-    "base64url": "^3.0.1",
-    "cdk-nag": "^2.35.57",
-    "constructs": "^10.4.2",
-    "dotenv": "^16.4.7"
-  }
+  "license": "ISC"
 }
