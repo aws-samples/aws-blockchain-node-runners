@@ -58,7 +58,7 @@ npx cdk deploy HABitcoinCoreNodeStack
 
 #### Single Node Setup
 
-- A **Bitcoin node** deployed in a **public subnet** continuously synchronizes with the Bitcoin network using outbound connections through a **NAT Gateway**.
+- A **Bitcoin node** deployed in a **private subnet** continuously synchronizes with the Bitcoin network using outbound connections through a **NAT Gateway**.
 - Outbound communication flows through an **Internet Gateway (IGW)**, but the node itself does not have a **public IP address** or **Elastic IP (EIP)**.
 - The **NAT Gateway** translates the node's private IP into a public IP for outbound connections, but inbound connections are blocked. This ensures that the node functions as an **outbound-only node** (i.e., it does not accept inbound peer connections), increasing security and reducing data transfer costs.
 

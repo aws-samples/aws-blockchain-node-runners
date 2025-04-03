@@ -18,6 +18,7 @@
     "aws-cdk-lib": "^2.185.0",
     "base64url": "^3.0.1",
     "cdk-nag": "^2.35.57",
-    "constructs": "^10.4.2"
+    "constructs": "^10.4.2",
+    "dotenv": "^16.4.7"
   }
 }
