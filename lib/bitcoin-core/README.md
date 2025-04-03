@@ -14,26 +14,22 @@ This guide walks you through deploying a Bitcoin Core mainnet node in a **Virtua
 
 #### Cloning the Repository
 
-First, clone the repository from GitHub to get the necessary files and configurations:
+First, clone the repository and install the dependencies: 
 
 ```
 git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
-cd aws-blockchain-node-runners/lib/bitcoin-core
-```
-
-#### Installing Dependencies
-
-Make sure you have AWS CLI installed and configured. Run the following to install any additional dependencies:
-
-```
+cd aws-blockchain-node-runners
 npm install
 ```
+
+Before proceeding, ensure you have the AWS CLI installed and configured.
 
 ### Configuration Management - Generating RPC Authentication
 
 To interact with the Bitcoin Core RPC endpoint within your isolated VPC environment, run the following command before deploying the Bitcoin Node via CDK:
 
 ```
+cd aws-blockchain-node-runners/lib/bitcoin-core
 node generateRPCAuth.js
 ```
 
