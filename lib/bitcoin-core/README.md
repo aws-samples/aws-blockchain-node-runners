@@ -269,7 +269,7 @@ This will update the value of your credentials in Secrets Manager.
 
 **Replacing the Credentials and Restarting the Node to Apply Updates**
 
-- Replace the old `rpcauth` value from the `bitcoin.conf` file with the new one. Make sure that you change the placeholder value for `[new rpcauth string with escape char]`:
+- Replace the old `rpcauth` value from the `bitcoin.conf` file with the new one. Make sure that you change the placeholder value for `[new rpcauth string with escape char]` (this is printed to the terminal after running the `generateRPCAuth` script):
 
   ```
   sudo docker exec -it bitcoind sh -c "sed -i 's/^rpcauth=.*/rpcauth=[new rpcauth string with escape char]/' /root/.bitcoin/bitcoin.conf"
