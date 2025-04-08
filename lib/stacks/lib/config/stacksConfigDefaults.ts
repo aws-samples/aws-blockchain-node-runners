@@ -12,7 +12,7 @@ export function stacksNodeConfigDefaults(
     const isMainnet: boolean = stacksNetwork === "mainnet";
 
     const defaultDataVolume: configTypes.StacksVolumeConfig = {
-        sizeGiB: isMainnet ? 512 : 256,
+        sizeGiB: isMainnet ? 1024 : 512,
         type: ec2.EbsDeviceVolumeType.GP3,
         iops: 12000,
         throughput: 700
