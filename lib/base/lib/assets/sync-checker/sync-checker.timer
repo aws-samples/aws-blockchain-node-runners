@@ -1,0 +1,9 @@
+[Unit]
+Description="Run Sync checker service every 5 min"
+
+[Timer]
+OnCalendar=*:*:0/5
+Unit=sync-checker.service
+
+[Install]
+WantedBy=multi-user.target

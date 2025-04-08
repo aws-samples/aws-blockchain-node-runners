@@ -1,7 +1,7 @@
 #!/bin/bash
 set +e
 
-source /etc/environment
+source /etc/cdk_environment
 
 echo "Downloading Snapshot."
 
@@ -28,4 +28,4 @@ echo "Snapshot is ready, starting the service.."
 chown -R bcuser:bcuser $SNAPSHOT_DIR
 
 sudo systemctl daemon-reload
-sudo systemctl enable --now base
+sudo systemctl enable --now node

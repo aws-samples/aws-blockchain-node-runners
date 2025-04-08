@@ -30,7 +30,7 @@ export class BaseSingleNodeStack extends cdk.Stack {
         super(scope, id, props);
 
         // Setting up necessary environment variables
-        const REGION = cdk.Stack.of(this).region;
+        const AWS_REGION = cdk.Stack.of(this).region;
         const STACK_NAME = cdk.Stack.of(this).stackName;
         const STACK_ID = cdk.Stack.of(this).stackId;
         const availabilityZones = cdk.Stack.of(this).availabilityZones;
@@ -82,7 +82,8 @@ export class BaseSingleNodeStack extends cdk.Stack {
             dataVolumes: [dataVolume],
             rootDataVolumeDeviceName: "/dev/xvda",
             machineImage: new ec2.AmazonLinuxImage({
-                generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+                generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023,
+                kernel:ec2.AmazonLinuxKernel.KERNEL6_1,
                 cpuType: instanceCpuType,
             }),
             vpc,
@@ -95,11 +96,11 @@ export class BaseSingleNodeStack extends cdk.Stack {
         });
 
         // Parsing user data script and injecting necessary variables
-        const nodeStartScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
+        const nodeStartScript = fs.readFileSync(path.join(__dirname, "assets", "user-data-alinux.sh")).toString();
         const dataVolumeSizeBytes = dataVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
 
         const modifiedInitNodeScript = cdk.Fn.sub(nodeStartScript, {
-            _REGION_: REGION,
+            _AWS_REGION_: AWS_REGION,
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
             _STACK_NAME_: STACK_NAME,
             _NODE_CF_LOGICAL_ID_: node.nodeCFLogicalId,
@@ -122,7 +123,7 @@ export class BaseSingleNodeStack extends cdk.Stack {
         const dashboardString = cdk.Fn.sub(JSON.stringify(nodeCwDashboard.SyncNodeCWDashboardJSON), {
             INSTANCE_ID:node.instanceId,
             INSTANCE_NAME: STACK_NAME,
-            REGION: REGION,
+            REGION: AWS_REGION,
         })
 
         new cw.CfnDashboard(this, 'base-cw-dashboard', {
