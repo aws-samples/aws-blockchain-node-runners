@@ -31,7 +31,7 @@ export class BaseHANodesStack extends cdk.Stack {
     constructor(scope: cdkConstructs.Construct, id: string, props: BaseHANodesStackProps) {
         super(scope, id, props);
 
-        const REGION = cdk.Stack.of(this).region;
+        const AWS_REGION = cdk.Stack.of(this).region;
         const STACK_NAME = cdk.Stack.of(this).stackName;
         const lifecycleHookName = STACK_NAME;
         const autoScalingGroupName = STACK_NAME;
@@ -69,11 +69,11 @@ export class BaseHANodesStack extends cdk.Stack {
         asset.bucket.grantRead(instanceRole);
 
         // parsing user data script and injecting necessary variables
-        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data", "node.sh")).toString();
+        const nodeScript = fs.readFileSync(path.join(__dirname, "assets", "user-data-alinux.sh")).toString();
         const dataVolumeSizeBytes = dataVolume.sizeGiB * constants.GibibytesToBytesConversionCoefficient;
 
         const modifiedInitNodeScript = cdk.Fn.sub(nodeScript, {
-            _REGION_: REGION,
+            _AWS_REGION_: AWS_REGION,
             _ASSETS_S3_PATH_: `s3://${asset.s3BucketName}/${asset.s3ObjectKey}`,
             _STACK_NAME_: STACK_NAME,
             _NODE_CF_LOGICAL_ID_: constants.NoneValue,
@@ -94,9 +94,9 @@ export class BaseHANodesStack extends cdk.Stack {
             instanceType,
             dataVolumes: [dataVolume],
             machineImage: new ec2.AmazonLinuxImage({
-                generation: AmazonLinuxGeneration.AMAZON_LINUX_2,
-                kernel:ec2.AmazonLinuxKernel.KERNEL5_X,
-                cpuType: instanceCpuType
+                generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2023,
+                kernel:ec2.AmazonLinuxKernel.KERNEL6_1,
+                cpuType: instanceCpuType,
             }),
             role: instanceRole,
             vpc,
