@@ -64,7 +64,7 @@ Before proceeding, ensure you have the AWS CLI installed and configured.
 
 ### Configuration
 
-1. Make sure you are in the root directory of the cloned repository. 
+1. Make sure you are in the root directory of the cloned repository.
 
 2. If you have deleted or don't have the default VPC, create default VPC
 
@@ -80,7 +80,7 @@ cd lib/bitcoin
 cp ./sample-configs/.env-sample-bitcoin-mainnet .env
 vim .env
 ```
- 
+
 4. Deploy common components such as IAM role:
 
 ```bash
@@ -121,15 +121,15 @@ npx cdk deploy HABitcoinCoreNodeStack --outputs-file ha-nodes-outputs.json
 - A **Bitcoin node** deployed in a **public subnet** continuously synchronizes with the Bitcoin network.
 - Outbound peer-to-peer (P2P) communication flows through an **Internet Gateway (IGW)**.
 - The node's security group permits incoming P2P connections on port 8333.
-- The node's RPC methods can be accessed from within the VPC. 
-- The Solana node sends various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch. 
+- The node's RPC methods can be accessed from within the VPC.
+- The Solana node sends various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch.
 
 #### High Availability (HA) Setup
 ![HA Node Deployment](./doc/assets/Bitcoin-HA-Nodes-Arch.png)
 
 - Deploying **multiple Bitcoin nodes** in an **Auto Scaling Group** enhances fault tolerance and availability.
 - The nodes' RPC endpoints are exposed through an **Application Load Balancer (ALB)**.  The ALB implements session persistence using a "stickiness cookie". This ensures that subsequent requests from the same client are consistently routed to the same node, maintaining session continuity. The stickiness duration is set to 90 minutes but can be configured for up to 7 days. Note: The Bitcoin Core nodes in the HA setup do not share state (e.g., wallet, mempool)
-- HA nodes do not expose the RPC endpoint to the public internet. This endpoint can be accessed from within the VPC. 
+- HA nodes do not expose the RPC endpoint to the public internet. This endpoint can be accessed from within the VPC.
 
 ---
 
@@ -206,7 +206,7 @@ Use the following command to retrieve your load balancer's DNS name:
 export LOAD_BALANCER_DNS=$(jq -r '.HABitcoinCoreNodeStack.LoadBalancerDNS' ha-nodes-outputs.json)
 echo LOAD_BALANCER_DNS=$LOAD_BALANCER_DNS
 ```
-Copy output from the last `echo` command with `RPC_ABL_URL=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `RPC_ABL_URL=<internal_IP>` into the new CloudShell tab. 
+Copy output from the last `echo` command with `RPC_ABL_URL=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `RPC_ABL_URL=<internal_IP>` into the new CloudShell tab.
 
  Execute the following command to make an RPC request to your HA node setup:
 
