@@ -92,7 +92,7 @@ npx cdk deploy BitcoinCommonStack
 To interact with the Bitcoin Core RPC endpoint within your isolated VPC environment, run the following command before deploying the Bitcoin Node via CDK:
 
 ```
-cd lib/bitcoin-core
+# Make sure you are in aws-blockchain-node-runners/lib/bitcoin-core
 node generateRPCAuth.js
 ```
 
