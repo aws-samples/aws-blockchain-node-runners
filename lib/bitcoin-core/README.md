@@ -211,6 +211,8 @@ echo LOAD_BALANCER_DNS=$LOAD_BALANCER_DNS
 ```
 Copy output from the last `echo` command with `RPC_ABL_URL=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `RPC_ABL_URL=<internal_IP>` into the new CloudShell tab.
 
+Note: Make sure that you pasted `BTC_RPC_AUTH=<rpc_credentials>` into the CloudShell VPC environment as well. 
+
  Execute the following command to make an RPC request to your HA node setup:
 
 ```
