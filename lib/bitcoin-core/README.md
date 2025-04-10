@@ -10,7 +10,45 @@ This guide walks you through deploying a Bitcoin Core mainnet node in a **Virtua
 
 ---
 
+## Well-Architected
+
+<details>
+<summary>Review pros and cons of this solution.</summary>
+
+### Well-Architected Checklist
+
+This is the Well-Architected checklist for **Bitcoin Core node implementation** of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+
+| Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
+|:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Port 8332 (RPC) is restricted to the VPC. |
+|                         |                                   | Traffic inspection                                                               | Optional: VPC Flow Logs or traffic mirroring can be enabled for deeper inspection. |
+|                         | Compute protection                | Reduce attack surface                                                            | This solution uses Amazon Linux 2 AMI. No SSH access is enabled; SSM is used. |
+|                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager Session Manager. |
+|                         | Data protection at rest           | Use encrypted Amazon Elastic Block Store (Amazon EBS) volumes                    | Encrypted Amazon EBS volumes are used. |
+|                         | Data protection in transit        | Use TLS                                                                          | The AWS Application Load balancer currently uses HTTP listener. Create HTTPS listener with self signed certificate if TLS is desired. |
+|                         | Authorization and access control  | Use instance profile with Amazon Elastic Compute Cloud (Amazon EC2) instances    | AWS IAM role is attached to the EC2 instance. |
+|                         |                                   | Following principle of least privilege access                                    | IAM privileges are scoped down to what is necessary. |
+|                         | Application security              | Security focused development practices                                           | `cdk-nag` is used with appropriate suppressions. |
+| Cost optimization       | Service selection                 | Use cost effective resources                                                     | Cost efficient T3 instances provide a baseline level of CPU performance with the ability to burst CPU usage at any time for as long as required. T3 instances are designed for applications with moderate CPU usage that experience temporary spikes in use. |
+| Reliability             | Resiliency implementation         | Withstand component failures                                                     | Single node deployment. Can be extended with backup nodes and monitoring. |
+|                         | Resource monitoring               | How are workload resources monitored?                                            | Amazon CloudWatch Dashboards track CPU, memory, disk, network, and block height. |
+| Performance efficiency  | Compute selection                 | How is compute solution selected?                                                | Compute solution is selected based on performance needs and budget. |
+|                         | Storage selection                 | How is storage solution selected?                                                | EBS volumes (e.g. gp3 or io2) are selected for consistent throughput and IOPS. |
+| Operational excellence  | Workload health                   | How is health of workload determined?                                            | Health is tracked using CloudWatch custom metrics including block height. |
+| Sustainability          | Hardware & services               | Select most efficient hardware for your workload                                 | T3A instances offer efficient memory utilization, reducing power and cost. |
+
+</details>
+
 ### Getting Started
+
+#### Open AWS CloudShell
+
+To begin, ensure you login to your AWS account with permissions to create and modify resources in IAM, EC2, EBS, VPC, S3, KMS, and Secrets Manager.
+
+From the AWS Management Console, open the [AWS CloudShell](https://docs.aws.amazon.com/cloudshell/latest/userguide/welcome.html), a web-based shell environment. If unfamiliar, review the [2-minute YouTube video](https://youtu.be/fz4rbjRaiQM) for an overview and check out [CloudShell with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) that we'll use to test nodes API from internal IP address space.
+
+Once ready, you can run the commands to deploy and test blueprints in the CloudShell.
 
 #### Cloning the Repository
 
@@ -24,7 +62,32 @@ npm install
 
 Before proceeding, ensure you have the AWS CLI installed and configured.
 
-### Configuration Management - Generating RPC Authentication
+### Configuration
+
+1. Make sure you are in the root directory of the cloned repository. 
+
+2. If you have deleted or don't have the default VPC, create default VPC
+
+```
+aws ec2 create-default-vpc
+```
+> **NOTE:** *You may see the following error if the default VPC already exists: `An error occurred (DefaultVpcAlreadyExists) when calling the CreateDefaultVpc operation: A Default VPC already exists for this account in this region.`. That means you can just continue with the following steps.*
+
+3. Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
+
+```bash
+cd lib/bitcoin
+cp ./sample-configs/.env-sample-bitcoin-mainnet .env
+vim .env
+```
+ 
+4. Deploy common components such as IAM role:
+
+```bash
+npx cdk deploy BitcoinCommonStack
+```
+
+### Generating RPC Authentication
 
 To interact with the Bitcoin Core RPC endpoint within your isolated VPC environment, run the following command before deploying the Bitcoin Node via CDK:
 
@@ -41,53 +104,57 @@ For a deeper dive and an overview of credential rotation, see [RPC Authenticatio
 To deploy a single node setup, use the following command:
 
 ```
-npx cdk deploy SingleNodeBitcoinCoreStack
+npx cdk deploy SingleNodeBitcoinCoreStack --outputs-file single-node-outputs.json
 ```
 
 For High Availability (HA) node deployment, use:
 
 ```
-npx cdk deploy HABitcoinCoreNodeStack
+npx cdk deploy HABitcoinCoreNodeStack --outputs-file ha-nodes-outputs.json
 ```
 
 ### Deployment Architectures for Bitcoin Nodes
 
 #### Single Node Setup
+![Single Node Deployment](./doc/assets/Bitcoin-Single-Node-Arch.png)
 
-- A **Bitcoin node** deployed in a **private subnet** continuously synchronizes with the Bitcoin network using outbound connections through a **NAT Gateway**.
-- Outbound communication flows through an **Internet Gateway (IGW)**, but the node itself does not have a **public IP address** or **Elastic IP (EIP)**.
-- The **NAT Gateway** translates the node's private IP into a public IP for outbound connections, but inbound connections are blocked. This ensures that the node functions as an **outbound-only node** (i.e., it does not accept inbound peer connections), increasing security and reducing data transfer costs.
+- A **Bitcoin node** deployed in a **public subnet** continuously synchronizes with the Bitcoin network.
+- Outbound peer-to-peer (P2P) communication flows through an **Internet Gateway (IGW)**.
+- The node's security group permits incoming P2P connections on port 8333.
+- The node's RPC methods can be accessed from within the VPC. 
+- The Solana node sends various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch. 
 
 #### High Availability (HA) Setup
+![HA Node Deployment](./doc/assets/Bitcoin-HA-Nodes-Arch.png)
 
 - Deploying **multiple Bitcoin nodes** in an **Auto Scaling Group** enhances fault tolerance and availability.
-- The nodes' RPC endpoints are exposed through an **Application Load Balancer (ALB)**.  The ALB implements session persistence using a "stickiness cookie". This ensures that subsequent requests from the same client are consistently routed to the same node, maintaining session continuity. The stickiness duration is set to 90 minutes but can be configured for up to 7 days.
-  Note: The Bitcoin Core nodes in the HA setup do not share state (e.g., wallet, mempool)
-- HA nodes maintain synchronization through the **NAT Gateway** without exposing the RPC endpoint to the public internet.
+- The nodes' RPC endpoints are exposed through an **Application Load Balancer (ALB)**.  The ALB implements session persistence using a "stickiness cookie". This ensures that subsequent requests from the same client are consistently routed to the same node, maintaining session continuity. The stickiness duration is set to 90 minutes but can be configured for up to 7 days. Note: The Bitcoin Core nodes in the HA setup do not share state (e.g., wallet, mempool)
+- HA nodes do not expose the RPC endpoint to the public internet. This endpoint can be accessed from within the VPC. 
 
 ---
 
-### Optimizing Data Transfer Costs
-
-By deploying as an **outbound-only node**, data transfer costs are significantly reduced since the node does not serve blockchain data to external peers. With its outbound connections, the node(s) are able to maintain full blockchain synchronization.
-
----
 ### Accessing and Using bitcoin-cli on a Bitcoin Core Instance
 
 To interact with your Bitcoin Core instance, you'll need to use AWS Systems Manager, as direct SSH access is not available.
 
 Bitcoin Core supports cookie-based authentication by default, so interacting with the `bitcoin-cli` from the node itself does not require credentials.
 
-Follow these steps to make an RPC call:
+From your CloudShell terminal, run the following command to connect to your node via Systems Manager:
 
-1. **Access the Instance:**
-   - Open the AWS Console and navigate to EC2 Instances.
+```
+export INSTANCE_ID=$(jq -r '.SingleNodeBitcoinCoreStack.BitcoinNodeInstanceId' single-node-outputs.json)
+echo "INSTANCE_ID="$INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+```
+
+**Note**: You can alternatively connect to your node via Systems Manager in the AWS Console with the following steps:
+ - Open the AWS Console and navigate to EC2 Instances.
    - Locate and select the instance named `SingleNodeBitcoinCoreStack/BitcoinSingleNode`.
    - Click the "Connect" button.
    - Choose "Session Manager" from the connection options.
    - Select "Connect" to establish a session.
 
-2. **Execute an RPC Call:**
+**Execute an RPC Call:**
 Once connected, you can interact with the Bitcoin Core node using Docker commands.
 
 To test the RPC interface, use the following command:
@@ -98,7 +165,7 @@ sudo docker exec -it bitcoind bitcoin-cli getblockchaininfo
 
    This command executes the `getblockchaininfo` RPC method, which returns current state information about the blockchain.
 
-3. **Interpreting Results:**
+**Interpreting Results:**
    - The output will provide detailed information about the current state of the blockchain, including the current block height, difficulty, and other relevant data.
    - You can use similar commands to execute other RPC methods supported by Bitcoin Core.
 
@@ -117,23 +184,37 @@ export BTC_RPC_AUTH=$(aws secretsmanager get-secret-value --secret-id bitcoin_rp
 ```
 
 #### Single node RPC Call using credentials
-To make an RPC call to a single Bitcoin node, use the following command. Replace `[Bitcoin-Node-Private-IP]` with the actual private IP address of your Bitcoin node:
+To make an RPC call to a single Bitcoin node, run the following command to retrieve the private IP address of your Bitcoin node:
+
+```
+export BITCOIN_NODE_IP=$(jq -r '.SingleNodeBitcoinCoreStack.BitcoinNodePrivateIP' single-node-outputs.json)
+echo "BITCOIN_NODE_IP=$BITCOIN_NODE_IP"
+```
+Copy output from the last `echo` command with `BITCOIN_NODE_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `BITCOIN_NODE_IP=<internal_IP>` into the new CloudShell tab. Then query the node:
 
 ```
 curl --user "$BTC_RPC_AUTH" \
      --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' \
-     -H 'content-type: text/plain;' http://[Bitcoin-Node-Private-IP]:8332/
+     -H 'content-type: text/plain;' http://$BITCOIN_NODE_IP:8332/
 ```
 
 #### High Availability (HA) RPC Call using credentials
 
-For high availability setups utilizing an Application Load Balancer (ALB), use the following command. Replace `[Load-Balancer-DNS-Name]` with your ALB's DNS name:
+Use the following command to retrieve your load balancer's DNS name:
+
+```
+export LOAD_BALANCER_DNS=$(jq -r '.HABitcoinCoreNodeStack.LoadBalancerDNS' ha-nodes-outputs.json)
+echo LOAD_BALANCER_DNS=$LOAD_BALANCER_DNS
+```
+Copy output from the last `echo` command with `RPC_ABL_URL=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `RPC_ABL_URL=<internal_IP>` into the new CloudShell tab. 
+
+ Execute the following command to make an RPC request to your HA node setup:
 
 ```
 curl --user "$BTC_RPC_AUTH" \
      --data-binary '{"jsonrpc": "1.0", "id": "curltest", "method": "getblockchaininfo", "params": []}' \
      -H 'content-type: text/plain;' \
-     [Load Balancer DNS Name]
+     $LOAD_BALANCER_DNS
 ```
 
 ---
@@ -293,7 +374,15 @@ curl --user "$BTC_RPC_AUTH" \
 
 ### Monitoring and Troubleshooting
 
-Keep your node healthy by monitoring logs and configurations:
+Keep your node healthy by monitoring logs and configurations.
+
+These can be run after accessing the node via Systems Manager:
+
+```
+export INSTANCE_ID=$(jq -r '.SingleNodeBitcoinCoreStack.BitcoinNodeInstanceId' single-node-outputs.json)
+echo "INSTANCE_ID="$INSTANCE_ID
+aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+```
 
 - Check recent Bitcoin logs:
   ```
