@@ -179,7 +179,7 @@ First, retrieve the RPC credentials from AWS Secrets Manager in your CloudShell 
 
 ```
 export BTC_RPC_AUTH=$(aws secretsmanager get-secret-value --secret-id bitcoin_rpc_credentials --query SecretString --output text)
-echo "BTC_RPC_ATH=$BTC_RPC_AUTH"
+echo "BTC_RPC_AUTH=$BTC_RPC_AUTH"
 ```
 
 #### Single node RPC Call using credentials
@@ -191,7 +191,7 @@ echo "BITCOIN_NODE_IP=$BITCOIN_NODE_IP"
 ```
 Copy output from the last `echo` command with `BITCOIN_NODE_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `BITCOIN_NODE_IP=<internal_IP>` into the new CloudShell tab. 
 
-Additionally, copy the output from the first `echo` command with `BTC_RPC_ATH=<rpc_credentials>` into the CloudShell VPC environment. 
+Additionally, copy the output from the first `echo` command with `BTC_RPC_AUTH=<rpc_credentials>` into the CloudShell VPC environment. 
 
 Then query the node:
 
