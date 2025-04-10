@@ -189,9 +189,9 @@ To make an RPC call to a single Bitcoin node, run the following command to retri
 export BITCOIN_NODE_IP=$(jq -r '.SingleNodeBitcoinCoreStack.BitcoinNodePrivateIP' single-node-outputs.json)
 echo "BITCOIN_NODE_IP=$BITCOIN_NODE_IP"
 ```
-Copy output from the last `echo` command with `BITCOIN_NODE_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `BITCOIN_NODE_IP=<internal_IP>` into the new CloudShell tab. 
+Copy output from the last `echo` command with `BITCOIN_NODE_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `BITCOIN_NODE_IP=<internal_IP>` into the new CloudShell tab.
 
-Additionally, copy the output from the first `echo` command with `BTC_RPC_AUTH=<rpc_credentials>` into the CloudShell VPC environment. 
+Additionally, copy the output from the first `echo` command with `BTC_RPC_AUTH=<rpc_credentials>` into the CloudShell VPC environment.
 
 Then query the node:
 
