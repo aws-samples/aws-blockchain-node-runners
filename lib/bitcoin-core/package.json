@@ -1,15 +1,11 @@
 {
-  "name": "bitcoin-core",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "directories": {
-    "lib": "lib"
-  },
+  "name": "aws-blockchain-node-runners-bitcoin-core",
+  "version": "0.1.0",
   "scripts": {
-    "test": "jest"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "build": "npx tsc",
+    "watch": "npx tsc -w",
+    "test": "npx jest",
+    "cdk": "npx cdk",
+    "scan-cdk": "npx cdk synth"
+  }
 }
