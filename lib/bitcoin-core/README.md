@@ -122,7 +122,7 @@ npx cdk deploy HABitcoinCoreNodeStack --outputs-file ha-nodes-outputs.json
 - Outbound peer-to-peer (P2P) communication flows through an **Internet Gateway (IGW)**.
 - The node's security group permits incoming P2P connections on port 8333.
 - The node's RPC methods can be accessed from within the VPC.
-- The Solana node sends various monitoring metrics for both EC2 and Solana nodes to Amazon CloudWatch.
+- The Bitcoin node sends various monitoring metrics to Amazon CloudWatch.
 
 #### High Availability (HA) Setup
 ![HA Node Deployment](./doc/assets/Bitcoin-HA-Nodes-Arch.png)
