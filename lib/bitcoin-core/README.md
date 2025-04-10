@@ -76,7 +76,7 @@ aws ec2 create-default-vpc
 3. Create your own copy of `.env` file and edit it to update with your AWS Account ID and Region:
 
 ```bash
-cd lib/bitcoin
+cd lib/bitcoin-core
 cp ./sample-configs/.env-sample-bitcoin-mainnet .env
 vim .env
 ```
