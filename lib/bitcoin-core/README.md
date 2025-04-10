@@ -172,15 +172,14 @@ sudo docker exec -it bitcoind bitcoin-cli getblockchaininfo
 ---
 ### Secure RPC Access with AWS Secrets Manager
 
-For a client to securely interact with the Bitcoin Core RPC endpoint from a private subnet within your isolated VPC environment, AWS Secrets Manager is leveraged for credential storage and retrieval.
-
-**Important**: Ensure that you execute the following commands from within a private subnet in the Bitcoin Core Node VPC. A VPC CloudShell environment is suitable for testing purposes.
+For a client to securely interact with the Bitcoin Core RPC endpoint from a subnet within your VPC environment, AWS Secrets Manager is leveraged for credential storage and retrieval.
 
 #### Retrieving Credentials
-First, retrieve the RPC credentials from AWS Secrets Manager:
+First, retrieve the RPC credentials from AWS Secrets Manager in your CloudShell tab:
 
 ```
 export BTC_RPC_AUTH=$(aws secretsmanager get-secret-value --secret-id bitcoin_rpc_credentials --query SecretString --output text)
+echo "BTC_RPC_ATH=$BTC_RPC_AUTH"
 ```
 
 #### Single node RPC Call using credentials
@@ -190,7 +189,11 @@ To make an RPC call to a single Bitcoin node, run the following command to retri
 export BITCOIN_NODE_IP=$(jq -r '.SingleNodeBitcoinCoreStack.BitcoinNodePrivateIP' single-node-outputs.json)
 echo "BITCOIN_NODE_IP=$BITCOIN_NODE_IP"
 ```
-Copy output from the last `echo` command with `BITCOIN_NODE_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `BITCOIN_NODE_IP=<internal_IP>` into the new CloudShell tab. Then query the node:
+Copy output from the last `echo` command with `BITCOIN_NODE_IP=<internal_IP>` and open [CloudShell tab with VPC environment](https://docs.aws.amazon.com/cloudshell/latest/userguide/creating-vpc-environment.html) to access internal IP address space. Paste `BITCOIN_NODE_IP=<internal_IP>` into the new CloudShell tab. 
+
+Additionally, copy the output from the first `echo` command with `BTC_RPC_ATH=<rpc_credentials>` into the CloudShell VPC environment. 
+
+Then query the node:
 
 ```
 curl --user "$BTC_RPC_AUTH" \
