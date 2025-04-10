@@ -25,6 +25,8 @@
     "aws-cdk-lib": "^2.184.0",
     "constructs": "^10.3.0",
     "dotenv": "^16.4.5",
-    "source-map-support": "^0.5.21"
+    "source-map-support": "^0.5.21",
+    "@aws-sdk/client-secrets-manager": "^3.775.0",
+    "base64url": "^3.0.1"
   }
 }
