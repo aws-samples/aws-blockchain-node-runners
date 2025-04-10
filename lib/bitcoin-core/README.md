@@ -203,7 +203,7 @@ curl --user "$BTC_RPC_AUTH" \
 
 #### High Availability (HA) RPC Call using credentials
 
-Use the following command to retrieve your load balancer's DNS name:
+Use the following command from your CloudShell terminal to retrieve your load balancer's DNS name:
 
 ```
 export LOAD_BALANCER_DNS=$(jq -r '.HABitcoinCoreNodeStack.LoadBalancerDNS' ha-nodes-outputs.json)
