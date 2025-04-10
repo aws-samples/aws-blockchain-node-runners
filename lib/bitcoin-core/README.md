@@ -229,6 +229,8 @@ curl --user "$BTC_RPC_AUTH" \
 
 This guide covers how to create an encrypted Bitcoin Core wallet specifically designed for receiving and managing payments in a secure and efficient way.
 
+Note: Make sure that you run the following commands after accessing the node via Systems Manager.
+
 ---
 
 #### **1. Create an Encrypted Payment Wallet**
