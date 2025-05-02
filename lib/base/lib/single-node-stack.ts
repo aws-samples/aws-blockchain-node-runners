@@ -17,6 +17,7 @@ export interface BaseSingleNodeStackProps extends cdk.StackProps {
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
     baseNetworkId: configTypes.BaseNetworkId;
+    baseClient: configTypes.BaseClient,
     baseNodeConfiguration: configTypes.BaseNodeConfiguration;
     restoreFromSnapshot: boolean;
     l1ExecutionEndpoint: string,
@@ -34,13 +35,14 @@ export class BaseSingleNodeStack extends cdk.Stack {
         const STACK_NAME = cdk.Stack.of(this).stackName;
         const STACK_ID = cdk.Stack.of(this).stackId;
         const availabilityZones = cdk.Stack.of(this).availabilityZones;
-        const chosenAvailabilityZone = availabilityZones.slice(0, 1)[0];
+        const chosenAvailabilityZone = availabilityZones.slice(0, 2)[1];
 
         // Getting our config from initialization properties
         const {
             instanceType,
             instanceCpuType,
             baseNetworkId,
+            baseClient,
             baseNodeConfiguration,
             restoreFromSnapshot,
             l1ExecutionEndpoint,
@@ -107,6 +109,7 @@ export class BaseSingleNodeStack extends cdk.Stack {
             _DATA_VOLUME_TYPE_: dataVolume.type,
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
             _NETWORK_ID_: baseNetworkId,
+            _BASE_CLIENT_: baseClient,
             _NODE_CONFIG_: baseNodeConfiguration,
             _LIFECYCLE_HOOK_NAME_: constants.NoneValue,
             _AUTOSCALING_GROUP_NAME_: constants.NoneValue,

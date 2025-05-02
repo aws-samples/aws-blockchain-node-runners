@@ -16,6 +16,7 @@ export interface BaseHANodesStackProps extends cdk.StackProps {
     instanceType: ec2.InstanceType;
     instanceCpuType: ec2.AmazonLinuxCpuType;
     baseNetworkId: configTypes.BaseNetworkId;
+    baseClient: configTypes.BaseClient,
     baseNodeConfiguration: configTypes.BaseNodeConfiguration;
     restoreFromSnapshot: boolean;
     l1ExecutionEndpoint: string,
@@ -40,6 +41,7 @@ export class BaseHANodesStack extends cdk.Stack {
             instanceType,
             instanceCpuType,
             baseNetworkId,
+            baseClient,
             baseNodeConfiguration,
             restoreFromSnapshot,
             l1ExecutionEndpoint,
@@ -80,6 +82,7 @@ export class BaseHANodesStack extends cdk.Stack {
             _DATA_VOLUME_TYPE_: dataVolume.type,
             _DATA_VOLUME_SIZE_: dataVolumeSizeBytes.toString(),
             _NETWORK_ID_: baseNetworkId,
+            _BASE_CLIENT_: baseClient,
             _NODE_CONFIG_: baseNodeConfiguration,
             _LIFECYCLE_HOOK_NAME_: lifecycleHookName,
             _AUTOSCALING_GROUP_NAME_: autoScalingGroupName,
