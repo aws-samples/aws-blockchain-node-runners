@@ -258,9 +258,9 @@ aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 ```bash
 sudo su bcuser
 # Execution client logs:
-docker logs --tail 50 node_execution_1 -f
+docker logs --tail 50 node-execution-1 -f
 # Base client logs:
-docker logs --tail 50 node_node_1 -f
+docker logs --tail 50 node-node-1 -f
 ```
 2. How to check the logs from the EC2 user-data script?
 
