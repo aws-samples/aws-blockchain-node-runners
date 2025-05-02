@@ -110,7 +110,7 @@ pwd
 cp ./sample-configs/.env-sample-full .env
 nano .env
 ```
-> **IMPORTANT**: *By default we use the latest Geth Fullnode snapshot from [48 Club](https://github.com/48Club/bsc-snapshots/blob/main/data.json) If you want to set your own `BSC_SNAPSHOTS_URI`, check this GitHub: https://github.com/48Club/bsc-snapshots, and use Geth full node link.*
+> **IMPORTANT**: *By default we use the latest Geth Fullnode snapshot from [48 Club](https://github.com/48Club/bsc-snapshots/blob/develop/data.json) If you want to set your own `BSC_SNAPSHOTS_URI`, check this GitHub: https://github.com/48Club/bsc-snapshots, and use Geth full node link.*
 
 4. Deploy common components such as IAM role
 
