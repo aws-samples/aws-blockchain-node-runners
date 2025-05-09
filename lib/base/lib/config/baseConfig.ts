@@ -18,16 +18,28 @@ const parseDataVolumeType = (dataVolumeType: string) => {
     }
 }
 
+const getClientConfiguration = (client: configTypes.BaseClient, nodeConfiguration: configTypes.BaseNodeConfiguration) => {
+    switch (client) {
+        case "reth":
+            return "archive";
+        case "geth":
+            return "full";
+        default:
+            return "full";
+    }
+}
+
 export const baseConfig: configTypes.BaseBaseConfig = {
     accountId: process.env.AWS_ACCOUNT_ID || "xxxxxxxxxxx",
-    region: process.env.AWS_REGION || "us-east-2",
+    region: process.env.AWS_REGION || "us-east-1",
 }
 
 export const baseNodeConfig: configTypes.BaseBaseNodeConfig = {
     instanceType: new ec2.InstanceType(process.env.BASE_INSTANCE_TYPE ? process.env.BASE_INSTANCE_TYPE : "m7g.2xlarge"),
     instanceCpuType: process.env.BASE_CPU_TYPE?.toLowerCase() == "x86_64" ? ec2.AmazonLinuxCpuType.X86_64 : ec2.AmazonLinuxCpuType.ARM_64,
     baseNetworkId: <configTypes.BaseNetworkId> process.env.BASE_NETWORK_ID || "mainnet",
-    baseNodeConfiguration: <configTypes.BaseNodeConfiguration> process.env.BASE_NODE_CONFIGURATION || "full",
+    baseClient: <configTypes.BaseClient> process.env.BASE_CLIENT || "geth",
+    baseNodeConfiguration: getClientConfiguration(<configTypes.BaseClient> process.env.BASE_CLIENT, <configTypes.BaseNodeConfiguration> process.env.BASE_NODE_CONFIGURATION),
     restoreFromSnapshot: process.env.BASE_RESTORE_FROM_SNAPSHOT?.toLowerCase() == "true" ? true : false,
     l1ExecutionEndpoint: process.env.BASE_L1_EXECUTION_ENDPOINT || constants.NoneValue,
     l1ConsensusEndpoint: process.env.BASE_L1_CONSENSUS_ENDPOINT || constants.NoneValue,

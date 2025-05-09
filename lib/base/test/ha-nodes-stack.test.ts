@@ -12,22 +12,11 @@ describe("BaseHANodesStack", () => {
 
     // Create the BaseHANodesStack.
     const baseHANodesStack = new BaseHANodesStack(app, "base-sync-node", {
-      stackName: `base-ha-nodes-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
+      stackName: `base-ha-nodes-${config.baseNodeConfig.baseClient}-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
       env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
-      instanceType: config.baseNodeConfig.instanceType,
-      instanceCpuType: config.baseNodeConfig.instanceCpuType,
-      baseNetworkId: config.baseNodeConfig.baseNetworkId,
-      baseNodeConfiguration: config.baseNodeConfig.baseNodeConfiguration,
-      restoreFromSnapshot: config.baseNodeConfig.restoreFromSnapshot,
-      l1ExecutionEndpoint: config.baseNodeConfig.l1ExecutionEndpoint,
-      l1ConsensusEndpoint: config.baseNodeConfig.l1ConsensusEndpoint,
-      snapshotUrl: config.baseNodeConfig.snapshotUrl,
-      dataVolume: config.baseNodeConfig.dataVolume,
-
-      albHealthCheckGracePeriodMin: config.haNodeConfig.albHealthCheckGracePeriodMin,
-      heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
-      numberOfNodes: config.haNodeConfig.numberOfNodes
+      ...config.baseNodeConfig,
+      ...config.haNodeConfig
   });
 
     // Prepare the stack for assertions.
@@ -158,7 +147,7 @@ describe("BaseHANodesStack", () => {
 
     // Has Auto Scaling Group.
     template.hasResourceProperties("AWS::AutoScaling::AutoScalingGroup", {
-      AutoScalingGroupName: `base-ha-nodes-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
+      AutoScalingGroupName: `base-ha-nodes-${config.baseNodeConfig.baseClient}-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
       HealthCheckGracePeriod: config.haNodeConfig.albHealthCheckGracePeriodMin * 60,
       HealthCheckType: "ELB",
       DefaultInstanceWarmup: 60,
@@ -173,7 +162,7 @@ describe("BaseHANodesStack", () => {
     template.hasResourceProperties("AWS::AutoScaling::LifecycleHook", {
       DefaultResult: "ABANDON",
       HeartbeatTimeout: config.haNodeConfig.heartBeatDelayMin * 60,
-      LifecycleHookName: `base-ha-nodes-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
+      LifecycleHookName: `base-ha-nodes-${config.baseNodeConfig.baseClient}-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
       LifecycleTransition: "autoscaling:EC2_INSTANCE_LAUNCHING",
     });
 
@@ -216,7 +205,7 @@ describe("BaseHANodesStack", () => {
         },
         {
          Key: "access_logs.s3.prefix",
-         Value: `base-ha-nodes-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`
+         Value: `base-ha-nodes-${config.baseNodeConfig.baseClient}-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`
         }
        ],
        Scheme: "internal",

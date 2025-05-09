@@ -4,7 +4,8 @@ set -e
 source /etc/cdk_environment
 
 export NETWORK_ENV=".env.$NETWORK_ID"
-export CLIENT=geth
+export CLIENT="$BASE_CLIENT"
+export HOST_DATA_DIR="/data"
 
 echo "Script is starting client $CLIENT on $NETWORK_ENV"
 # Start the node

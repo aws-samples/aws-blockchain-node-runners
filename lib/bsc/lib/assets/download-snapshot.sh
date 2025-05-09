@@ -12,7 +12,7 @@ BSC_SNAPSHOTS_DIR=/data/
 BSC_SNAPSHOTS_DOWNLOAD_STATUS=-1
 
 if [ "$BSC_SNAPSHOTS_URI" == "none" ]; then
-  BSC_SNAPSHOTS_URI=$(curl https://raw.githubusercontent.com/48Club/bsc-snapshots/main/data.json | jq -r .geth.local.link)
+  BSC_SNAPSHOTS_URI=$(curl https://raw.githubusercontent.com/48Club/bsc-snapshots/develop/data.json | jq -r .geth.local.link)
 fi
 
 # take about 1 hour to download the bsc snapshot
@@ -50,7 +50,8 @@ zstd -cd geth.tar.zst | pv | tar xvf - 2>&1 | tee unzip.log && echo "decompressi
 echo "Decompression BSC snapshot success ..."
 
 mv /data/geth.full/geth /data/
-sudo rm -rf /data/geth.full
+mv /data/full/geth /data/
+sudo rm -rf /data/full
 sudo rm -rf /data/geth.tar.zst
 
 echo "BSC snapshot is ready !!!"

@@ -17,12 +17,13 @@ new BaseCommonStack(app, "base-common", {
 });
 
 new BaseSingleNodeStack(app, "base-single-node", {
-  stackName: `base-single-node-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
+  stackName: `base-single-node-${config.baseNodeConfig.baseClient}-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
   env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
   instanceType: config.baseNodeConfig.instanceType,
   instanceCpuType: config.baseNodeConfig.instanceCpuType,
   baseNetworkId: config.baseNodeConfig.baseNetworkId,
+  baseClient: config.baseNodeConfig.baseClient,
   baseNodeConfiguration: config.baseNodeConfig.baseNodeConfiguration,
   restoreFromSnapshot: config.baseNodeConfig.restoreFromSnapshot,
   l1ExecutionEndpoint: config.baseNodeConfig.l1ExecutionEndpoint,
@@ -32,12 +33,13 @@ new BaseSingleNodeStack(app, "base-single-node", {
 });
 
 new BaseHANodesStack(app, "base-ha-nodes", {
-  stackName: `base-ha-nodes-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
+  stackName: `base-ha-nodes-${config.baseNodeConfig.baseClient}-${config.baseNodeConfig.baseNodeConfiguration}-${config.baseNodeConfig.baseNetworkId}`,
   env: { account: config.baseConfig.accountId, region: config.baseConfig.region },
 
   instanceType: config.baseNodeConfig.instanceType,
   instanceCpuType: config.baseNodeConfig.instanceCpuType,
   baseNetworkId: config.baseNodeConfig.baseNetworkId,
+  baseClient: config.baseNodeConfig.baseClient,
   baseNodeConfiguration: config.baseNodeConfig.baseNodeConfiguration,
   restoreFromSnapshot: config.baseNodeConfig.restoreFromSnapshot,
   l1ExecutionEndpoint: config.baseNodeConfig.l1ExecutionEndpoint,
