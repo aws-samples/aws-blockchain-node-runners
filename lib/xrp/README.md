@@ -1,10 +1,10 @@
-# Sample AWS Blockchain Node Runner app for XRP Nodes
+# Sample AWS Blockchain Node Runner app for XRP Ledger Nodes
 
 |          Contributed by          |
 |:--------------------------------:|
 | [Pedro Aceves](https://github.com/acevesp)|
 
-XRP node deployment on AWS. All nodes are configure as ["Stock Servers"](https://xrpl.org/docs/infrastructure/configuration/server-modes/run-rippled-as-a-stock-server)
+XRP Ledger node deployment on AWS. All nodes are configure as ["Stock Servers"](https://xrpl.org/docs/infrastructure/configuration/server-modes/run-rippled-as-a-stock-server)
 
 ## Overview of Deployment Architectures for Single and HA setups
 
@@ -12,17 +12,17 @@ XRP node deployment on AWS. All nodes are configure as ["Stock Servers"](https:/
 
 ![Single Node Deployment](./doc/assets/Architecture-Single%20node.drawio.png)
 
-1.	A XRP node deployed in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on the configured xrp network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-2.	The XRP node is used by dApps or development tools internally from within the Default VPC. RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
-3.  The XRP node sends various monitoring metrics for both EC2 and current XRP ledger sequence to Amazon CloudWatch. It also updates the dashboard with correct storage device names to display respective metrics properly.
+1.	A XRP Ledger node deployed in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizes with the rest of nodes on the configured XRPL network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+2.	The XRP Ledger node is used by dApps or development tools internally from within the Default VPC. RPC API is not exposed to the Internet directly to protect nodes from unauthorized access.
+3.  The XRP Ledger node sends various monitoring metrics for both EC2 and current XRP Ledger sequence to Amazon CloudWatch. It also updates the dashboard with correct storage device names to display respective metrics properly.
 
 ### HA setup
 
 ![Highly Available Nodes Deployment](./doc/assets/Architecture-HA%20Nodes.drawio.png)
 
-1.	A set of XRP nodes are deployed within an [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizing with the rest of nodes on the configured xrp network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
-2.	The XRP nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). RPC API is not exposed to the Internet to protect nodes from unauthorized access.
-3.	The XRP nodes send various monitoring metrics for EC2 to Amazon CloudWatch.
+1.	A set of XRP Ledger nodes are deployed within an [Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html) in the [Default VPC](https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) continuously synchronizing with the rest of nodes on the configured XRPL network through [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html).
+2.	The XRP Ledger nodes are accessed by dApps or development tools internally through [Application Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html). RPC API is not exposed to the Internet to protect nodes from unauthorized access.
+3.	The XRP Ledger nodes send various monitoring metrics for EC2 to Amazon CloudWatch.
 
 ## Well-Architected
 
@@ -31,11 +31,11 @@ XRP node deployment on AWS. All nodes are configure as ["Stock Servers"](https:/
 
 ### Well-Architected Checklist
 
-This is the Well-Architected checklist for XRP nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
+This is the Well-Architected checklist for XRP Ledger nodes implementation of the AWS Blockchain Node Runner app. This checklist takes into account questions from the [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/) which are relevant to this workload. Please feel free to add more checks from the framework if required for your workload.
 
 | Pillar                  | Control                           | Question/Check                                                                   | Remarks          |
 |:------------------------|:----------------------------------|:---------------------------------------------------------------------------------|:-----------------|
-| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that XRP sync ports remain open for outbound connections; Port 2459 and 51235 (TCP/UDP).  |
+| Security                | Network protection                | Are there unnecessary open ports in security groups?                             | Please note that rippled sync ports remain open for outbound connections; Port 2459 and 51235 (TCP/UDP).  |
 |                         |                                   | Traffic inspection                                                               | AWS WAF could be implemented for traffic inspection. Additional charges will apply.  |
 |                         | Compute protection                | Reduce attack surface                                                            | This solution uses Amazon Linux 2 AMI. You may choose to run hardening scripts on it.  |
 |                         |                                   | Enable people to perform actions at a distance                                   | This solution uses AWS Systems Manager for terminal session, not ssh ports.  |
@@ -111,7 +111,7 @@ npx cdk deploy XRP-common
 npx cdk deploy XRP-single-node --json --outputs-file single-node-deploy.json
 ```
 
-2. After starting the node you need to wait for the initial synchronization process to finish. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `XRP Sequence` metrics. When the node is fully synced the sequence should match that of the configured xrp network (testnet, mainnet, etc). To see them:
+2. After starting the node you need to wait for the initial synchronization process to finish. You can use Amazon CloudWatch to track the progress. There is a script that publishes CloudWatch metrics every 5 minutes, where you can watch `XRP Sequence` metrics. When the node is fully synced the sequence should match that of the configured XRPL network (testnet, mainnet, etc). To see them:
 
     - Navigate to [CloudWatch service](https://console.aws.amazon.com/cloudwatch/) (make sure you are in the region you have specified for `AWS_REGION`)
     - Open `Dashboards` and select dashboard that starts with `XRP-single-node` from the list of dashboards.
@@ -217,10 +217,10 @@ aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
 sudo cat /var/log/cloud-init-output.log
 sudo cat /var/log/user-data.log
 ```
-2. How can I change rippled (XRP) configuration?  
-   There are two places of configuration for the xrp nodes:
+2. How can I change rippled (XRPL) configuration?  
+   There are two places of configuration for the XRP Ledger nodes:
 
-   a. `.env` file. Here is where you specify the xrp network you want. This is the key for the config in part b
+   a. `.env` file. Here is where you specify the XRPL network you want. This is the key for the config in part b
 
       ```bash
       HUB_NETWORK_ID="testnet"
