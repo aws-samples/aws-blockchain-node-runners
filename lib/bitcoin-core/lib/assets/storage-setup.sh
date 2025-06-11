@@ -138,7 +138,7 @@ fi
       echo "Error: Could not get UUID for volume $VOLUME_ID. Exiting."
       exit 1
     fi
-    
+
     VOLUME_FSTAB_CONF="UUID=$VOLUME_UUID $DIR_NAME $FILE_SYSTEM $FS_CONFIG 0 2"
     echo "VOLUME_ID=$VOLUME_ID"
     echo "VOLUME_UUID=$VOLUME_UUID"
@@ -164,7 +164,7 @@ fi
       echo "Error: Failed to mount the volume. Exiting."
       exit 1
     fi
-    
+
     echo "Volume mounted successfully at $DIR_NAME"
   else
     echo "$DIR_NAME volume is mounted, nothing changed"

@@ -18,4 +18,3 @@ export class BitcoinSecurityGroup extends Construct {
         this.securityGroup = sg;
     }
 }
-

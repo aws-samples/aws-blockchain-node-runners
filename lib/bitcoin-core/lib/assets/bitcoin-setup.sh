@@ -60,4 +60,3 @@ else
   fi
   cfn-signal --stack "$STACK_NAME" --resource "$RESOURCE_ID" --region "$AWS_REGION"
 fi
-
