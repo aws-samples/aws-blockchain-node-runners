@@ -62,23 +62,35 @@ describe("SingleNodeBitcoinCoreStack", () => {
         // Has EC2 instance with node configuration
         template.hasResourceProperties("AWS::EC2::Instance", {
             InstanceType: Match.stringLikeRegexp(".*"), // accept any value including 'undefined.undefined'
-            BlockDeviceMappings: Match.arrayWith([
+            BlockDeviceMappings: [
                 {
                     DeviceName: "/dev/xvda",
                     Ebs: Match.objectLike({
                         Encrypted: true,
                     }),
                 },
-                {
-                    DeviceName: "/dev/sdf",
-                    Ebs: Match.objectLike({
-                        Encrypted: true,
-                    }),
-                },
-            ]),
+            ],
             SecurityGroupIds: Match.anyValue(),
             SubnetId: Match.anyValue(),
             UserData: Match.anyValue(),
+        });
+
+        // Has EBS data volume
+        template.hasResourceProperties("AWS::EC2::Volume", {
+            AvailabilityZone: Match.anyValue(),
+            Encrypted: true,
+            Iops: 3000,
+            MultiAttachEnabled: false,
+            Size: 1000,
+            Throughput: 125,
+            VolumeType: "gp3",
+        });
+
+        // Has EBS data volume attachment
+        template.hasResourceProperties("AWS::EC2::VolumeAttachment", {
+            Device: "/dev/sdf",
+            InstanceId: Match.anyValue(),
+            VolumeId: Match.anyValue(),
         });
 
 
