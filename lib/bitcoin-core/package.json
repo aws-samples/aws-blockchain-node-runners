@@ -7,9 +7,5 @@
     "test": "jest",
     "cdk": "cdk",
     "scan-cdk": "cdk synth"
-  },
-  "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.828.0",
-    "base64url": "^3.0.1"
   }
 }
