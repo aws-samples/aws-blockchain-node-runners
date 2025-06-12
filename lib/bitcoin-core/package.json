@@ -1,0 +1,11 @@
+{
+  "name": "aws-blockchain-node-runners-bitcoin-core",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk",
+    "scan-cdk": "cdk synth"
+  }
+}
