@@ -1,0 +1,23 @@
+# Any ${var} in this file will be automatically picked up by the values in the shell environment
+# To pass variables to docker compose:
+# 1. Use a .env file (VAR=value, one per line) in the same directory as /opt/instance/node/docker-compose-node.yml
+# 2. Export them in the shell before running (e.g. export VAR=value)
+# 3. Pass them inline: VAR1=value1 VAR2=value2 docker compose up
+
+services:
+    node:
+        image: "${VET_CONTAINER_IMAGE}"
+        container_name: node
+        restart: unless-stopped
+        networks:
+            node-network:
+                ipv4_address: 192.168.112.21
+        volumes:
+            - /thor:/home/thor/.org.vechain.thor
+        command: ${NODE_OPTIONS}
+networks:
+    node-network:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 192.168.112.0/24
