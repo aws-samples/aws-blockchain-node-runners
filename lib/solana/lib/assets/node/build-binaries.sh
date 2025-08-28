@@ -30,7 +30,7 @@ source $PWD/ci/rust-version.sh all
 
 echo "Installing libssl-dev, pkg-config, zlib1g-dev, protobuf etc."
 apt-get update
-apt-get -y install libssl-dev libudev-dev pkg-config zlib1g-dev llvm clang cmake make libprotobuf-dev protobuf-compiler
+apt-get -y install libssl-dev libclang-dev libudev-dev pkg-config zlib1g-dev llvm clang cmake make libprotobuf-dev protobuf-compiler
 
 echo "Building Solana..."
 ./scripts/cargo-install-all.sh .

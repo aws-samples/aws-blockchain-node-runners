@@ -24,7 +24,7 @@ __ENTRY_POINTS__ \
 --full-rpc-api \
 --rpc-port 8899 \
 --gossip-port 8800 \
---dynamic-port-range 8800-8816 \
+--dynamic-port-range 8800-8820 \
 --private-rpc \
 --rpc-bind-address $EC2_INTERNAL_IP \
 --wal-recovery-mode skip_any_corrupted_record \
