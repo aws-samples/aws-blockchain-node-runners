@@ -24,8 +24,8 @@ export interface NodeSecurityGroupConstructProps {
       });
 
       // Public ports
-      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcpRange(8800, 8816), "allow all TCP P2P protocols (gossip, turbine, repair, etc)");
-      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(8800, 8816), "allow all UDP P2P protocols (gossip, turbine, repair, etc)");
+      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcpRange(8800, 8820), "allow all TCP P2P protocols (gossip, turbine, repair, etc)");
+      sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.udpRange(8800, 8820), "allow all UDP P2P protocols (gossip, turbine, repair, etc)");
 
       // Private ports restricted only to the VPC IP range
       sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(8899), "allow internal RPC port HTTP (user access needs to be restricted. Allowed access only from internal IPs)");
