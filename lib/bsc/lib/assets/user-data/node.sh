@@ -161,34 +161,6 @@ fi
 
 lsblk -d
 
-if [[ "$BSC_DOWNLOAD_SNAPSHOT" == "true"  ]]; then
-  # install aria2 a p2p downloader
-
-  if [ "$arch" == "x86_64" ]; then
-    wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
-    tar jxvf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
-    cd aria2-1.36.0-linux-gnu-64bit-build1/
-    make install
-  else
-    wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
-    tar jxvf aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
-    cd aria2-1.36.0-linux-gnu-arm-rbpi-build1/
-    make install
-  fi
-
-  # finish download and archive
-  sudo yum install zstd -y
-  sudo yum install pv -y
-  zstd --version
-  pv --version
-  # download snapshot if network is mainnet
-  if [[ "$BSC_NETWORK" == "mainnet"  ]]; then
-    echo "Downloading BSC snapshot"
-    chmod +x /opt/download-snapshot.sh
-    /opt/download-snapshot.sh
-  fi
-fi
-
 chown bcuser:bcuser -R /data
 
 echo 'Configuring CloudWatch Agent'
