@@ -22,22 +22,6 @@ arch=$(uname -m)
 apt-get -yqq update
 apt-get -yqq install -y build-essential cargo pkg-config git upx-ucl libjemalloc-dev libjemalloc2 awscli jq unzip python3-pip
 
-cd /tmp
-
-# install aria2 a p2p downloader
-
-if [ "$arch" == "x86_64" ]; then
-  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
-  tar jxvf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
-  cd aria2-1.36.0-linux-gnu-64bit-build1/
-  make install
-else
-  wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
-  tar jxvf aria2-1.36.0-linux-gnu-arm-rbpi-build1.tar.bz2
-  cd aria2-1.36.0-linux-gnu-arm-rbpi-build1/
-  make install
-fi
-
 cd /opt
 
 echo "Downloading assets zip file"
