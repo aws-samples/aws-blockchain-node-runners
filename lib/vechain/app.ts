@@ -4,6 +4,7 @@ import { VetCommonStack } from "./lib/common-stack";
 import * as config from "./lib/config/node-config";
 import { VETHaNodeStack } from "./lib/ha-node-stack";
 import { VETSingleNodeStack } from "./lib/single-node-stack";
+import * as nag from "cdk-nag";
 
 const app = new cdk.App();
 cdk.Tags.of(app).add("Project", "AWSVet");
@@ -42,3 +43,12 @@ new VETHaNodeStack(app, `vet-ha-node`, {
     heartBeatDelayMin: config.haNodeConfig.heartBeatDelayMin,
     numberOfNodes: config.haNodeConfig.numberOfNodes,
 });
+
+// Security Check
+cdk.Aspects.of(app).add(
+    new nag.AwsSolutionsChecks({
+        verbose: false,
+        reports: true,
+        logIgnores: false,
+    })
+);
