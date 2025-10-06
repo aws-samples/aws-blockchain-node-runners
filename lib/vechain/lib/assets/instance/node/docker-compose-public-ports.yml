@@ -1,0 +1,14 @@
+# Docker Compose can't expand a single variable into multiple list items.
+# For example: PORTS="80:80 443:443" or won't become separate entries under `ports:`.
+# To support different application types (e.g. public, authority), we use override files
+# that fully define `ports:` or `command:` as needed.
+# This keeps the base file reusable and separates app-specific configurations.
+
+services:
+    node:
+        ports:
+            - "80:80"
+            - "2113:2113"
+            - "11235:11235"
+            - "11235:11235/udp"
+            - "2112:2112"
