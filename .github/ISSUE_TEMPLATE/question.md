@@ -1,6 +1,10 @@
 ---
 name: Question
 about: I have a Question
+title: ''
+labels: ''
+assignees: ''
+
 ---
 
 - [ ] ✋ I have searched the open/closed issues and my issue is not listed.
