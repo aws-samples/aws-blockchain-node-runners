@@ -22,6 +22,7 @@ export interface HANodesConstructCustomProps {
   rpcPortForALB: number,
   albHealthCheckGracePeriodMin: number;
   healthCheckPath? : string;
+  healthCheckPort?: number;
   heartBeatDelayMin: number;
   lifecycleHookName: string;
   autoScalingGroupName: string;
@@ -48,6 +49,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
       rpcPortForALB,
       albHealthCheckGracePeriodMin,
       healthCheckPath,
+      healthCheckPort,
       heartBeatDelayMin,
       lifecycleHookName,
       autoScalingGroupName,
@@ -183,7 +185,7 @@ export class HANodesConstruct extends cdkContructs.Construct {
           healthyHttpCodes: "200-299",
           path: healthCheckPath ? healthCheckPath : "/",
           // In the future, can create a separate service to have a more reliable health check
-          port: rpcPortForALB.toString(),
+          port: (healthCheckPort ? healthCheckPort : rpcPortForALB).toString(),
           unhealthyThresholdCount: 2,
           healthyThresholdCount: 3,
           interval: cdk.Duration.seconds(30),
