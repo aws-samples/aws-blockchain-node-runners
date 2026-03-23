@@ -18,6 +18,7 @@ TRUSTED_DOMAINS=(
   "docs.solana.com"
   "metrics.solana.com"
   "169.254.169.254"
+  "localhost"
 )
 
 BLOCKED=0
