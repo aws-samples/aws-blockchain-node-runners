@@ -22,8 +22,12 @@ TRUSTED_DOMAINS=(
 
 BLOCKED=0
 
-# Get staged shell files (new or modified)
-FILES=$(git diff --cached --name-only --diff-filter=ACM -- '*.sh' || true)
+# Accept files as arguments (pre-commit framework) or fall back to git staged files
+if [ $# -gt 0 ]; then
+  FILES="$*"
+else
+  FILES=$(git diff --cached --name-only --diff-filter=ACM -- '*.sh' || true)
+fi
 
 if [ -z "$FILES" ]; then
   exit 0
