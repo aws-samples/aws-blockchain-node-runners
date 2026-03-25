@@ -17,10 +17,10 @@ jobs:
         shell: bash
         working-directory: website
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 19
+          node-version: 20
           cache: npm
           cache-dependency-path: website/package-lock.json
 
