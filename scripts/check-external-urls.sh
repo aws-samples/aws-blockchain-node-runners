@@ -8,6 +8,7 @@ set -euo pipefail
 TRUSTED_DOMAINS=(
   "s3.amazonaws.com"
   "awscli.amazonaws.com"
+  "yum.corretto.aws"
   "download.docker.com"
   "sh.rustup.rs"
   "raw.githubusercontent.com"
@@ -26,6 +27,7 @@ TRUSTED_DOMAINS=(
 TRUSTED_REPOS=(
   "github.com/docker/compose"
   "github.com/peak/s5cmd"
+  "github.com/tronprotocol/java-tron"
   "github.com/MystenLabs/sui"
   "github.com/anza-xyz/agave"
   "github.com/bnb-chain/bsc"
@@ -36,6 +38,7 @@ TRUSTED_REPOS=(
 # Trusted org prefixes (domain + org, any repo under it allowed)
 TRUSTED_ORGS=(
   "github.com/NethermindEth"
+  "github.com/tron-nile-testnet"
   "github.com/stacks-network"
 )
 
