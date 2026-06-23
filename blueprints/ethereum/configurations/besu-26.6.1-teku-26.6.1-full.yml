@@ -1,0 +1,63 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+---
+version: "3"
+services:
+    execution:
+        image: hyperledger/besu:26.6.1
+        container_name: execution
+        restart: always
+        command:
+            [
+                "--network=${BC_NETWORK}",
+                "--engine-rpc-enabled=true",
+                "--engine-rpc-port=8551",
+                "--engine-jwt-secret=/var/lib/besu/secrets/jwtsecret",
+                "--engine-host-allowlist=*",
+                "--rpc-http-enabled=true",
+                "--rpc-http-api=ADMIN,ETH,WEB3,TXPOOL,NET,DEBUG,TRACE",
+                "--rpc-http-host=${EC2_INTERNAL_IP}",
+                "--host-allowlist=*",
+                "--rpc-ws-enabled=true",
+                "--rpc-ws-host=${EC2_INTERNAL_IP}",
+                "--data-path=/var/lib/besu/data",
+                "--max-peers=50",
+            ]
+        volumes:
+            - /secrets:/var/lib/besu/secrets
+            - /data/execution:/var/lib/besu/data
+        stop_signal: SIGTERM
+        stop_grace_period: 8m
+        security_opt:
+            - no-new-privileges:true
+        network_mode: host
+
+    consensus:
+        image: consensys/teku:26.6.1
+        container_name: consensus
+        restart: always
+        command:
+            [
+                "--network=${BC_NETWORK}",
+                "--ee-endpoint=http://${EC2_INTERNAL_IP}:8551",
+                "--ee-jwt-secret-file=/var/lib/teku/secrets/jwtsecret",
+                "--checkpoint-sync-url=${ETH_CONSENSUS_CHECKPOINT_SYNC_URL}",
+                "--rest-api-enabled=true",
+                "--rest-api-port=5052",
+                "--rest-api-interface=${EC2_INTERNAL_IP}",
+                "--rest-api-host-allowlist=*",
+                "--metrics-enabled=true",
+                "--metrics-interface=${EC2_INTERNAL_IP}",
+                "--data-path=/var/lib/teku/data",
+            ]
+        depends_on:
+            - execution
+        volumes:
+            - /secrets:/var/lib/teku/secrets
+            - /data/consensus:/var/lib/teku/data
+        stop_signal: SIGTERM
+        stop_grace_period: 5m
+        security_opt:
+            - no-new-privileges:true
+        network_mode: host

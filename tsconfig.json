@@ -23,11 +23,19 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "types": ["node"],
-    "outDir": "dist"
+    "types": ["node", "jest"],
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
+  "include": [
+    "lib/**/*",
+    "test/**/*"
+  ],
   "exclude": [
     "node_modules",
-    "cdk.out"
+    "cdk.out",
+    "dist"
   ]
 }

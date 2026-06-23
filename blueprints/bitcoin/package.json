@@ -1,0 +1,75 @@
+{
+  "name": "aws-bnr-blueprint-bitcoin",
+  "version": "2.0.0",
+  "description": "Bitcoin Core blockchain node runner with RPC authentication and AWS Secrets Manager integration",
+  "engines": {
+    "aws-blockchain-node-runners": ">=2.0.0"
+  },
+  "aws-blockchain-node-runner": {
+    "BLOCKCHAIN_PROTOCOL": "bitcoin",
+    "supportedDeploymentModes": [
+      "single-node",
+      "ha-nodes"
+    ],
+    "defaultConfiguration": "bitcoin-core-v31.0-full.yml",
+    "availableConfigurations": [
+      {
+        "name": "bitcoin-core-v31.0-full.yml"
+      }
+    ],
+    "BC_NETWORKS": [
+      "mainnet",
+      "testnet"
+    ],
+    "defaultInstanceTypes": {
+      "x86_64": "r7i.2xlarge",
+      "ARM_64": "r8g.2xlarge"
+    },
+    "requiredPorts": [
+      {
+        "port": 8332,
+        "protocol": "tcp",
+        "description": "JSON RPC",
+        "public": false
+      },
+      {
+        "port": 8333,
+        "protocol": "tcp",
+        "description": "P2P (mainnet)",
+        "public": true
+      },
+      {
+        "port": 18332,
+        "protocol": "tcp",
+        "description": "JSON RPC (testnet)",
+        "public": false
+      },
+      {
+        "port": 18333,
+        "protocol": "tcp",
+        "description": "P2P (testnet)",
+        "public": true
+      }
+    ],
+    "monitoring": {
+      "healthCheckPath": "/",
+      "metricsPort": 8332,
+      "clientNames": ["Bitcoin Core"]
+    },
+    "storage": {
+      "defaultDataVolumes": [
+        {
+          "name": "data",
+          "sizeGiB": 1000,
+          "type": "gp3",
+          "iops": 6000,
+          "throughput": 400,
+          "mountPath": "/data",
+          "fileSystem": "ext4"
+        }
+      ]
+    },
+    "customEnvVarsNamePrefix": "BTC",
+    "customEnvVars": []
+  }
+}

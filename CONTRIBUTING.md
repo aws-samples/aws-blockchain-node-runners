@@ -32,8 +32,7 @@ To send us a pull request, please:
 1. Fork the repository.
 2. Modify the source; please focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
 3. Ensure local tests pass.
-4. If you contribute a new CDK app, make sure you use [cdk-nag](https://aws.amazon.com/blogs/devops/manage-application-security-and-compliance-with-the-aws-cloud-development-kit-and-cdk-nag/) in your application.
-4. Set up and run [pre-merge quality control tools](./docs/pre-merge-tools.md) on your local machine.
+4. Run local validation: `npm run build && npm run test && npm run run-pre-commit`
 5. Commit to your fork using clear commit messages.
 6. Send us a pull request, answering any default questions in the pull request interface.
 7. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
@@ -41,7 +40,18 @@ To send us a pull request, please:
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
 [creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
 
-We reserve the right to reject potentially unsafe code being executed on the Node Runners context.
+Your PR will be checked by automated CI workflows including security scanning (ASH), CodeQL analysis, dependency review, and ShellCheck for shell scripts. Address any findings before requesting review.
+
+
+## Contributing a New Blockchain Protocol
+
+Since v2, new protocols are added as **external community blueprints** — standalone NPM packages maintained in your own repository. You do not need to modify this repo to support a new chain.
+
+- **[About Blueprints](https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/about)** — architecture, directory structure, and the pluggable NPM system
+- **[Add Protocol with AI](https://aws-samples.github.io/aws-blockchain-node-runners/docs/ai-prompts/add-protocol-with-ai)** — AI-assisted workflow for creating a new blueprint end-to-end
+- **[Community Blueprints](https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/community)** — how to submit your blueprint for catalog listing
+- **Reference implementation:** `blueprints/dummy/` in this repository
+
 
 ## Finding contributions to work on
 Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/duplicate/help wanted/invalid/question/wontfix), looking at any 'help wanted' issues is a great place to start.

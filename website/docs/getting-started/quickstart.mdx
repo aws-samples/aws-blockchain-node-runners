@@ -1,0 +1,127 @@
+---
+sidebar_label: Quickstart
+sidebar_position: 3
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Quickstart
+
+Pre-built Kiro CLI prompts automate the full AI workflow steps, so you can deploy nodes, run healthchecks, add protocols, and troubleshoot issues without manually following each workflow guide. Each prompt encapsulates the complete workflow logic and handles the multi-step process for you.
+
+The pre-built prompts live in the `.kiro/prompts/` directory of this repository. You invoke them using the `@` syntax in Kiro CLI (e.g., `@deploy`, `@healthcheck`).
+
+## Before You Begin
+
+<Tabs>
+<TabItem value="cloudshell" label="AWS CloudShell (Recommended)" default>
+
+The fastest way to get started. AWS CloudShell is a browser-based shell with Node.js, AWS CLI, git, and your AWS credentials already configured — no local setup required.
+
+**1. Open CloudShell**
+
+<a href="https://console.aws.amazon.com/cloudshell/home" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.shields.io/badge/Open-AWS%20CloudShell-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" alt="Open AWS CloudShell" />
+</a>
+
+Or click the CloudShell icon (terminal icon) in the top navigation bar of the AWS Console.
+
+**2. Clone the repository and install dependencies**
+
+```bash
+git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
+cd aws-blockchain-node-runners
+npm install
+npm run build
+```
+
+**3. Bootstrap CDK (one-time per region)**
+
+```bash
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+AWS_REGION=$(aws configure get region)
+npx cdk bootstrap aws://$AWS_ACCOUNT_ID/$AWS_REGION
+```
+
+**4. Authenticate in pre-installed Kiro CLI**
+
+```bash
+kiro-cli auth login
+```
+
+Follow the prompts to authenticate with your AWS Builder ID.
+
+You're ready to go! Jump to the [Deploy](#deploy) section below.
+
+</TabItem>
+<TabItem value="local" label="Local Machine">
+
+For a local development setup, complete the [Prerequisites](/docs/getting-started/prerequisites) page first, then:
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
+   cd aws-blockchain-node-runners
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   npm install
+   npm run build
+   ```
+
+3. **Bootstrap CDK** (one-time per account/region):
+
+   ```bash
+   AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+   AWS_REGION=$(aws configure get region)
+   npx cdk bootstrap aws://$AWS_ACCOUNT_ID/$AWS_REGION
+   ```
+
+</TabItem>
+</Tabs>
+
+## Deploy
+
+The Deploy workflow recommends optimal AWS infrastructure for your blockchain node, estimates costs, generates the required configuration files, and executes the full CDK deployment. Just specify the protocol and network you want to run.
+
+```bash
+@deploy Deploy an Ethereum mainnet full node
+```
+
+Repeat this flow for any supported protocol — Ethereum, Solana, Base, BNB Chain, or Bitcoin. Each deployment creates an independent stack, so you can run multiple nodes for different protocols on the same AWS account.
+
+[Full prompt →](/docs/ai-prompts/deploy-with-ai)
+
+## Healthcheck
+
+The Healthcheck workflow analyzes your running node's status, checks resource utilization and storage performance, identifies potential issues, and provides actionable recommendations to keep your infrastructure healthy.
+
+```bash
+@healthcheck Check the health of my Ethereum mainnet node
+```
+
+[Full prompt →](/docs/ai-prompts/healthcheck-with-ai)
+
+## Add Protocol
+
+The Add Protocol workflow generates the complete protocol directory structure, configuration files, sample environment files, and documentation needed to support a new blockchain protocol in the project.
+
+```bash
+@add-protocol Add support for Polygon protocol
+```
+
+[Full prompt →](/docs/ai-prompts/add-protocol-with-ai)
+
+## Troubleshoot
+
+The Troubleshoot workflow diagnoses root causes of node issues by checking logs and CloudWatch metrics, correlating error patterns, and recommending targeted solutions to restore normal operation.
+
+```bash
+@troubleshoot My Ethereum mainnet node stopped syncing 2 hours ago
+```
+
+[Full prompt →](/docs/guides/troubleshooting)

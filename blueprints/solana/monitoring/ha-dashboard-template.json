@@ -1,0 +1,124 @@
+{
+    "widgets": [
+        {
+            "type": "text",
+            "x": 0,
+            "y": 0,
+            "width": 24,
+            "height": 1,
+            "properties": {
+                "markdown": "# Solana HA Nodes - ${STACK_NAME} | Network: ${BC_NETWORK} | ALB: ${ALB_DNS_NAME}"
+            }
+        },
+        {
+            "type": "text",
+            "x": 0,
+            "y": 1,
+            "width": 24,
+            "height": 2,
+            "properties": {
+                "markdown": "## HA Deployment Note\nThis is a reference dashboard template for Solana HA deployments. Customize with your specific instance IDs and ALB ARN after deployment. For production monitoring, consider creating custom dashboards tailored to your specific needs."
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 3,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "ALB Healthy Host Count",
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    ["AWS/ApplicationELB", "HealthyHostCount", "TargetGroup", "${TARGET_GROUP_ARN}", "LoadBalancer", "${ALB_ARN}", {"label": "Healthy Hosts", "color": "#2ca02c"}],
+                    ["AWS/ApplicationELB", "UnHealthyHostCount", "TargetGroup", "${TARGET_GROUP_ARN}", "LoadBalancer", "${ALB_ARN}", {"label": "Unhealthy Hosts", "color": "#d62728"}]
+                ],
+                "period": 60,
+                "stat": "Average",
+                "region": "${AWS_REGION}",
+                "yAxis": {
+                    "left": {
+                        "label": "Count",
+                        "showUnits": false,
+                        "min": 0
+                    }
+                }
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 3,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "ALB Request Count",
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${ALB_ARN}", {"label": "Requests", "color": "#1f77b4"}]
+                ],
+                "period": 60,
+                "stat": "Sum",
+                "region": "${AWS_REGION}",
+                "yAxis": {
+                    "left": {
+                        "label": "Count",
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 9,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "ALB Target Response Time",
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "${ALB_ARN}", {"label": "Response Time (s)", "color": "#ff7f0e"}]
+                ],
+                "period": 60,
+                "stat": "p99",
+                "region": "${AWS_REGION}",
+                "yAxis": {
+                    "left": {
+                        "label": "Seconds",
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 9,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "Auto Scaling Group - Instance Count",
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    ["AWS/AutoScaling", "GroupInServiceInstances", "AutoScalingGroupName", "${ASG_NAME}", {"label": "In Service", "color": "#2ca02c"}],
+                    ["AWS/AutoScaling", "GroupDesiredCapacity", "AutoScalingGroupName", "${ASG_NAME}", {"label": "Desired", "color": "#1f77b4"}]
+                ],
+                "period": 60,
+                "stat": "Average",
+                "region": "${AWS_REGION}",
+                "yAxis": {
+                    "left": {
+                        "label": "Count",
+                        "showUnits": false,
+                        "min": 0
+                    }
+                }
+            }
+        }
+    ]
+}

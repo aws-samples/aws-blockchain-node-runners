@@ -1,0 +1,303 @@
+{
+    "widgets": [
+        {
+            "height": 5,
+            "width": 6,
+            "y": 0,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stat": "Average",
+                "period": 300,
+                "stacked": false,
+                "yAxis": { "left": { "min": 0 } },
+                "region": "${REGION}",
+                "metrics": [
+                    [ "AWS/EC2", "CPUUtilization", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}" } ]
+                ],
+                "title": "CPU Utilization (%)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 5,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Average",
+                "period": 300,
+                "metrics": [
+                    [ "CWAgent", "cpu_usage_iowait", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}" } ]
+                ],
+                "title": "CPU I/O Wait (%)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 10,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Average",
+                "period": 300,
+                "metrics": [
+                    [ "CWAgent", "mem_used_percent", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}" } ]
+                ],
+                "title": "Memory Used (%)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 0,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "m1/PERIOD(m1)", "label": "Read", "id": "e1" } ],
+                    [ "CWAgent", "diskio_reads", "InstanceId", "${INSTANCE_ID}", "name", "${D1_DEVICE_ID}", { "id": "m1", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ { "expression": "m2/PERIOD(m2)", "label": "Write", "id": "e2" } ],
+                    [ "CWAgent", "diskio_writes", "InstanceId", "${INSTANCE_ID}", "name", "${D1_DEVICE_ID}", { "id": "m2", "visible": false, "stat": "Sum", "period": 60 } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Sum",
+                "period": 60,
+                "title": "${D1_DEVICE_ID} (${D1_MOUNT_PATH}) Read/Write (IO/sec)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 5,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stat": "Sum",
+                "period": 60,
+                "stacked": false,
+                "yAxis": { "left": { "min": 0 } },
+                "region": "${REGION}",
+                "metrics": [
+                    [ { "expression": "IF(m2 !=0, (m1 / m2), 0)", "label": "Read", "id": "e1" } ],
+                    [ "CWAgent", "diskio_read_time", "InstanceId", "${INSTANCE_ID}", "name", "${D1_DEVICE_ID}", { "id": "m1", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ "CWAgent", "diskio_reads", "InstanceId", "${INSTANCE_ID}", "name", "${D1_DEVICE_ID}", { "id": "m2", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ { "expression": "IF(m4 !=0, (m3 / m4), 0)", "label": "Write", "id": "e2" } ],
+                    [ "CWAgent", "diskio_write_time", "InstanceId", "${INSTANCE_ID}", "name", "${D1_DEVICE_ID}", { "id": "m3", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ "CWAgent", "diskio_writes", "InstanceId", "${INSTANCE_ID}", "name", "${D1_DEVICE_ID}", { "id": "m4", "visible": false, "stat": "Sum", "period": 60 } ]
+                ],
+                "title": "${D1_DEVICE_ID} (${D1_MOUNT_PATH}) Read/Write Latency (ms/op)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 10,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "m1/PERIOD(m1)", "label": "Read", "id": "e1", "period": 60, "region": "${REGION}" } ],
+                    [ "CWAgent", "diskio_read_bytes", "InstanceId", "${INSTANCE_ID}", "name", "${D1_DEVICE_ID}", { "id": "m1", "stat": "Sum", "visible": false, "period": 60 } ],
+                    [ { "expression": "m2/PERIOD(m2)", "label": "Write", "id": "e2", "period": 60, "region": "${REGION}" } ],
+                    [ "CWAgent", "diskio_write_bytes", "InstanceId", "${INSTANCE_ID}", "name", "${D1_DEVICE_ID}", { "id": "m2", "stat": "Sum", "visible": false, "period": 60 } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Average",
+                "period": 60,
+                "title": "${D1_DEVICE_ID} (${D1_MOUNT_PATH}) Throughput (bytes/sec)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 0,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "m1/PERIOD(m1)", "label": "Read", "id": "e1" } ],
+                    [ "CWAgent", "diskio_reads", "InstanceId", "${INSTANCE_ID}", "name", "${D2_DEVICE_ID}", { "id": "m1", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ { "expression": "m2/PERIOD(m2)", "label": "Write", "id": "e2" } ],
+                    [ "CWAgent", "diskio_writes", "InstanceId", "${INSTANCE_ID}", "name", "${D2_DEVICE_ID}", { "id": "m2", "visible": false, "stat": "Sum", "period": 60 } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Sum",
+                "period": 60,
+                "title": "${D2_DEVICE_ID} (${D2_MOUNT_PATH}) Read/Write (IO/sec)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 5,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stat": "Sum",
+                "period": 60,
+                "stacked": false,
+                "yAxis": { "left": { "min": 0 } },
+                "region": "${REGION}",
+                "metrics": [
+                    [ { "expression": "IF(m2 !=0, (m1 / m2), 0)", "label": "Read", "id": "e1" } ],
+                    [ "CWAgent", "diskio_read_time", "InstanceId", "${INSTANCE_ID}", "name", "${D2_DEVICE_ID}", { "id": "m1", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ "CWAgent", "diskio_reads", "InstanceId", "${INSTANCE_ID}", "name", "${D2_DEVICE_ID}", { "id": "m2", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ { "expression": "IF(m4 !=0, (m3 / m4), 0)", "label": "Write", "id": "e2" } ],
+                    [ "CWAgent", "diskio_write_time", "InstanceId", "${INSTANCE_ID}", "name", "${D2_DEVICE_ID}", { "id": "m3", "visible": false, "stat": "Sum", "period": 60 } ],
+                    [ "CWAgent", "diskio_writes", "InstanceId", "${INSTANCE_ID}", "name", "${D2_DEVICE_ID}", { "id": "m4", "visible": false, "stat": "Sum", "period": 60 } ]
+                ],
+                "title": "${D2_DEVICE_ID} (${D2_MOUNT_PATH}) Read/Write Latency (ms/op)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 10,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "m1/PERIOD(m1)", "label": "Read", "id": "e1", "period": 60, "region": "${REGION}" } ],
+                    [ "CWAgent", "diskio_read_bytes", "InstanceId", "${INSTANCE_ID}", "name", "${D2_DEVICE_ID}", { "id": "m1", "stat": "Sum", "visible": false, "period": 60 } ],
+                    [ { "expression": "m2/PERIOD(m2)", "label": "Write", "id": "e2", "period": 60, "region": "${REGION}" } ],
+                    [ "CWAgent", "diskio_write_bytes", "InstanceId", "${INSTANCE_ID}", "name", "${D2_DEVICE_ID}", { "id": "m2", "stat": "Sum", "visible": false, "period": 60 } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Average",
+                "period": 60,
+                "title": "${D2_DEVICE_ID} (${D2_MOUNT_PATH}) Throughput (bytes/sec)"
+            }
+        },
+        {
+            "height": 4,
+            "width": 6,
+            "y": 0,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ "CWAgent", "c1_block_height", "InstanceId", "${INSTANCE_ID}", { "label": "${Client1} Block Height" } ]
+                ],
+                "sparkline": true,
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Maximum",
+                "period": 60,
+                "title": "${Client1} Block Height"
+            }
+        },
+        {
+            "height": 4,
+            "width": 6,
+            "y": 4,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "sparkline": true,
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${REGION}",
+                "stat": "Maximum",
+                "period": 60,
+                "metrics": [
+                    [ "CWAgent", "c1_blocks_behind", "InstanceId", "${INSTANCE_ID}", { "label": "${Client1} Slots Behind" } ]
+                ],
+                "title": "${Client1} Slots Behind"
+            }
+        },
+        {
+            "height": 3,
+            "width": 6,
+            "y": 8,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stat": "Average",
+                "period": 300,
+                "stacked": false,
+                "yAxis": { "left": { "min": 0 } },
+                "region": "${REGION}",
+                "metrics": [
+                    [ "AWS/EC2", "NetworkIn", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}" } ]
+                ],
+                "title": "Network In (bytes)"
+            }
+        },
+        {
+            "height": 4,
+            "width": 6,
+            "y": 11,
+            "x": 18,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stat": "Average",
+                "period": 300,
+                "stacked": false,
+                "yAxis": { "left": { "min": 0 } },
+                "region": "${REGION}",
+                "metrics": [
+                    [ "AWS/EC2", "NetworkOut", "InstanceId", "${INSTANCE_ID}", { "label": "${INSTANCE_ID}" } ]
+                ],
+                "title": "Network Out (bytes)"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 15,
+            "x": 6,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SELECT AVG(disk_used_percent) FROM CWAgent WHERE path = '${D1_MOUNT_PATH}' AND InstanceId = '${INSTANCE_ID}'", "label": "${D1_MOUNT_PATH}", "id": "q1" } ]
+                ],
+                "sparkline": true,
+                "view": "singleValue",
+                "region": "${REGION}",
+                "title": "${D1_DEVICE_ID} (${D1_MOUNT_PATH}) Disk Used (%)",
+                "period": 60,
+                "stat": "Average"
+            }
+        },
+        {
+            "height": 5,
+            "width": 6,
+            "y": 15,
+            "x": 12,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SELECT AVG(disk_used_percent) FROM CWAgent WHERE path = '${D2_MOUNT_PATH}' AND InstanceId = '${INSTANCE_ID}'", "label": "${D2_MOUNT_PATH}", "id": "q1" } ]
+                ],
+                "sparkline": true,
+                "view": "singleValue",
+                "region": "${REGION}",
+                "title": "${D2_DEVICE_ID} (${D2_MOUNT_PATH}) Disk Used (%)",
+                "period": 60,
+                "stat": "Average"
+            }
+        }
+    ]
+}

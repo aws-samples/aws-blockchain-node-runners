@@ -1,30 +1,29 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
+labels: enhancement
 ---
-
-<!--- Please keep this note for the community --->
 
 ### Community Note
 
-* Please vote on this issue by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to the original issue to help the community and maintainers prioritize this request
-* Please do not leave "+1" or other comments that do not add relevant new information or questions, they generate extra noise for issue followers and do not help prioritize the request
-* If you are interested in working on this issue or have submitted a pull request, please leave a comment
+* Please vote by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to the original issue to help maintainers prioritize it.
+* Please avoid "+1" comments — they add noise without helping prioritization.
+* If you would like to work on this or have opened a PR, leave a comment.
 
-<!--- Thank you for keeping this note for the community --->
+- [ ] ✋ I have searched the open/closed issues and my request is not listed.
 
-#### What is the outcome that you are trying to reach?
+### What outcome are you trying to reach?
 
-<!-- A clear and concise description of what the problem is. -->
+<!-- A clear and concise description of the problem or goal. -->
 
-#### Describe the solution you would like
+### Describe the solution you would like
 
 <!-- A clear and concise description of what you want to happen. -->
 
-#### Describe alternatives you have considered
+### Describe alternatives you have considered
 
-<!-- A clear and concise description of any alternative solutions or features you've considered. -->
+<!-- Any alternative solutions or features you've considered. -->
 
-#### Additional context
+### Additional context
 
-<!-- Add any other context or screenshots about the feature request here. -->
+<!-- Any other context or screenshots about the feature request. -->

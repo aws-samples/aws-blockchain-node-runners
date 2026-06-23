@@ -1,0 +1,64 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+---
+version: "3"
+services:
+    execution:
+        image: erigontech/erigon:v3.4.3
+        container_name: execution
+        restart: always
+        user: "1002:1002"
+        command:
+            [
+                "--chain=${BC_NETWORK}",
+                "--authrpc.addr=0.0.0.0",
+                "--authrpc.jwtsecret=/var/lib/erigon/secrets/jwtsecret",
+                "--authrpc.vhosts=*",
+                "--http.vhosts=*",
+                "--http",
+                "--http.api=admin,eth,web3,txpool,net,debug,trace,erigon",
+                "--http.addr=${EC2_INTERNAL_IP}",
+                "--ws",
+                "--datadir=/var/lib/erigon/data",
+                "--maxpeers=50",
+                "--externalcl",
+            ]
+        volumes:
+            - /secrets:/var/lib/erigon/secrets
+            - /data/execution:/var/lib/erigon/data
+        stop_signal: SIGTERM
+        stop_grace_period: 8m
+        security_opt:
+            - no-new-privileges:true
+        network_mode: host
+
+    consensus:
+        image: gcr.io/prysmaticlabs/prysm/beacon-chain:v7.1.5
+        container_name: consensus
+        restart: always
+        user: "1002:1002"
+        command:
+            [
+                "--${BC_NETWORK}",
+                "--execution-endpoint=http://127.0.0.1:8551",
+                "--jwt-secret=/var/lib/prysm/secrets/jwtsecret",
+                "--checkpoint-sync-url=${ETH_CONSENSUS_CHECKPOINT_SYNC_URL}",
+                "--genesis-beacon-api-url=${ETH_CONSENSUS_CHECKPOINT_SYNC_URL}",
+                "--grpc-gateway-host=${EC2_INTERNAL_IP}",
+                "--grpc-gateway-port=5052",
+                "--rpc-host=${EC2_INTERNAL_IP}",
+                "--monitoring-host=${EC2_INTERNAL_IP}",
+                "--datadir=/var/lib/prysm/data",
+                "--accept-terms-of-use",
+            ]
+        depends_on:
+            - execution
+        volumes:
+            - /secrets:/var/lib/prysm/secrets
+            - /data/consensus:/var/lib/prysm/data
+        stop_signal: SIGTERM
+        stop_grace_period: 5m
+        security_opt:
+            - no-new-privileges:true
+        network_mode: host

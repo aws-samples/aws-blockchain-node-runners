@@ -1,0 +1,66 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+---
+version: "3"
+services:
+    execution:
+        image: ghcr.io/paradigmxyz/reth:v1.10.2
+        container_name: execution
+        restart: always
+        pid: host
+        command: >
+            node
+            --chain ${BC_NETWORK}
+            --authrpc.addr 0.0.0.0
+            --authrpc.port 8551
+            --authrpc.jwtsecret /root/jwt/jwtsecret
+            --datadir /root/.local/share/reth
+            --http --http.addr ${EC2_INTERNAL_IP} --http.port 8545
+            --log.file.max-files 0
+            --http.api "admin,eth,web3,txpool,net,debug,trace,reth"
+            --ws --ws.addr ${EC2_INTERNAL_IP}
+            --ws.port 8546
+        volumes:
+            - /secrets:/root/jwt
+            - /data/execution:/root/.local/share/reth
+        tmpfs:
+            - /tmp
+        stop_signal: SIGTERM
+        stop_grace_period: 8m
+        security_opt:
+            - no-new-privileges:true
+        read_only: true
+        network_mode: host
+
+    consensus:
+        image: sigp/lighthouse:v8.1.3
+        container_name: consensus
+        restart: always
+        command:
+            [
+                "lighthouse",
+                "beacon",
+                "--network=${BC_NETWORK}",
+                "--execution-endpoint=http://127.0.0.1:8551",
+                "--execution-jwt=/var/lib/lighthouse/secrets/jwtsecret",
+                "--checkpoint-sync-url=${ETH_CONSENSUS_CHECKPOINT_SYNC_URL}",
+                "--http",
+                "--http-port=5052",
+                "--http-address=${EC2_INTERNAL_IP}",
+                "--metrics",
+                "--metrics-address=${EC2_INTERNAL_IP}",
+                "--datadir=/var/lib/lighthouse/data",
+                "${ETH_CONSENSUS_SUPERNODE_FLAG}",
+            ]
+        depends_on:
+            - execution
+        volumes:
+            - /secrets:/var/lib/lighthouse/secrets
+            - /data/consensus:/var/lib/lighthouse/data
+        stop_signal: SIGTERM
+        stop_grace_period: 5m
+        security_opt:
+            - no-new-privileges:true
+        read_only: true
+        network_mode: host

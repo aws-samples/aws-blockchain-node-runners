@@ -1,0 +1,85 @@
+---
+sidebar_label: Community Blueprints
+sidebar_position: 99
+title: Community Blueprints
+---
+
+# Community Blueprints
+
+Community blueprints are **externally maintained** Node Runners blueprints created by the community. They follow the same architecture as built-in blueprints but are published and maintained independently.
+
+:::info No community blueprints published yet
+
+The community blueprint system is new. Be the first to publish one! See [Creating Your Own Blueprint](#creating-your-own-blueprint) below.
+
+:::
+
+## Catalog
+
+Community blueprints will be listed here as they are published and submitted for inclusion.
+
+| Protocol | Package | Maintainer | Docs | Networks | Install |
+|----------|---------|------------|------|----------|---------|
+| _Example Chain_ | `aws-bnr-blueprint-example-chain` | [@example-org](https://github.com/example-org) | [README](https://github.com/example-org/aws-bnr-blueprint-example-chain#readme) | Mainnet, Testnet | `npm install aws-bnr-blueprint-example-chain` |
+
+*The example above shows the format. Real entries will appear once community blueprints are submitted.*
+
+---
+
+## Using a Community Blueprint
+
+1. **Install the package:**
+
+   ```bash
+   npm install aws-bnr-blueprint-<protocol>
+   ```
+
+   Or from a GitHub repository:
+
+   ```bash
+   npm install github:org/aws-bnr-blueprint-<protocol>
+   ```
+
+2. **Configure your `.env` file** using the blueprint's sample configs (check the blueprint's README for available networks and options).
+
+3. **Deploy with the AI workflow** (recommended):
+
+   ```
+   @deploy using <protocol> blueprint on <network>
+   ```
+
+   Or deploy manually with `npx cdk deploy`.
+
+4. **Security review:** On first use of any community blueprint, the AI workflow performs an automated security review of its configuration scripts before deployment. See the [Security Review Guide](/docs/ai-prompts/security-review-with-ai) for details.
+
+:::warning Community blueprints are NOT officially vetted by AWS
+
+Community blueprints are maintained by their respective authors. They have not been reviewed or endorsed by AWS. The automated security review helps catch common issues, but you should review any blueprint's source code before deploying to production.
+
+:::
+
+---
+
+## Creating Your Own Blueprint
+
+Want to add support for a new blockchain protocol? Community blueprints use the same pluggable NPM package system as built-in ones — there is no distinction at runtime.
+
+### Resources
+
+- **[About Blueprints](/docs/blueprints/about)** — Architecture overview, directory structure, `package.json` format, and the pluggable NPM system explained.
+- **[Add Protocol with AI](/docs/ai-prompts/add-protocol-with-ai)** — Step-by-step AI-assisted workflow for creating a new blueprint. Covers both core maintainer (Path A) and community developer (Path B) flows.
+- **[Dummy Blueprint](https://github.com/aws-samples/aws-blockchain-node-runners/tree/main/blueprints/dummy)** — The canonical reference implementation. Use it as your starting template.
+- **[Contributing Guidelines](https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md)** — General contribution process, PR etiquette, and licensing.
+
+### Quick Summary
+
+1. Create your blueprint package following the structure in [About Blueprints](/docs/blueprints/about#directory-structure)
+2. Include the `"aws-blockchain-node-runner"` field in your `package.json` (see [format reference](/docs/blueprints/about#pluggable-npm-package-system))
+3. Publish to NPM or a public GitHub repository
+4. [Submit for catalog listing](https://github.com/aws-samples/aws-blockchain-node-runners/issues/new?template=blueprint_submission.md)
+
+:::tip Use the AI workflow
+
+The fastest way to create a new blueprint is with the `@add-protocol` AI workflow. It guides you through the entire process interactively — from fetching your protocol's docs to generating all required files. See [Add Protocol with AI](/docs/ai-prompts/add-protocol-with-ai) for details.
+
+:::

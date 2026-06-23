@@ -1,0 +1,101 @@
+name: ASH Security Scan - Post Comments
+
+on:
+  workflow_run:
+    workflows: ["ASH Security Scan"]
+    types:
+      - completed
+
+permissions:
+  pull-requests: write
+  actions: read
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Download artifacts
+        id: download
+        # Don't fail the job if the upstream scan produced no artifact (e.g. the
+        # scan was skipped because no scannable files changed, or the upload
+        # failed). Later steps guard on this step's outcome.
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: ash-security-results
+          path: /tmp/ash-results
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get PR information
+        id: pr-info
+        if: steps.download.outcome == 'success'
+        run: |
+          if [ -f /tmp/ash-results/pr_number.txt ]; then
+            PR_NUMBER=$(cat /tmp/ash-results/pr_number.txt)
+            echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          else
+            echo "No PR number found"
+            exit 1
+          fi
+          if [ -f /tmp/ash-results/pr_sha.txt ]; then
+            PR_SHA=$(cat /tmp/ash-results/pr_sha.txt)
+            echo "pr_sha=${PR_SHA}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post comment on PR
+        if: steps.pr-info.outputs.pr_number
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        env:
+          # Pass values via env and read with process.env rather than interpolating
+          # ${{ }} directly into the script body (avoids any script-injection risk).
+          PR_NUMBER: ${{ steps.pr-info.outputs.pr_number }}
+          PR_SHA: ${{ steps.pr-info.outputs.pr_sha }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const commentPath = '/tmp/ash-results/pr_comment.md';
+
+            if (!fs.existsSync(commentPath)) {
+              console.log('No comment file found');
+              return;
+            }
+
+            const commentBody = fs.readFileSync(commentPath, 'utf8');
+            const prNumber = parseInt(process.env.PR_NUMBER, 10);
+            const prSha = process.env.PR_SHA || '';
+
+            if (!prNumber) return;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const ashComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('<!-- ASH-SECURITY-SCAN -->')
+            );
+
+            const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+            const shortSha = prSha ? prSha.substring(0, 7) : 'unknown';
+            const body = `**Scan for commit:** \`${shortSha}\` | **Updated:** ${timestamp}\n\n${commentBody}\n\n<!-- ASH-SECURITY-SCAN -->`;
+
+            if (ashComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: ashComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+            }

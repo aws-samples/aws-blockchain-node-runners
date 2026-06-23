@@ -1,0 +1,120 @@
+{
+  "name": "aws-bnr-blueprint-solana",
+  "version": "2.0.0",
+  "description": "Solana blockchain node runner using Agave and Frankendancer validator clients for RPC nodes",
+  "engines": {
+    "aws-blockchain-node-runners": ">=2.0.0"
+  },
+  "aws-blockchain-node-runner": {
+    "BLOCKCHAIN_PROTOCOL": "solana",
+    "supportedDeploymentModes": [
+      "single-node",
+      "ha-nodes"
+    ],
+    "defaultConfiguration": "agave-4.0.3-rpc-base.sh",
+    "availableConfigurations": [
+      {
+        "name": "agave-4.0.3-rpc-base.sh"
+      },
+      {
+        "name": "agave-4.0.3-rpc-extended.sh"
+      },
+      {
+        "name": "agave-4.1.0-rc.1-rpc-base.sh"
+      },
+      {
+        "name": "agave-4.1.0-rc.1-rpc-extended.sh"
+      },
+      {
+        "name": "agave-3.1.14-rpc-base.sh"
+      },
+      {
+        "name": "agave-3.1.14-rpc-extended.sh"
+      },
+      {
+        "name": "frankendancer-0.912.40003-rpc-base.sh"
+      },
+      {
+        "name": "frankendancer-0.912.40003-rpc-extended.sh"
+      }
+    ],
+    "BC_NETWORKS": [
+      "mainnet-beta",
+      "testnet",
+      "devnet"
+    ],
+    "defaultInstanceTypes": {
+      "x86_64": "i7i.12xlarge",
+      "ARM_64": "i8g.12xlarge"
+    },
+    "requiredPorts": [
+      {
+        "port": 8899,
+        "protocol": "tcp",
+        "description": "JSON RPC",
+        "public": false
+      },
+      {
+        "port": 8900,
+        "protocol": "tcp",
+        "description": "WebSocket",
+        "public": false
+      },
+      {
+        "portRange": {
+          "from": 8001,
+          "to": 8029
+        },
+        "protocol": "tcp",
+        "description": "Gossip + dynamic port range",
+        "public": true
+      },
+      {
+        "portRange": {
+          "from": 8001,
+          "to": 8029
+        },
+        "protocol": "udp",
+        "description": "Gossip UDP + dynamic port range",
+        "public": true
+      },
+      {
+        "port": 8003,
+        "protocol": "udp",
+        "description": "Frankendancer shred (Turbine block data)",
+        "public": true
+      }
+    ],
+    "monitoring": {
+      "healthCheckPath": "/health",
+      "metricsPort": 8899,
+      "clientNames": ["Agave Validator", "Frankendancer"]
+    },
+    "storage": {
+      "defaultDataVolumes": [
+        {
+          "name": "data",
+          "sizeGiB": 2000,
+          "type": "io2",
+          "iops": 17000,
+          "throughput": 700,
+          "mountPath": "/data",
+          "fileSystem": "ext4"
+        },
+        {
+          "name": "accounts",
+          "sizeGiB": 500,
+          "type": "io2",
+          "iops": 7000,
+          "throughput": 700,
+          "mountPath": "/accounts",
+          "fileSystem": "ext4"
+        }
+      ]
+    },
+    "customEnvVarsNamePrefix": "SOLANA",
+    "customEnvVars": [
+      "SOLANA_NODE_IDENTITY_SECRET_ARN=none"
+    ]
+  }
+}

@@ -17,8 +17,14 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/docs/intro">
-            Start with Intro
+            to="/docs/getting-started/quickstart">
+            Get Started
+          </Link>
+          <Link
+            className="button button--outline button--secondary button--lg"
+            to="/docs/blueprints/about"
+            style={{marginLeft: '1rem'}}>
+            Explore Blueprints
           </Link>
         </div>
       </div>
@@ -31,7 +37,7 @@ export default function Home() {
   return (
     <Layout
       title={`${siteConfig.title}`}
-      description="Run blockchain nodes on AWS">
+      description="AI-driven blockchain node infrastructure experimentation and optimization on AWS">
       <HomepageHeader />
       <main>
         <HomepageFeatures />

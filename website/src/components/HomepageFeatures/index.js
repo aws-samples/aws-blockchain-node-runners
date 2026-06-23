@@ -4,29 +4,29 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Open Source',
-    Icon: "⚀",
+    title: 'AI-Guided Deployment',
+    Icon: "🤖",
     description: (
        <span>
-        Deployment code is fully open source and available on GitHub. You can see what you are going to deploy before deploying it.
+        Use AI assistants to deploy, configure, and troubleshoot blockchain nodes with guided workflows
        </span>
     ),
   },
   {
-    title: 'Scalable',
-    Icon: "⚁",
+    title: 'Rapid Experimentation',
+    Icon: "⚡",
     description: (
       <span>
-          Best Practice Blockchain Nodes Deployment Templates and Examples to run across Regions.
+          Spin up nodes for any supported protocol in minutes using pre-built blueprints and sample configurations
       </span>
     ),
   },
   {
-    title: 'Highly Available',
-    Icon: "⚂",
+    title: 'Universal Architecture',
+    Icon: "🏗️",
     description: (
         <span>
-            Multi-Node Highly Available deployment options to run across Availability Zones.
+            One CDK framework supporting multiple protocols through a pluggable blueprint system
         </span>
     ),
   },

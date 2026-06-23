@@ -1,7 +1,11 @@
 {
   "name": "aws-blockchain-node-runners",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "install-git-secrets-mac": "brew install git-secrets",
     "setup-git-secrets": "git secrets --install & git secrets --register-aws",
     "scan-history-git-secrets": "git secrets --scan-history",
@@ -12,22 +16,25 @@
     "run-pre-commit": "pre-commit run --all-files"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.11",
-    "@types/node": "^20.14.2",
-    "@typescript-eslint/eslint-plugin": "^8.41.0",
-    "@typescript-eslint/parser": "^8.41.0",
-    "aws-cdk": "^2.1113.0",
-    "cdk-nag": "^2.36.18",
-    "eslint": "^9.34.0",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.4",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "aws-cdk": "^2.1033.0",
+    "cdk-nag": "^2.37.55",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "~5.4.5"
+    "typescript": "~5.9.3"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.260.0",
-    "constructs": "^10.6.0",
-    "dotenv": "^17.3.1",
+    "aws-bnr-blueprint-dummy": "file:blueprints/dummy",
+    "aws-bnr-blueprint-ethereum": "file:blueprints/ethereum",
+    "aws-bnr-blueprint-base": "file:blueprints/base",
+    "aws-bnr-blueprint-bitcoin": "file:blueprints/bitcoin",
+    "aws-bnr-blueprint-bnb": "file:blueprints/bnb",
+    "aws-bnr-blueprint-solana": "file:blueprints/solana",
+    "aws-cdk-lib": "^2.232.1",
+    "constructs": "^10.4.3",
+    "dotenv": "^17.2.3",
     "source-map-support": "^0.5.21"
   }
 }

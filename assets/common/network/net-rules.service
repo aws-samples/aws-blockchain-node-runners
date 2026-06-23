@@ -1,0 +1,15 @@
+[Unit]
+Description=Network Traffic Shaping Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/network/net-rules-start.sh
+ExecStop=/opt/network/net-rules-stop.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

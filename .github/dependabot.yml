@@ -1,0 +1,62 @@
+version: 2
+updates:
+  # Keep SHA-pinned GitHub Actions current automatically. Dependabot bumps the
+  # commit SHA *and* rewrites the trailing "# vX.Y.Z" version comment, so pins
+  # stay reproducible and tamper-proof without manual SHA lookups.
+  #
+  # Note: this does NOT cover the ASH tool, which is installed via
+  # `pip install git+https://github.com/awslabs/automated-security-helper.git@v3`
+  # inside a run step (a floating tag, not a tracked action).
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    # Batch all action bumps into a single weekly PR to minimize review noise.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: ci
+    labels:
+      - dependencies
+      - github-actions
+
+  # Root CDK app dependencies (aws-cdk-lib, constructs, cdk-nag, typescript,
+  # jest, etc.). Grouped into one weekly PR to keep review noise low.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      npm:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: chore
+    labels:
+      - dependencies
+      - npm
+    # The blueprints are local file: deps (file:blueprints/*); Dependabot
+    # ignores those automatically. Blockchain client versions are managed
+    # separately via the @version-update workflow, not here.
+
+  # Documentation website (Docusaurus) dependencies.
+  - package-ecosystem: npm
+    directory: "/website"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      docusaurus:
+        patterns:
+          - "@docusaurus/*"
+      website:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: chore
+    labels:
+      - dependencies
+      - website

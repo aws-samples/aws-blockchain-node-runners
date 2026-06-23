@@ -18,7 +18,7 @@ dist
 spike
 
 output.json
-deploy-output.json
+deploy-output*
 
 cdk.context.json
 ec2-trust-policy.json
@@ -36,6 +36,17 @@ ha-nodes-deploy*.json
 
 *.OLD
 .env
+/.env-*
 .idea
 .vscode
 .venv
+
+coverage
+
+# Kiro specs: only the universal-blockchain-node-runner spec is published to the
+# public repo. All other specs and the local security review docs (review-*)
+# are kept local. NOTE: .gitignore does not untrack already-committed files —
+# specs previously committed must also be removed from the index with
+# `git rm -r --cached <path>`.
+.kiro/specs/*
+!.kiro/specs/universal-blockchain-node-runner/

@@ -1,0 +1,32 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+---
+version: "3"
+services:
+    execution:
+        image: erigontech/erigon:v3.4.3
+        container_name: execution
+        restart: always
+        user: "1002:1002"
+        command:
+            [
+                "--chain=${BC_NETWORK}",
+                "--http.vhosts=*",
+                "--http",
+                "--http.api=admin,eth,web3,txpool,net,debug,trace,erigon",
+                "--http.addr=${EC2_INTERNAL_IP}",
+                "--ws",
+                "--datadir=/var/lib/erigon/data",
+                "--maxpeers=50",
+                "--beacon.api=beacon,builder,config,debug,events,node,validator,lighthouse",
+                "--beacon.api.addr=${EC2_INTERNAL_IP}",
+                "--beacon.api.port=5052",
+            ]
+        volumes:
+            - /data/execution:/var/lib/erigon/data
+        stop_signal: SIGTERM
+        stop_grace_period: 8m
+        security_opt:
+            - no-new-privileges:true
+        network_mode: host

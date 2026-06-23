@@ -1,24 +1,42 @@
+# Pre-commit hooks: fast, local hygiene + security checks that run at commit
+# time (on staged files) and are re-validated in CI by .github/workflows/
+# pre-commit.yml. Heavy SAST/dependency/IaC scanning stays in the dedicated
+# CI workflows (ASH, CodeQL, dependency-review) — not here, to keep commits fast.
+#
+# Run locally: `npm run run-pre-commit` (pre-commit run --all-files)
+# Install the git hook: `pre-commit install`
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v5.0.0
     hooks:
-      - id: check-json
-      - id: trailing-whitespace
-        args: ['--markdown-linebreak-ext=md']
+      # Note: the `trailing-whitespace` hook is intentionally NOT used. Several
+      # provisioning scripts write files via heredocs where whitespace-only
+      # lines can be significant, and stripping them risks altering generated
+      # content. Trailing whitespace is non-critical hygiene, so we skip it.
       - id: end-of-file-fixer
       - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=2000]
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+        # tsconfig*.json and cdk.json allow comments (JSONC); the strict JSON
+        # parser would reject them.
+        exclude: '(^|/)(tsconfig.*\.json|cdk\.json)$'
       - id: detect-private-key
-      - id: detect-aws-credentials
-        args: ['--allow-missing-credentials']
-      - id: forbid-submodules
-  - repo: https://github.com/iamthefij/docker-pre-commit
-    rev: master
-    hooks:
-      - id: docker-compose-check
+
   - repo: local
     hooks:
-      - id: check-external-urls
-        name: Check for untrusted external downloads
-        entry: scripts/check-external-urls.sh
-        language: script
+      - id: shellcheck
+        name: shellcheck
+        # Use the system ShellCheck (preinstalled on ubuntu-latest runners and
+        # via `brew install shellcheck` locally) instead of the shellcheck-py
+        # mirror — no per-run binary download, and it matches the tool we already
+        # rely on. Match CI's bar: fail on warning-level and above. Runs only on
+        # changed .sh files (staged locally; --from-ref/--to-ref in CI), so
+        # pre-existing findings in untouched legacy scripts don't block PRs.
+        entry: shellcheck
+        language: system
+        args: [--severity=warning]
         types: [shell]

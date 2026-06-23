@@ -1,0 +1,81 @@
+# Custom Semgrep rules to flag prompt-injection / instruction-override content
+# embedded in AI prompt files. This repo ships AI-driven workflows (the ageai-*
+# docs and .kiro/prompts), where a malicious PR could slip adversarial
+# instructions into a prompt that an AI agent later executes.
+#
+# No off-the-shelf SAST/secret/IaC scanner understands prompt injection, so
+# these pattern rules provide CI coverage. They are loaded by ASH's bundled
+# Semgrep scanner (see scanners.semgrep.options.rules in the ASH config built by
+# .github/workflows/ash-security-scan.yml) alongside ASH's default ruleset.
+# They run in Semgrep "generic" mode (plain-text regex matching) and are
+# intentionally scoped to the prompt files only via paths.include on each rule.
+#
+# These are heuristics: tune patterns and add exceptions as legitimate prompt
+# wording evolves. False positives can be suppressed inline with a
+# `nosemgrep: <rule-id>` comment on the offending line.
+
+rules:
+  - id: prompt-injection-instruction-override
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Possible prompt-injection: text instructs the model to ignore or disregard
+      prior/system instructions. Review this prompt content before merging.
+    paths:
+      include:
+        - "docs/ageai-*.md"
+        - ".kiro/prompts/*.md"
+    patterns:
+      - pattern-regex: (?i)\b(ignore|disregard|forget|override)\b[^.\n]{0,40}\b(all\s+)?(the\s+)?(previous|prior|above|preceding|earlier|system)\b[^.\n]{0,20}\b(instruction|instructions|prompt|prompts|context|rule|rules|direction|directions)\b
+
+  - id: prompt-injection-reveal-system-prompt
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Possible prompt-injection: text asks the model to reveal, print, or repeat
+      its system prompt / hidden instructions. Review before merging.
+    paths:
+      include:
+        - "docs/ageai-*.md"
+        - ".kiro/prompts/*.md"
+    patterns:
+      - pattern-regex: (?i)\b(reveal|print|show|repeat|output|expose|disclose|dump|leak)\b[^.\n]{0,40}\b(your|the|its)\b[^.\n]{0,20}\b(system\s+)?(prompt|instructions|rules|configuration|guidelines)\b
+
+  - id: prompt-injection-hide-from-user
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Possible prompt-injection: text directs the model to act covertly or hide
+      actions/output from the user. Review before merging.
+    paths:
+      include:
+        - "docs/ageai-*.md"
+        - ".kiro/prompts/*.md"
+    patterns:
+      - pattern-regex: (?i)\b(do\s+not|don't|never|without)\b[^.\n]{0,30}\b(tell|telling|inform|informing|notify|notifying|reveal|revealing|mention|mentioning|show|showing)\b[^.\n]{0,20}\b(the\s+)?user\b
+
+  - id: prompt-injection-secret-exfiltration
+    languages: [generic]
+    severity: ERROR
+    message: >
+      Possible prompt-injection: text instructs sending/exfiltrating secrets,
+      credentials, tokens, or environment variables. Review before merging.
+    paths:
+      include:
+        - "docs/ageai-*.md"
+        - ".kiro/prompts/*.md"
+    patterns:
+      - pattern-regex: (?i)\b(send|post|upload|transmit|exfiltrate|leak|forward|email|curl|wget|fetch)\b[^.\n]{0,60}\b(secret|secrets|credential|credentials|api[_-]?key|api[_-]?keys|access[_-]?key|token|tokens|password|passwords|private[_-]?key|env(ironment)?\s+variable|aws_secret)\b
+
+  - id: prompt-injection-jailbreak-or-safety-bypass
+    languages: [generic]
+    severity: WARNING
+    message: >
+      Possible prompt-injection: jailbreak phrasing or request to bypass safety
+      guardrails / restrictions. Review before merging.
+    paths:
+      include:
+        - "docs/ageai-*.md"
+        - ".kiro/prompts/*.md"
+    patterns:
+      - pattern-regex: (?i)(\bdeveloper\s+mode\b|\bjailbreak\b|\bDAN\s+mode\b|\bunrestricted\s+(mode|assistant|ai)\b|\b(bypass|ignore|disable|turn\s+off)\b[^.\n]{0,30}\b(safety|guardrail|guardrails|restriction|restrictions|filter|filters|content\s+polic)\w*)

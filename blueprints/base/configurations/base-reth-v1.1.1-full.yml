@@ -1,0 +1,27 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Base Node - base-reth-node + base-consensus (Full Node)
+#
+# This configuration uses the official base/node repository build approach.
+# Both base-reth-node and base-consensus are built from source on the instance
+# using `docker compose build` from the cloned https://github.com/base/node repository.
+#
+# The build produces a single Docker image containing both base-reth-node
+# and base-consensus, managed by supervisord inside the container.
+#
+# This file is a configuration marker — the actual docker-compose.yml and
+# .env files come from the base/node repository. See node.sh for the
+# full setup logic. Versions are pinned in the repo's versions.env file.
+#
+# Reference: https://github.com/base/node
+#
+# SECURITY: base_node_tag MUST be a specific release tag (or commit SHA), never
+# a moving branch like "main". node.sh clones this exact ref and builds it as
+# root at boot, so an unpinned ref would execute whatever is on the branch tip.
+# Update this to a newer Base release tag via the @version-update workflow.
+# Tag reference: https://github.com/base/node/tags
+
+base_node_repo: "https://github.com/base/node.git"
+base_node_tag: "v1.1.1"
+client: "reth"

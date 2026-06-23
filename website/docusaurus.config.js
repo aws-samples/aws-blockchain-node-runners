@@ -8,7 +8,7 @@ const darkCodeTheme = themes.dracula;
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'AWS Blockchain Node Runners',
-  tagline: 'Run blockchain nodes on cloud',
+  tagline: 'AI-driven blockchain node infrastructure experimentation on AWS',
   //favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -26,6 +26,10 @@ const config = {
   projectName: 'aws-blockchain-node-runners', // Usually your repo name.
   deploymentBranch: 'gh-pages',
   githubHost: 'github.com',
+
+  markdown: {
+    format: 'detect',
+  },
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -78,15 +82,27 @@ const config = {
         items: [
           {
             type: 'doc',
-            docId: 'intro/intro',
+            docId: 'getting-started/quickstart',
             position: 'left',
-            label: 'Introduction',
+            label: 'Getting Started',
           },
           {
             type: 'doc',
-            docId: 'Blueprints/intro',
+            docId: 'blueprints/about',
             position: 'left',
             label: 'Blueprints',
+          },
+          {
+            type: 'doc',
+            docId: 'guides/configuration-reference',
+            position: 'left',
+            label: 'Guides',
+          },
+          {
+            type: 'doc',
+            docId: 'ai-prompts/deploy-with-ai',
+            position: 'left',
+            label: 'AI Prompts',
           },
           {
             href: 'https://github.com/aws-samples/aws-blockchain-node-runners',
@@ -99,25 +115,29 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Get Started',
+            title: 'Documentation',
             items: [
               {
-                label: 'Docs',
-                to: '/docs/intro',
+                label: 'Getting Started',
+                to: '/docs/getting-started/intro',
+              },
+              {
+                label: 'Configuration Reference',
+                to: '/docs/guides/configuration-reference',
               },
             ],
           },
           {
-            title: 'Get Involved',
+            title: 'Community',
             items: [
               {
-                label: 'Github',
+                label: 'GitHub',
                 href: 'https://github.com/aws-samples/aws-blockchain-node-runners',
               },
               {
-                label: 'Contribution guide',
+                label: 'Contribution Guide',
                 href: 'https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md',
-              }
+              },
             ],
           },
         ],

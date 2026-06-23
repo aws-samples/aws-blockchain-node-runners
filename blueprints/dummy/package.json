@@ -1,0 +1,99 @@
+{
+  "name": "aws-bnr-blueprint-dummy",
+  "version": "2.0.0",
+  "description": "Dummy blockchain protocol for testing and development purposes",
+  "engines": {
+    "aws-blockchain-node-runners": ">=2.0.0"
+  },
+  "aws-blockchain-node-runner": {
+    "BLOCKCHAIN_PROTOCOL": "dummy",
+    "supportedDeploymentModes": [
+      "single-node",
+      "ha-nodes"
+    ],
+    "defaultConfiguration": "dummy-1.0.0-rpc-base.sh",
+    "availableConfigurations": [
+      {
+        "name": "dummy-1.0.0-rpc-base.sh"
+      },
+      {
+        "name": "dummy-1.0.0-rpc-extended.sh"
+      }
+    ],
+    "BC_NETWORKS": [
+      "testnet",
+      "mainnet",
+      "devnet"
+    ],
+    "defaultInstanceTypes": {
+      "x86_64": "t3.medium",
+      "ARM_64": "t4g.medium"
+    },
+    "requiredPorts": [
+      {
+        "port": 8545,
+        "protocol": "tcp",
+        "description": "JSON RPC",
+        "public": false
+      },
+      {
+        "port": 8546,
+        "protocol": "tcp",
+        "description": "WebSocket",
+        "public": false
+      },
+      {
+        "port": 9090,
+        "protocol": "tcp",
+        "description": "Metrics endpoint",
+        "public": false
+      },
+      {
+        "portRange": {
+          "from": 30303,
+          "to": 30305
+        },
+        "protocol": "tcp",
+        "description": "P2P range",
+        "public": true
+      },
+      {
+        "portRange": {
+          "from": 30303,
+          "to": 30305
+        },
+        "protocol": "udp",
+        "description": "P2P UDP range",
+        "public": true
+      }
+    ],
+    "monitoring": {
+      "healthCheckPath": "/health",
+      "metricsPort": 8545,
+      "clientNames": ["Dummy Execution"]
+    },
+    "storage": {
+      "defaultDataVolumes": [
+        {
+          "name": "data",
+          "sizeGiB": 100,
+          "type": "gp3",
+          "iops": 3000,
+          "throughput": 125,
+          "mountPath": "/data",
+          "fileSystem": "ext4"
+        }
+      ]
+    },
+    "snapshot": {
+      "enabled": true,
+      "downloadUrl": "https://snapshots.dummy.org/testnet/latest.tar.gz"
+    },
+    "customEnvVarsNamePrefix": "DUMMY",
+    "customEnvVars": [
+      "DUMMY_NODE_TYPE=validator",
+      "DUMMY_SYNC_MODE=fast",
+      "DUMMY_LOG_LEVEL=info"
+    ]
+  }
+}

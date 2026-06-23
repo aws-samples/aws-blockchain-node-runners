@@ -1,0 +1,23 @@
+name: Dependency Review
+
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@da24556b548a50705dd671f47852072ea4c105d9 # v4.7.1
+        with:
+          # Fail PRs that introduce dependencies with known HIGH or CRITICAL
+          # vulnerabilities. "moderate" is intentionally not blocking to avoid
+          # noise from transitive advisories; those still appear in the PR summary.
+          fail-on-severity: high
+          comment-summary-in-pr: always

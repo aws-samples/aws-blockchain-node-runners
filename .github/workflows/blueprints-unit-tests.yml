@@ -1,24 +1,21 @@
-name: blueprints-cdk-tests
+name: build-and-test
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-  blueprints-cdk-tests:
-    name: Run CDK tests for all blueprints
+  build-and-test:
+    name: Build, test, and validate CDK synthesis
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
-    defaults:
-      run:
-        shell: bash
-        working-directory: scripts
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -26,5 +23,54 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-      - name: Run unit tests
-        run: ./run-all-cdk-tests.sh
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test
+
+      # Validate that the app.ts entrypoint and config wiring synthesize end to end.
+      # app.ts calls ec2.Vpc.fromLookup, which normally needs AWS credentials. To keep
+      # CI credential-free we seed CDK's lookup cache with a dummy default VPC for the
+      # placeholder account (123456789012 / us-east-1) and use the dummy blueprint's
+      # sample config. Both generated files are scoped to this runner and never committed
+      # (cdk.context.json and .env are gitignored).
+      - name: Validate CDK synthesis (credential-free)
+        run: |
+          cp blueprints/dummy/samples/.env-mainnet-single-node .env
+          cat > cdk.context.json <<'EOF'
+          {
+            "vpc-provider:account=123456789012:filter.isDefault=true:region=us-east-1:returnAsymmetricSubnets=true": {
+              "vpcId": "vpc-00000000000000000",
+              "vpcCidrBlock": "10.0.0.0/16",
+              "ownerAccountId": "123456789012",
+              "availabilityZones": [],
+              "subnetGroups": [
+                {
+                  "name": "Public",
+                  "type": "Public",
+                  "subnets": [
+                    {
+                      "subnetId": "subnet-00000000000000001",
+                      "cidr": "10.0.0.0/20",
+                      "availabilityZone": "us-east-1a",
+                      "routeTableId": "rtb-00000000000000001"
+                    },
+                    {
+                      "subnetId": "subnet-00000000000000002",
+                      "cidr": "10.0.16.0/20",
+                      "availabilityZone": "us-east-1b",
+                      "routeTableId": "rtb-00000000000000001"
+                    }
+                  ]
+                }
+              ]
+            },
+            "availability-zones:account=123456789012:region=us-east-1": [
+              "us-east-1a",
+              "us-east-1b"
+            ]
+          }
+          EOF
+          npx cdk synth

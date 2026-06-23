@@ -1,43 +1,32 @@
 ---
 name: Bug report
 about: Create a report to help us improve
+labels: bug
 ---
 
-## Description
+### Description
 
-Please provide a clear and concise description of the issue you are encountering, and a reproduction of your configuration.
-
-If your request is for a new feature, please use the `Feature request` template.
+<!-- A clear and concise description of the bug. If this is a feature request, use the "Feature request" template instead. -->
 
 - [ ] ✋ I have searched the open/closed issues and my issue is not listed.
 
-## Versions
+### Versions
 
-- Module version [Required]:
+- Node Runners version (git commit or tag) [Required]:
+- AWS CDK version (`npx cdk --version`):
 
-- AWS CDK version:
-<!-- Execute npx cdk --version -->
+### Reproduction [Required]
 
-## Reproduction Code [Required]
+<!-- The blueprint/config used and the steps, in order, that led to the bug. -->
 
-<!-- REQUIRED -->
+### Expected behavior
 
-Steps to reproduce the behavior:
+<!-- What you expected to happen. -->
 
-<!-- List steps in order that led up to the issue you encountered -->
+### Actual behavior
 
-## Expected behavior
+<!-- What actually happened. Include terminal output or screenshots if helpful. -->
 
-<!-- A clear and concise description of what you expected to happen -->
+### Additional context
 
-## Actual behavior
-
-<!-- A clear and concise description of what actually happened -->
-
-### Terminal Output Screenshot(s)
-
-<!-- Optional but helpful -->
-
-## Additional context
-
-<!-- Add any other context about the problem here -->
+<!-- Any other context about the problem. -->

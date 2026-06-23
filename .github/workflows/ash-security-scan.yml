@@ -1,0 +1,184 @@
+name: ASH Security Scan
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        # SHA-pinned: tj-actions/changed-files was the target of a supply-chain
+        # compromise (CVE-2025-30066) where version tags were retroactively
+        # repointed to a malicious commit. Pinning to an immutable commit SHA is
+        # the documented mitigation. Bump deliberately, never via a floating tag.
+        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
+        with:
+          files: |
+            **/*.ts
+            **/*.mts
+            **/*.cts
+            **/*.js
+            **/*.mjs
+            **/*.cjs
+            **/*.json
+            **/*.yaml
+            **/*.yml
+            **/*.sh
+            **/*.mdx
+            **/*.md
+            **/Dockerfile*
+            **/package*.json
+            # Blockchain node configs frequently embed RPC endpoints, keys, or
+            # seed phrases. Include all .env sample variants so secret scanners
+            # (detect-secrets via ASH) inspect them on change.
+            **/.env*
+            **/*.env*
+
+      - name: Set up Python
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v4.7.1
+        with:
+          python-version: '3.10'
+
+      - name: Install ASH
+        if: steps.changed-files.outputs.any_changed == 'true'
+        # Use the floating @v3 tag, which awslabs maintains to always point at the
+        # latest stable v3.x release. This keeps ASH current with zero maintenance
+        # (Dependabot can't track this pip git ref). Trade-off: builds aren't fully
+        # reproducible — pin a specific tag (e.g. @v3.5.3) if you need that.
+        run: pip install git+https://github.com/awslabs/automated-security-helper.git@v3
+
+      - name: Create temp directory for changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        # Pass the file list through the environment instead of inline ${{ }}
+        # expansion. The list is derived from PR-controlled file names, so direct
+        # interpolation into a shell command is a script-injection vector.
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          mkdir -p /tmp/ash-scan
+          echo "Changed files for security scan:"
+          echo "$ALL_CHANGED_FILES" | tr ' ' '\n'
+
+      - name: Copy changed files to temp directory
+        if: steps.changed-files.outputs.any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in $ALL_CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              mkdir -p "/tmp/ash-scan/$(dirname "$file")"
+              cp "$file" "/tmp/ash-scan/$file"
+              echo "Copied for scan: $file"
+            fi
+          done
+
+      - name: Run ASH scan on changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          # Stage our custom prompt-injection Semgrep rules inside the scan dir so
+          # ASH's bundled Semgrep scanner can load them. The container mounts this
+          # directory, so a path relative to the scan root resolves inside it.
+          # The rule file lives in the repo (version-controlled) but isn't part of
+          # the copied changed-file set, so copy it in explicitly.
+          mkdir -p /tmp/ash-scan/.ash/semgrep-rules
+          cp "$GITHUB_WORKSPACE/.github/semgrep/prompt-injection.yml" \
+             /tmp/ash-scan/.ash/semgrep-rules/prompt-injection.yml
+
+          cd /tmp/ash-scan
+          cat > .ash_config.yaml << 'EOF'
+          reporters:
+            markdown:
+              enabled: true
+              options:
+                include_detailed_findings: true
+                max_detailed_findings: 100
+          scanners:
+            semgrep:
+              enabled: true
+              options:
+                # Keep ASH's default CI ruleset and add our custom prompt-injection
+                # rules. The custom rules are path-scoped (docs/ageai-*.md and
+                # .kiro/prompts/*.md) via paths.include, so they only evaluate the
+                # prompt files when those files are part of the PR diff.
+                rules:
+                  - 'p/ci'
+                  - '.ash/semgrep-rules/prompt-injection.yml'
+          EOF
+          ash --mode container --config .ash_config.yaml 2>&1 | tee /tmp/ash-output.log
+        # Intentionally non-blocking: findings are surfaced as a PR comment by the
+        # companion "ASH Security Scan - Post Comments" workflow rather than failing
+        # CI. This keeps community/fork PRs reviewable while still flagging issues.
+        # If you want findings to block merges, gate on the `has_findings` output
+        # of the next step (e.g. add a step that exits 1 when has_findings == true).
+        continue-on-error: true
+
+      - name: Process scan results
+        if: steps.changed-files.outputs.any_changed == 'true'
+        id: process-results
+        env:
+          CHANGED_FILES_COUNT: ${{ steps.changed-files.outputs.all_changed_files_count }}
+        run: |
+          SUMMARY_FILE="/tmp/pr_comment.md"
+
+          echo "## 🔒 Security Scan Results" > "$SUMMARY_FILE"
+          echo "" >> "$SUMMARY_FILE"
+          echo "**Scanned files:** ${CHANGED_FILES_COUNT}" >> "$SUMMARY_FILE"
+          echo "" >> "$SUMMARY_FILE"
+
+          if [ -f "/tmp/ash-output.log" ]; then
+            TABLE_START=$(grep -n "ASH Scan Results Summary" /tmp/ash-output.log | head -1 | cut -d: -f1 || echo "0")
+            TABLE_END=$(grep -n "source-dir:" /tmp/ash-output.log | head -1 | cut -d: -f1 || echo "0")
+
+            if [ "$TABLE_START" != "0" ] && [ "$TABLE_END" != "0" ] && [ "$TABLE_END" -gt "$TABLE_START" ]; then
+              echo "| Scanner | S | C | H | M | L | I | Result |" >> "$SUMMARY_FILE"
+              echo "|---------|---|---|---|---|---|---|--------|" >> "$SUMMARY_FILE"
+              sed -n "${TABLE_START},${TABLE_END}p" /tmp/ash-output.log | \
+              sed 's/\x1b\[[0-9;]*m//g' | \
+              grep "^│" | \
+              sed 's/│/|/g' | \
+              sed 's/^ *|/|/' | \
+              sed 's/| *$/|/' >> "$SUMMARY_FILE"
+              echo "" >> "$SUMMARY_FILE"
+            fi
+
+            if grep -q "Actionable findings detected!" /tmp/ash-output.log; then
+              echo "has_findings=true" >> $GITHUB_OUTPUT
+              echo "⚠️ **Security findings detected.** Please review and address before merging." >> "$SUMMARY_FILE"
+            else
+              echo "has_findings=false" >> $GITHUB_OUTPUT
+              echo "✅ **No security issues found.**" >> "$SUMMARY_FILE"
+            fi
+          fi
+
+      - name: Save PR number for comment workflow
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "${{ github.event.pull_request.number }}" > /tmp/pr_number.txt
+          echo "${{ github.event.pull_request.head.sha }}" > /tmp/pr_sha.txt
+
+      - name: Upload scan results
+        if: always() && steps.changed-files.outputs.any_changed == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ash-security-results
+          path: |
+            /tmp/ash-output.log
+            /tmp/pr_comment.md
+            /tmp/pr_number.txt
+            /tmp/pr_sha.txt
+          retention-days: 7
+
+      - name: Skip message
+        if: steps.changed-files.outputs.any_changed == 'false'
+        run: echo "⏭️ No scannable files changed — skipping security scan"

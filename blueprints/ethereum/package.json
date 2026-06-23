@@ -1,0 +1,122 @@
+{
+  "name": "aws-bnr-blueprint-ethereum",
+  "version": "2.0.0",
+  "description": "Ethereum blockchain node runner with flexible client selection supporting multiple execution and consensus client combinations",
+  "engines": {
+    "aws-blockchain-node-runners": ">=2.0.0"
+  },
+  "aws-blockchain-node-runner": {
+    "BLOCKCHAIN_PROTOCOL": "ethereum",
+    "supportedDeploymentModes": [
+      "single-node",
+      "ha-nodes"
+    ],
+    "defaultConfiguration": "geth-1.17.3-lighthouse-8.1.3-full.yml",
+    "availableConfigurations": [
+      {
+        "name": "geth-1.17.3-lighthouse-8.1.3-full.yml"
+      },
+      {
+        "name": "reth-1.10.2-lighthouse-8.1.3-archive.yml"
+      },
+      {
+        "name": "erigon-3.4.3-caplin-archive.yml"
+      },
+      {
+        "name": "erigon-3.4.3-prysm-7.1.5-archive.yml"
+      },
+      {
+        "name": "besu-26.6.1-teku-26.6.1-full.yml"
+      },
+      {
+        "name": "nethermind-1.38.1-teku-26.6.1-full.yml"
+      }
+    ],
+    "BC_NETWORKS": [
+      "mainnet",
+      "sepolia",
+      "holesky"
+    ],
+    "defaultInstanceTypes": {
+      "x86_64": "r7g.2xlarge",
+      "ARM_64": "r7g.2xlarge"
+    },
+    "requiredPorts": [
+      {
+        "port": 8545,
+        "protocol": "tcp",
+        "description": "JSON RPC",
+        "public": false
+      },
+      {
+        "port": 8546,
+        "protocol": "tcp",
+        "description": "WebSocket",
+        "public": false
+      },
+      {
+        "port": 8551,
+        "protocol": "tcp",
+        "description": "Engine API (execution-consensus communication)",
+        "public": false
+      },
+      {
+        "port": 30303,
+        "protocol": "tcp",
+        "description": "Execution P2P",
+        "public": true
+      },
+      {
+        "port": 30303,
+        "protocol": "udp",
+        "description": "Execution P2P UDP",
+        "public": true
+      },
+      {
+        "port": 9000,
+        "protocol": "tcp",
+        "description": "Consensus P2P",
+        "public": true
+      },
+      {
+        "port": 9000,
+        "protocol": "udp",
+        "description": "Consensus P2P UDP",
+        "public": true
+      },
+      {
+        "port": 5052,
+        "protocol": "tcp",
+        "description": "Consensus HTTP API",
+        "public": false
+      }
+    ],
+    "monitoring": {
+      "healthCheckPath": "/",
+      "metricsPort": 8545,
+      "clientNames": ["Execution Client", "Consensus Client"]
+    },
+    "storage": {
+      "defaultDataVolumes": [
+        {
+          "name": "data",
+          "sizeGiB": 3072,
+          "type": "gp3",
+          "iops": 16000,
+          "throughput": 1000,
+          "mountPath": "/data",
+          "fileSystem": "ext4"
+        }
+      ]
+    },
+    "snapshot": {
+      "enabled": true,
+      "downloadUrl": "https://snapshots.ethereum.org/mainnet/latest.tar.lz4"
+    },
+    "customEnvVarsNamePrefix": "ETH",
+    "customEnvVars": [
+      "ETH_CONSENSUS_CHECKPOINT_SYNC_URL=https://beaconstate.info",
+      "ETH_CONSENSUS_SUPERNODE=true"
+    ]
+  }
+}

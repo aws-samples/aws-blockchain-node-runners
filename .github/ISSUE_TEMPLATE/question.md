@@ -1,18 +1,19 @@
 ---
 name: Question
-about: I have a Question
+about: Ask a question about the project
+labels: question
 ---
 
-- [ ] ✋ I have searched the open/closed issues and my issue is not listed.
+- [ ] ✋ I have searched the open/closed issues and my question is not listed.
 
-#### Please describe your question here
+### Question
 
-<!-- Provide as much information as possible to explain your question -->
+<!-- Provide as much information as possible to explain your question. -->
 
-#### Provide a link to the example/module related to the question
+### Related blueprint or docs
 
-<!-- Please provide the link to the example related to this question from this repo -->
+<!-- Link to the blueprint, sample config, or docs page related to this question. -->
 
-#### Additional context
+### Additional context
 
-<!-- Add any other context or screenshots about the question here -->
+<!-- Any other context or screenshots about the question. -->

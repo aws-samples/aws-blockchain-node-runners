@@ -1,0 +1,94 @@
+{
+  "name": "aws-bnr-blueprint-base",
+  "version": "2.0.0",
+  "description": "Base blockchain node runner using base-reth-node (execution) and base-consensus on the OP Stack",
+  "engines": {
+    "aws-blockchain-node-runners": ">=2.0.0"
+  },
+  "aws-blockchain-node-runner": {
+    "BLOCKCHAIN_PROTOCOL": "base",
+    "supportedDeploymentModes": [
+      "single-node",
+      "ha-nodes"
+    ],
+    "defaultConfiguration": "base-reth-v1.1.1-full.yml",
+    "availableConfigurations": [
+      {
+        "name": "base-reth-v1.1.1-full.yml",
+        "version": "v1.1.1"
+      }
+    ],
+    "BC_NETWORKS": [
+      "base-mainnet",
+      "base-sepolia"
+    ],
+    "defaultInstanceTypes": {
+      "x86_64": "i7i.12xlarge"
+    },
+    "requiredPorts": [
+      {
+        "port": 8545,
+        "protocol": "tcp",
+        "description": "Execution client JSON RPC",
+        "public": false
+      },
+      {
+        "port": 8546,
+        "protocol": "tcp",
+        "description": "Execution client WebSocket",
+        "public": false
+      },
+      {
+        "port": 7545,
+        "protocol": "tcp",
+        "description": "op-node RPC",
+        "public": false
+      },
+      {
+        "port": 30303,
+        "protocol": "tcp",
+        "description": "Execution client P2P",
+        "public": true
+      },
+      {
+        "port": 30303,
+        "protocol": "udp",
+        "description": "Execution client P2P UDP",
+        "public": true
+      },
+      {
+        "port": 9222,
+        "protocol": "tcp",
+        "description": "op-node P2P (discv5)",
+        "public": true
+      },
+      {
+        "port": 9222,
+        "protocol": "udp",
+        "description": "op-node P2P UDP",
+        "public": true
+      }
+    ],
+    "monitoring": {
+      "healthCheckPath": "/",
+      "metricsPort": 8545,
+      "clientNames": ["execution client", "op-node"]
+    },
+    "storage": {
+      "defaultDataVolumes": [
+        {
+          "name": "data",
+          "sizeGiB": 3750,
+          "type": "instance-store",
+          "mountPath": "/data",
+          "fileSystem": "ext4"
+        }
+      ]
+    },
+    "customEnvVarsNamePrefix": "BASE",
+    "customEnvVars": [
+      "BASE_L1_RPC_URL=https://your-ethereum-l1-rpc-url",
+      "BASE_L1_BEACON_URL=https://your-ethereum-beacon-url"
+    ]
+  }
+}
