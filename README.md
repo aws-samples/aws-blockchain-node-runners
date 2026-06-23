@@ -1,5 +1,9 @@
 # AWS Blockchain Node Runners
 
+> ⚠️ **This branch is frozen.** Active development has moved to the `main` branch which contains Node Runners v2 — a complete rewrite with AI-driven workflows and a pluggable blueprint system.
+>
+> 👉 **[Switch to v2 (main branch)](https://github.com/aws-samples/aws-blockchain-node-runners/tree/main)**
+
 This repository contains sample [AWS Cloud Development Kit (CDK)](https://aws.amazon.com/cdk/) applications (Node Runner Blueprints) to deploy on AWS self-service blockchain nodes for various protocols. For more information, see [Introducing AWS Blockchain Node Runners](https://aws-samples.github.io/aws-blockchain-node-runners/docs/intro).
 
 ### Documentation
