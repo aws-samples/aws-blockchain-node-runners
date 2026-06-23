@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-blueprints/solana" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.10.1">
+<title data-rh="true">Solana | AWS Blockchain Node Runners</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://aws-samples.github.io/aws-blockchain-node-runners/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://aws-samples.github.io/aws-blockchain-node-runners/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/solana"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Solana | AWS Blockchain Node Runners"><link data-rh="true" rel="canonical" href="https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/solana"><link data-rh="true" rel="alternate" href="https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/solana" hreflang="en"><link data-rh="true" rel="alternate" href="https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/solana" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Solana","item":"https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/solana"}]}</script><link rel="preconnect" href="https://www.google-analytics.com">
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEK2TQ67TP"></script>
+<script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-KEK2TQ67TP",{anonymize_ip:!0})</script>
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script>window.dataLayer=window.dataLayer||[]</script>
+<script>!function(e,t,a,n){e[n]=e[n]||[],e[n].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var g=t.getElementsByTagName(a)[0],m=t.createElement(a);m.async=!0,m.src="https://www.googletagmanager.com/gtm.js?id=GTM-WQ97QTTR",g.parentNode.insertBefore(m,g)}(window,document,"script","dataLayer")</script><link rel="stylesheet" href="/aws-blockchain-node-runners/assets/css/styles.a61c0be4.css">
+<script src="/aws-blockchain-node-runners/assets/js/runtime~main.2dad2b6f.js" defer="defer"></script>
+<script src="/aws-blockchain-node-runners/assets/js/main.a2dfdf97.js" defer="defer"></script>
+</head>
+<body>
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"dark"),document.documentElement.setAttribute("data-theme-choice",t||"dark")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WQ97QTTR" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/aws-blockchain-node-runners/"><b class="navbar__title text--truncate">▣-▣-▣ Node Runners</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/getting-started/quickstart">Getting Started</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/blueprints/about">Blueprints</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Guides</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/ai-prompts/deploy-with-ai">AI Prompts</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/aws-samples/aws-blockchain-node-runners" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/aws-blockchain-node-runners/docs/getting-started/intro"><span title="Getting Started" class="categoryLinkLabel_W154">Getting Started</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/aws-blockchain-node-runners/docs/blueprints/about"><span title="Blueprints" class="categoryLinkLabel_W154">Blueprints</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/about"><span title="About Blueprints" class="linkLabel_WmDU">About Blueprints</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/community"><span title="Community Blueprints" class="linkLabel_WmDU">Community Blueprints</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/base"><span title="Base" class="linkLabel_WmDU">Base</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/bitcoin"><span title="Bitcoin" class="linkLabel_WmDU">Bitcoin</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/bnb"><span title="BNB Chain" class="linkLabel_WmDU">BNB Chain</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/ethereum"><span title="Ethereum" class="linkLabel_WmDU">Ethereum</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/solana"><span title="Solana" class="linkLabel_WmDU">Solana</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/aws-blockchain-node-runners/docs/guides/configuration-reference"><span title="Guides" class="categoryLinkLabel_W154">Guides</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/aws-blockchain-node-runners/docs/ai-prompts/add-protocol-with-ai"><span title="AI Workflow Reference" class="categoryLinkLabel_W154">AI Workflow Reference</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/aws-blockchain-node-runners/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Blueprints</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Solana</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Solana</h1></header><header><h1>Solana Protocol Node Runner</h1></header>
+<p>This protocol implementation provides support for running Solana RPC nodes on AWS using the Universal Blockchain Node Runner. It supports two validator clients: <strong>Agave</strong> (the canonical Solana validator by Anza) and <strong>Frankendancer</strong> (a high-performance hybrid client by Jump Trading). Both are installed natively for maximum performance.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="overview-of-deployment-architectures">Overview of Deployment Architectures<a href="#overview-of-deployment-architectures" class="hash-link" aria-label="Direct link to Overview of Deployment Architectures" title="Direct link to Overview of Deployment Architectures" translate="no">​</a></h2>
+<p>The Solana protocol supports two deployment modes, each compatible with both Agave and Frankendancer clients:</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="single-node-deployment">Single Node Deployment<a href="#single-node-deployment" class="hash-link" aria-label="Direct link to Single Node Deployment" title="Direct link to Single Node Deployment" translate="no">​</a></h3>
+<p>A single EC2 instance running the selected validator client in RPC mode, suitable for development, testing, and production RPC access.</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token plain">┌─────────────────────────────────────────────────────────────┐</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│                         VPC (Default)                        │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  ┌─────────────────────────────────────────────────────────┐│</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │                    Public Subnet                         ││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  ┌─────────────────────────────────────────────────────┐││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │         EC2 Instance (Solana Node)                  │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  ┌──────────────────────────────────────────────┐   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │    Agave or Frankendancer (RPC Mode)         │   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │  Port 8899 (JSON RPC) - internal only        │   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │  Port 8900 (WebSocket) - internal only       │   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │  Ports 8001-8029 (Gossip + P2P) - public     │   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │  Port 8003/UDP (Shred/Turbine) - public      │   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │  Dynamic port range: 8004-8029 (both clients)│   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  └──────────────────────────────────────────────┘   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  ┌──────────────────────────────────────────────┐   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │  NVMe /data (2 TB+) - Ledger               │   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │  NVMe /accounts (500 GB+) - Accounts DB    │   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  └──────────────────────────────────────────────┘   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  └─────────────────────────────────────────────────────┘││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  └─────────────────────────────────────────────────────────┘│</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">└─────────────────────────────────────────────────────────────┘</span><br></div></code></pre></div></div>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="high-availability-ha-deployment">High Availability (HA) Deployment<a href="#high-availability-ha-deployment" class="hash-link" aria-label="Direct link to High Availability (HA) Deployment" title="Direct link to High Availability (HA) Deployment" translate="no">​</a></h3>
+<p>Multiple EC2 instances behind an Application Load Balancer with auto-scaling for production RPC workloads.</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token plain">┌─────────────────────────────────────────────────────────────┐</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│                         VPC (Default)                        │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  ┌─────────────────────────────────────────────────────────┐│</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │           Application Load Balancer (Port 8899)          ││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  └─────────────────────────────────────────────────────────┘│</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│                              │                               │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  ┌───────────────────────────┼───────────────────────────┐  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │                Auto Scaling Group                      │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │   Node 1    │  │   Node 2    │  │   Node N    │    │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │ Agave or FD │  │ Agave or FD │  │ Agave or FD │    │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  (RPC Mode) │  │  (RPC Mode) │  │  (RPC Mode) │    │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  └─────────────┘  └─────────────┘  └─────────────┘    │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  └───────────────────────────────────────────────────────┘  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">└─────────────────────────────────────────────────────────────┘</span><br></div></code></pre></div></div>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="supported-configurations">Supported Configurations<a href="#supported-configurations" class="hash-link" aria-label="Direct link to Supported Configurations" title="Direct link to Supported Configurations" translate="no">​</a></h2>
+<p>The Solana protocol provides sample configurations for two validator clients across base and extended RPC modes:</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="available-configurations">Available Configurations<a href="#available-configurations" class="hash-link" aria-label="Direct link to Available Configurations" title="Direct link to Available Configurations" translate="no">​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Configuration</th><th>Client</th><th>Description</th><th>Best For</th></tr></thead><tbody><tr><td>agave-&lt;version&gt;-rpc-base.sh</td><td>Agave</td><td>Standard RPC with full transaction history</td><td>General RPC access</td></tr><tr><td>agave-&lt;version&gt;-rpc-extended.sh</td><td>Agave</td><td>Extended RPC with account indexing</td><td>dApps needing token/program lookups</td></tr><tr><td>frankendancer-&lt;version&gt;-rpc-base.sh</td><td>Frankendancer</td><td>Standard RPC with high-performance networking</td><td>General RPC access with lower latency</td></tr><tr><td>frankendancer-&lt;version&gt;-rpc-extended.sh</td><td>Frankendancer</td><td>Extended RPC with account indexing</td><td>dApps needing token/program lookups with lower latency</td></tr></tbody></table>
+<blockquote>
+<p><strong>Note:</strong> Configuration file names include the pinned client version (shown as <code>&lt;version&gt;</code> above). For the exact current filename, run <code>ls node_modules/aws-bnr-blueprint-solana/configurations/</code>, or simply copy the matching sample from <code>samples/</code> — it already sets <code>CLIENT_CONFIG</code> for you.</p>
+</blockquote>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-differences">Configuration Differences<a href="#configuration-differences" class="hash-link" aria-label="Direct link to Configuration Differences" title="Direct link to Configuration Differences" translate="no">​</a></h3>
+<p><strong>Base RPC</strong> (agave <code>rpc-base</code> / frankendancer <code>rpc-base</code>):</p>
+<ul>
+<li class="">Full RPC API access</li>
+<li class="">Transaction history enabled</li>
+<li class="">Lower memory footprint</li>
+</ul>
+<p><strong>Extended RPC</strong> (agave <code>rpc-extended</code> / frankendancer <code>rpc-extended</code>):</p>
+<ul>
+<li class="">All base RPC features</li>
+<li class="">Account indexes: <code>spl-token-owner</code>, <code>program-id</code>, <code>spl-token-mint</code></li>
+<li class="">Required for <code>getTokenAccountsByOwner</code>, <code>getProgramAccounts</code> queries</li>
+<li class="">Higher memory and storage requirements</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="agave-vs-frankendancer">Agave vs Frankendancer<a href="#agave-vs-frankendancer" class="hash-link" aria-label="Direct link to Agave vs Frankendancer" title="Direct link to Agave vs Frankendancer" translate="no">​</a></h2>
+<p>Both clients expose the same Solana JSON RPC API on port 8899 and are fully interchangeable for RPC workloads. The key differences are in how they are configured, built, and run.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Aspect</th><th>Agave</th><th>Frankendancer</th></tr></thead><tbody><tr><td>Maintained by</td><td>Anza (formerly Solana Labs)</td><td>Jump Trading (Firedancer team)</td></tr><tr><td>Configuration format</td><td>CLI flags</td><td>TOML file (<code>frankendancer.toml</code>)</td></tr><tr><td>Binary</td><td><code>agave-validator</code></td><td><code>fdctl</code> (manages Firedancer tiles + Agave subprocess)</td></tr><tr><td>Networking stack</td><td>Standard Solana networking</td><td>AF_XDP kernel bypass (high-performance)</td></tr><tr><td>Dynamic port range</td><td><code>8004-8029</code> (CLI flag)</td><td><code>8004-8029</code> (TOML, passed to embedded Agave)</td></tr><tr><td>Privilege model</td><td>Runs entirely as <code>bcuser</code></td><td>Starts as root (AF_XDP requires <code>CAP_SYS_ADMIN</code>), drops to <code>bcuser</code> via TOML <code>user</code> field</td></tr><tr><td>System initialization</td><td>None required</td><td><code>fdctl configure init all</code> sets up hugetlbfs, sysctl, ethtool before each run</td></tr><tr><td>Build from source</td><td><code>cargo-install-all.sh</code> (~30-60 min)</td><td><code>deps.sh</code> + <code>make -j fdctl solana</code> (~20-40 min)</td></tr><tr><td>Maturity</td><td>Production-proven, canonical client</td><td>Newer, rapidly maturing, used by high-performance validators</td></tr></tbody></table>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="when-to-choose-frankendancer">When to Choose Frankendancer<a href="#when-to-choose-frankendancer" class="hash-link" aria-label="Direct link to When to Choose Frankendancer" title="Direct link to When to Choose Frankendancer" translate="no">​</a></h3>
+<p>Frankendancer is a good fit when you want:</p>
+<ul>
+<li class="">Lower networking latency via AF_XDP kernel bypass</li>
+<li class="">Potentially faster block data ingestion (Turbine shred processing)</li>
+<li class="">To run the same client used by many high-performance validators</li>
+</ul>
+<p>Agave remains the safe default for most RPC use cases. Both clients produce identical RPC responses and sync from the same network.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="port-security-unified-dynamic-port-range">Port Security: Unified Dynamic Port Range<a href="#port-security-unified-dynamic-port-range" class="hash-link" aria-label="Direct link to Port Security: Unified Dynamic Port Range" title="Direct link to Port Security: Unified Dynamic Port Range" translate="no">​</a></h3>
+<p>Both Agave and Frankendancer use the same dynamic port range: <strong>8004-8029</strong>. This is an intentional architectural decision — since both clients share a single <code>requiredPorts</code> definition in <code>package.json</code>, aligning the dynamic port range avoids opening unnecessary ports when either client is deployed.</p>
+<p>Frankendancer&#x27;s upstream default is <code>8900-9000</code>, but we override it to <code>8004-8029</code> to fit within the gossip security group rules (8001-8029). The range starts at 8004 to avoid Frankendancer&#x27;s static ports: gossip (8001) and shred (8003). The Firedancer documentation explicitly states that the dynamic port range must not overlap with static Firedancer ports. The width of 25 (<code>8029 - 8004</code>) meets the Agave minimum (<code>MINIMUM_VALIDATOR_PORT_RANGE_WIDTH = 25</code> in <code>solana-net-utils</code>).</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="port-security-why-ports-9001-and-9007-are-not-exposed">Port Security: Why Ports 9001 and 9007 Are Not Exposed<a href="#port-security-why-ports-9001-and-9007-are-not-exposed" class="hash-link" aria-label="Direct link to Port Security: Why Ports 9001 and 9007 Are Not Exposed" title="Direct link to Port Security: Why Ports 9001 and 9007 Are Not Exposed" translate="no">​</a></h3>
+<p>Frankendancer introduces three ports beyond the standard Agave gossip range (8001-8027):</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Port</th><th>Protocol</th><th>Purpose</th><th>Exposed?</th><th>Rationale</th></tr></thead><tbody><tr><td>8003</td><td>UDP</td><td>Shred reception (Turbine block data)</td><td>Yes (public)</td><td>Required for real-time block data. Without it, the node falls back to the repair protocol and lags behind the cluster tip.</td></tr><tr><td>9001</td><td>UDP</td><td>Regular (non-QUIC) transaction ingestion</td><td>No</td><td>RPC-only nodes (<code>no_voting=true</code>) do not produce blocks. Clients submit transactions via the JSON RPC API on port 8899, and the Agave subprocess forwards them to the current leader.</td></tr><tr><td>9007</td><td>UDP</td><td>QUIC transaction ingestion</td><td>No</td><td>Same rationale as 9001 — QUIC transaction ingestion is a leader/validator function, not needed for RPC-only nodes.</td></tr></tbody></table>
+<p>Only port 8003 is added to the security group. This minimizes the public attack surface while maintaining full RPC functionality and real-time sync performance.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="infrastructure-requirements">Infrastructure Requirements<a href="#infrastructure-requirements" class="hash-link" aria-label="Direct link to Infrastructure Requirements" title="Direct link to Infrastructure Requirements" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="hardware-requirements">Hardware Requirements<a href="#hardware-requirements" class="hash-link" aria-label="Direct link to Hardware Requirements" title="Direct link to Hardware Requirements" translate="no">​</a></h3>
+<p>Both Agave and Frankendancer share the same minimum hardware requirements:</p>
+<ul>
+<li class=""><strong>CPU</strong>: 24+ cores (48+ vCPUs recommended for mainnet-beta)</li>
+<li class=""><strong>RAM</strong>: 256 GB minimum (384 GB recommended for mainnet-beta)</li>
+<li class=""><strong>Storage</strong>: 2 TB NVMe SSD minimum (separate volumes for ledger and accounts)</li>
+<li class=""><strong>Network</strong>: 1 Gbps minimum</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="recommended-instance-types">Recommended Instance Types<a href="#recommended-instance-types" class="hash-link" aria-label="Direct link to Recommended Instance Types" title="Direct link to Recommended Instance Types" translate="no">​</a></h3>
+<p><strong>Mainnet-Beta (Production RPC)</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Configuration</th><th>Instance Type</th><th>vCPUs</th><th>Memory</th><th>Instance Store</th></tr></thead><tbody><tr><td>Base RPC (best performance)</td><td>i7ie.12xlarge</td><td>48</td><td>384 GB</td><td>4x 7,500 GB NVMe</td></tr><tr><td>Extended RPC (best performance)</td><td>i7ie.18xlarge</td><td>72</td><td>576 GB</td><td>6x 7,500 GB NVMe</td></tr><tr><td>Base RPC (cost-effective)</td><td>i7i.12xlarge</td><td>48</td><td>384 GB</td><td>3x 3,750 GB NVMe</td></tr><tr><td>Base RPC (ARM, budget)</td><td>i8g.8xlarge</td><td>32</td><td>256 GB</td><td>2x 3,750 GB NVMe</td></tr></tbody></table>
+<p><strong>Testnet/Devnet (Development &amp; Testing)</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Network</th><th>Instance Type</th><th>vCPUs</th><th>Memory</th><th>Instance Store</th></tr></thead><tbody><tr><td>Testnet (x86)</td><td>i7i.4xlarge</td><td>16</td><td>128 GB</td><td>1x 3,750 GB NVMe</td></tr><tr><td>Testnet (ARM)</td><td>i8g.4xlarge</td><td>16</td><td>128 GB</td><td>1x 3,750 GB NVMe</td></tr><tr><td>Devnet (x86)</td><td>i7i.2xlarge</td><td>8</td><td>64 GB</td><td>1x 1,875 GB NVMe</td></tr><tr><td>Devnet (ARM)</td><td>i8g.2xlarge</td><td>8</td><td>64 GB</td><td>1x 1,875 GB NVMe</td></tr></tbody></table>
+<p>*For cost estimates, use the <a href="https://calculator.aws/" target="_blank" rel="noopener noreferrer" class="">AWS Pricing Calculator</a> with your specific region and commitment level.</p>
+<p><strong>Instance Family Recommendations:</strong></p>
+<ul>
+<li class=""><strong>i7ie (x86)</strong>: Best performance for mainnet-beta production RPC nodes, highest storage capacity (7.5 TB per NVMe)</li>
+<li class=""><strong>i7i (x86)</strong>: Cost-effective option for mainnet-beta, good performance with lower storage capacity (3.75 TB per NVMe)</li>
+<li class=""><strong>i8g (ARM Graviton 4)</strong>: Budget option for mainnet-beta base RPC, suitable for testnet/devnet. Note: Slower performance than x86 for Solana workloads.</li>
+</ul>
+<p><strong>Storage Capacity:</strong></p>
+<ul>
+<li class="">i7ie instances: 4-6x NVMe drives (7.5 TB each) - optimal for mainnet-beta with extended retention</li>
+<li class="">i7i instances: 3-4x NVMe drives (3.75 TB each) - sufficient for mainnet-beta with standard retention</li>
+<li class="">i8g.8xlarge: 2x NVMe drives (3.75 TB each) - sufficient for mainnet-beta base RPC with separate /data and /accounts</li>
+<li class="">All recommended instances provide separate NVMe drives for /data (ledger) and /accounts volumes</li>
+<li class="">Instance store provides optimal I/O performance for Solana&#x27;s demanding workload</li>
+</ul>
+<p><strong>Network Costs:</strong>
+Traffic shaping reduces outbound data transfer by over 85%, significantly lowering network costs for mainnet-beta RPC nodes. See <a class="" href="/aws-blockchain-node-runners/docs/guides/traffic-shaping">Traffic Shaping Documentation</a> for details.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="storage-requirements">Storage Requirements<a href="#storage-requirements" class="hash-link" aria-label="Direct link to Storage Requirements" title="Direct link to Storage Requirements" translate="no">​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Network</th><th>Volume</th><th>Current Size</th><th>Growth Rate</th><th>Recommended</th><th>Type</th></tr></thead><tbody><tr><td>Mainnet-Beta</td><td>Ledger (/data)</td><td>~1.5 TB</td><td>~50 GB/month</td><td>2-3 TB</td><td>instance-store (NVMe)</td></tr><tr><td>Mainnet-Beta</td><td>Accounts (/accounts)</td><td>~400 GB</td><td>~10 GB/month</td><td>500-750 GB</td><td>instance-store (NVMe)</td></tr><tr><td>Testnet</td><td>Ledger (/data)</td><td>~500 GB</td><td>~20 GB/month</td><td>1 TB</td><td>instance-store (NVMe)</td></tr><tr><td>Testnet</td><td>Accounts (/accounts)</td><td>~150 GB</td><td>~5 GB/month</td><td>250 GB</td><td>instance-store (NVMe)</td></tr><tr><td>Devnet</td><td>Ledger (/data)</td><td>~200 GB</td><td>~10 GB/month</td><td>500 GB</td><td>instance-store (NVMe)</td></tr><tr><td>Devnet</td><td>Accounts (/accounts)</td><td>~50 GB</td><td>~2 GB/month</td><td>100 GB</td><td>instance-store (NVMe)</td></tr></tbody></table>
+<p><strong>Storage Notes:</strong></p>
+<ul>
+<li class=""><strong>Instance Store (NVMe)</strong>: Provides optimal I/O performance for Solana (17,000+ IOPS)</li>
+<li class=""><strong>i7ie instances</strong>: 4-6x 7,500 GB NVMe drives (30-45 TB total) - best for mainnet-beta production</li>
+<li class=""><strong>i7i instances</strong>: 3-4x 3,750 GB NVMe drives (11-15 TB total) - cost-effective for mainnet-beta</li>
+<li class=""><strong>i8g.8xlarge</strong>: 2x 3,750 GB NVMe drives (7.5 TB total) - sufficient for mainnet-beta base RPC</li>
+<li class=""><strong>i8g.4xlarge/2xlarge</strong>: 1x NVMe drive - suitable for testnet/devnet (single volume for both /data and /accounts)</li>
+<li class="">All recommended instances have sufficient capacity for blockchain data</li>
+<li class="">Instance store data is ephemeral (lost on stop/terminate) - suitable for RPC nodes that can re-sync</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="network-traffic">Network Traffic<a href="#network-traffic" class="hash-link" aria-label="Direct link to Network Traffic" title="Direct link to Network Traffic" translate="no">​</a></h3>
+<p>Solana mainnet-beta generates significant outbound traffic due to its high-throughput architecture:</p>
+<ul>
+<li class=""><strong>Without traffic shaping</strong>: ~100-200 TiB/month</li>
+<li class=""><strong>With traffic shaping (20-40 Mbit/s)</strong>: ~0.2-0.4 TiB/month</li>
+</ul>
+<p><strong>Traffic shaping reduces outbound data transfer by over 85%, significantly lowering network costs for mainnet-beta RPC nodes.</strong></p>
+<p>See <a class="" href="/aws-blockchain-node-runners/docs/guides/traffic-shaping">Traffic Shaping Documentation</a> for configuration details.</p>
+<blockquote>
+<p>Running multiple protocols? Each deployment creates an independent CloudFormation stack. Total costs are additive — use the tables above per protocol.</p>
+</blockquote>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="setup-instructions">Setup Instructions<a href="#setup-instructions" class="hash-link" aria-label="Direct link to Setup Instructions" title="Direct link to Setup Instructions" translate="no">​</a></h2>
+<p>There are two ways to deploy a Solana node.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="option-1-ai-driven-deployment-recommended">Option 1: AI-Driven Deployment (Recommended)<a href="#option-1-ai-driven-deployment-recommended" class="hash-link" aria-label="Direct link to Option 1: AI-Driven Deployment (Recommended)" title="Direct link to Option 1: AI-Driven Deployment (Recommended)" translate="no">​</a></h3>
+<p>Deploy with a single prompt. In Kiro (or your AI assistant of choice), run:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token plain">@deploy a Solana mainnet RPC node in us-east-1</span><br></div></code></pre></div></div>
+<p>The AI assistant will guide you through infrastructure selection, configuration, deployment, and initial healthcheck. For full setup, see <a class="" href="/aws-blockchain-node-runners/docs/getting-started/quickstart">Getting Started</a>.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="option-2-manual-deployment">Option 2: Manual Deployment<a href="#option-2-manual-deployment" class="hash-link" aria-label="Direct link to Option 2: Manual Deployment" title="Direct link to Option 2: Manual Deployment" translate="no">​</a></h3>
+<p>This section focuses on Solana-specific configuration and client selection.</p>
+<p><strong>Quick Start (Agave):</strong></p>
+<ol>
+<li class="">Copy sample configuration: <code>cp node_modules/aws-bnr-blueprint-solana/samples/.env-mainnet-beta-agave-rpc-base .env</code></li>
+<li class="">Edit <code>.env</code> with your AWS account details</li>
+<li class="">Enable traffic shaping (recommended): <code>TRAFFIC_SHAPING_ENABLED=&quot;true&quot;</code></li>
+<li class="">Deploy: <code>npx cdk deploy --json --outputs-file deploy-output-{stack-name}.json</code></li>
+</ol>
+<p><strong>Quick Start (Frankendancer):</strong></p>
+<ol>
+<li class="">Copy sample configuration: <code>cp node_modules/aws-bnr-blueprint-solana/samples/.env-mainnet-beta-frankendancer-rpc-base .env</code></li>
+<li class="">Edit <code>.env</code> with your AWS account details</li>
+<li class="">Enable traffic shaping (recommended): <code>TRAFFIC_SHAPING_ENABLED=&quot;true&quot;</code></li>
+<li class="">Deploy: <code>npx cdk deploy --json --outputs-file deploy-output-{stack-name}.json</code></li>
+</ol>
+<p>For advanced options (HA mode, multiple stacks, maintenance), see the <a class="" href="/aws-blockchain-node-runners/docs/guides/deployment-guide">Deployment Guide</a>.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-options">Configuration Options<a href="#configuration-options" class="hash-link" aria-label="Direct link to Configuration Options" title="Direct link to Configuration Options" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="node-identity">Node Identity<a href="#node-identity" class="hash-link" aria-label="Direct link to Node Identity" title="Direct link to Node Identity" translate="no">​</a></h3>
+<p>By default, a new identity keypair is generated on first start. To use an existing identity, store your keypair in AWS Secrets Manager and set <code>SOLANA_NODE_IDENTITY_SECRET_ARN</code> in your .env file.</p>
+<blockquote>
+<p><strong>⚠️ HA mode and shared identities:</strong> In HA mode each instance generates its
+own unique identity by default, which is correct for RPC nodes. If you set
+<code>SOLANA_NODE_IDENTITY_SECRET_ARN</code>, <strong>every</strong> node in the Auto Scaling Group
+loads the <em>same</em> identity. That is safe for these RPC (non-voting) nodes, but
+it would be dangerous if this pattern were copied to a <strong>voting validator</strong>:
+two validators running the same identity key sign conflicting votes and get
+<strong>slashed</strong>. These blueprints are RPC-only and must not be adapted into a
+voting validator that shares one identity across multiple running instances.</p>
+</blockquote>
+<p>See <a class="" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Configuration Reference</a> for all available options.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="traffic-shaping">Traffic Shaping<a href="#traffic-shaping" class="hash-link" aria-label="Direct link to Traffic Shaping" title="Direct link to Traffic Shaping" translate="no">​</a></h3>
+<p>Traffic shaping reduces outbound data transfer by over 85%:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Rate</th><th>Monthly Transfer</th><th>Transfer Reduction</th></tr></thead><tbody><tr><td>No limit</td><td>~150 TiB</td><td>-</td></tr><tr><td>100 Mbit/s</td><td>~1 TiB</td><td>99%</td></tr><tr><td>40 Mbit/s</td><td>~0.4 TiB</td><td>99.7%</td></tr><tr><td>20 Mbit/s</td><td>~0.2 TiB</td><td>99.9%</td></tr></tbody></table>
+<p><strong>Important</strong>: Traffic shaping is for RPC nodes only. Do not use on consensus/validator nodes.</p>
+<p>See <a class="" href="/aws-blockchain-node-runners/docs/guides/traffic-shaping">Traffic Shaping Documentation</a> for configuration details.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="hash-link" aria-label="Direct link to Troubleshooting" title="Direct link to Troubleshooting" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="common-issues-both-clients">Common Issues (Both Clients)<a href="#common-issues-both-clients" class="hash-link" aria-label="Direct link to Common Issues (Both Clients)" title="Direct link to Common Issues (Both Clients)" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Node not starting</strong>: Check CloudWatch logs (<code>/aws/ec2/blockchain-nodes/systemd-services</code>) and service status</li>
+<li class=""><strong>Slow sync</strong>: Verify disk I/O performance, gossip ports open, sufficient disk space</li>
+<li class=""><strong>High memory usage</strong>: Ensure instance has 256-384 GB RAM for mainnet-beta, consider base RPC vs extended</li>
+<li class=""><strong>RPC not responding</strong>: Verify node synced, security group allows VPC traffic on port 8899</li>
+<li class=""><strong>Traffic shaping issues</strong>: Check syncchecker timer and logs</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="frankendancer-specific-issues">Frankendancer-Specific Issues<a href="#frankendancer-specific-issues" class="hash-link" aria-label="Direct link to Frankendancer-Specific Issues" title="Direct link to Frankendancer-Specific Issues" translate="no">​</a></h3>
+<ul>
+<li class="">
+<p><strong><code>fdctl configure init all</code> fails</strong>: This step sets up hugetlbfs mounts, sysctl parameters, and ethtool settings. It requires root privileges. Check that the systemd service is running as root (no <code>User=</code> directive). Common causes:</p>
+<ul>
+<li class="">Insufficient huge pages: The kernel may not have enough free memory for 2 MiB and 1 GiB huge pages. Verify with <code>cat /proc/meminfo | grep Huge</code>.</li>
+<li class="">ethtool failures: Some instance types may not support all ethtool channel/offload settings. Check <code>journalctl -u node.service</code> for specific ethtool errors.</li>
+</ul>
+</li>
+<li class="">
+<p><strong>hugetlbfs mount issues</strong>: Frankendancer requires hugetlbfs for both 2 MiB and 1 GiB huge pages. If <code>fdctl configure init all</code> reports hugetlbfs errors:</p>
+<ul>
+<li class="">Verify mounts: <code>mount | grep hugetlbfs</code></li>
+<li class="">Check available huge pages: <code>cat /proc/meminfo | grep -i huge</code></li>
+<li class="">Ensure the instance has sufficient RAM (256 GB minimum for mainnet-beta)</li>
+</ul>
+</li>
+<li class="">
+<p><strong>AF_XDP permission errors</strong>: Frankendancer uses AF_XDP for kernel-bypass networking, which requires <code>CAP_SYS_ADMIN</code> and <code>CAP_NET_RAW</code>. If you see permission errors:</p>
+<ul>
+<li class="">Verify the systemd service runs as root (no <code>User=bcuser</code> line in <code>node.service</code>)</li>
+<li class="">Check <code>LimitMEMLOCK=infinity</code> is set in the service unit</li>
+<li class="">Verify the kernel supports AF_XDP: <code>ls /sys/fs/bpf/</code> should exist</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Frankendancer crashes on startup</strong>: Check <code>journalctl -u node.service -n 100</code> for the specific error. Common causes:</p>
+<ul>
+<li class="">Invalid TOML configuration: Verify <code>/home/bcuser/config/frankendancer.toml</code> is valid TOML</li>
+<li class="">Missing identity keypair: Ensure <code>/home/bcuser/config/validator-keypair.json</code> exists</li>
+<li class="">Network mismatch: Verify <code>BC_NETWORK</code> matches the intended network</li>
+</ul>
+</li>
+</ul>
+<p>See <a class="" href="/aws-blockchain-node-runners/docs/guides/troubleshooting">Troubleshooting Guide</a> for detailed diagnostics and solutions.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="upgrades">Upgrades<a href="#upgrades" class="hash-link" aria-label="Direct link to Upgrades" title="Direct link to Upgrades" translate="no">​</a></h2>
+<p>To upgrade the validator client version:</p>
+<ol>
+<li class="">Create new configuration script with updated version</li>
+<li class="">Update <code>CLIENT_CONFIG</code> and <code>CLIENT_VERSION</code> in <code>.env</code></li>
+<li class="">Redeploy: <code>npx cdk deploy --json --outputs-file deploy-output-{stack-name}.json</code></li>
+</ol>
+<p>Note: Instance will be replaced and will need to re-sync from snapshots.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="cost-optimization">Cost Optimization<a href="#cost-optimization" class="hash-link" aria-label="Direct link to Cost Optimization" title="Direct link to Cost Optimization" translate="no">​</a></h2>
+<ul>
+<li class=""><strong>i7ie instances</strong>: Best performance for mainnet-beta production</li>
+<li class=""><strong>i7i instances</strong>: ~27% cost savings vs i7ie, good performance</li>
+<li class=""><strong>i8g.8xlarge (ARM)</strong>: ~40% cost savings vs i7i for base RPC, slower but sufficient</li>
+<li class=""><strong>Instance store (NVMe)</strong>: Recommended for best I/O performance</li>
+<li class=""><strong>Traffic shaping</strong>: Reduces outbound transfer by over 85% (most impactful)</li>
+<li class=""><strong>Savings Plans</strong>: 30-50% discount on long-term commitments</li>
+</ul>
+<p>See <a class="" href="/aws-blockchain-node-runners/docs/guides/deployment-guide">Deployment Guide</a> for detailed cost optimization strategies.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-considerations">Security Considerations<a href="#security-considerations" class="hash-link" aria-label="Direct link to Security Considerations" title="Direct link to Security Considerations" translate="no">​</a></h2>
+<ul>
+<li class="">RPC endpoints bind to internal IP only (VPC-only access)</li>
+<li class="">Gossip and P2P ports (8001-8029 TCP/UDP) open for network participation; both clients use dynamic port range 8004-8029 within this range (see <a href="#port-security-unified-dynamic-port-range" class="">Unified Dynamic Port Range</a>)</li>
+<li class="">Frankendancer shred port (8003/UDP) open for Turbine block data; transaction ingestion ports (9001, 9007) are not exposed (see <a href="#port-security-why-ports-9001-and-9007-are-not-exposed" class="">Port Security</a>)</li>
+<li class="">AWS Systems Manager Session Manager for secure access (no SSH)</li>
+<li class="">Encrypted storage volumes</li>
+<li class="">IAM roles with least privilege</li>
+<li class="">Optional: Node identity keypair in AWS Secrets Manager</li>
+</ul>
+<p>See <a class="" href="/aws-blockchain-node-runners/docs/guides/deployment-guide">Deployment Guide</a> for security best practices.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="faq">FAQ<a href="#faq" class="hash-link" aria-label="Direct link to FAQ" title="Direct link to FAQ" translate="no">​</a></h2>
+<p><strong>Q: When should I choose Frankendancer over Agave?</strong>
+A: Frankendancer offers lower networking latency via AF_XDP kernel bypass and is used by many high-performance validators. Choose it if you want cutting-edge networking performance. Agave is the safer, more mature default. Both expose the same RPC API, so you can switch between them by changing <code>CLIENT_CONFIG</code> in your <code>.env</code> file and redeploying.</p>
+<p><strong>Q: How long does initial sync take?</strong>
+A: 12-48 hours for mainnet-beta with automatic snapshot downloading. Sync time is similar for both Agave and Frankendancer.</p>
+<p><strong>Q: Which configuration should I choose?</strong>
+A: Use a <code>rpc-base</code> configuration for most use cases. Use <code>rpc-extended</code> only if you need <code>getTokenAccountsByOwner</code> or <code>getProgramAccounts</code> queries. Choose between Agave and Frankendancer based on your performance and maturity preferences.</p>
+<p><strong>Q: Why is my data transfer bill high?</strong>
+A: Solana mainnet-beta generates 100-200 TiB/month outbound. Enable traffic shaping to reduce by over 85%.</p>
+<p><strong>Q: Should I use instance store or EBS?</strong>
+A: Instance store is <strong>recommended</strong> for optimal I/O performance. It&#x27;s ephemeral but RPC nodes can re-sync.</p>
+<p><strong>Q: Can I run a validator/consensus node?</strong>
+A: This configuration is for RPC nodes only. Validator nodes have different requirements not covered here.</p>
+<p><strong>Q: How do I keep my node identity across redeployments?</strong>
+A: Store keypair in AWS Secrets Manager and set <code>SOLANA_NODE_IDENTITY_SECRET_ARN</code> in .env.</p>
+<p><strong>Q: Does Frankendancer require different hardware than Agave?</strong>
+A: No. Both clients have the same minimum requirements: 24-core CPU, 256 GB RAM, 2 TB NVMe SSD. The same instance types work for both.</p>
+<p><strong>Q: Why does Frankendancer run as root?</strong>
+A: Frankendancer uses AF_XDP kernel-bypass networking, which requires <code>CAP_SYS_ADMIN</code> at startup. It drops privileges to <code>bcuser</code> internally via the TOML <code>user</code> field after initialization. The Agave client does not need root and runs entirely as <code>bcuser</code>.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="additional-resources">Additional Resources<a href="#additional-resources" class="hash-link" aria-label="Direct link to Additional Resources" title="Direct link to Additional Resources" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="client-release-channels">Client Release Channels<a href="#client-release-channels" class="hash-link" aria-label="Direct link to Client Release Channels" title="Direct link to Client Release Channels" translate="no">​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Client</th><th>Repo</th><th>Query method</th><th>Version line</th><th>Prereleases</th></tr></thead><tbody><tr><td>Agave</td><td><a href="https://github.com/anza-xyz/agave/releases" target="_blank" rel="noopener noreferrer" class="">anza-xyz/agave</a></td><td>tags (semver)</td><td>3.1.x</td><td>exclude rc/beta</td></tr><tr><td>Frankendancer</td><td><a href="https://github.com/firedancer-io/firedancer/releases" target="_blank" rel="noopener noreferrer" class="">firedancer-io/firedancer</a></td><td>releases/latest</td><td>*</td><td>stable only</td></tr></tbody></table>
+<blockquote>
+<p>Column legend — <strong>Repo</strong>: canonical <code>owner/repo</code> (link goes to the releases page). <strong>Query method</strong>: <code>releases/latest</code> = newest non-prerelease via GitHub API (<code>https://api.github.com/repos/{repo}/releases/latest</code>); <code>tags</code> = list <code>/tags</code> and pick the highest matching semver; <code>releases</code> = list <code>/releases</code> and pick the newest matching the prerelease policy; <code>pinned-file</code> = read the named file at the given ref. <strong>Version line</strong>: constrains updates to a release line (<code>*</code> = any). <strong>Prereleases</strong>: whether beta/RC tags are eligible.</p>
+<p>Note: <code>Agave</code> maintains multiple concurrent release lines (e.g. <code>3.1.x</code> and <code>4.0.x</code>), so <code>releases/latest</code> can jump across major lines. The blueprint tracks the <code>3.1.x</code> line by default; moving to a newer major line (<code>4.x</code>) is an explicit opt-in decision, not a routine update.</p>
+</blockquote>
+<ul>
+<li class=""><a href="https://docs.solana.com/" target="_blank" rel="noopener noreferrer" class="">Solana Documentation</a></li>
+<li class=""><a href="https://github.com/anza-xyz/agave" target="_blank" rel="noopener noreferrer" class="">Agave Validator GitHub</a></li>
+<li class=""><a href="https://docs.firedancer.io/" target="_blank" rel="noopener noreferrer" class="">Firedancer Documentation</a></li>
+<li class=""><a href="https://github.com/firedancer-io/firedancer" target="_blank" rel="noopener noreferrer" class="">Firedancer GitHub</a></li>
+<li class=""><a href="https://docs.solana.com/api/http" target="_blank" rel="noopener noreferrer" class="">Solana RPC API Reference</a></li>
+<li class=""><a href="https://docs.solana.com/running-validator/validator-reqs" target="_blank" rel="noopener noreferrer" class="">Solana Validator Requirements</a></li>
+<li class=""><a class="" href="/aws-blockchain-node-runners/docs/guides/traffic-shaping">Traffic Shaping Documentation</a></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="support">Support<a href="#support" class="hash-link" aria-label="Direct link to Support" title="Direct link to Support" translate="no">​</a></h2>
+<p>For issues and questions:</p>
+<ul>
+<li class="">Check <a class="" href="/aws-blockchain-node-runners/docs/guides/troubleshooting">Troubleshooting Guide</a></li>
+<li class="">Review <a class="" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Configuration Reference</a></li>
+<li class="">Open a GitHub issue</li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/aws-samples/aws-blockchain-node-runners/website/docs/blueprints/solana.mdx" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/aws-blockchain-node-runners/docs/blueprints/ethereum"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Ethereum</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/aws-blockchain-node-runners/docs/guides/configuration-reference"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Configuration Reference</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#overview-of-deployment-architectures" class="table-of-contents__link toc-highlight">Overview of Deployment Architectures</a><ul><li><a href="#single-node-deployment" class="table-of-contents__link toc-highlight">Single Node Deployment</a></li><li><a href="#high-availability-ha-deployment" class="table-of-contents__link toc-highlight">High Availability (HA) Deployment</a></li></ul></li><li><a href="#supported-configurations" class="table-of-contents__link toc-highlight">Supported Configurations</a><ul><li><a href="#available-configurations" class="table-of-contents__link toc-highlight">Available Configurations</a></li><li><a href="#configuration-differences" class="table-of-contents__link toc-highlight">Configuration Differences</a></li></ul></li><li><a href="#agave-vs-frankendancer" class="table-of-contents__link toc-highlight">Agave vs Frankendancer</a><ul><li><a href="#when-to-choose-frankendancer" class="table-of-contents__link toc-highlight">When to Choose Frankendancer</a></li><li><a href="#port-security-unified-dynamic-port-range" class="table-of-contents__link toc-highlight">Port Security: Unified Dynamic Port Range</a></li><li><a href="#port-security-why-ports-9001-and-9007-are-not-exposed" class="table-of-contents__link toc-highlight">Port Security: Why Ports 9001 and 9007 Are Not Exposed</a></li></ul></li><li><a href="#infrastructure-requirements" class="table-of-contents__link toc-highlight">Infrastructure Requirements</a><ul><li><a href="#hardware-requirements" class="table-of-contents__link toc-highlight">Hardware Requirements</a></li><li><a href="#recommended-instance-types" class="table-of-contents__link toc-highlight">Recommended Instance Types</a></li><li><a href="#storage-requirements" class="table-of-contents__link toc-highlight">Storage Requirements</a></li><li><a href="#network-traffic" class="table-of-contents__link toc-highlight">Network Traffic</a></li></ul></li><li><a href="#setup-instructions" class="table-of-contents__link toc-highlight">Setup Instructions</a><ul><li><a href="#option-1-ai-driven-deployment-recommended" class="table-of-contents__link toc-highlight">Option 1: AI-Driven Deployment (Recommended)</a></li><li><a href="#option-2-manual-deployment" class="table-of-contents__link toc-highlight">Option 2: Manual Deployment</a></li></ul></li><li><a href="#configuration-options" class="table-of-contents__link toc-highlight">Configuration Options</a><ul><li><a href="#node-identity" class="table-of-contents__link toc-highlight">Node Identity</a></li><li><a href="#traffic-shaping" class="table-of-contents__link toc-highlight">Traffic Shaping</a></li></ul></li><li><a href="#troubleshooting" class="table-of-contents__link toc-highlight">Troubleshooting</a><ul><li><a href="#common-issues-both-clients" class="table-of-contents__link toc-highlight">Common Issues (Both Clients)</a></li><li><a href="#frankendancer-specific-issues" class="table-of-contents__link toc-highlight">Frankendancer-Specific Issues</a></li></ul></li><li><a href="#upgrades" class="table-of-contents__link toc-highlight">Upgrades</a></li><li><a href="#cost-optimization" class="table-of-contents__link toc-highlight">Cost Optimization</a></li><li><a href="#security-considerations" class="table-of-contents__link toc-highlight">Security Considerations</a></li><li><a href="#faq" class="table-of-contents__link toc-highlight">FAQ</a></li><li><a href="#additional-resources" class="table-of-contents__link toc-highlight">Additional Resources</a><ul><li><a href="#client-release-channels" class="table-of-contents__link toc-highlight">Client Release Channels</a></li></ul></li><li><a href="#support" class="table-of-contents__link toc-highlight">Support</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Documentation</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/aws-blockchain-node-runners/docs/getting-started/intro">Getting Started</a></li><li class="footer__item"><a class="footer__link-item" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Configuration Reference</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/aws-samples/aws-blockchain-node-runners" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" class="footer__link-item">Contribution Guide<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Built with ❤️ at AWS  <br> © 2026 Amazon.com, Inc. or its affiliates. All Rights Reserved.</div></div></div></footer></div>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-ai-prompts/deploy-with-ai" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.10.1">
+<title data-rh="true">deploy-with-ai | AWS Blockchain Node Runners</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://aws-samples.github.io/aws-blockchain-node-runners/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://aws-samples.github.io/aws-blockchain-node-runners/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://aws-samples.github.io/aws-blockchain-node-runners/docs/ai-prompts/deploy-with-ai"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="deploy-with-ai | AWS Blockchain Node Runners"><meta data-rh="true" name="description" content="This page documents the internal workflow that Kiro follows when you run the corresponding @prompt. You don&#x27;t need to read this to use the tool — it&#x27;s here for transparency and for developers who want to understand or extend the workflows."><meta data-rh="true" property="og:description" content="This page documents the internal workflow that Kiro follows when you run the corresponding @prompt. You don&#x27;t need to read this to use the tool — it&#x27;s here for transparency and for developers who want to understand or extend the workflows."><link data-rh="true" rel="canonical" href="https://aws-samples.github.io/aws-blockchain-node-runners/docs/ai-prompts/deploy-with-ai"><link data-rh="true" rel="alternate" href="https://aws-samples.github.io/aws-blockchain-node-runners/docs/ai-prompts/deploy-with-ai" hreflang="en"><link data-rh="true" rel="alternate" href="https://aws-samples.github.io/aws-blockchain-node-runners/docs/ai-prompts/deploy-with-ai" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Deploy a Node with AI","item":"https://aws-samples.github.io/aws-blockchain-node-runners/docs/ai-prompts/deploy-with-ai"}]}</script><link rel="preconnect" href="https://www.google-analytics.com">
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEK2TQ67TP"></script>
+<script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-KEK2TQ67TP",{anonymize_ip:!0})</script>
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script>window.dataLayer=window.dataLayer||[]</script>
+<script>!function(e,t,a,n){e[n]=e[n]||[],e[n].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var g=t.getElementsByTagName(a)[0],m=t.createElement(a);m.async=!0,m.src="https://www.googletagmanager.com/gtm.js?id=GTM-WQ97QTTR",g.parentNode.insertBefore(m,g)}(window,document,"script","dataLayer")</script><link rel="stylesheet" href="/aws-blockchain-node-runners/assets/css/styles.a61c0be4.css">
+<script src="/aws-blockchain-node-runners/assets/js/runtime~main.2dad2b6f.js" defer="defer"></script>
+<script src="/aws-blockchain-node-runners/assets/js/main.a2dfdf97.js" defer="defer"></script>
+</head>
+<body>
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"dark"),document.documentElement.setAttribute("data-theme-choice",t||"dark")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WQ97QTTR" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/aws-blockchain-node-runners/"><b class="navbar__title text--truncate">▣-▣-▣ Node Runners</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/getting-started/quickstart">Getting Started</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/blueprints/about">Blueprints</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Guides</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/ai-prompts/deploy-with-ai">AI Prompts</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/aws-samples/aws-blockchain-node-runners" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/aws-blockchain-node-runners/docs/getting-started/intro"><span title="Getting Started" class="categoryLinkLabel_W154">Getting Started</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/aws-blockchain-node-runners/docs/blueprints/about"><span title="Blueprints" class="categoryLinkLabel_W154">Blueprints</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/aws-blockchain-node-runners/docs/guides/configuration-reference"><span title="Guides" class="categoryLinkLabel_W154">Guides</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/aws-blockchain-node-runners/docs/ai-prompts/add-protocol-with-ai"><span title="AI Workflow Reference" class="categoryLinkLabel_W154">AI Workflow Reference</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/ai-prompts/add-protocol-with-ai"><span title="Add Protocol Blueprint with AI" class="linkLabel_WmDU">Add Protocol Blueprint with AI</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/aws-blockchain-node-runners/docs/ai-prompts/deploy-with-ai"><span title="Deploy a Node with AI" class="linkLabel_WmDU">Deploy a Node with AI</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/ai-prompts/healthcheck-with-ai"><span title="Healthcheck a Node with AI" class="linkLabel_WmDU">Healthcheck a Node with AI</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/ai-prompts/security-review-with-ai"><span title="Blueprint Security Review with AI" class="linkLabel_WmDU">Blueprint Security Review with AI</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/ai-prompts/version-update-with-ai"><span title="Version Update with AI" class="linkLabel_WmDU">Version Update with AI</span></a></li></ul></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/aws-blockchain-node-runners/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">AI Workflow Reference</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Deploy a Node with AI</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1></h1></header>
+<!-- -->
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>This page documents the internal workflow that Kiro follows when you run the corresponding <code>@prompt</code>. You don&#x27;t need to read this to use the tool — it&#x27;s here for transparency and for developers who want to understand or extend the workflows.</p></div></div>
+<header><h1>Deploy a Blockchain Node</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-1-gather-requirements">STEP 1: GATHER REQUIREMENTS<a href="#step-1-gather-requirements" class="hash-link" aria-label="Direct link to STEP 1: GATHER REQUIREMENTS" title="Direct link to STEP 1: GATHER REQUIREMENTS" translate="no">​</a></h2>
+<p>Before asking the user anything, auto-detect their AWS environment:</p>
+<ul>
+<li class="">Run: <code>aws sts get-caller-identity --query Account --output text</code> → AWS Account ID</li>
+<li class="">Run: <code>aws configure get region</code> → CLI profile default region</li>
+<li class="">Run: <code>aws cloudformation describe-stacks --stack-name CDKToolkit</code> → CDK bootstrap status</li>
+</ul>
+<p>Present what you found, for example:</p>
+<blockquote>
+<p>&quot;Detected AWS Account: 123456789012, CLI profile region: us-east-1, CDK bootstrap: present&quot;</p>
+</blockquote>
+<p>Note: the deployment region is set in the .env file (AWS_REGION) and always takes precedence over the CLI profile default — so the user can deploy to any region regardless of their profile.</p>
+<p>Then ask for the remaining information:</p>
+<ol>
+<li class="">Which blockchain protocol? (ethereum, solana, etc.)</li>
+<li class="">Which network? (mainnet, testnet, devnet)</li>
+<li class="">What type of node? (RPC, archive, pruned)</li>
+<li class="">Is this for production or development?</li>
+<li class="">Do you need high availability (HA)?</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-15-ensure-dependencies-are-installed">STEP 1.5: ENSURE DEPENDENCIES ARE INSTALLED<a href="#step-15-ensure-dependencies-are-installed" class="hash-link" aria-label="Direct link to STEP 1.5: ENSURE DEPENDENCIES ARE INSTALLED" title="Direct link to STEP 1.5: ENSURE DEPENDENCIES ARE INSTALLED" translate="no">​</a></h2>
+<p>Before reading protocol documentation or running any CDK commands, verify that dependencies are installed:</p>
+<ol>
+<li class="">
+<p>Check if <code>node_modules/</code> exists and contains the protocol blueprint:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token function" style="color:rgb(80, 250, 123)">ls</span><span class="token plain"> node_modules/aws-bnr-blueprint-</span><span class="token punctuation" style="color:rgb(248, 248, 242)">{</span><span class="token plain">protocol</span><span class="token punctuation" style="color:rgb(248, 248, 242)">}</span><span class="token plain">/package.json </span><span class="token operator file-descriptor important">2</span><span class="token operator">&gt;</span><span class="token plain">/dev/null</span><br></div></code></pre></div></div>
+</li>
+<li class="">
+<p>If the directory is missing or the check fails, install dependencies:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token function" style="color:rgb(80, 250, 123)">npm</span><span class="token plain"> </span><span class="token function" style="color:rgb(80, 250, 123)">install</span><br></div></code></pre></div></div>
+</li>
+<li class="">
+<p>Verify the installation succeeded:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token function" style="color:rgb(80, 250, 123)">ls</span><span class="token plain"> node_modules/aws-bnr-blueprint-</span><span class="token punctuation" style="color:rgb(248, 248, 242)">{</span><span class="token plain">protocol</span><span class="token punctuation" style="color:rgb(248, 248, 242)">}</span><span class="token plain">/package.json</span><br></div></code></pre></div></div>
+</li>
+</ol>
+<p><strong>Why this matters</strong>: Protocol blueprints are installed as local <code>file:</code> dependencies. Without <code>npm install</code>, the <code>node_modules/aws-bnr-blueprint-{protocol}/</code> paths referenced throughout this workflow will not exist, and CDK commands (<code>npx cdk synth</code>, <code>npx cdk deploy</code>) will fail.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-2-read-protocol-documentation">STEP 2: READ PROTOCOL DOCUMENTATION<a href="#step-2-read-protocol-documentation" class="hash-link" aria-label="Direct link to STEP 2: READ PROTOCOL DOCUMENTATION" title="Direct link to STEP 2: READ PROTOCOL DOCUMENTATION" translate="no">​</a></h2>
+<p>Before making recommendations, read these files:</p>
+<ul>
+<li class=""><code>node_modules/aws-bnr-blueprint-{protocol}/README.md</code> — Protocol requirements and cost estimates</li>
+<li class=""><code>node_modules/aws-bnr-blueprint-{protocol}/package.json</code> — Available configurations (in <code>&quot;aws-blockchain-node-runner&quot;</code> field)</li>
+<li class=""><code>node_modules/aws-bnr-blueprint-{protocol}/samples/</code> — Sample .env templates</li>
+<li class=""><code>docs/configuration-reference.md</code> — Environment variable reference</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-25-security-review-for-external-blueprints">STEP 2.5: SECURITY REVIEW FOR EXTERNAL BLUEPRINTS<a href="#step-25-security-review-for-external-blueprints" class="hash-link" aria-label="Direct link to STEP 2.5: SECURITY REVIEW FOR EXTERNAL BLUEPRINTS" title="Direct link to STEP 2.5: SECURITY REVIEW FOR EXTERNAL BLUEPRINTS" translate="no">​</a></h2>
+<p>IMPORTANT: If the selected protocol is from an EXTERNAL blueprint (not ethereum, solana, bnb, base, or dummy), you MUST perform a security review before proceeding:</p>
+<ol>
+<li class="">Read <code>docs/ageai-blueprint-security-review.md</code></li>
+<li class="">Follow the complete security review workflow</li>
+<li class="">Do NOT proceed to Step 3 until the user acknowledges the review</li>
+</ol>
+<p>Built-in blueprints (ethereum, solana, bnb, base, dummy) skip this step.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-3-analyze-and-recommend">STEP 3: ANALYZE AND RECOMMEND<a href="#step-3-analyze-and-recommend" class="hash-link" aria-label="Direct link to STEP 3: ANALYZE AND RECOMMEND" title="Direct link to STEP 3: ANALYZE AND RECOMMEND" translate="no">​</a></h2>
+<p>Based on the requirements and the protocol documentation:</p>
+<ol>
+<li class="">Identify the best configuration from availableConfigurations</li>
+<li class="">Recommend infrastructure (instance type, storage, deployment mode)</li>
+<li class="">Present your recommendation with clear rationale</li>
+<li class="">Explain why you chose this configuration</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-4-cost-estimation-mandatory">STEP 4: COST ESTIMATION (MANDATORY)<a href="#step-4-cost-estimation-mandatory" class="hash-link" aria-label="Direct link to STEP 4: COST ESTIMATION (MANDATORY)" title="Direct link to STEP 4: COST ESTIMATION (MANDATORY)" translate="no">​</a></h2>
+<p>CRITICAL: You MUST present cost information before proceeding. Never skip this step.</p>
+<p>4a. Always extract and present the cost estimates from the protocol README (<code>node_modules/aws-bnr-blueprint-{protocol}/README.md</code>). Every protocol README contains a cost table or cost section — find it and show it to the user. This is the MINIMUM cost information that must be shown.</p>
+<p>4b. Then ask if the user wants a detailed, real-time cost breakdown using AWS Pricing API. If yes:</p>
+<ul>
+<li class=""><code>aws pricing get-products</code> cli option is preferred method for all cost estimations, use it unless the user refuses to configure it</li>
+<li class="">Calculate: compute, storage, network, CloudWatch logs</li>
+<li class="">Present cost breakdown with optimization suggestions</li>
+</ul>
+<p>4c. If network costs &gt; $100/month, mention traffic shaping (<code>docs/traffic-shaping.md</code>)</p>
+<p>4d. If <code>SNAPSHOT_STAGING_VOL_SIZE</code> is configured (&gt; 0), include the one-time staging volume cost in the estimate:</p>
+<ul>
+<li class="">Storage: SNAPSHOT_STAGING_VOL_SIZE (GiB) × $0.08/GiB/mo × (estimated_download_days / 30)</li>
+<li class="">Provisioned throughput (1000 MB/s): $0.04/provisioned-MB/s/mo × 1000 × (days / 30)</li>
+<li class="">Present as a one-time cost (volume is deleted after extraction)</li>
+<li class="">Example: 5 TB staging volume for ~2 days ≈ $29</li>
+</ul>
+<p>4e. Present the final cost summary clearly. This summary will be required in Step 6.</p>
+<p>Do NOT proceed to Step 5 until cost information has been presented to the user.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-5-generate-configuration">STEP 5: GENERATE CONFIGURATION<a href="#step-5-generate-configuration" class="hash-link" aria-label="Direct link to STEP 5: GENERATE CONFIGURATION" title="Direct link to STEP 5: GENERATE CONFIGURATION" translate="no">​</a></h2>
+<p>Once the user approves the recommendation:</p>
+<ol>
+<li class="">Read <code>docs/configuration-reference.md</code> for configuration options</li>
+<li class="">Use the appropriate sample from <code>node_modules/aws-bnr-blueprint-{protocol}/samples/</code> as template</li>
+<li class="">Customize with the user&#x27;s AWS Account ID, region, and approved settings</li>
+<li class="">If SNAPSHOT_ENABLED=true, check whether the protocol needs a staging volume:
+<ul>
+<li class="">Look at the snapshot archive size (from protocol README or sample .env comments)</li>
+<li class="">Compare: compressed_archive_size + extracted_data_size vs available /data space</li>
+<li class="">If the sum exceeds available disk (common with instance-store volumes and multi-TB archives), set SNAPSHOT_STAGING_VOL_SIZE to ~1.1x the compressed archive size (in GiB)</li>
+<li class="">If the sample .env already includes SNAPSHOT_STAGING_VOL_SIZE, keep that value</li>
+<li class="">See <code>docs/snapshot-staging.md</code> for per-protocol sizing guidance</li>
+</ul>
+</li>
+<li class="">Save as <code>.env</code> in repository root</li>
+<li class="">Show the user the key settings</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-6-get-deployment-confirmation">STEP 6: GET DEPLOYMENT CONFIRMATION<a href="#step-6-get-deployment-confirmation" class="hash-link" aria-label="Direct link to STEP 6: GET DEPLOYMENT CONFIRMATION" title="Direct link to STEP 6: GET DEPLOYMENT CONFIRMATION" translate="no">​</a></h2>
+<p>CRITICAL: You MUST get explicit confirmation before deploying. You MUST NOT skip or abbreviate this step under any circumstances.</p>
+<p>Present a clear deployment summary with ALL of the following items:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token plain">📋 DEPLOYMENT SUMMARY</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">─────────────────────</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">Protocol:       {protocol}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">Network:        {network}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">Client:         {client software and version}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">Instance type:  {instance type}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">Storage:        {storage size and type}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">Deployment mode:{single-node or HA}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">Region:         {AWS region}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">Staging volume: {SNAPSHOT_STAGING_VOL_SIZE GiB, or &quot;none&quot; if 0/omitted}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">💰 ESTIMATED MONTHLY COST</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">─────────────────────────</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">{cost summary from Step 4 — if Step 4 was somehow skipped, go back and do it NOW}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">{if staging volume configured, include one-time staging cost as a separate line}</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">⚠️  AWS charges begin IMMEDIATELY upon deployment.</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">🗑️  To destroy later: npx cdk destroy</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">Type &quot;yes&quot; to deploy, or &quot;no&quot; to cancel.</span><br></div></code></pre></div></div>
+<p>RULES:</p>
+<ul>
+<li class="">You MUST show the cost summary. If you don&#x27;t have cost data, go back to Step 4.</li>
+<li class="">You MUST wait for the user to type &quot;yes&quot; before proceeding to Step 7.</li>
+<li class="">If the user says &quot;no&quot;, cancel and save the .env file for later.</li>
+<li class="">If the user says anything other than a clear &quot;yes&quot;, ask for clarification. Do NOT assume consent.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-7-deploy">STEP 7: DEPLOY<a href="#step-7-deploy" class="hash-link" aria-label="Direct link to STEP 7: DEPLOY" title="Direct link to STEP 7: DEPLOY" translate="no">​</a></h2>
+<p>Once the user confirms with &quot;yes&quot;:</p>
+<p>7a. Check if CDK bootstrap is needed (run if required)</p>
+<p>7b. Resolve the stack name BEFORE deploying:</p>
+<ul>
+<li class="">Run: <code>npx cdk synth --quiet 2&gt;&amp;1 | head -20</code></li>
+<li class="">Or look at the CDK app output to identify the exact stack name.</li>
+<li class="">Store the stack name in a variable, e.g.: <code>STACK_NAME=&quot;solana-mainnet-beta-frankendancer-rpc-base&quot;</code></li>
+<li class="">You MUST know the exact stack name before proceeding. Do NOT use a generic name.</li>
+</ul>
+<p>7c. Backup the .env file using the resolved stack name:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token function" style="color:rgb(80, 250, 123)">cp</span><span class="token plain"> .env .env-</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">$STACK_NAME</span><br></div></code></pre></div></div>
+<p>7d. Deploy using the resolved stack name in the output filename:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token plain">npx cdk deploy </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">--json</span><span class="token plain"> --outputs-file deploy-output-</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">$STACK_NAME</span><span class="token plain">.json</span><br></div></code></pre></div></div>
+<p>CRITICAL: The outputs file MUST be named <code>deploy-output-{stack-name}.json</code></p>
+<ul>
+<li class="">WRONG: <code>deploy-output.json</code></li>
+<li class="">CORRECT: <code>deploy-output-solana-mainnet-beta-agave-rpc-base.json</code></li>
+</ul>
+<p>This naming convention prevents confusion when managing multiple deployments.</p>
+<p>7e. Monitor progress and report status</p>
+<p>7f. Extract outputs (instance ID, IPs, endpoints)</p>
+<p>7g. Report success with key information and the output filename</p>
+<p>7h. Confirm both files were created:</p>
+<ul>
+<li class=""><code>.env-{stack-name}</code> (configuration backup)</li>
+<li class=""><code>deploy-output-{stack-name}.json</code> (deployment outputs)</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-8-wait-for-initialization">STEP 8: WAIT FOR INITIALIZATION<a href="#step-8-wait-for-initialization" class="hash-link" aria-label="Direct link to STEP 8: WAIT FOR INITIALIZATION" title="Direct link to STEP 8: WAIT FOR INITIALIZATION" translate="no">​</a></h2>
+<p>After successful deployment:</p>
+<ol>
+<li class="">Inform the user that the node is initializing</li>
+<li class="">Explain that initial setup takes 3-5 minutes</li>
+<li class="">Tell the user you&#x27;ll perform a healthcheck in 5 minutes</li>
+<li class="">Wait 5 minutes before proceeding to next step</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-9-perform-healthcheck">STEP 9: PERFORM HEALTHCHECK<a href="#step-9-perform-healthcheck" class="hash-link" aria-label="Direct link to STEP 9: PERFORM HEALTHCHECK" title="Direct link to STEP 9: PERFORM HEALTHCHECK" translate="no">​</a></h2>
+<p>After waiting 5 minutes:</p>
+<ol>
+<li class="">Read <code>docs/ageai-healthcheck-prompt.md</code></li>
+<li class="">Identify the correct deployment output file: <code>deploy-output-{stack-name}.json</code></li>
+<li class="">Follow the comprehensive healthcheck instructions using the correct deployment file</li>
+<li class="">Report the healthcheck results</li>
+<li class="">If issues found, provide troubleshooting guidance</li>
+</ol>
+<p>IMPORTANT: If multiple deployments exist (multiple <code>deploy-output-*.json</code> files):</p>
+<ul>
+<li class="">List all available deployment files</li>
+<li class="">Ask the user to confirm which deployment to check</li>
+<li class="">Use the correct <code>deploy-output-{stack-name}.json</code> file for that specific node</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-10-provide-monitoring-guidance">STEP 10: PROVIDE MONITORING GUIDANCE<a href="#step-10-provide-monitoring-guidance" class="hash-link" aria-label="Direct link to STEP 10: PROVIDE MONITORING GUIDANCE" title="Direct link to STEP 10: PROVIDE MONITORING GUIDANCE" translate="no">​</a></h2>
+<p>Guide the user on monitoring sync progress:</p>
+<p>For Single-Node:</p>
+<ul>
+<li class="">CloudWatch Dashboard URL and key metrics</li>
+<li class="">CLI commands to check service status</li>
+<li class="">CloudWatch Logs viewing commands</li>
+<li class="">Expected sync time</li>
+</ul>
+<p>For HA:</p>
+<ul>
+<li class="">ALB DNS and RPC endpoint</li>
+<li class="">Target health check commands</li>
+<li class="">Note about custom dashboard creation</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-11-provide-connection-guidance">STEP 11: PROVIDE CONNECTION GUIDANCE<a href="#step-11-provide-connection-guidance" class="hash-link" aria-label="Direct link to STEP 11: PROVIDE CONNECTION GUIDANCE" title="Direct link to STEP 11: PROVIDE CONNECTION GUIDANCE" translate="no">​</a></h2>
+<p>Explain how to connect applications:</p>
+<ul>
+<li class="">RPC endpoint (single-node vs HA)</li>
+<li class="">Security group requirements</li>
+<li class="">Protocol-specific connection examples</li>
+<li class="">Best practices</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-12-offer-ongoing-assistance">STEP 12: OFFER ONGOING ASSISTANCE<a href="#step-12-offer-ongoing-assistance" class="hash-link" aria-label="Direct link to STEP 12: OFFER ONGOING ASSISTANCE" title="Direct link to STEP 12: OFFER ONGOING ASSISTANCE" translate="no">​</a></h2>
+<p>Let the user know you can help with:</p>
+<ul>
+<li class="">Monitoring sync progress</li>
+<li class="">Troubleshooting (refer to <code>docs/troubleshooting.md</code>)</li>
+<li class="">Setting up CloudWatch alarms</li>
+<li class="">Performance optimization</li>
+<li class="">Scaling to HA</li>
+<li class="">Cost optimization</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="error-handling">ERROR HANDLING<a href="#error-handling" class="hash-link" aria-label="Direct link to ERROR HANDLING" title="Direct link to ERROR HANDLING" translate="no">​</a></h2>
+<ul>
+<li class="">If deployment fails: Check CloudFormation events, review logs, refer to <code>docs/troubleshooting.md</code></li>
+<li class="">If deployment fails with disk full during snapshot download: Set <code>SNAPSHOT_STAGING_VOL_SIZE</code> in <code>.env</code> to ~1.1x the compressed archive size (in GiB), destroy the stack, and redeploy. This creates a temporary EBS volume to hold the archive during download. See <code>docs/snapshot-staging.md</code> for sizing guidance.</li>
+<li class="">If the user cancels: Confirm cancellation, save .env file, offer alternatives</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="guidelines">GUIDELINES<a href="#guidelines" class="hash-link" aria-label="Direct link to GUIDELINES" title="Direct link to GUIDELINES" translate="no">​</a></h2>
+<p>DO:</p>
+<ul>
+<li class="">Always ensure <code>npm install</code> has been run before reading protocol docs or deploying</li>
+<li class="">Always read protocol README first</li>
+<li class="">Use protocol samples as templates</li>
+<li class="">Always show cost estimates from protocol README (Step 4 is mandatory)</li>
+<li class="">Always show the full deployment summary in Step 6 including costs</li>
+<li class="">Get explicit &quot;yes&quot; confirmation before deploying</li>
+<li class="">Perform security review for external blueprints (see <code>docs/ageai-blueprint-security-review.md</code>)</li>
+<li class="">Wait 5 minutes after deployment before healthcheck</li>
+<li class="">Provide monitoring and connection guidance</li>
+<li class="">Refer to <code>docs/troubleshooting.md</code> for issues</li>
+</ul>
+<p>DO NOT:</p>
+<ul>
+<li class="">Never run CDK commands without first verifying <code>npm install</code> has been completed</li>
+<li class="">Never deploy without explicit &quot;yes&quot; confirmation</li>
+<li class="">Never guess configuration values</li>
+<li class="">Never skip cost estimation (Step 4) — it is mandatory</li>
+<li class="">Never skip the deployment summary (Step 6) — it is mandatory</li>
+<li class="">Never proceed to deployment without showing costs</li>
+<li class="">Never skip security review for external blueprints</li>
+<li class="">Never proceed if the user seems uncertain</li>
+<li class="">Never skip the 5-minute wait before healthcheck</li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/aws-samples/aws-blockchain-node-runners/website/docs/ai-prompts/deploy-with-ai.mdx" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/aws-blockchain-node-runners/docs/ai-prompts/add-protocol-with-ai"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">Add Protocol Blueprint with AI</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/aws-blockchain-node-runners/docs/ai-prompts/healthcheck-with-ai"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Healthcheck a Node with AI</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#step-1-gather-requirements" class="table-of-contents__link toc-highlight">STEP 1: GATHER REQUIREMENTS</a></li><li><a href="#step-15-ensure-dependencies-are-installed" class="table-of-contents__link toc-highlight">STEP 1.5: ENSURE DEPENDENCIES ARE INSTALLED</a></li><li><a href="#step-2-read-protocol-documentation" class="table-of-contents__link toc-highlight">STEP 2: READ PROTOCOL DOCUMENTATION</a></li><li><a href="#step-25-security-review-for-external-blueprints" class="table-of-contents__link toc-highlight">STEP 2.5: SECURITY REVIEW FOR EXTERNAL BLUEPRINTS</a></li><li><a href="#step-3-analyze-and-recommend" class="table-of-contents__link toc-highlight">STEP 3: ANALYZE AND RECOMMEND</a></li><li><a href="#step-4-cost-estimation-mandatory" class="table-of-contents__link toc-highlight">STEP 4: COST ESTIMATION (MANDATORY)</a></li><li><a href="#step-5-generate-configuration" class="table-of-contents__link toc-highlight">STEP 5: GENERATE CONFIGURATION</a></li><li><a href="#step-6-get-deployment-confirmation" class="table-of-contents__link toc-highlight">STEP 6: GET DEPLOYMENT CONFIRMATION</a></li><li><a href="#step-7-deploy" class="table-of-contents__link toc-highlight">STEP 7: DEPLOY</a></li><li><a href="#step-8-wait-for-initialization" class="table-of-contents__link toc-highlight">STEP 8: WAIT FOR INITIALIZATION</a></li><li><a href="#step-9-perform-healthcheck" class="table-of-contents__link toc-highlight">STEP 9: PERFORM HEALTHCHECK</a></li><li><a href="#step-10-provide-monitoring-guidance" class="table-of-contents__link toc-highlight">STEP 10: PROVIDE MONITORING GUIDANCE</a></li><li><a href="#step-11-provide-connection-guidance" class="table-of-contents__link toc-highlight">STEP 11: PROVIDE CONNECTION GUIDANCE</a></li><li><a href="#step-12-offer-ongoing-assistance" class="table-of-contents__link toc-highlight">STEP 12: OFFER ONGOING ASSISTANCE</a></li><li><a href="#error-handling" class="table-of-contents__link toc-highlight">ERROR HANDLING</a></li><li><a href="#guidelines" class="table-of-contents__link toc-highlight">GUIDELINES</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Documentation</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/aws-blockchain-node-runners/docs/getting-started/intro">Getting Started</a></li><li class="footer__item"><a class="footer__link-item" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Configuration Reference</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/aws-samples/aws-blockchain-node-runners" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" class="footer__link-item">Contribution Guide<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Built with ❤️ at AWS  <br> © 2026 Amazon.com, Inc. or its affiliates. All Rights Reserved.</div></div></div></footer></div>
+</body>
+</html>

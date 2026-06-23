@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-blueprints/ethereum" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.10.1">
+<title data-rh="true">Ethereum | AWS Blockchain Node Runners</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://aws-samples.github.io/aws-blockchain-node-runners/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://aws-samples.github.io/aws-blockchain-node-runners/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/ethereum"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Ethereum | AWS Blockchain Node Runners"><link data-rh="true" rel="canonical" href="https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/ethereum"><link data-rh="true" rel="alternate" href="https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/ethereum" hreflang="en"><link data-rh="true" rel="alternate" href="https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/ethereum" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ethereum","item":"https://aws-samples.github.io/aws-blockchain-node-runners/docs/blueprints/ethereum"}]}</script><link rel="preconnect" href="https://www.google-analytics.com">
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KEK2TQ67TP"></script>
+<script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-KEK2TQ67TP",{anonymize_ip:!0})</script>
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<script>window.dataLayer=window.dataLayer||[]</script>
+<script>!function(e,t,a,n){e[n]=e[n]||[],e[n].push({"gtm.start":(new Date).getTime(),event:"gtm.js"});var g=t.getElementsByTagName(a)[0],m=t.createElement(a);m.async=!0,m.src="https://www.googletagmanager.com/gtm.js?id=GTM-WQ97QTTR",g.parentNode.insertBefore(m,g)}(window,document,"script","dataLayer")</script><link rel="stylesheet" href="/aws-blockchain-node-runners/assets/css/styles.a61c0be4.css">
+<script src="/aws-blockchain-node-runners/assets/js/runtime~main.2dad2b6f.js" defer="defer"></script>
+<script src="/aws-blockchain-node-runners/assets/js/main.a2dfdf97.js" defer="defer"></script>
+</head>
+<body>
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"dark"),document.documentElement.setAttribute("data-theme-choice",t||"dark")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script>
+
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WQ97QTTR" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/aws-blockchain-node-runners/"><b class="navbar__title text--truncate">▣-▣-▣ Node Runners</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/getting-started/quickstart">Getting Started</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/blueprints/about">Blueprints</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Guides</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/aws-blockchain-node-runners/docs/ai-prompts/deploy-with-ai">AI Prompts</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/aws-samples/aws-blockchain-node-runners" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/aws-blockchain-node-runners/docs/getting-started/intro"><span title="Getting Started" class="categoryLinkLabel_W154">Getting Started</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/aws-blockchain-node-runners/docs/blueprints/about"><span title="Blueprints" class="categoryLinkLabel_W154">Blueprints</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/about"><span title="About Blueprints" class="linkLabel_WmDU">About Blueprints</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/community"><span title="Community Blueprints" class="linkLabel_WmDU">Community Blueprints</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/base"><span title="Base" class="linkLabel_WmDU">Base</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/bitcoin"><span title="Bitcoin" class="linkLabel_WmDU">Bitcoin</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/bnb"><span title="BNB Chain" class="linkLabel_WmDU">BNB Chain</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/ethereum"><span title="Ethereum" class="linkLabel_WmDU">Ethereum</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/aws-blockchain-node-runners/docs/blueprints/solana"><span title="Solana" class="linkLabel_WmDU">Solana</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/aws-blockchain-node-runners/docs/guides/configuration-reference"><span title="Guides" class="categoryLinkLabel_W154">Guides</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/aws-blockchain-node-runners/docs/ai-prompts/add-protocol-with-ai"><span title="AI Workflow Reference" class="categoryLinkLabel_W154">AI Workflow Reference</span></a></div></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/aws-blockchain-node-runners/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">Blueprints</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Ethereum</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Ethereum</h1></header><header><h1>Ethereum Protocol Node Runner</h1></header>
+<p>This protocol implementation provides support for running Ethereum RPC nodes on AWS using the Universal Blockchain Node Runner. It supports multiple execution and consensus client combinations with flexible deployment options.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="overview-of-deployment-architectures">Overview of Deployment Architectures<a href="#overview-of-deployment-architectures" class="hash-link" aria-label="Direct link to Overview of Deployment Architectures" title="Direct link to Overview of Deployment Architectures" translate="no">​</a></h2>
+<p>The Ethereum protocol supports two deployment modes:</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="single-node-deployment">Single Node Deployment<a href="#single-node-deployment" class="hash-link" aria-label="Direct link to Single Node Deployment" title="Direct link to Single Node Deployment" translate="no">​</a></h3>
+<p>A single EC2 instance running both execution and consensus clients, suitable for development, testing, and small-scale production use.</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token plain">┌─────────────────────────────────────────────────────────────┐</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│                         VPC (Default)                        │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  ┌─────────────────────────────────────────────────────────┐│</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │                    Public Subnet                         ││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  ┌─────────────────────────────────────────────────────┐││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │         EC2 Instance (Ethereum Node)                │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  ┌──────────────┐  ┌──────────────┐                │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │  Execution   │  │  Consensus   │                │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │   Client     │◄─┤   Client     │                │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │  (Geth/Reth) │  │ (Lighthouse) │                │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  └──────────────┘  └──────────────┘                │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  ┌─────────────────────────────────────────────┐   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  │    EBS Volume (/data) - 3+ TB gp3          │   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │  └─────────────────────────────────────────────┘   │││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  └─────────────────────────────────────────────────────┘││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  └─────────────────────────────────────────────────────────┘│</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">└─────────────────────────────────────────────────────────────┘</span><br></div></code></pre></div></div>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="high-availability-ha-deployment">High Availability (HA) Deployment<a href="#high-availability-ha-deployment" class="hash-link" aria-label="Direct link to High Availability (HA) Deployment" title="Direct link to High Availability (HA) Deployment" translate="no">​</a></h3>
+<p>Multiple EC2 instances behind an Application Load Balancer with auto-scaling for production workloads.</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token plain">┌─────────────────────────────────────────────────────────────┐</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│                         VPC (Default)                        │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  ┌─────────────────────────────────────────────────────────┐│</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │                Application Load Balancer                 ││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │                    (Port 8545 RPC)                       ││</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  └─────────────────────────────────────────────────────────┘│</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│                              │                               │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  ┌───────────────────────────┼───────────────────────────┐  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │                Auto Scaling Group                      │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │   Node 1    │  │   Node 2    │  │   Node N    │    │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  │ Exec + Cons │  │ Exec + Cons │  │ Exec + Cons │    │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  │  └─────────────┘  └─────────────┘  └─────────────┘    │  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">│  └───────────────────────────────────────────────────────┘  │</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">└─────────────────────────────────────────────────────────────┘</span><br></div></code></pre></div></div>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="supported-configurations">Supported Configurations<a href="#supported-configurations" class="hash-link" aria-label="Direct link to Supported Configurations" title="Direct link to Supported Configurations" translate="no">​</a></h2>
+<p>The Ethereum protocol supports multiple execution and consensus client combinations for client diversity:</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="execution-clients">Execution Clients<a href="#execution-clients" class="hash-link" aria-label="Direct link to Execution Clients" title="Direct link to Execution Clients" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Geth</strong> - Go Ethereum, most popular execution client</li>
+<li class=""><strong>Reth</strong> - Rust-based execution client, high performance</li>
+<li class=""><strong>Erigon</strong> - Efficient execution client with lower storage requirements</li>
+<li class=""><strong>Besu</strong> - Java-based execution client by Hyperledger</li>
+<li class=""><strong>Nethermind</strong> - .NET-based execution client</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="consensus-clients">Consensus Clients<a href="#consensus-clients" class="hash-link" aria-label="Direct link to Consensus Clients" title="Direct link to Consensus Clients" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>Lighthouse</strong> - Rust-based consensus client</li>
+<li class=""><strong>Prysm</strong> - Go-based consensus client</li>
+<li class=""><strong>Teku</strong> - Java-based consensus client</li>
+<li class=""><strong>Caplin</strong> - Erigon&#x27;s integrated consensus client</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="available-configurations">Available Configurations<a href="#available-configurations" class="hash-link" aria-label="Direct link to Available Configurations" title="Direct link to Available Configurations" translate="no">​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Configuration</th><th>Execution</th><th>Consensus</th><th>Best For</th></tr></thead><tbody><tr><td>geth-&lt;version&gt;-lighthouse-&lt;version&gt;-full.yml</td><td>Geth</td><td>Lighthouse</td><td>General purpose, most tested</td></tr><tr><td>reth-&lt;version&gt;-lighthouse-&lt;version&gt;-archive.yml</td><td>Reth</td><td>Lighthouse</td><td>High performance, fast sync</td></tr><tr><td>erigon-&lt;version&gt;-caplin-archive.yml</td><td>Erigon</td><td>Caplin (built-in)</td><td>Lower storage, integrated consensus</td></tr><tr><td>erigon-&lt;version&gt;-prysm-&lt;version&gt;-archive.yml</td><td>Erigon</td><td>Prysm</td><td>Client diversity with external CL</td></tr><tr><td>besu-&lt;version&gt;-teku-&lt;version&gt;-full.yml</td><td>Besu</td><td>Teku</td><td>Enterprise deployments</td></tr><tr><td>nethermind-&lt;version&gt;-teku-&lt;version&gt;-full.yml</td><td>Nethermind</td><td>Teku</td><td>.NET ecosystem</td></tr></tbody></table>
+<blockquote>
+<p><strong>Note:</strong> Configuration file names include the pinned client versions (shown as <code>&lt;version&gt;</code> above). For the exact current filenames, run <code>ls node_modules/aws-bnr-blueprint-ethereum/configurations/</code>, or simply copy the matching sample from <code>samples/</code> — it already sets <code>CLIENT_CONFIG</code> for you.</p>
+</blockquote>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="infrastructure-requirements">Infrastructure Requirements<a href="#infrastructure-requirements" class="hash-link" aria-label="Direct link to Infrastructure Requirements" title="Direct link to Infrastructure Requirements" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="recommended-instance-types">Recommended Instance Types<a href="#recommended-instance-types" class="hash-link" aria-label="Direct link to Recommended Instance Types" title="Direct link to Recommended Instance Types" translate="no">​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Network</th><th>Deployment</th><th>Instance Type</th><th>vCPUs</th><th>Memory</th><th>Storage</th></tr></thead><tbody><tr><td>Mainnet (Full)</td><td>Single Node</td><td>r7g.2xlarge</td><td>8</td><td>64 GB</td><td>2.5 TB gp3</td></tr><tr><td>Mainnet (Archive)</td><td>Single Node</td><td>i8g.4xlarge</td><td>16</td><td>128 GB</td><td>3.75 TB NVMe</td></tr><tr><td>Mainnet (Full HA)</td><td>HA (2 nodes)</td><td>r7g.2xlarge</td><td>8 each</td><td>64 GB each</td><td>2.5 TB gp3 each</td></tr><tr><td>Sepolia</td><td>Single Node</td><td>r7g.xlarge</td><td>4</td><td>32 GB</td><td>256 GB gp3</td></tr></tbody></table>
+<p>*For cost estimates, use the <a href="https://calculator.aws/" target="_blank" rel="noopener noreferrer" class="">AWS Pricing Calculator</a> with your specific region and commitment level.</p>
+<p><strong>Note</strong>: Archive nodes use i8g.4xlarge with NVMe instance store for maximum I/O performance (&lt;1ms latency, 250K+ IOPS). Full nodes use r7g.2xlarge with gp3 EBS for cost-effective persistent storage.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="storage-requirements">Storage Requirements<a href="#storage-requirements" class="hash-link" aria-label="Direct link to Storage Requirements" title="Direct link to Storage Requirements" translate="no">​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Network</th><th>Node Type</th><th>Current Size</th><th>Growth Rate</th><th>Recommended</th><th>Type</th><th>IOPS</th><th>Throughput</th></tr></thead><tbody><tr><td>Mainnet</td><td>Full</td><td>~2 TB</td><td>~50 GB/month</td><td>2.5 TB</td><td>gp3</td><td>8,000</td><td>700 MB/s</td></tr><tr><td>Mainnet</td><td>Archive</td><td>~3 TB</td><td>~100 GB/month</td><td>3.75 TB</td><td>Instance Store (NVMe)</td><td>250K+</td><td>10+ GB/s</td></tr><tr><td>Sepolia</td><td>Full</td><td>~100 GB</td><td>~5 GB/month</td><td>256 GB</td><td>gp3</td><td>3,000</td><td>250 MB/s</td></tr></tbody></table>
+<p><strong>Storage Type Selection</strong>:</p>
+<ul>
+<li class=""><strong>Full Nodes</strong>: Use gp3 EBS volumes for cost-effective persistent storage</li>
+<li class=""><strong>Archive Nodes</strong>: Use instance store (NVMe) for maximum I/O performance with ephemeral storage
+<ul>
+<li class="">Reth, Erigon archive configurations use i8g.4xlarge with 3.75TB NVMe</li>
+<li class="">&lt;1ms latency vs 5-10ms for EBS</li>
+<li class="">250K+ IOPS vs 16K max for gp3</li>
+<li class="">Note: Data is lost on instance stop/termination</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="network-traffic">Network Traffic<a href="#network-traffic" class="hash-link" aria-label="Direct link to Network Traffic" title="Direct link to Network Traffic" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>P2P Traffic</strong>: ~3 TB/month outbound (mainnet, supernode mode — includes blob column serving)</li>
+<li class=""><strong>RPC Traffic</strong>: Varies based on usage</li>
+<li class=""><strong>Checkpoint Sync</strong>: Significantly reduces initial sync time</li>
+</ul>
+<blockquote>
+<p><strong>Note</strong>: Supernode mode (default) increases P2P bandwidth by ~30x for blob data compared to a regular node. This is well within the capacity of recommended instance types but may increase data transfer costs by ~$50-150/month depending on peer demand.</p>
+</blockquote>
+<blockquote>
+<p>Running multiple protocols? Each deployment creates an independent CloudFormation stack. Total costs are additive — use the tables above per protocol.</p>
+</blockquote>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="setup-instructions">Setup Instructions<a href="#setup-instructions" class="hash-link" aria-label="Direct link to Setup Instructions" title="Direct link to Setup Instructions" translate="no">​</a></h2>
+<p>There are two ways to deploy an Ethereum node.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="option-1-ai-driven-deployment-recommended">Option 1: AI-Driven Deployment (Recommended)<a href="#option-1-ai-driven-deployment-recommended" class="hash-link" aria-label="Direct link to Option 1: AI-Driven Deployment (Recommended)" title="Direct link to Option 1: AI-Driven Deployment (Recommended)" translate="no">​</a></h3>
+<p>Deploy with a single prompt. In Kiro (or your AI assistant of choice), run:</p>
+<div class="language-text codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-text codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token plain">@deploy an Ethereum mainnet RPC node in us-east-1</span><br></div></code></pre></div></div>
+<p>The AI assistant will guide you through infrastructure selection, configuration, deployment, and initial healthcheck. For full setup, see <a class="" href="/aws-blockchain-node-runners/docs/getting-started/quickstart">Getting Started</a>.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="option-2-manual-deployment">Option 2: Manual Deployment<a href="#option-2-manual-deployment" class="hash-link" aria-label="Direct link to Option 2: Manual Deployment" title="Direct link to Option 2: Manual Deployment" translate="no">​</a></h3>
+<p>This section focuses on Ethereum-specific configuration options and client selection.</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-1-configure-environment">Step 1: Configure Environment<a href="#step-1-configure-environment" class="hash-link" aria-label="Direct link to Step 1: Configure Environment" title="Direct link to Step 1: Configure Environment" translate="no">​</a></h4>
+<p>Copy the appropriate sample configuration:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token comment" style="color:rgb(98, 114, 164)"># For mainnet single Geth node</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">cp</span><span class="token plain"> node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-geth-lighthouse-full .env</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># For mainnet Reth archive node</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">cp</span><span class="token plain"> node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-reth-lighthouse-archive .env</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># For HA deployment</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">cp</span><span class="token plain"> node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-geth-lighthouse-full-ha .env</span><br></div></code></pre></div></div>
+<p>Edit <code>.env</code> with your AWS account details:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">AWS_ACCOUNT_ID</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;your-account-id&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">AWS_REGION</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;us-east-1&quot;</span><br></div></code></pre></div></div>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-2-choose-client-combination">Step 2: Choose Client Combination<a href="#step-2-choose-client-combination" class="hash-link" aria-label="Direct link to Step 2: Choose Client Combination" title="Direct link to Step 2: Choose Client Combination" translate="no">​</a></h4>
+<p>Select your preferred client combination by setting <code>CLIENT_CONFIG</code> to one of the file names in <code>configurations/</code> (replace <code>&lt;version&gt;</code> with the pinned version — the matching sample already sets this for you):</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token comment" style="color:rgb(98, 114, 164)"># Most popular combination</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">CLIENT_CONFIG</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;geth-&lt;version&gt;-lighthouse-&lt;version&gt;-full.yml&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># High performance option</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">CLIENT_CONFIG</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;reth-&lt;version&gt;-lighthouse-&lt;version&gt;-archive.yml&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Erigon with built-in Caplin consensus</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">CLIENT_CONFIG</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;erigon-&lt;version&gt;-caplin-archive.yml&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Erigon with external Prysm consensus</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">CLIENT_CONFIG</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;erigon-&lt;version&gt;-prysm-&lt;version&gt;-archive.yml&quot;</span><br></div></code></pre></div></div>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-3-deploy">Step 3: Deploy<a href="#step-3-deploy" class="hash-link" aria-label="Direct link to Step 3: Deploy" title="Direct link to Step 3: Deploy" translate="no">​</a></h4>
+<blockquote>
+<p>CDK bootstrap is a one-time setup step — see <a class="" href="/aws-blockchain-node-runners/docs/getting-started/quickstart">Getting Started</a>.</p>
+</blockquote>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token comment" style="color:rgb(98, 114, 164)"># Deploy the stack</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">npx cdk deploy </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">--json</span><span class="token plain"> --outputs-file deploy-output.json</span><br></div></code></pre></div></div>
+<p>For advanced options (HA mode, multiple stacks, maintenance), see the <a class="" href="/aws-blockchain-node-runners/docs/guides/deployment-guide">Deployment Guide</a>.</p>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-4-monitor-synchronization">Step 4: Monitor Synchronization<a href="#step-4-monitor-synchronization" class="hash-link" aria-label="Direct link to Step 4: Monitor Synchronization" title="Direct link to Step 4: Monitor Synchronization" translate="no">​</a></h4>
+<p>Initial synchronization can take 6-48 hours depending on:</p>
+<ul>
+<li class="">Client combination chosen</li>
+<li class="">Network conditions</li>
+<li class="">Whether checkpoint sync is used</li>
+</ul>
+<p>Monitor progress via CloudWatch dashboard:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token comment" style="color:rgb(98, 114, 164)"># Get dashboard name from deployment output</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">DASHBOARD_NAME</span><span class="token operator">=</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">$(</span><span class="token variable function" style="color:rgb(80, 250, 123);font-style:italic">cat</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"> deploy-output.json </span><span class="token variable operator" style="color:rgb(189, 147, 249);font-style:italic">|</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"> jq </span><span class="token variable parameter variable" style="color:rgb(189, 147, 249);font-style:italic">-r</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"> </span><span class="token variable string" style="color:rgb(255, 121, 198);font-style:italic">&#x27;..|.DashboardName? | select(. != null)&#x27;</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token builtin class-name" style="color:rgb(189, 147, 249)">echo</span><span class="token plain"> </span><span class="token string" style="color:rgb(255, 121, 198)">&quot;Dashboard: https://console.aws.amazon.com/cloudwatch/home?region=</span><span class="token string variable" style="color:rgb(189, 147, 249);font-style:italic">$AWS_REGION</span><span class="token string" style="color:rgb(255, 121, 198)">#dashboards:name=</span><span class="token string variable" style="color:rgb(189, 147, 249);font-style:italic">$DASHBOARD_NAME</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;</span><br></div></code></pre></div></div>
+<p>Key metrics to watch:</p>
+<ul>
+<li class=""><strong>c1_blocks_behind</strong>: Execution client sync status (should reach 0)</li>
+<li class=""><strong>c2_blocks_behind</strong>: Consensus client sync distance (should reach 0)</li>
+<li class=""><strong>c1_block_height</strong>: Current execution block</li>
+<li class=""><strong>c2_block_height</strong>: Current consensus slot</li>
+</ul>
+<h4 class="anchor anchorTargetStickyNavbar_Vzrq" id="step-5-verify-node-operation">Step 5: Verify Node Operation<a href="#step-5-verify-node-operation" class="hash-link" aria-label="Direct link to Step 5: Verify Node Operation" title="Direct link to Step 5: Verify Node Operation" translate="no">​</a></h4>
+<p>Once synchronized, test the RPC endpoint:</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token comment" style="color:rgb(98, 114, 164)"># Get instance ID</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">INSTANCE_ID</span><span class="token operator">=</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">$(</span><span class="token variable function" style="color:rgb(80, 250, 123);font-style:italic">cat</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"> deploy-output.json </span><span class="token variable operator" style="color:rgb(189, 147, 249);font-style:italic">|</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"> jq </span><span class="token variable parameter variable" style="color:rgb(189, 147, 249);font-style:italic">-r</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"> </span><span class="token variable string" style="color:rgb(255, 121, 198);font-style:italic">&#x27;..|.InstanceId? | select(. != null)&#x27;</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Connect via SSM</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">aws ssm start-session </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">--target</span><span class="token plain"> </span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">$INSTANCE_ID</span><span class="token plain"> </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">--region</span><span class="token plain"> </span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">$AWS_REGION</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Check service status</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">sudo</span><span class="token plain"> systemctl status </span><span class="token function" style="color:rgb(80, 250, 123)">node</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># View logs</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">sudo</span><span class="token plain"> </span><span class="token function" style="color:rgb(80, 250, 123)">docker</span><span class="token plain"> logs execution </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">-f</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">sudo</span><span class="token plain"> </span><span class="token function" style="color:rgb(80, 250, 123)">docker</span><span class="token plain"> logs consensus </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">-f</span><br></div></code></pre></div></div>
+<p>Test RPC API (from within VPC):</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token comment" style="color:rgb(98, 114, 164)"># Get internal IP</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">NODE_INTERNAL_IP</span><span class="token operator">=</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">$(</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">aws ec2 describe-instances --instance-ids $INSTANCE_ID </span><span class="token variable punctuation" style="color:rgb(248, 248, 242);font-style:italic">\</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">    </span><span class="token variable parameter variable" style="color:rgb(189, 147, 249);font-style:italic">--query</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"> </span><span class="token variable string" style="color:rgb(255, 121, 198);font-style:italic">&#x27;Reservations[*].Instances[*].PrivateIpAddress&#x27;</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"> </span><span class="token variable parameter variable" style="color:rgb(189, 147, 249);font-style:italic">--output</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic"> text</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Query latest block</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">curl</span><span class="token plain"> </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">-X</span><span class="token plain"> POST </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">-H</span><span class="token plain"> </span><span class="token string" style="color:rgb(255, 121, 198)">&quot;Content-Type: application/json&quot;</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(248, 248, 242)">\</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">    </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">--data</span><span class="token plain"> </span><span class="token string" style="color:rgb(255, 121, 198)">&#x27;{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;method&quot;:&quot;eth_blockNumber&quot;,&quot;params&quot;:[],&quot;id&quot;:1}&#x27;</span><span class="token plain"> </span><span class="token punctuation" style="color:rgb(248, 248, 242)">\</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain">    http://</span><span class="token variable" style="color:rgb(189, 147, 249);font-style:italic">$NODE_INTERNAL_IP</span><span class="token plain">:8545</span><br></div></code></pre></div></div>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="configuration-options">Configuration Options<a href="#configuration-options" class="hash-link" aria-label="Direct link to Configuration Options" title="Direct link to Configuration Options" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="checkpoint-sync">Checkpoint Sync<a href="#checkpoint-sync" class="hash-link" aria-label="Direct link to Checkpoint Sync" title="Direct link to Checkpoint Sync" translate="no">​</a></h3>
+<p>Checkpoint sync dramatically reduces initial sync time (from days to hours):</p>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token comment" style="color:rgb(98, 114, 164)"># Mainnet</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">ETH_CONSENSUS_CHECKPOINT_SYNC_URL</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;https://beaconstate.info&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Sepolia</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">ETH_CONSENSUS_CHECKPOINT_SYNC_URL</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;https://sepolia.beaconstate.info&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Holesky</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">ETH_CONSENSUS_CHECKPOINT_SYNC_URL</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;https://holesky.beaconstate.info&quot;</span><br></div></code></pre></div></div>
+<p>More checkpoint sync endpoints: <a href="https://eth-clients.github.io/checkpoint-sync-endpoints/" target="_blank" rel="noopener noreferrer" class="">https://eth-clients.github.io/checkpoint-sync-endpoints/</a></p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="supernode-mode-lighthouse--peerdas">Supernode Mode (Lighthouse — PeerDAS)<a href="#supernode-mode-lighthouse--peerdas" class="hash-link" aria-label="Direct link to Supernode Mode (Lighthouse — PeerDAS)" title="Direct link to Supernode Mode (Lighthouse — PeerDAS)" translate="no">​</a></h3>
+<p>After the Ethereum Pectra upgrade (May 2025), PeerDAS (EIP-7594) replaced full blob distribution with Data Availability Sampling. Under PeerDAS, regular beacon nodes only store a small subset of data columns (typically 4 out of 128) and <strong>cannot</strong> serve full blobs via the <code>/eth/v1/beacon/blob_sidecars</code> API.</p>
+<p>This blueprint enables <code>--supernode</code> by default on all Lighthouse configurations, which stores all 128 data columns. This is required if:</p>
+<ul>
+<li class="">The node serves as an L1 data source for L2 rollup nodes (Base, OP Stack, etc.)</li>
+<li class="">You need the blob sidecars API to return complete blob data</li>
+<li class="">You want to contribute to network-wide data availability</li>
+</ul>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token comment" style="color:rgb(98, 114, 164)"># Default: full supernode (128 columns) — recommended</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">ETH_CONSENSUS_SUPERNODE</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;true&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Alternative: semi-supernode (64 columns) — enough to reconstruct blobs, lower bandwidth</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">ETH_CONSENSUS_SUPERNODE</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;semi&quot;</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Disable: regular node (4 columns) — blob API will NOT work</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token assign-left variable" style="color:rgb(189, 147, 249);font-style:italic">ETH_CONSENSUS_SUPERNODE</span><span class="token operator">=</span><span class="token string" style="color:rgb(255, 121, 198)">&quot;false&quot;</span><br></div></code></pre></div></div>
+<p><strong>Resource impact of supernode mode:</strong></p>
+<ul>
+<li class="">Bandwidth: ~30x more blob-related P2P traffic (~5-15 MB/s additional sustained)</li>
+<li class="">Storage: ~50-100 GB extra for the full column set over the ~18-day retention window</li>
+<li class="">CPU/Memory: negligible impact</li>
+</ul>
+<p><strong>Note</strong>: This setting only applies to Lighthouse-based configurations. Prysm, Teku, and Caplin (Erigon) handle PeerDAS differently and are not affected.</p>
+<p><strong>Important</strong>: If you change this setting on an existing deployment from <code>false</code> to <code>true</code>, you must delete the beacon database and re-sync via checkpoint sync. Adding <code>--supernode</code> does not backfill historical data columns.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="snapshot-support">Snapshot Support<a href="#snapshot-support" class="hash-link" aria-label="Direct link to Snapshot Support" title="Direct link to Snapshot Support" translate="no">​</a></h3>
+<p>For Ethereum, <strong>checkpoint sync</strong> (above) is the recommended fast-sync method. Block snapshot download is also supported through the generic <code>SNAPSHOT_ENABLED</code> / <code>SNAPSHOT_DOWNLOAD_URL</code> settings — see the <a class="" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Configuration Reference</a> for these variables.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="hash-link" aria-label="Direct link to Troubleshooting" title="Direct link to Troubleshooting" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="node-not-syncing">Node Not Syncing<a href="#node-not-syncing" class="hash-link" aria-label="Direct link to Node Not Syncing" title="Direct link to Node Not Syncing" translate="no">​</a></h3>
+<ol>
+<li class="">Check if containers are running:</li>
+</ol>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token function" style="color:rgb(80, 250, 123)">sudo</span><span class="token plain"> </span><span class="token function" style="color:rgb(80, 250, 123)">docker</span><span class="token plain"> </span><span class="token function" style="color:rgb(80, 250, 123)">ps</span><br></div></code></pre></div></div>
+<ol start="2">
+<li class="">View execution client logs:</li>
+</ol>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token function" style="color:rgb(80, 250, 123)">sudo</span><span class="token plain"> </span><span class="token function" style="color:rgb(80, 250, 123)">docker</span><span class="token plain"> logs execution </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">--tail</span><span class="token plain"> </span><span class="token number">100</span><span class="token plain"> </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">-f</span><br></div></code></pre></div></div>
+<ol start="3">
+<li class="">View consensus client logs:</li>
+</ol>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token function" style="color:rgb(80, 250, 123)">sudo</span><span class="token plain"> </span><span class="token function" style="color:rgb(80, 250, 123)">docker</span><span class="token plain"> logs consensus </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">--tail</span><span class="token plain"> </span><span class="token number">100</span><span class="token plain"> </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">-f</span><br></div></code></pre></div></div>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="high-memory-usage">High Memory Usage<a href="#high-memory-usage" class="hash-link" aria-label="Direct link to High Memory Usage" title="Direct link to High Memory Usage" translate="no">​</a></h3>
+<p>Ethereum nodes require significant memory. If experiencing OOM issues:</p>
+<ul>
+<li class="">Increase instance size (e.g., r7g.2xlarge → r7g.4xlarge)</li>
+<li class="">Reduce cache size in client configuration</li>
+<li class="">Consider using Erigon for lower memory footprint</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="slow-sync">Slow Sync<a href="#slow-sync" class="hash-link" aria-label="Direct link to Slow Sync" title="Direct link to Slow Sync" translate="no">​</a></h3>
+<ul>
+<li class="">Verify checkpoint sync URL is working</li>
+<li class="">Check network connectivity and peer count</li>
+<li class="">Consider using Reth for faster sync times</li>
+<li class="">Ensure sufficient IOPS on storage volume</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rpc-not-responding">RPC Not Responding<a href="#rpc-not-responding" class="hash-link" aria-label="Direct link to RPC Not Responding" title="Direct link to RPC Not Responding" translate="no">​</a></h3>
+<ol>
+<li class="">Verify node is fully synced (blocks_behind = 0)</li>
+<li class="">Check security group allows traffic on port 8545</li>
+<li class="">Verify RPC is bound to internal IP correctly</li>
+<li class="">Test from within VPC using CloudShell</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="blob-sidecars-api-returns-error-lighthouse">Blob Sidecars API Returns Error (Lighthouse)<a href="#blob-sidecars-api-returns-error-lighthouse" class="hash-link" aria-label="Direct link to Blob Sidecars API Returns Error (Lighthouse)" title="Direct link to Blob Sidecars API Returns Error (Lighthouse)" translate="no">​</a></h3>
+<p>If you see <code>BAD_REQUEST: Insufficient data columns to reconstruct blobs</code> when calling <code>/eth/v1/beacon/blob_sidecars/{slot}</code>:</p>
+<ol>
+<li class="">Verify <code>ETH_CONSENSUS_SUPERNODE</code> is set to <code>&quot;true&quot;</code> in your <code>.env</code> file</li>
+<li class="">If you changed this setting on an existing deployment, you must re-sync the beacon:</li>
+</ol>
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#F8F8F2;--prism-background-color:#282A36"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#F8F8F2;background-color:#282A36"><code class="codeBlockLines_e6Vv"><div class="token-line" style="color:#F8F8F2"><span class="token comment" style="color:rgb(98, 114, 164)"># Stop the node</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">sudo</span><span class="token plain"> systemctl stop </span><span class="token function" style="color:rgb(80, 250, 123)">node</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Delete beacon database</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">sudo</span><span class="token plain"> </span><span class="token function" style="color:rgb(80, 250, 123)">rm</span><span class="token plain"> </span><span class="token parameter variable" style="color:rgb(189, 147, 249);font-style:italic">-rf</span><span class="token plain"> /data/consensus/beacon</span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain" style="display:inline-block"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token comment" style="color:rgb(98, 114, 164)"># Start the node (will checkpoint sync)</span><span class="token plain"></span><br></div><div class="token-line" style="color:#F8F8F2"><span class="token plain"></span><span class="token function" style="color:rgb(80, 250, 123)">sudo</span><span class="token plain"> systemctl start </span><span class="token function" style="color:rgb(80, 250, 123)">node</span><br></div></code></pre></div></div>
+<ol start="3">
+<li class="">Wait for checkpoint sync to complete (~2-5 minutes) and backfill to reach needed slots</li>
+</ol>
+<p>This is required post-Pectra (May 2025) due to PeerDAS (EIP-7594). Without supernode mode, Lighthouse only stores 4 out of 128 data columns and cannot reconstruct full blobs.</p>
+<p>See the <a class="" href="/aws-blockchain-node-runners/docs/guides/troubleshooting">Troubleshooting Guide</a> for detailed diagnostics.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="upgrades">Upgrades<a href="#upgrades" class="hash-link" aria-label="Direct link to Upgrades" title="Direct link to Upgrades" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="upgrading-client-versions">Upgrading Client Versions<a href="#upgrading-client-versions" class="hash-link" aria-label="Direct link to Upgrading Client Versions" title="Direct link to Upgrading Client Versions" translate="no">​</a></h3>
+<p>To upgrade to newer client versions:</p>
+<ol>
+<li class="">Update <code>CLIENT_CONFIG</code> in <code>.env</code> to new configuration file</li>
+<li class="">Create new docker-compose file with updated versions</li>
+<li class="">Redeploy: <code>npx cdk deploy --json --outputs-file deploy-output.json</code></li>
+</ol>
+<p>Note: The instance will be replaced with the new configuration.</p>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="rolling-updates-ha-only">Rolling Updates (HA Only)<a href="#rolling-updates-ha-only" class="hash-link" aria-label="Direct link to Rolling Updates (HA Only)" title="Direct link to Rolling Updates (HA Only)" translate="no">​</a></h3>
+<p>HA deployments perform rolling updates automatically, ensuring no RPC downtime during client upgrades. See the <a class="" href="/aws-blockchain-node-runners/docs/guides/deployment-guide">Deployment Guide</a> for details.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="cost-optimization">Cost Optimization<a href="#cost-optimization" class="hash-link" aria-label="Direct link to Cost Optimization" title="Direct link to Cost Optimization" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="storage-optimization">Storage Optimization<a href="#storage-optimization" class="hash-link" aria-label="Direct link to Storage Optimization" title="Direct link to Storage Optimization" translate="no">​</a></h3>
+<ul>
+<li class="">Use gp3 instead of io2 for most workloads (3x cheaper)</li>
+<li class="">Right-size storage based on network (mainnet needs 3+ TB)</li>
+<li class="">Consider Instance Store for temporary high-performance needs</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="compute-optimization">Compute Optimization<a href="#compute-optimization" class="hash-link" aria-label="Direct link to Compute Optimization" title="Direct link to Compute Optimization" translate="no">​</a></h3>
+<ul>
+<li class="">Use ARM-based instances (r7g) for 20% cost savings vs x86</li>
+<li class="">Use Savings Plans for 30-50% discount on long-term deployments</li>
+<li class="">Scale down testnet nodes to smaller instance types</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="network-optimization">Network Optimization<a href="#network-optimization" class="hash-link" aria-label="Direct link to Network Optimization" title="Direct link to Network Optimization" translate="no">​</a></h3>
+<ul>
+<li class="">Limit peer connections to reduce outbound traffic</li>
+<li class="">Use VPC endpoints for AWS service communication</li>
+<li class="">Consider traffic shaping for high-traffic RPC nodes</li>
+</ul>
+<p>See the <a class="" href="/aws-blockchain-node-runners/docs/guides/deployment-guide">Deployment Guide</a> for detailed cost optimization strategies.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="security-considerations">Security Considerations<a href="#security-considerations" class="hash-link" aria-label="Direct link to Security Considerations" title="Direct link to Security Considerations" translate="no">​</a></h2>
+<ul>
+<li class="">RPC endpoints bind to internal IP only (not 0.0.0.0)</li>
+<li class="">P2P ports allow external connectivity for network participation</li>
+<li class="">Access control via Security Groups</li>
+<li class="">No SSH access - use AWS Systems Manager Session Manager</li>
+<li class="">Encrypted EBS volumes</li>
+<li class="">IAM roles with least privilege</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="faq">FAQ<a href="#faq" class="hash-link" aria-label="Direct link to FAQ" title="Direct link to FAQ" translate="no">​</a></h2>
+<p><strong>Q: Which client combination should I choose?</strong></p>
+<p>A: For most users, Geth + Lighthouse is recommended as it&#x27;s the most tested and widely used. For faster sync, try Reth + Lighthouse. For lower storage, use Erigon + Lighthouse.</p>
+<p><strong>Q: How long does initial sync take?</strong></p>
+<p>A: With checkpoint sync: 6-24 hours. Without checkpoint sync: 2-7 days depending on client and network conditions.</p>
+<p><strong>Q: Can I switch client combinations?</strong></p>
+<p>A: Yes, but you&#x27;ll need to resync from scratch. Update CLIENT_CONFIG and redeploy. You can deploy multiple clients in paralell on their own nodes.</p>
+<p><strong>Q: Do I need to run both execution and consensus clients?</strong></p>
+<p>A: Yes, Ethereum requires both clients after The Merge. They communicate via the Engine API.</p>
+<p><strong>Q: Can I use this for validator nodes?</strong></p>
+<p>A: This configuration is optimized for RPC nodes. Validator nodes have different requirements and are not covered by this implementation.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="additional-resources">Additional Resources<a href="#additional-resources" class="hash-link" aria-label="Direct link to Additional Resources" title="Direct link to Additional Resources" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="client-release-channels">Client Release Channels<a href="#client-release-channels" class="hash-link" aria-label="Direct link to Client Release Channels" title="Direct link to Client Release Channels" translate="no">​</a></h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Client</th><th>Type</th><th>Repo</th><th>Query method</th><th>Version line</th><th>Prereleases</th></tr></thead><tbody><tr><td>Geth</td><td>EL</td><td><a href="https://github.com/ethereum/go-ethereum/releases" target="_blank" rel="noopener noreferrer" class="">ethereum/go-ethereum</a></td><td>releases/latest</td><td>*</td><td>stable only</td></tr><tr><td>Reth</td><td>EL</td><td><a href="https://github.com/paradigmxyz/reth/releases" target="_blank" rel="noopener noreferrer" class="">paradigmxyz/reth</a></td><td>releases/latest</td><td>*</td><td>stable only</td></tr><tr><td>Erigon</td><td>EL+CL</td><td><a href="https://github.com/erigontech/erigon/releases" target="_blank" rel="noopener noreferrer" class="">erigontech/erigon</a></td><td>releases/latest</td><td>*</td><td>stable only</td></tr><tr><td>Besu</td><td>EL</td><td><a href="https://github.com/hyperledger/besu/releases" target="_blank" rel="noopener noreferrer" class="">hyperledger/besu</a></td><td>tags (semver)</td><td>*</td><td>exclude <code>*-RC*</code></td></tr><tr><td>Nethermind</td><td>EL</td><td><a href="https://github.com/NethermindEth/nethermind/releases" target="_blank" rel="noopener noreferrer" class="">NethermindEth/nethermind</a></td><td>releases/latest</td><td>*</td><td>stable only</td></tr><tr><td>Lighthouse</td><td>CL</td><td><a href="https://github.com/sigp/lighthouse/releases" target="_blank" rel="noopener noreferrer" class="">sigp/lighthouse</a></td><td>releases/latest</td><td>*</td><td>stable only</td></tr><tr><td>Prysm</td><td>CL</td><td><a href="https://github.com/OffchainLabs/prysm/releases" target="_blank" rel="noopener noreferrer" class="">OffchainLabs/prysm</a></td><td>releases/latest</td><td>*</td><td>stable only</td></tr><tr><td>Teku</td><td>CL</td><td><a href="https://github.com/Consensys/teku/releases" target="_blank" rel="noopener noreferrer" class="">Consensys/teku</a></td><td>releases/latest</td><td>*</td><td>stable only</td></tr></tbody></table>
+<blockquote>
+<p>Column legend — <strong>Repo</strong>: canonical <code>owner/repo</code> (link goes to the releases page). <strong>Query method</strong>: <code>releases/latest</code> = newest non-prerelease via GitHub API (<code>https://api.github.com/repos/{repo}/releases/latest</code>); <code>tags</code> = list <code>/tags</code> and pick the highest matching semver; <code>releases</code> = list <code>/releases</code> and pick the newest matching the prerelease policy; <code>pinned-file</code> = read the named file at the given ref. <strong>Version line</strong>: constrains updates to a release line (<code>*</code> = any). <strong>Prereleases</strong>: whether beta/RC tags are eligible.</p>
+<p>Notes: <code>Besu</code> does not return a usable <code>releases/latest</code> (its newest GitHub release object is not a stable release), so resolve it from semver <code>tags</code> and skip <code>*-RC*</code> and non-semver tags (<code>develop</code>, <code>dev</code>, <code>canary</code>). <code>Prysm</code> is queried from <code>OffchainLabs/prysm</code> (the repo <code>prysmaticlabs/prysm</code> now redirects there).</p>
+</blockquote>
+<ul>
+<li class=""><a href="https://ethereum.org/en/developers/docs/" target="_blank" rel="noopener noreferrer" class="">Ethereum Documentation</a></li>
+<li class=""><a href="https://clientdiversity.org/" target="_blank" rel="noopener noreferrer" class="">Client Diversity</a></li>
+<li class=""><a href="https://eth-clients.github.io/checkpoint-sync-endpoints/" target="_blank" rel="noopener noreferrer" class="">Checkpoint Sync Endpoints</a></li>
+<li class=""><a href="https://ethereum.org/en/developers/docs/nodes-and-clients/run-a-node/" target="_blank" rel="noopener noreferrer" class="">Ethereum Node Requirements</a></li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="support">Support<a href="#support" class="hash-link" aria-label="Direct link to Support" title="Direct link to Support" translate="no">​</a></h2>
+<p>For issues and questions:</p>
+<ul>
+<li class="">Check <a class="" href="/aws-blockchain-node-runners/docs/guides/troubleshooting">Troubleshooting Guide</a></li>
+<li class="">Review <a class="" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Configuration Reference</a></li>
+<li class="">Open a GitHub issue</li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/aws-samples/aws-blockchain-node-runners/website/docs/blueprints/ethereum.mdx" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/aws-blockchain-node-runners/docs/blueprints/bnb"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">BNB Chain</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/aws-blockchain-node-runners/docs/blueprints/solana"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">Solana</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#overview-of-deployment-architectures" class="table-of-contents__link toc-highlight">Overview of Deployment Architectures</a><ul><li><a href="#single-node-deployment" class="table-of-contents__link toc-highlight">Single Node Deployment</a></li><li><a href="#high-availability-ha-deployment" class="table-of-contents__link toc-highlight">High Availability (HA) Deployment</a></li></ul></li><li><a href="#supported-configurations" class="table-of-contents__link toc-highlight">Supported Configurations</a><ul><li><a href="#execution-clients" class="table-of-contents__link toc-highlight">Execution Clients</a></li><li><a href="#consensus-clients" class="table-of-contents__link toc-highlight">Consensus Clients</a></li><li><a href="#available-configurations" class="table-of-contents__link toc-highlight">Available Configurations</a></li></ul></li><li><a href="#infrastructure-requirements" class="table-of-contents__link toc-highlight">Infrastructure Requirements</a><ul><li><a href="#recommended-instance-types" class="table-of-contents__link toc-highlight">Recommended Instance Types</a></li><li><a href="#storage-requirements" class="table-of-contents__link toc-highlight">Storage Requirements</a></li><li><a href="#network-traffic" class="table-of-contents__link toc-highlight">Network Traffic</a></li></ul></li><li><a href="#setup-instructions" class="table-of-contents__link toc-highlight">Setup Instructions</a><ul><li><a href="#option-1-ai-driven-deployment-recommended" class="table-of-contents__link toc-highlight">Option 1: AI-Driven Deployment (Recommended)</a></li><li><a href="#option-2-manual-deployment" class="table-of-contents__link toc-highlight">Option 2: Manual Deployment</a></li></ul></li><li><a href="#configuration-options" class="table-of-contents__link toc-highlight">Configuration Options</a><ul><li><a href="#checkpoint-sync" class="table-of-contents__link toc-highlight">Checkpoint Sync</a></li><li><a href="#supernode-mode-lighthouse--peerdas" class="table-of-contents__link toc-highlight">Supernode Mode (Lighthouse — PeerDAS)</a></li><li><a href="#snapshot-support" class="table-of-contents__link toc-highlight">Snapshot Support</a></li></ul></li><li><a href="#troubleshooting" class="table-of-contents__link toc-highlight">Troubleshooting</a><ul><li><a href="#node-not-syncing" class="table-of-contents__link toc-highlight">Node Not Syncing</a></li><li><a href="#high-memory-usage" class="table-of-contents__link toc-highlight">High Memory Usage</a></li><li><a href="#slow-sync" class="table-of-contents__link toc-highlight">Slow Sync</a></li><li><a href="#rpc-not-responding" class="table-of-contents__link toc-highlight">RPC Not Responding</a></li><li><a href="#blob-sidecars-api-returns-error-lighthouse" class="table-of-contents__link toc-highlight">Blob Sidecars API Returns Error (Lighthouse)</a></li></ul></li><li><a href="#upgrades" class="table-of-contents__link toc-highlight">Upgrades</a><ul><li><a href="#upgrading-client-versions" class="table-of-contents__link toc-highlight">Upgrading Client Versions</a></li><li><a href="#rolling-updates-ha-only" class="table-of-contents__link toc-highlight">Rolling Updates (HA Only)</a></li></ul></li><li><a href="#cost-optimization" class="table-of-contents__link toc-highlight">Cost Optimization</a><ul><li><a href="#storage-optimization" class="table-of-contents__link toc-highlight">Storage Optimization</a></li><li><a href="#compute-optimization" class="table-of-contents__link toc-highlight">Compute Optimization</a></li><li><a href="#network-optimization" class="table-of-contents__link toc-highlight">Network Optimization</a></li></ul></li><li><a href="#security-considerations" class="table-of-contents__link toc-highlight">Security Considerations</a></li><li><a href="#faq" class="table-of-contents__link toc-highlight">FAQ</a></li><li><a href="#additional-resources" class="table-of-contents__link toc-highlight">Additional Resources</a><ul><li><a href="#client-release-channels" class="table-of-contents__link toc-highlight">Client Release Channels</a></li></ul></li><li><a href="#support" class="table-of-contents__link toc-highlight">Support</a></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Documentation</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/aws-blockchain-node-runners/docs/getting-started/intro">Getting Started</a></li><li class="footer__item"><a class="footer__link-item" href="/aws-blockchain-node-runners/docs/guides/configuration-reference">Configuration Reference</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Community</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://github.com/aws-samples/aws-blockchain-node-runners" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" class="footer__link-item">Contribution Guide<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Built with ❤️ at AWS  <br> © 2026 Amazon.com, Inc. or its affiliates. All Rights Reserved.</div></div></div></footer></div>
+</body>
+</html>
