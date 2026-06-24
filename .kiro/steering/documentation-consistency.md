@@ -171,6 +171,9 @@ Before committing changes, verify:
 - **tech.md** - Technology stack
 - **testing-patterns.md** - Testing best practices
 - **documentation-consistency.md** - This file
+- **ci-workflows.md** - CI workflow and security-scanning conventions
+- **shell-scripts.md** - Shell script (provisioning) conventions
+- **git-workflow.md** - Branch model, commit conventions, and release strategy
 
 ### Protocol Files (blueprints/)
 

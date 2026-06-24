@@ -43,6 +43,35 @@ GitHub provides additional document on [forking a repository](https://help.githu
 Your PR will be checked by automated CI workflows including security scanning (ASH), CodeQL analysis, dependency review, and ShellCheck for shell scripts. Address any findings before requesting review.
 
 
+## Branching, Commits, and Releases
+
+This project uses a lightweight, trunk-based workflow.
+
+**Branches**
+- `main` is the default, always-releasable integration branch. The docs website deploys from it automatically.
+- `v1` is the frozen legacy branch (pre-v2 rewrite) — no new features.
+- Do your work on a short-lived branch in your fork, then open a PR against `main`. Branch names like `feat/...`, `fix/...`, or `docs/...` are encouraged.
+
+**Commits** follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<optional scope>): <subject>
+```
+
+- Types: `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+- Scope is the blueprint or area, e.g. `feat(solana):`, `fix(base):`, `docs(website):`.
+- Use the imperative mood, capitalize the subject, no trailing period, keep the header under ~72 characters.
+- One logical change per commit. Link issues in the footer (`Fixes #123`), and flag incompatible changes with a `BREAKING CHANGE:` footer.
+
+PRs are **squash-merged**, so your PR title becomes the commit on `main` — make it a valid Conventional Commit subject.
+
+**Pull requests** are required for all code, blueprint, configuration, and CI changes (and are the only path for external contributors, who work from forks). Trivial docs-only edits are the exception. Every PR runs build, tests, CDK synth, CodeQL, dependency review, ShellCheck, and the ASH security scan — resolve findings before requesting review.
+
+**Releases** use [Semantic Versioning](https://semver.org/): MAJOR for breaking changes to configuration or the deployment contract, MINOR for backwards-compatible additions (such as a new blueprint), and PATCH for fixes. Releases are milestone-based — cut when meaningful changes accumulate — and recorded in [CHANGELOG.md](./CHANGELOG.md) with a matching `vX.Y.Z` git tag and GitHub Release. User-facing changes should add an entry under `## [Unreleased]` in the changelog.
+
+> Maintainers: the full decision rules (PR-vs-direct-commit thresholds, version-bump criteria, release steps, and branch-protection configuration) live in `.kiro/steering/git-workflow.md`.
+
+
 ## Contributing a New Blockchain Protocol
 
 Since v2, new protocols are added as **external community blueprints** — standalone NPM packages maintained in your own repository. You do not need to modify this repo to support a new chain.
