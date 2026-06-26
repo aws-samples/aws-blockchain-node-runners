@@ -11,7 +11,7 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
@@ -21,7 +21,7 @@ jobs:
         # compromise (CVE-2025-30066) where version tags were retroactively
         # repointed to a malicious commit. Pinning to an immutable commit SHA is
         # the documented mitigation. Bump deliberately, never via a floating tag.
-        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46.0.5
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           files: |
             **/*.ts
@@ -46,7 +46,7 @@ jobs:
 
       - name: Set up Python
         if: steps.changed-files.outputs.any_changed == 'true'
-        uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v4.7.1
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v4.7.1
         with:
           python-version: '3.10'
 
@@ -169,7 +169,7 @@ jobs:
 
       - name: Upload scan results
         if: always() && steps.changed-files.outputs.any_changed == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ash-security-results
           path: |
