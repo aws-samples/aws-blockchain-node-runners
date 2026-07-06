@@ -36,10 +36,32 @@ npx cdk destroy
 ```
 
 ## Dependencies
-- **aws-cdk-lib**: ^2.189.1 - Core CDK library
-- **constructs**: ^10.3.0 - CDK constructs framework
-- **dotenv**: ^16.4.5 - Environment variable management
-- **cdk-nag**: ^2.36.18 - Security and compliance validation
+
+Versions are intentionally **not** listed here — they are tracked in the package
+manifests, which are the single source of truth. See the root `package.json` and
+`package-lock.json` (CDK app) and `website/package.json` (docs site) for the
+current, authoritative versions. This section only names the key dependencies and
+their roles.
+
+Runtime dependencies (CDK app):
+- **aws-cdk-lib** - Core CDK v2 library
+- **constructs** - CDK constructs framework
+- **dotenv** - Environment variable management
+- **source-map-support** - Source maps for stack traces
+
+Build / test toolchain (devDependencies):
+- **aws-cdk** (CLI) - CDK CLI for synth/deploy
+- **typescript** - TypeScript compiler
+- **ts-node** - TypeScript execution for the CDK app entrypoint
+- **cdk-nag** - Security and compliance validation
+- **jest** / **ts-jest** - Unit testing
+- **@types/node** / **@types/jest** - Type definitions
+
+> The `aws-cdk` CLI and `aws-cdk-lib` are version-coupled: the CLI must be new
+> enough to read the cloud-assembly schema emitted by the library, so bump them
+> together (the "Validate CDK synthesis" CI check enforces this). Keep
+> `@types/node`'s major aligned with the Node.js runtime you target rather than
+> chasing its latest release.
 
 ## Development Standards
 - Strict TypeScript configuration with null checks
