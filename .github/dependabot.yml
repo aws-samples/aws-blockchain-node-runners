@@ -50,6 +50,19 @@ updates:
     labels:
       - dependencies
       - npm
+    ignore:
+      # Hold cdk-nag on v2.x: v3 is a breaking rewrite (IAspect ->
+      # IPolicyValidationPlugin, and NagSuppressions -> per-finding
+      # Validations.acknowledge). Deferred until upstream supports prefix/bulk
+      # acknowledgment. Minor/patch (2.x) updates still flow; unignore when
+      # ready to do the v3 migration.
+      - dependency-name: "cdk-nag"
+        update-types: ["version-update:semver-major"]
+      # Keep @types/node aligned with the Node.js runtime major we target
+      # (currently 24); bump it deliberately when the runtime moves rather than
+      # chasing the newest typings. Minor/patch within the major still flow.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     # The blueprints are local file: deps (file:blueprints/*); Dependabot
     # ignores those automatically. Blockchain client versions are managed
     # separately via the @version-update workflow, not here.
