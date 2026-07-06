@@ -3,6 +3,9 @@
     "target": "ES2020",
     "module": "commonjs",
     "moduleResolution": "node",
+    // TS 6 deprecates moduleResolution "node" (node10); acknowledge it here
+    // until it is modernized (e.g. to "node16"/"bundler") before TS 7.
+    "ignoreDeprecations": "6.0",
     "lib": [
       "es2020"
     ],
