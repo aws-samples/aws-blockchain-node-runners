@@ -85,3 +85,12 @@ updates:
     labels:
       - dependencies
       - website
+    ignore:
+      # uuid is vulnerable only via webpack-dev-server -> sockjs, the dev/build
+      # server behind `docusaurus start`. It is NOT included in the
+      # `docusaurus build` static output that ships, so it does not reach the
+      # deployed site. sockjs pins uuid ^8.3.2 and the lowest non-vulnerable
+      # uuid is 14.0.0, so there is no in-range fix and Dependabot's security
+      # update errors out (security_update_not_possible). Ignore it until
+      # Docusaurus / webpack-dev-server move off the vulnerable uuid.
+      - dependency-name: "uuid"
