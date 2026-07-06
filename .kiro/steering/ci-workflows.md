@@ -22,8 +22,10 @@ review churn:
   `tj-actions/changed-files` compromise, CVE-2025-30066) target third-party
   actions. There are only a handful in this repo, so the cost is small.
   Especially mandatory for any third-party action that runs with a `write`
-  permission scope or receives a token (e.g. `peaceiris/actions-gh-pages` in
-  `website-deploy.yaml`, which has `contents: write`).
+  permission scope or receives a token. (The website deploy previously used
+  `peaceiris/actions-gh-pages` with `contents: write`; it now uses GitHub's
+  first-party Pages actions with OIDC, so no third-party action holds repository
+  write access.)
 - **First-party actions (`actions/*`, `github/*`): a major-version tag (e.g.
   `@v4`) is acceptable.** These are GitHub-owned and carry a much lower
   tag-repointing risk. Allowing major tags here removes most Dependabot review

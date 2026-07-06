@@ -24,7 +24,6 @@ const config = {
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'aws-samples', // Usually your GitHub org/user name.
   projectName: 'aws-blockchain-node-runners', // Usually your repo name.
-  deploymentBranch: 'gh-pages',
   githubHost: 'github.com',
 
   markdown: {
