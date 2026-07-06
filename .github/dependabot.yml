@@ -30,6 +30,18 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     groups:
+      # Keep the CDK CLI and library (plus constructs) in a single PR: they are
+      # version-coupled — aws-cdk-lib's cloud-assembly schema must be readable
+      # by the aws-cdk CLI. NOTE: grouping only batches *version* updates. A
+      # security advisory affecting just one of them can still bump it alone
+      # (Dependabot only touches packages with an update/advisory), so the
+      # "Validate CDK synthesis" CI check remains the real guard against
+      # lib/CLI schema drift.
+      aws-cdk:
+        patterns:
+          - "aws-cdk"
+          - "aws-cdk-lib"
+          - "constructs"
       npm:
         patterns:
           - "*"
