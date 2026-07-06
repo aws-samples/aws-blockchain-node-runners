@@ -26,8 +26,12 @@ This command generates static content into the `build` directory and can be serv
 
 ### Deployment
 
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
+Deployment is automated. On every push to `main`, the
+[`website-deploy.yaml`](../.github/workflows/website-deploy.yaml) GitHub Actions
+workflow builds the site and publishes it to GitHub Pages using GitHub's
+first-party Pages actions (build → `upload-pages-artifact` → `deploy-pages` to
+the `github-pages` environment). There is no manual deploy step and no push to a
+`gh-pages` branch.
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+The Docusaurus `yarn deploy` / `npm run deploy` command (which would build and
+push to a `gh-pages` branch) is **not** used by this repository.

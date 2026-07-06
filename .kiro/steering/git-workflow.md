@@ -28,7 +28,7 @@ Trunk-based development around a single integration branch.
 |--------|------|-------|
 | `main` | Default + integration branch. Always releasable. | Protected. No force-push, no deletion. Website auto-deploys from it. |
 | `v1` | Frozen legacy (pre-rewrite). | Protected. No new features. Security-only fixes if ever. Linked from `CHANGELOG.md`. |
-| `gh-pages` | Machine-managed Docusaurus build output. | Never hand-edit; written by `website-deploy.yaml`. |
+| `gh-pages` | **Legacy** Docusaurus deploy branch (pre-first-party-Pages). | No longer written — the site now deploys via the first-party Pages artifact model in `website-deploy.yaml`. Delete once the first-party deploy is verified. |
 | `feat/*`, `fix/*`, `docs/*`, `chore/*`, `ci/*` | Short-lived working branches for non-trivial work. | Branch from `main`, open a PR, delete after merge. |
 | `dependabot/*` | Automated dependency PRs. | Managed by Dependabot; merge or close, don't push to them. |
 
@@ -187,9 +187,10 @@ supply chain stays protected:
   second maintainer joins, raise to 1 and add a `CODEOWNERS` file.
 - **Require linear history** — pairs with squash-merge.
 - **Signed commits:** recommended if commit signing is set up (SSH/GPG/gitsign).
-  This rule applies per-branch, so enabling it on `main` does not affect the
-  `gh-pages` deploy (a separate branch). Dependabot's commits are signed by
-  GitHub. Optional while solo; enable once your own signing is configured.
+  The first-party Pages deploy publishes an artifact rather than pushing commits,
+  so a signed-commits rule on `main` won't interfere with the website deploy.
+  Dependabot's commits are signed by GitHub. Optional while solo; enable once
+  your own signing is configured.
 
 Revisit these when the contributor base grows: require approvals, add
 `CODEOWNERS`, and consider promoting ASH to a blocking check.
