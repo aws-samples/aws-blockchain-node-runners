@@ -37,26 +37,28 @@ npx cdk destroy
 
 ## Dependencies
 
-The root `package.json` (and `package-lock.json`) is the source of truth for
-versions; the list below is a summary and may lag. Update it when the core
-dependencies change.
+Versions are intentionally **not** listed here — they are tracked in the package
+manifests, which are the single source of truth. See the root `package.json` and
+`package-lock.json` (CDK app) and `website/package.json` (docs site) for the
+current, authoritative versions. This section only names the key dependencies and
+their roles.
 
-Runtime dependencies:
-- **aws-cdk-lib**: ^2.261.0 - Core CDK v2 library
-- **constructs**: ^10.4.3 - CDK constructs framework
-- **dotenv**: ^17.2.3 - Environment variable management
-- **source-map-support**: ^0.5.21 - Source maps for stack traces
+Runtime dependencies (CDK app):
+- **aws-cdk-lib** - Core CDK v2 library
+- **constructs** - CDK constructs framework
+- **dotenv** - Environment variable management
+- **source-map-support** - Source maps for stack traces
 
 Build / test toolchain (devDependencies):
-- **aws-cdk** (CLI): ^2.1129.0 - CDK CLI for synth/deploy
-- **typescript**: ~6.0.3 - TypeScript compiler
-- **ts-node**: ^10.9.2 - TypeScript execution for the CDK app entrypoint
-- **cdk-nag**: ^2.37.55 - Security and compliance validation
-- **jest**: ^30.2.0 / **ts-jest**: ^29.4.11 - Unit testing
-- **@types/node**: ^24.10.1 / **@types/jest**: ^30.0.0 - Type definitions
+- **aws-cdk** (CLI) - CDK CLI for synth/deploy
+- **typescript** - TypeScript compiler
+- **ts-node** - TypeScript execution for the CDK app entrypoint
+- **cdk-nag** - Security and compliance validation
+- **jest** / **ts-jest** - Unit testing
+- **@types/node** / **@types/jest** - Type definitions
 
 > The `aws-cdk` CLI and `aws-cdk-lib` are version-coupled: the CLI must be new
-> enough to read the cloud-assembly schema emitted by the library. Bump them
+> enough to read the cloud-assembly schema emitted by the library, so bump them
 > together (the "Validate CDK synthesis" CI check enforces this). Keep
 > `@types/node`'s major aligned with the Node.js runtime you target rather than
 > chasing its latest release.
