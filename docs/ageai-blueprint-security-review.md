@@ -24,7 +24,7 @@ External blueprints (installed by user):
 If the user asks to discover community blueprints:
 1. Run: `npm search aws-bnr-blueprint`
 2. Present results with package name, description, and version
-3. Show the install command for any blueprint they want to add: `npm install aws-bnr-blueprint-<protocol>`
+3. Show the install command for any blueprint they want to add: `npm install aws-bnr-blueprint-<protocol> --legacy-peer-deps` (the `--legacy-peer-deps` flag is required because blueprints declare a peer dependency on the `aws-blockchain-node-runners` framework, which is not published to the npm registry)
 
 Present this disclaimer: Community blueprints are NOT reviewed or verified by the core repository maintainers. The user assumes full responsibility for any external blueprint they install and deploy. Always perform a security review before deploying an external blueprint.
 

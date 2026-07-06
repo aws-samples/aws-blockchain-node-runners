@@ -20,7 +20,7 @@ Community blueprints will be listed here as they are published and submitted for
 
 | Protocol | Package | Maintainer | Docs | Networks | Install |
 |----------|---------|------------|------|----------|---------|
-| _Example Chain_ | `aws-bnr-blueprint-example-chain` | [@example-org](https://github.com/example-org) | [README](https://github.com/example-org/aws-bnr-blueprint-example-chain#readme) | Mainnet, Testnet | `npm install aws-bnr-blueprint-example-chain` |
+| _Example Chain_ | `aws-bnr-blueprint-example-chain` | [@example-org](https://github.com/example-org) | [README](https://github.com/example-org/aws-bnr-blueprint-example-chain#readme) | Mainnet, Testnet | `npm install aws-bnr-blueprint-example-chain --legacy-peer-deps` |
 
 *The example above shows the format. Real entries will appear once community blueprints are submitted.*
 
@@ -31,14 +31,20 @@ Community blueprints will be listed here as they are published and submitted for
 1. **Install the package:**
 
    ```bash
-   npm install aws-bnr-blueprint-<protocol>
+   npm install aws-bnr-blueprint-<protocol> --legacy-peer-deps
    ```
 
    Or from a GitHub repository:
 
    ```bash
-   npm install github:org/aws-bnr-blueprint-<protocol>
+   npm install github:org/aws-bnr-blueprint-<protocol> --legacy-peer-deps
    ```
+
+   :::note Why `--legacy-peer-deps`?
+
+   Blueprints declare a peer dependency on the `aws-blockchain-node-runners` framework, which is not published to the npm registry. Without this flag, npm's strict peer resolution (npm 7+) fails with a `404 Not Found` for `aws-blockchain-node-runners`.
+
+   :::
 
 2. **Configure your `.env` file** using the blueprint's sample configs (check the blueprint's README for available networks and options).
 
