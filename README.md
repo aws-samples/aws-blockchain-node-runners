@@ -33,13 +33,15 @@ Blockchain protocols are delivered as NPM packages (blueprints). Six built-in bl
 
 ```bash
 # Install an external blueprint
-npm install aws-bnr-blueprint-polygon
+npm install aws-bnr-blueprint-polygon --legacy-peer-deps
 
 # Or from GitHub
-npm install github:owner/aws-bnr-blueprint-polygon#v1.0.0
+npm install github:owner/aws-bnr-blueprint-polygon#v1.0.0 --legacy-peer-deps
 ```
 
-After `npm install`, set `BLOCKCHAIN_PROTOCOL` in your `.env` to the protocol name and deploy. See [Adding New Protocols](./docs/ageai-add-protocol-prompt.md) for how to create your own blueprint package.
+The `--legacy-peer-deps` flag is required: blueprints declare a peer dependency on the `aws-blockchain-node-runners` framework, which is not published to the npm registry, so npm's default (strict) peer resolution would otherwise fail.
+
+After installing, set `BLOCKCHAIN_PROTOCOL` in your `.env` to the protocol name and deploy. See [Adding New Protocols](./docs/ageai-add-protocol-prompt.md) for how to create your own blueprint package.
 
 ## Prerequisites
 

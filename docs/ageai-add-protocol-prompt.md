@@ -366,9 +366,9 @@ For Path B (external blueprints), test the package against a local checkout of N
    git clone https://github.com/aws-samples/aws-blockchain-node-runners.git
    cd aws-blockchain-node-runners
    npm install
-   npm install /path/to/your/blueprint
+   npm install /path/to/your/blueprint --legacy-peer-deps
    ```
-   Pointing `npm install` at the local blueprint directory links it into `node_modules/` so the `ConfigurationLoader` resolves it like any published blueprint.
+   Pointing `npm install` at the local blueprint directory links it into `node_modules/` so the `ConfigurationLoader` resolves it like any published blueprint. The `--legacy-peer-deps` flag is required because the blueprint declares a peer dependency on the `aws-blockchain-node-runners` framework, which is not published to the npm registry.
 
 2. **Synthesize the stack** to validate configuration files and user-data scripts resolve:
    ```bash
@@ -465,8 +465,9 @@ DO NOT:
 
 Once an external blueprint (Path B) is tested, distribute it so users can install it into their own Node Runners checkout. Choose one or more of the following:
 
-- **NPM Registry**: Publish the package with `npm publish`. Users then install it with `npm install aws-bnr-blueprint-<protocol>`.
-- **GitHub**: Push the blueprint to a public repository. Users can install directly from the repo with `npm install github:org/repo`.
+- **NPM Registry**: Publish the package with `npm publish`. Users then install it with `npm install aws-bnr-blueprint-<protocol> --legacy-peer-deps`.
+- **GitHub**: Push the blueprint to a public repository. Users can install directly from the repo with `npm install github:org/repo --legacy-peer-deps`.
+- **Note**: The `--legacy-peer-deps` flag is required when installing an external blueprint because blueprints declare a peer dependency on the `aws-blockchain-node-runners` framework, which is not published to the npm registry (npm 7+ strict peer resolution would otherwise fail).
 - **Community Catalog**: Open a pull request to add an entry for your blueprint to the Community Blueprints Catalog page so others can discover it.
 
 After installation by any method, the blueprint lands in `node_modules/` and the `ConfigurationLoader` resolves it identically to a built-in blueprint — users deploy it with `BLOCKCHAIN_PROTOCOL=<protocol> npx cdk deploy`.
