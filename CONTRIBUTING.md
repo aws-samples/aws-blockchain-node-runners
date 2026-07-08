@@ -42,6 +42,8 @@ GitHub provides additional document on [forking a repository](https://help.githu
 
 Your PR will be checked by automated CI workflows including security scanning (ASH), CodeQL analysis, dependency review, and ShellCheck for shell scripts. Address any findings before requesting review.
 
+Most ASH findings are advisory (reported as a PR comment). The exception: prompt-injection findings on AI prompt files (`docs/ageai-*.md`, `.kiro/prompts/*.md`) are **blocking** — the scan fails and the PR cannot merge until resolved. If a match is a genuine false positive (for example, security-review wording that legitimately describes an attack pattern), suppress it with an inline `nosemgrep: <rule-id>` comment on the offending line and a short justification. Suppressions are version-controlled and reviewed in the diff.
+
 
 ## Branching, Commits, and Releases
 
