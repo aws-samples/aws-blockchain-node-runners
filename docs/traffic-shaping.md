@@ -20,9 +20,11 @@ The system operates in a continuous cycle: when a node is fully synchronized (bl
 
 ## Examples of traffic limits
 
-- **20 Mbit/s limit**: ~0.2 TiB/month
-- **40 Mbit/s limit**: ~0.4 TiB/month
-- **100 Mbit/s limit**: ~1 TiB/month
+Assuming a sustained transfer at the configured cap over an average month (~730 hours), the maximum outbound volume is roughly **0.3 TiB per Mbit/s** (`Mbit/s × 10⁶ ÷ 8 bytes/s × 2,628,000 s ÷ 2⁴⁰`):
+
+- **20 Mbit/s limit**: up to 6 TiB/month
+- **40 Mbit/s limit**: up to 12 TiB/month
+- **100 Mbit/s limit**: up to 30 TiB/month
 
 ## When to Use Traffic Shaping
 
