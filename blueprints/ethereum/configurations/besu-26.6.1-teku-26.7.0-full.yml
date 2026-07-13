@@ -34,7 +34,7 @@ services:
         network_mode: host
 
     consensus:
-        image: consensys/teku:26.6.1
+        image: consensys/teku:26.7.0
         container_name: consensus
         restart: always
         command:

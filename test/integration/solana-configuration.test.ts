@@ -52,7 +52,7 @@ describe('Solana Protocol Configuration', () => {
             expect(agaveExtended).toBeDefined();
 
             // Agave 4.x configurations (4.0.3 stable for mainnet-beta,
-            // 4.1.0-rc.1 matching the current devnet/testnet clusters).
+            // 4.1.1 matching the current devnet/testnet clusters).
             const agave403Base = protocolConfig.availableConfigurations.find(
                 c => c.name === 'agave-4.0.3-rpc-base.sh'
             );
@@ -63,23 +63,23 @@ describe('Solana Protocol Configuration', () => {
             );
             expect(agave403Extended).toBeDefined();
 
-            const agave410Base = protocolConfig.availableConfigurations.find(
-                c => c.name === 'agave-4.1.0-rc.1-rpc-base.sh'
+            const agave411Base = protocolConfig.availableConfigurations.find(
+                c => c.name === 'agave-4.1.1-rpc-base.sh'
             );
-            expect(agave410Base).toBeDefined();
+            expect(agave411Base).toBeDefined();
 
-            const agave410Extended = protocolConfig.availableConfigurations.find(
-                c => c.name === 'agave-4.1.0-rc.1-rpc-extended.sh'
+            const agave411Extended = protocolConfig.availableConfigurations.find(
+                c => c.name === 'agave-4.1.1-rpc-extended.sh'
             );
-            expect(agave410Extended).toBeDefined();
+            expect(agave411Extended).toBeDefined();
 
             const fdBase = protocolConfig.availableConfigurations.find(
-                c => c.name === 'frankendancer-0.912.40003-rpc-base.sh'
+                c => c.name === 'frankendancer-0.1005.40100-rpc-base.sh'
             );
             expect(fdBase).toBeDefined();
 
             const fdExtended = protocolConfig.availableConfigurations.find(
-                c => c.name === 'frankendancer-0.912.40003-rpc-extended.sh'
+                c => c.name === 'frankendancer-0.1005.40100-rpc-extended.sh'
             );
             expect(fdExtended).toBeDefined();
         });
