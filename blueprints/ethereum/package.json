@@ -115,7 +115,7 @@
     },
     "customEnvVarsNamePrefix": "ETH",
     "customEnvVars": [
-      "ETH_CONSENSUS_CHECKPOINT_SYNC_URL=https://beaconstate.info",
+      "ETH_CONSENSUS_CHECKPOINT_SYNC_URL=https://beaconstate.ethstaker.cc",
       "ETH_CONSENSUS_SUPERNODE=true"
     ]
   }

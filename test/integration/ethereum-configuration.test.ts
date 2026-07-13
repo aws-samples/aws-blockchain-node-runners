@@ -56,7 +56,7 @@ describe('Ethereum Protocol Configuration', () => {
             const protocolConfig = configLoader.loadProtocolConfig('ethereum');
 
             expect(protocolConfig.customEnvVarsNamePrefix).toBe('ETH');
-            expect(protocolConfig.customEnvVars).toContain('ETH_CONSENSUS_CHECKPOINT_SYNC_URL=https://beaconstate.info');
+            expect(protocolConfig.customEnvVars).toContain('ETH_CONSENSUS_CHECKPOINT_SYNC_URL=https://beaconstate.ethstaker.cc');
         });
 
         it('should have monitoring configuration for dual clients', () => {
@@ -86,7 +86,7 @@ describe('Ethereum Protocol Configuration', () => {
             const envConfig = configLoader.loadEnvironmentConfig(envPath);
 
             expect(envConfig.CUSTOM_VARIABLES).toBeDefined();
-            expect(envConfig.CUSTOM_VARIABLES.ETH_CONSENSUS_CHECKPOINT_SYNC_URL).toBe('https://beaconstate.info');
+            expect(envConfig.CUSTOM_VARIABLES.ETH_CONSENSUS_CHECKPOINT_SYNC_URL).toBe('https://beaconstate.ethstaker.cc');
         });
     });
 

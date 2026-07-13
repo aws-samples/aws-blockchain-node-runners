@@ -13,6 +13,10 @@
 - **BNB Chain**: BSC Reth `v0.0.10-beta` → `v0.1.0-fix`.
 - **Bitcoin**: Bitcoin Core `v31.0` → `v31.1`.
 
+### Fixed
+
+- **Ethereum**: replaced the `beaconstate.info` checkpoint-sync endpoints, which no longer resolve, across the README, sample `.env` files, and the blueprint's default (`package.json`). Mainnet now defaults to `https://beaconstate.ethstaker.cc` and Sepolia to `https://checkpoint-sync.sepolia.ethpandaops.io`. Without this, consensus clients crash-loop on startup ("Failed to start beacon node") because they cannot reach the checkpoint endpoint.
+
 ## [2.0.0] — 2026-06-22
 
 ### Breaking Changes

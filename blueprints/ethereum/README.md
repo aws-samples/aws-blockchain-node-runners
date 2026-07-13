@@ -253,16 +253,16 @@ Checkpoint sync dramatically reduces initial sync time (from days to hours):
 
 ```bash
 # Mainnet
-ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://beaconstate.info"
+ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://beaconstate.ethstaker.cc"
 
 # Sepolia
-ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://sepolia.beaconstate.info"
+ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.sepolia.ethpandaops.io"
 
 # Holesky
-ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://holesky.beaconstate.info"
+ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.holesky.ethpandaops.io"
 ```
 
-More checkpoint sync endpoints: https://eth-clients.github.io/checkpoint-sync-endpoints/
+Pick any provider from the maintained list — https://eth-clients.github.io/checkpoint-sync-endpoints/ — if one is unreachable. Endpoints do come and go (the previously used `beaconstate.info` domain stopped resolving).
 
 ### Supernode Mode (Lighthouse — PeerDAS)
 
