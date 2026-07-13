@@ -11,7 +11,7 @@ import { DeploymentMode, CpuType } from './enums';
  * Configuration for a specific blockchain client/version combination.
  *
  * The client version is encoded in the configuration file name (e.g.
- * `geth-1.17.3-lighthouse-8.1.3-full.yml`), which is the single source of
+ * `geth-1.17.4-lighthouse-8.2.0-full.yml`), which is the single source of
  * truth. There is intentionally no separate `version` field to avoid
  * duplicating the version string.
  */

@@ -11,10 +11,10 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "bitcoin-core-v31.0-full.yml",
+    "defaultConfiguration": "bitcoin-core-v31.1-full.yml",
     "availableConfigurations": [
       {
-        "name": "bitcoin-core-v31.0-full.yml"
+        "name": "bitcoin-core-v31.1-full.yml"
       }
     ],
     "BC_NETWORKS": [

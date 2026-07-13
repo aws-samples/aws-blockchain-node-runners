@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased]
+
+### Security
+
+- **Ethereum**: upgraded Lighthouse `8.1.3` → `8.2.0` in the Geth + Lighthouse configuration. This is a high-priority upstream release that addresses several security vulnerabilities (including a fork-choice fix); beacon-node operators should upgrade promptly. Upgrading requires deploying a node with the new configuration.
+
+### Changed
+
+- **Ethereum**: bumped client versions — Geth `1.17.3` → `1.17.4`, Erigon `3.4.3` → `3.5.0`, Nethermind `1.38.1` → `1.39.0`, Prysm `7.1.5` → `7.1.6`, Teku `26.6.1` → `26.7.0`. Configuration file names and matching `samples/` were updated accordingly.
+- **Solana**: Agave `4.1.0-rc.1` → `4.1.1` (release candidate replaced with the stable release on the same line); Frankendancer `0.912.40003` → `0.1005.40100`.
+- **BNB Chain**: BSC Reth `v0.0.10-beta` → `v0.1.0-fix`.
+- **Bitcoin**: Bitcoin Core `v31.0` → `v31.1`.
+
 ## [2.0.0] — 2026-06-22
 
 ### Breaking Changes
