@@ -9,6 +9,7 @@
 ### Changed
 
 - **Ethereum**: bumped client versions — Geth `1.17.3` → `1.17.4`, Erigon `3.4.3` → `3.5.0`, Nethermind `1.38.1` → `1.39.0`, Prysm `7.1.5` → `7.1.6`, Teku `26.6.1` → `26.7.0`. Configuration file names and matching `samples/` were updated accordingly.
+- **Ethereum**: upgraded the Reth archive configuration to Reth `1.10.2` → `2.3.0` and Lighthouse `8.1.3` → `8.2.0` (`reth-2.3.0-lighthouse-8.2.0-archive.yml`). Reth 2.x makes **Storage V2** the default; there is no in-place upgrade for an existing Reth v1 datadir, so upgrading requires deploying a new node and resyncing (consistent with the blueprint's replace-the-instance upgrade model). Reth 2.2 also enables Discv5 discovery by default. No blueprint CLI flags changed.
 - **Solana**: Agave `4.1.0-rc.1` → `4.1.1` (release candidate replaced with the stable release on the same line); Frankendancer `0.912.40003` → `0.1005.40100`.
 - **BNB Chain**: BSC Reth `v0.0.10-beta` → `v0.1.0-fix`.
 - **Bitcoin**: Bitcoin Core `v31.0` → `v31.1`.
