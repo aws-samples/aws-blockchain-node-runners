@@ -15,7 +15,7 @@ jobs:
         with:
           # Need the PR base commit so pre-commit can diff for changed files.
           fetch-depth: 0
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v4.7.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v4.7.1
       # ShellCheck is invoked as a local "system" hook (see .pre-commit-config.yaml);
       # it is preinstalled on ubuntu-latest, so no install step is required.
       - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
