@@ -5,7 +5,7 @@
 version: "3"
 services:
     execution:
-        image: erigontech/erigon:v3.5.0
+        image: erigontech/erigon:v3.5.3
         container_name: execution
         restart: always
         user: "1002:1002"
@@ -34,7 +34,7 @@ services:
         network_mode: host
 
     consensus:
-        image: gcr.io/prysmaticlabs/prysm/beacon-chain:v7.1.6
+        image: gcr.io/prysmaticlabs/prysm/beacon-chain:v7.1.7
         container_name: consensus
         restart: always
         user: "1002:1002"

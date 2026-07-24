@@ -14,7 +14,7 @@ import * as path from 'path';
  */
 describe('Base blueprint — pinned base/node ref', () => {
     const blueprintDir = path.join(__dirname, '../../../blueprints/base');
-    const configPath = path.join(blueprintDir, 'configurations/base-reth-v1.1.1-full.yml');
+    const configPath = path.join(blueprintDir, 'configurations/base-reth-v1.2.0-full.yml');
     const nodeScriptPath = path.join(blueprintDir, 'user-data/node.sh');
 
     const readTag = (): string => {
