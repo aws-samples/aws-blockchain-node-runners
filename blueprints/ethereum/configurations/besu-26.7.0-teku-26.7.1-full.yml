@@ -5,7 +5,7 @@
 version: "3"
 services:
     execution:
-        image: hyperledger/besu:26.6.1
+        image: hyperledger/besu:26.7.0
         container_name: execution
         restart: always
         command:
@@ -34,7 +34,7 @@ services:
         network_mode: host
 
     consensus:
-        image: consensys/teku:26.7.0
+        image: consensys/teku:26.7.1
         container_name: consensus
         restart: always
         command:
