@@ -11,11 +11,11 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "base-reth-v1.1.1-full.yml",
+    "defaultConfiguration": "base-reth-v1.2.0-full.yml",
     "availableConfigurations": [
       {
-        "name": "base-reth-v1.1.1-full.yml",
-        "version": "v1.1.1"
+        "name": "base-reth-v1.2.0-full.yml",
+        "version": "v1.2.0"
       }
     ],
     "BC_NETWORKS": [

@@ -38,7 +38,7 @@ services:
         network_mode: host
 
     consensus:
-        image: sigp/lighthouse:v8.2.0
+        image: sigp/lighthouse:v8.2.1
         container_name: consensus
         restart: always
         command:

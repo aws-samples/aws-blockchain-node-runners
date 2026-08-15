@@ -23,5 +23,5 @@
 # Tag reference: https://github.com/base/node/tags
 
 base_node_repo: "https://github.com/base/node.git"
-base_node_tag: "v1.1.1"
+base_node_tag: "v1.2.0"
 client: "reth"

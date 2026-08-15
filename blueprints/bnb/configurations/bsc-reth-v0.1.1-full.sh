@@ -9,7 +9,7 @@
 #   no args   — runs reth-bsc with full-node flags (systemd entrypoint)
 #
 # The client version is derived from CLIENT_CONFIG (the configuration file
-# name, e.g. "bsc-reth-v0.1.0-fix-full.sh" -> "v0.1.0-fix"), which is the
+# name, e.g. "bsc-reth-v0.1.1-full.sh" -> "v0.1.1"), which is the
 # single source of truth. The upstream tag suffix (e.g. "-beta", "-fix") is
 # part of the version and is carried in the file name.
 #
@@ -44,6 +44,9 @@ install_client() {
     # Install Rust toolchain if not present
     if ! command -v cargo &> /dev/null; then
         echo "Installing Rust toolchain..."
+        # cloud-init runs user-data as root with HOME unset; rustup then installs
+        # to /root/.cargo. Pin HOME so the install and the env source agree.
+        export HOME="${HOME:-/root}"
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         source "$HOME/.cargo/env"
     fi
@@ -113,7 +116,7 @@ run_node() {
         --engine.parallel-sparse-trie \
         --metrics="$EC2_INTERNAL_IP:6060" \
         --engine.memory-block-buffer-target=128 \
-        --maxpeers=50
+        --max-peers=50
 }
 
 # Dispatch based on argument

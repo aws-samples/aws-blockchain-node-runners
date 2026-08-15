@@ -58,7 +58,7 @@ Multiple EC2 instances behind an Application Load Balancer for production RPC wo
 
 | Configuration | Execution | Consensus | Snapshot Support | Best For |
 |--------------|-----------|-----------|------------------|----------|
-| base-reth-v1.1.1-full.yml | base-reth-node | base-consensus | Yes | Production RPC (recommended) |
+| base-reth-v1.2.0-full.yml | base-reth-node | base-consensus | Yes | Production RPC (recommended) |
 
 **Note:** As of the Base Azul upgrade (May 21, 2026 mainnet), only `base-reth-node` + `base-consensus` is supported. op-geth, nethermind, and op-node are no longer compatible with Base mainnet. This blueprint uses snapshot restoration for fast initial sync (hours instead of days).
 
@@ -394,7 +394,7 @@ This is an upstream geth issue (see [go-ethereum#26429](https://github.com/ether
 
 ### Client Release Channels
 
-The Base node is built from source by cloning the [base/node](https://github.com/base/node) repository at a **pinned release tag** and running `docker compose build`. The deployed version is therefore governed by `base_node_tag` in [`configurations/base-reth-v1.1.1-full.yml`](configurations/base-reth-v1.1.1-full.yml) — `node.sh` clones exactly that ref and refuses a moving branch (`main`/`master`/`HEAD`). The individual client binaries (base-reth-node, base-consensus) are pinned inside that tagged release's `versions.env`, so reading `versions.env` is informational only.
+The Base node is built from source by cloning the [base/node](https://github.com/base/node) repository at a **pinned release tag** and running `docker compose build`. The deployed version is therefore governed by `base_node_tag` in [`configurations/base-reth-v1.2.0-full.yml`](configurations/base-reth-v1.2.0-full.yml) — `node.sh` clones exactly that ref and refuses a moving branch (`main`/`master`/`HEAD`). The individual client binaries (base-reth-node, base-consensus) are pinned inside that tagged release's `versions.env`, so reading `versions.env` is informational only.
 
 To upgrade Base, set `base_node_tag` to a newer [base/node release tag](https://github.com/base/node/tags) and rename the configuration file to match (e.g. `base-reth-v1.2.0-full.yml`), updating `package.json` and the sample `.env` files' `CLIENT_CONFIG`. The `@version-update` workflow handles this.
 

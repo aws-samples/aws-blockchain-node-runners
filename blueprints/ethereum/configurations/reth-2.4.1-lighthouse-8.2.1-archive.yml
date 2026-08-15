@@ -5,7 +5,7 @@
 version: "3"
 services:
     execution:
-        image: ghcr.io/paradigmxyz/reth:v2.3.0
+        image: ghcr.io/paradigmxyz/reth:v2.4.1
         container_name: execution
         restart: always
         pid: host
@@ -34,7 +34,7 @@ services:
         network_mode: host
 
     consensus:
-        image: sigp/lighthouse:v8.2.0
+        image: sigp/lighthouse:v8.2.1
         container_name: consensus
         restart: always
         command:

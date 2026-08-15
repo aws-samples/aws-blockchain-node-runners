@@ -11,25 +11,25 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "geth-1.17.4-lighthouse-8.2.0-full.yml",
+    "defaultConfiguration": "geth-1.17.4-lighthouse-8.2.1-full.yml",
     "availableConfigurations": [
       {
-        "name": "geth-1.17.4-lighthouse-8.2.0-full.yml"
+        "name": "geth-1.17.4-lighthouse-8.2.1-full.yml"
       },
       {
-        "name": "reth-2.3.0-lighthouse-8.2.0-archive.yml"
+        "name": "reth-2.4.1-lighthouse-8.2.1-archive.yml"
       },
       {
-        "name": "erigon-3.5.0-caplin-archive.yml"
+        "name": "erigon-3.5.3-caplin-archive.yml"
       },
       {
-        "name": "erigon-3.5.0-prysm-7.1.6-archive.yml"
+        "name": "erigon-3.5.3-prysm-7.1.7-archive.yml"
       },
       {
-        "name": "besu-26.6.1-teku-26.7.0-full.yml"
+        "name": "besu-26.7.0-teku-26.7.1-full.yml"
       },
       {
-        "name": "nethermind-1.39.0-teku-26.7.0-full.yml"
+        "name": "nethermind-1.39.2-teku-26.7.1-full.yml"
       }
     ],
     "BC_NETWORKS": [
