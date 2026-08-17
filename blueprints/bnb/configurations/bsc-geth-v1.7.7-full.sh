@@ -9,7 +9,7 @@
 #   no args   — runs geth with full-node flags (systemd entrypoint)
 #
 # The client version is derived from CLIENT_CONFIG (the configuration file
-# name, e.g. "bsc-geth-v1.7.3-full.sh" -> "v1.7.3"), which is the single
+# name, e.g. "bsc-geth-v1.7.7-full.sh" -> "v1.7.7"), which is the single
 # source of truth.
 #
 # Runtime flags match the 48Club geth.local snapshot requirements.
