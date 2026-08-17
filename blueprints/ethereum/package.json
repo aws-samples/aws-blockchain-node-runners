@@ -20,16 +20,16 @@
         "name": "reth-2.4.1-lighthouse-8.2.1-archive.yml"
       },
       {
-        "name": "erigon-3.5.3-caplin-archive.yml"
+        "name": "erigon-3.5.4-caplin-archive.yml"
       },
       {
-        "name": "erigon-3.5.3-prysm-7.1.7-archive.yml"
+        "name": "erigon-3.5.4-prysm-7.1.8-archive.yml"
       },
       {
         "name": "besu-26.7.0-teku-26.7.1-full.yml"
       },
       {
-        "name": "nethermind-1.39.2-teku-26.7.1-full.yml"
+        "name": "nethermind-1.39.3-teku-26.7.1-full.yml"
       }
     ],
     "BC_NETWORKS": [
