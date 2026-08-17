@@ -5,7 +5,7 @@
 version: "3"
 services:
     execution:
-        image: nethermind/nethermind:1.39.2
+        image: nethermind/nethermind:1.39.3
         container_name: execution
         restart: always
         command:

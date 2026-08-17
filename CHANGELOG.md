@@ -10,6 +10,7 @@
 
 ### Changed
 
+- **Ethereum**: bumped patch versions — Nethermind `1.39.2` → `1.39.3`, Erigon `3.5.3` → `3.5.4`, and Prysm `7.1.7` → `7.1.8`. All three are drop-in upgrades within the same release series with no blueprint CLI flag changes; configuration file names and matching `samples/` were updated accordingly.
 - **Ethereum**: bumped client versions — Geth `1.17.3` → `1.17.4`, Erigon `3.4.3` → `3.5.3`, Prysm `7.1.5` → `7.1.7`, and Besu `26.6.1` → `26.7.0`. Configuration file names and matching `samples/` were updated accordingly. (Nethermind and Teku are covered under Security above.)
 - **Ethereum**: upgraded the Reth archive configuration to Reth `1.10.2` → `2.4.1` and Lighthouse `8.1.3` → `8.2.1` (`reth-2.4.1-lighthouse-8.2.1-archive.yml`). Reth 2.x makes **Storage V2** the default; there is no in-place upgrade for an existing Reth v1 datadir, so upgrading requires deploying a new node and resyncing (consistent with the blueprint's replace-the-instance upgrade model). Reth 2.2 also enables Discv5 discovery by default. No blueprint CLI flags changed.
 - **Solana**: Agave `4.1.0-rc.1` → `4.1.2` (prerelease replaced with the stable `4.1.x` line); Frankendancer `0.912.40003` → `0.1006.40100`. The Agave `3.1.14` and `4.0.3` (default) configurations are already current and unchanged.
