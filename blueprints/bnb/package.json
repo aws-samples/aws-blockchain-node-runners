@@ -11,10 +11,10 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "bsc-geth-v1.7.3-full.sh",
+    "defaultConfiguration": "bsc-geth-v1.7.7-full.sh",
     "availableConfigurations": [
       {
-        "name": "bsc-geth-v1.7.3-full.sh"
+        "name": "bsc-geth-v1.7.7-full.sh"
       },
       {
         "name": "bsc-reth-v0.1.1-full.sh"
