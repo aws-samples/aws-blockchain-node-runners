@@ -5,7 +5,7 @@
 version: "3"
 services:
     execution:
-        image: ethereum/client-go:v1.17.4
+        image: ethereum/client-go:v1.17.5
         container_name: execution
         restart: always
         command:
