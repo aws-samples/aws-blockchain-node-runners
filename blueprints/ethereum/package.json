@@ -11,10 +11,10 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "geth-1.17.4-lighthouse-8.2.1-full.yml",
+    "defaultConfiguration": "geth-1.17.5-lighthouse-8.2.1-full.yml",
     "availableConfigurations": [
       {
-        "name": "geth-1.17.4-lighthouse-8.2.1-full.yml"
+        "name": "geth-1.17.5-lighthouse-8.2.1-full.yml"
       },
       {
         "name": "reth-2.4.1-lighthouse-8.2.1-archive.yml"
@@ -26,7 +26,7 @@
         "name": "erigon-3.5.4-prysm-7.1.8-archive.yml"
       },
       {
-        "name": "besu-26.7.0-teku-26.7.1-full.yml"
+        "name": "besu-26.7.1-teku-26.7.1-full.yml"
       },
       {
         "name": "nethermind-1.39.3-teku-26.7.1-full.yml"

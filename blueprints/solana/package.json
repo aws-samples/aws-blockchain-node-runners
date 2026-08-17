@@ -32,10 +32,10 @@
         "name": "agave-3.1.14-rpc-extended.sh"
       },
       {
-        "name": "frankendancer-0.1006.40100-rpc-base.sh"
+        "name": "frankendancer-0.1105.40200-rpc-base.sh"
       },
       {
-        "name": "frankendancer-0.1006.40100-rpc-extended.sh"
+        "name": "frankendancer-0.1105.40200-rpc-extended.sh"
       }
     ],
     "BC_NETWORKS": [
@@ -63,7 +63,7 @@
       {
         "portRange": {
           "from": 8001,
-          "to": 8029
+          "to": 8040
         },
         "protocol": "tcp",
         "description": "Gossip + dynamic port range",
@@ -72,7 +72,7 @@
       {
         "portRange": {
           "from": 8001,
-          "to": 8029
+          "to": 8040
         },
         "protocol": "udp",
         "description": "Gossip UDP + dynamic port range",
