@@ -74,12 +74,12 @@ describe('Solana Protocol Configuration', () => {
             expect(agave412Extended).toBeDefined();
 
             const fdBase = protocolConfig.availableConfigurations.find(
-                c => c.name === 'frankendancer-0.1006.40100-rpc-base.sh'
+                c => c.name === 'frankendancer-0.1105.40200-rpc-base.sh'
             );
             expect(fdBase).toBeDefined();
 
             const fdExtended = protocolConfig.availableConfigurations.find(
-                c => c.name === 'frankendancer-0.1006.40100-rpc-extended.sh'
+                c => c.name === 'frankendancer-0.1105.40200-rpc-extended.sh'
             );
             expect(fdExtended).toBeDefined();
         });
@@ -112,14 +112,14 @@ describe('Solana Protocol Configuration', () => {
                 p => p.portRange?.from === 8001 && p.protocol === 'tcp'
             );
             expect(gossipTcp).toBeDefined();
-            expect(gossipTcp?.portRange?.to).toBe(8029);
+            expect(gossipTcp?.portRange?.to).toBe(8040);
             expect(gossipTcp?.public).toBe(true);
 
             const gossipUdp = protocolConfig.requiredPorts.find(
                 p => p.portRange?.from === 8001 && p.protocol === 'udp'
             );
             expect(gossipUdp).toBeDefined();
-            expect(gossipUdp?.portRange?.to).toBe(8029);
+            expect(gossipUdp?.portRange?.to).toBe(8040);
             expect(gossipUdp?.public).toBe(true);
         });
 
