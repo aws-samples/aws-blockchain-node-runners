@@ -178,6 +178,12 @@ Type=simple
 Restart=always
 RestartSec=10
 User=bcuser
+# Agave 4.2+ requires CAP_NET_ADMIN and CAP_NET_RAW for its networking stack
+# (earlier 4.0.x/4.1.x did not). Grant just these two to the non-root bcuser
+# process via ambient capabilities; the validator uses them at startup to set
+# up sockets and then drops them.
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
 LimitNOFILE=1000000
 LimitMEMLOCK=2000000000
 LogRateLimitIntervalSec=0

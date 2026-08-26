@@ -84,7 +84,7 @@ exec /home/bcuser/bin/agave-validator \
     --rpc-port 8899 \
     --rpc-bind-address ${EC2_INTERNAL_IP} \
     --gossip-port 8001 \
-    --dynamic-port-range 8004-8029 \
+    --dynamic-port-range 8004-8040 \
     --private-rpc \
     --wal-recovery-mode skip_any_corrupted_record \
     --enable-rpc-transaction-history \

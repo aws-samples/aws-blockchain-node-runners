@@ -21,9 +21,9 @@ A single EC2 instance running the selected validator client in RPC mode, suitabl
 │  │  │  │    Agave or Frankendancer (RPC Mode)         │   │││
 │  │  │  │  Port 8899 (JSON RPC) - internal only        │   │││
 │  │  │  │  Port 8900 (WebSocket) - internal only       │   │││
-│  │  │  │  Ports 8001-8029 (Gossip + P2P) - public     │   │││
+│  │  │  │  Ports 8001-8040 (Gossip + P2P) - public     │   │││
 │  │  │  │  Port 8003/UDP (Shred/Turbine) - public      │   │││
-│  │  │  │  Dynamic port range: 8004-8029 (both clients)│   │││
+│  │  │  │  Dynamic port range: 8004-8040 (both clients)│   │││
 │  │  │  └──────────────────────────────────────────────┘   │││
 │  │  │  ┌──────────────────────────────────────────────┐   │││
 │  │  │  │  NVMe /data (2 TB+) - Ledger               │   │││
@@ -94,8 +94,8 @@ Both clients expose the same Solana JSON RPC API on port 8899 and are fully inte
 | Configuration format | CLI flags | TOML file (`frankendancer.toml`) |
 | Binary | `agave-validator` | `fdctl` (manages Firedancer tiles + Agave subprocess) |
 | Networking stack | Standard Solana networking | AF_XDP kernel bypass (high-performance) |
-| Dynamic port range | `8004-8029` (CLI flag) | `8004-8029` (TOML, passed to embedded Agave) |
-| Privilege model | Runs entirely as `bcuser` | Starts as root (AF_XDP requires `CAP_SYS_ADMIN`), drops to `bcuser` via TOML `user` field |
+| Dynamic port range | `8004-8040` (CLI flag) | `8004-8040` (TOML, passed to embedded Agave) |
+| Privilege model | Runs as `bcuser`; Agave 4.2+ also needs `CAP_NET_ADMIN`+`CAP_NET_RAW` (granted via systemd `AmbientCapabilities`) | Starts as root (AF_XDP requires `CAP_SYS_ADMIN`), drops to `bcuser` via TOML `user` field |
 | System initialization | None required | `fdctl configure init all` sets up hugetlbfs, sysctl, ethtool before each run |
 | Build from source | `cargo-install-all.sh` (~30-60 min) | `deps.sh` + `make -j fdctl solana` (~20-40 min) |
 | Maturity | Production-proven, canonical client | Newer, rapidly maturing, used by high-performance validators |
@@ -111,9 +111,9 @@ Agave remains the safe default for most RPC use cases. Both clients produce iden
 
 ### Port Security: Unified Dynamic Port Range
 
-Both Agave and Frankendancer use the same dynamic port range: **8004-8029**. This is an intentional architectural decision — since both clients share a single `requiredPorts` definition in `package.json`, aligning the dynamic port range avoids opening unnecessary ports when either client is deployed.
+Both Agave and Frankendancer use the same dynamic port range: **8004-8040**. This is an intentional architectural decision — since both clients share a single `requiredPorts` definition in `package.json`, aligning the dynamic port range avoids opening unnecessary ports when either client is deployed.
 
-Frankendancer's upstream default is `8900-9000`, but we override it to `8004-8029` to fit within the gossip security group rules (8001-8029). The range starts at 8004 to avoid Frankendancer's static ports: gossip (8001) and shred (8003). The Firedancer documentation explicitly states that the dynamic port range must not overlap with static Firedancer ports. The width of 25 (`8029 - 8004`) meets the Agave minimum (`MINIMUM_VALIDATOR_PORT_RANGE_WIDTH = 25` in `solana-net-utils`).
+Frankendancer's upstream default is `8900-9000`, but we override it to `8004-8040` to fit within the gossip security group rules (8001-8040). The range starts at 8004 to avoid Frankendancer's static ports: gossip (8001) and shred (8003). The Firedancer documentation explicitly states that the dynamic port range must not overlap with static Firedancer ports. The width of 36 (`8040 - 8004`) satisfies Agave's minimum validator port-range width. **Note: Agave 4.2 raised this minimum above the previous 25** — the older `8004-8040` range (width 25) is rejected by 4.2 with "Port range is too small" (it now requires at least width 26, i.e. `8004-8030`), so the Agave 4.2.x configurations use `8004-8040` for headroom and parity with Frankendancer.
 
 ### Port Security: Why Ports 9001 and 9007 Are Not Exposed
 
@@ -328,7 +328,7 @@ See [Deployment Guide](/docs/guides/deployment-guide) for detailed cost optimiza
 ## Security Considerations
 
 - RPC endpoints bind to internal IP only (VPC-only access)
-- Gossip and P2P ports (8001-8029 TCP/UDP) open for network participation; both clients use dynamic port range 8004-8029 within this range (see [Unified Dynamic Port Range](#port-security-unified-dynamic-port-range))
+- Gossip and P2P ports (8001-8040 TCP/UDP) open for network participation; both clients use dynamic port range 8004-8040 within this range (see [Unified Dynamic Port Range](#port-security-unified-dynamic-port-range))
 - Frankendancer shred port (8003/UDP) open for Turbine block data; transaction ingestion ports (9001, 9007) are not exposed (see [Port Security](#port-security-why-ports-9001-and-9007-are-not-exposed))
 - AWS Systems Manager Session Manager for secure access (no SSH)
 - Encrypted storage volumes
