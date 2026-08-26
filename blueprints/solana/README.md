@@ -372,12 +372,12 @@ A: Frankendancer uses AF_XDP kernel-bypass networking, which requires `CAP_SYS_A
 
 | Client | Repo | Query method | Version line | Prereleases |
 |--------|------|--------------|--------------|-------------|
-| Agave | [anza-xyz/agave](https://github.com/anza-xyz/agave/releases) | tags (semver) | 3.1.x | exclude rc/beta |
+| Agave | [anza-xyz/agave](https://github.com/anza-xyz/agave/releases) | tags (semver) | 4.2.x | exclude rc/beta |
 | Frankendancer | [firedancer-io/firedancer](https://github.com/firedancer-io/firedancer/releases) | releases/latest | * | stable only |
 
 > Column legend — **Repo**: canonical `owner/repo` (link goes to the releases page). **Query method**: `releases/latest` = newest non-prerelease via GitHub API (`https://api.github.com/repos/{repo}/releases/latest`); `tags` = list `/tags` and pick the highest matching semver; `releases` = list `/releases` and pick the newest matching the prerelease policy; `pinned-file` = read the named file at the given ref. **Version line**: constrains updates to a release line (`*` = any). **Prereleases**: whether beta/RC tags are eligible.
 >
-> Note: `Agave` maintains multiple concurrent release lines (e.g. `3.1.x` and `4.0.x`), so `releases/latest` can jump across major lines. The blueprint tracks the `3.1.x` line by default; moving to a newer major line (`4.x`) is an explicit opt-in decision, not a routine update.
+> Note: `Agave` maintains multiple concurrent release lines (e.g. `3.1.x` and `4.2.x`), so `releases/latest` can jump across major lines. The blueprint tracks the `4.2.x` line by default (the current stable mainnet-beta line); moving to a newer major/minor line is an explicit opt-in decision, not a routine update. Older `3.1.14`, `4.0.3`, and `4.1.2` configurations remain available for pinning.
 
 - [Solana Documentation](https://docs.solana.com/)
 - [Agave Validator GitHub](https://github.com/anza-xyz/agave)

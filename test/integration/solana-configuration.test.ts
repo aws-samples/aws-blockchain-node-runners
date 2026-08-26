@@ -39,7 +39,7 @@ describe('Solana Protocol Configuration', () => {
         it('should have Agave and Frankendancer configurations', () => {
             const protocolConfig = configLoader.loadProtocolConfig('solana');
 
-            expect(protocolConfig.availableConfigurations.length).toBe(8);
+            expect(protocolConfig.availableConfigurations.length).toBe(10);
 
             const agaveBase = protocolConfig.availableConfigurations.find(
                 c => c.name === 'agave-3.1.14-rpc-base.sh'
@@ -51,8 +51,18 @@ describe('Solana Protocol Configuration', () => {
             );
             expect(agaveExtended).toBeDefined();
 
-            // Agave 4.x configurations (4.0.3 stable for mainnet-beta,
-            // 4.1.2 matching the current devnet/testnet clusters).
+            // Agave 4.x configurations (4.2.1 stable default for mainnet-beta,
+            // with 4.0.3 and 4.1.2 retained for pinning).
+            const agave421Base = protocolConfig.availableConfigurations.find(
+                c => c.name === 'agave-4.2.1-rpc-base.sh'
+            );
+            expect(agave421Base).toBeDefined();
+
+            const agave421Extended = protocolConfig.availableConfigurations.find(
+                c => c.name === 'agave-4.2.1-rpc-extended.sh'
+            );
+            expect(agave421Extended).toBeDefined();
+
             const agave403Base = protocolConfig.availableConfigurations.find(
                 c => c.name === 'agave-4.0.3-rpc-base.sh'
             );
@@ -86,7 +96,7 @@ describe('Solana Protocol Configuration', () => {
 
         it('should have correct default configuration', () => {
             const protocolConfig = configLoader.loadProtocolConfig('solana');
-            expect(protocolConfig.defaultConfiguration).toBe('agave-4.0.3-rpc-base.sh');
+            expect(protocolConfig.defaultConfiguration).toBe('agave-4.2.1-rpc-base.sh');
         });
 
         it('should have correct port configuration', () => {
@@ -180,7 +190,7 @@ describe('Solana Protocol Configuration', () => {
             expect(envConfig.BLOCKCHAIN_PROTOCOL).toBe('solana');
             expect(envConfig.DEPLOYMENT_MODE).toBe(DeploymentMode.SINGLE_NODE);
             expect(envConfig.BC_NETWORK).toBe('mainnet-beta');
-            expect(envConfig.CLIENT_CONFIG).toBe('agave-4.0.3-rpc-base.sh');
+            expect(envConfig.CLIENT_CONFIG).toBe('agave-4.2.1-rpc-base.sh');
         });
 
         it('should have two storage volumes for mainnet-beta', () => {
