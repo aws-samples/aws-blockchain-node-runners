@@ -1,6 +1,6 @@
 {
   "name": "aws-bnr-blueprint-solana",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Solana blockchain node runner using Agave and Frankendancer validator clients for RPC nodes",
   "engines": {
     "aws-blockchain-node-runners": ">=2.0.0"
@@ -11,8 +11,14 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "agave-4.0.3-rpc-base.sh",
+    "defaultConfiguration": "agave-4.2.1-rpc-base.sh",
     "availableConfigurations": [
+      {
+        "name": "agave-4.2.1-rpc-base.sh"
+      },
+      {
+        "name": "agave-4.2.1-rpc-extended.sh"
+      },
       {
         "name": "agave-4.0.3-rpc-base.sh"
       },
