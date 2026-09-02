@@ -61,7 +61,7 @@ echo "Detected client type: $CLIENT_TYPE"
 # tags such as release candidates:
 #   "agave-3.1.14-rpc-base.sh"            -> "3.1.14"
 #   "agave-4.0.3-rpc-extended.sh"         -> "4.0.3"
-#   "agave-4.1.2-rpc-base.sh"             -> "4.1.2"
+#   "agave-4.2.1-rpc-base.sh"             -> "4.2.1"
 #   "frankendancer-0.1105.40200-rpc-base.sh" -> "0.1105.40200"
 BUILD_VERSION=$(echo "$CLIENT_CONFIG" | sed -E 's/^[a-z]+-(.+)-rpc-(base|extended)\.sh$/\1/')
 if [ -z "$BUILD_VERSION" ] || [ "$BUILD_VERSION" = "$CLIENT_CONFIG" ]; then
@@ -178,6 +178,12 @@ Type=simple
 Restart=always
 RestartSec=10
 User=bcuser
+# Agave 4.2+ requires CAP_NET_ADMIN and CAP_NET_RAW for its networking stack
+# (earlier 4.0.x/4.1.x did not). Grant just these two to the non-root bcuser
+# process via ambient capabilities; the validator uses them at startup to set
+# up sockets and then drops them.
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
 LimitNOFILE=1000000
 LimitMEMLOCK=2000000000
 LogRateLimitIntervalSec=0
