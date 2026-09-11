@@ -5,28 +5,23 @@
 version: "3"
 services:
     execution:
-        image: hyperledger/besu:26.7.1
+        image: nethermind/nethermind:1.39.3
         container_name: execution
         restart: always
         command:
             [
-                "--network=${BC_NETWORK}",
-                "--engine-rpc-enabled=true",
-                "--engine-rpc-port=8551",
-                "--engine-jwt-secret=/var/lib/besu/secrets/jwtsecret",
-                "--engine-host-allowlist=*",
-                "--rpc-http-enabled=true",
-                "--rpc-http-api=ADMIN,ETH,WEB3,TXPOOL,NET,DEBUG,TRACE",
-                "--rpc-http-host=${EC2_INTERNAL_IP}",
-                "--host-allowlist=*",
-                "--rpc-ws-enabled=true",
-                "--rpc-ws-host=${EC2_INTERNAL_IP}",
-                "--data-path=/var/lib/besu/data",
-                "--max-peers=50",
+                "--config=${BC_NETWORK}",
+                "--JsonRpc.Enabled=true",
+                "--JsonRpc.Host=${EC2_INTERNAL_IP}",
+                "--JsonRpc.JwtSecretFile=/var/lib/nethermind/secrets/jwtsecret",
+                "--JsonRpc.EngineHost=0.0.0.0",
+                "--JsonRpc.EnginePort=8551",
+                "--datadir=/var/lib/nethermind/data",
+                "--Network.MaxActivePeers=50",
             ]
         volumes:
-            - /secrets:/var/lib/besu/secrets
-            - /data/execution:/var/lib/besu/data
+            - /secrets:/var/lib/nethermind/secrets
+            - /data/execution:/var/lib/nethermind/data
         stop_signal: SIGTERM
         stop_grace_period: 8m
         security_opt:
@@ -34,13 +29,13 @@ services:
         network_mode: host
 
     consensus:
-        image: consensys/teku:26.7.1
+        image: consensys/teku:26.8.0
         container_name: consensus
         restart: always
         command:
             [
                 "--network=${BC_NETWORK}",
-                "--ee-endpoint=http://${EC2_INTERNAL_IP}:8551",
+                "--ee-endpoint=http://127.0.0.1:8551",
                 "--ee-jwt-secret-file=/var/lib/teku/secrets/jwtsecret",
                 "--checkpoint-sync-url=${ETH_CONSENSUS_CHECKPOINT_SYNC_URL}",
                 "--rest-api-enabled=true",

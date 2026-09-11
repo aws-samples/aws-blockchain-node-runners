@@ -11,13 +11,13 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "agave-4.2.1-rpc-base.sh",
+    "defaultConfiguration": "agave-4.2.2-rpc-base.sh",
     "availableConfigurations": [
       {
-        "name": "agave-4.2.1-rpc-base.sh"
+        "name": "agave-4.2.2-rpc-base.sh"
       },
       {
-        "name": "agave-4.2.1-rpc-extended.sh"
+        "name": "agave-4.2.2-rpc-extended.sh"
       },
       {
         "name": "agave-4.0.3-rpc-base.sh"
@@ -38,10 +38,10 @@
         "name": "agave-3.1.14-rpc-extended.sh"
       },
       {
-        "name": "frankendancer-0.1105.40200-rpc-base.sh"
+        "name": "frankendancer-0.1106.40201-rpc-base.sh"
       },
       {
-        "name": "frankendancer-0.1105.40200-rpc-extended.sh"
+        "name": "frankendancer-0.1106.40201-rpc-extended.sh"
       }
     ],
     "BC_NETWORKS": [

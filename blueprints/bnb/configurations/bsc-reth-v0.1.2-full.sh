@@ -9,7 +9,7 @@
 #   no args   — runs reth-bsc with full-node flags (systemd entrypoint)
 #
 # The client version is derived from CLIENT_CONFIG (the configuration file
-# name, e.g. "bsc-reth-v0.1.1-full.sh" -> "v0.1.1"), which is the
+# name, e.g. "bsc-reth-v0.1.2-full.sh" -> "v0.1.2"), which is the
 # single source of truth. The upstream tag suffix (e.g. "-beta", "-fix") is
 # part of the version and is carried in the file name.
 #
