@@ -69,9 +69,9 @@ install_client() {
     echo "Build artifacts cleaned up"
 
     # --- Download snapshot ---
-    # reth.full    = full node snapshot (~4.3 TiB)
-    # reth.archive = archive node snapshot (~9.7 TiB)
-    local SNAPSHOT_TYPE="${BNB_SNAPSHOT_TYPE:-full}"
+    # reth.fast = fast/minimal node snapshot (~458 GiB compressed).
+    # 48Club currently publishes only the "fast" type for the reth client.
+    local SNAPSHOT_TYPE="${BNB_SNAPSHOT_TYPE:-fast}"
     /opt/blueprints/user-data/common/download-snapshot.sh reth "$SNAPSHOT_TYPE" || true
 
     echo "BSC Reth ${RETH_VERSION} full node installation complete"
