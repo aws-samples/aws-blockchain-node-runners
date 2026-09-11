@@ -5,31 +5,27 @@
 version: "3"
 services:
     execution:
-        image: ethereum/client-go:v1.17.5
+        image: ghcr.io/paradigmxyz/reth:v2.5.2
         container_name: execution
         restart: always
-        command:
-            [
-                "--${BC_NETWORK}",
-                "--metrics",
-                "--pprof",
-                "--authrpc.addr=0.0.0.0",
-                "--authrpc.jwtsecret=/var/lib/geth/secrets/jwtsecret",
-                "--authrpc.vhosts=*",
-                "--http.vhosts=*",
-                "--http",
-                "--http.api=admin,eth,web3,txpool,net,debug,engine",
-                "--http.addr=${EC2_INTERNAL_IP}",
-                "--ws",
-                "--ws.addr=${EC2_INTERNAL_IP}",
-                "--db.engine=pebble",
-                "--datadir=/var/lib/geth/data",
-                "--maxpeers=50",
-                "--cache=16000",
-            ]
+        pid: host
+        command: >
+            node
+            --chain ${BC_NETWORK}
+            --authrpc.addr 0.0.0.0
+            --authrpc.port 8551
+            --authrpc.jwtsecret /root/jwt/jwtsecret
+            --datadir /root/.local/share/reth
+            --http --http.addr ${EC2_INTERNAL_IP} --http.port 8545
+            --log.file.max-files 0
+            --http.api "admin,eth,web3,txpool,net,debug,trace,reth"
+            --ws --ws.addr ${EC2_INTERNAL_IP}
+            --ws.port 8546
         volumes:
-            - /secrets:/var/lib/geth/secrets
-            - /data/execution:/var/lib/geth/data
+            - /secrets:/root/jwt
+            - /data/execution:/root/.local/share/reth
+        tmpfs:
+            - /tmp
         stop_signal: SIGTERM
         stop_grace_period: 8m
         security_opt:
@@ -38,7 +34,7 @@ services:
         network_mode: host
 
     consensus:
-        image: sigp/lighthouse:v8.2.1
+        image: sigp/lighthouse:v8.2.2
         container_name: consensus
         restart: always
         command:

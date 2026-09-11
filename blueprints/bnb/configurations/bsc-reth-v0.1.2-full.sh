@@ -9,7 +9,7 @@
 #   no args   — runs reth-bsc with full-node flags (systemd entrypoint)
 #
 # The client version is derived from CLIENT_CONFIG (the configuration file
-# name, e.g. "bsc-reth-v0.1.1-full.sh" -> "v0.1.1"), which is the
+# name, e.g. "bsc-reth-v0.1.2-full.sh" -> "v0.1.2"), which is the
 # single source of truth. The upstream tag suffix (e.g. "-beta", "-fix") is
 # part of the version and is carried in the file name.
 #
@@ -69,9 +69,9 @@ install_client() {
     echo "Build artifacts cleaned up"
 
     # --- Download snapshot ---
-    # reth.full    = full node snapshot (~4.3 TiB)
-    # reth.archive = archive node snapshot (~9.7 TiB)
-    local SNAPSHOT_TYPE="${BNB_SNAPSHOT_TYPE:-full}"
+    # reth.fast = fast/minimal node snapshot (~458 GiB compressed).
+    # 48Club currently publishes only the "fast" type for the reth client.
+    local SNAPSHOT_TYPE="${BNB_SNAPSHOT_TYPE:-fast}"
     /opt/blueprints/user-data/common/download-snapshot.sh reth "$SNAPSHOT_TYPE" || true
 
     echo "BSC Reth ${RETH_VERSION} full node installation complete"
