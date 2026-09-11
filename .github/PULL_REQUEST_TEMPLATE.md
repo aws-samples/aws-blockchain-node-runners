@@ -16,6 +16,9 @@ Consult the [CONTRIBUTING](https://github.com/aws-samples/aws-blockchain-node-ru
 - [ ] New blueprint (adding a new protocol — see checklist below)
 - [ ] Documentation update
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] CDK updates
+- [ ] Website updates
+- [ ] Blockchain node blueprints update
 
 ### Testing
 
