@@ -17,13 +17,13 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.13.4",
+    "@types/node": "^24.13.6",
     "aws-cdk": "^2.1141.0",
     "cdk-nag": "^2.38.2",
-    "jest": "^30.5.1",
+    "jest": "^30.5.2",
     "ts-jest": "^29.4.12",
     "ts-node": "^10.9.2",
-    "typescript": "~6.0.3"
+    "typescript": "~7.0.2"
   },
   "dependencies": {
     "aws-bnr-blueprint-base": "file:blueprints/base",
@@ -34,7 +34,7 @@
     "aws-bnr-blueprint-solana": "file:blueprints/solana",
     "aws-cdk-lib": "^2.269.0",
     "constructs": "^10.8.1",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.2",
     "source-map-support": "^0.5.21"
   }
 }
