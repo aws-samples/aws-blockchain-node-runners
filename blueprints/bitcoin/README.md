@@ -18,7 +18,7 @@ This protocol implementation provides support for running Bitcoin Core nodes on 
 |  |  |  |   RPC: Port 8332 | P2P: Port 8333               | | |
 |  |  |  +--------------------------------------------------+ | |
 |  |  |  +--------------------------------------------------+ | |
-|  |  |  |    EBS Volume (/data) - 1 TB gp3                 | | |
+|  |  |  |    EBS Volume (/data) - 1.5 TB gp3               | | |
 |  |  |  +--------------------------------------------------+ | |
 |  |  +------------------------------------------------------+ |
 |  +----------------------------------------------------------+
@@ -65,8 +65,8 @@ Note: HA nodes do not share state (wallet, mempool). The ALB uses session sticki
 
 | Network | Deployment | Instance Type | vCPUs | Memory | Storage |
 |---------|-----------|---------------|-------|--------|---------|
-| Mainnet | Single Node | r7i.2xlarge | 8 | 64 GB | 1 TB gp3 |
-| Mainnet | HA (2 nodes) | r7i.2xlarge | 8 each | 64 GB each | 1 TB gp3 each |
+| Mainnet | Single Node | r7i.2xlarge | 8 | 64 GB | 1.5 TB gp3 |
+| Mainnet | HA (2 nodes) | r7i.2xlarge | 8 each | 64 GB each | 1.5 TB gp3 each |
 | Testnet | Single Node | r7i.xlarge | 4 | 32 GB | 200 GB gp3 |
 
 **ARM Alternative**: Use `r8g.2xlarge` for ~10% cost savings on mainnet.
@@ -75,7 +75,7 @@ Note: HA nodes do not share state (wallet, mempool). The ALB uses session sticki
 
 | Network | Current Size | Growth Rate | Recommended | Type | IOPS |
 |---------|-------------|-------------|-------------|------|------|
-| Mainnet | ~650 GB (with txindex) | ~80 GB/year | 1 TB | gp3 | 6,000 |
+| Mainnet | ~650 GB (with txindex) | ~80 GB/year | 1.5 TB | gp3 | 6,000 |
 | Testnet | ~50 GB | ~10 GB/year | 200 GB | gp3 | 3,000 |
 
 > Running multiple protocols? Each deployment creates an independent CloudFormation stack. Total costs are additive — use the tables above per protocol.
@@ -432,7 +432,7 @@ HA deployments perform rolling updates automatically, ensuring no RPC downtime d
 
 ### Storage
 - gp3 is sufficient for Bitcoin (10-minute block time, low write pressure)
-- 1 TB provides ~4 years of growth headroom with txindex
+- 1.5 TB provides multi-year growth headroom with txindex
 
 ### Compute
 - ARM instances (`r8g.2xlarge`) save ~10% vs x86
