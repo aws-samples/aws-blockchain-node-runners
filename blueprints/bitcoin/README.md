@@ -92,22 +92,42 @@ These results come from a side-by-side mainnet test on 2026-09-30:
   - Fastest full-block RPC, for block explorers and indexers.
   - Fastest high-volume light RPC, for wallet backends, transaction lookups and broadcast.
   - 11% cheaper per hour than r7i.
-- **r7g.2xlarge (secondary):** choose this when the lowest hourly price matters most.
-  - Suits a mostly idle synced node, or mostly light RPC. It also has the lowest total cost for the initial sync.
-  - Use it when r8g isn't available in your region or Availability Zone.
-  - Avoid it if the node mainly serves full decoded blocks: it's about 16% slower than r7i and 19% slower than r8g on `getblock` verbosity 2.
-- **r7i.2xlarge (x86):** choose this only when you need x86 on the host, such as x86-only sidecars or tooling, or an x86 fleet standard.
+- **r7g.2xlarge (secondary):** the best choice where r8g isn't available in your region or Availability Zone, or when the lowest hourly price matters most.
+  - It handles every workload tested, including heavy full-block serving.
+  - Versus r7i: r7g syncs faster, costs 19% less per hour and has the lowest total sync cost.
+  - r7i is better at two things:
+    - about 16% faster on full-block RPC (`getblock` verbosity 2)
+    - faster on light RPC once r7i's C-states are tuned (see below)
+- **r7i.2xlarge (x86):** choose this when you need x86 on the host, such as x86-only sidecars or tooling, or an x86 fleet standard.
+  - Among the three, it's second only to r8g on full-block RPC, and it's the slowest and most expensive at initial sync.
   - With default settings, small RPC requests are slower on r7i because the vCPUs enter the deep C6 idle state (190 µs exit latency) between requests.
   - For latency-sensitive light RPC on r7i, consider limiting C-states, for example the kernel boot parameter `intel_idle.max_cstate=1`. This trades Turbo Boost headroom for lower wakeup latency; see [Processor state control](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/processor_state_control.html).
   - Graviton instances don't expose C-states to the OS, so they don't have this issue.
 
 Initial sync spends most of its time on one CPU thread (block validation below the `assumevalid` height), so single-core performance matters more than vCPU count. The final stretch above `assumevalid` verifies signatures on multiple threads, where physical core count helps.
 
+#### After initial sync
+
+A synced node can run on a smaller instance.
+- **Tested:** `r8g.xlarge` (4 vCPU, 32 GB) kept up with the chain tip. On the single-client RPC benchmark it performed the same as `r8g.2xlarge` (`getblock` verbosity 2: 7.7/s; transaction lookups: 2,799/s) at half the hourly price.
+- **Memory:** bitcoind used about 6.4 GB of the 32 GB.
+- **Keep the 2xlarge for initial sync.** The xlarge's EBS baseline throughput (156 MB/s) is below the gp3 volume's 400 MB/s, and it has half the cores for signature checks. Also keep it for catching up after long downtime.
+- **Concurrency:** high-concurrency RPC on the xlarge wasn't tested.
+
+To resize a single-node deployment within the same architecture:
+1. Stop the instance.
+2. Change its instance type (EC2 console or `aws ec2 modify-instance-attribute --instance-type`).
+3. Start it.
+
+The data volume stays attached and the node resumes from its chain data. The CloudFormation stack still records the original instance type.
+
+> **Note:** Don't change `CPU_TYPE` on an existing single-node stack with `cdk deploy`. The new architecture needs a new AMI, so CloudFormation replaces the instance. The replacement then fails because the data volume is still attached to the old instance, and the stack rolls back with the node unchanged. To move a node to a different architecture (for example x86 to Graviton), deploy a new stack and let it sync.
+
 ### Storage Requirements
 
 | Network | Current Size | Growth Rate | Recommended | Type | IOPS |
 |---------|-------------|-------------|-------------|------|------|
-| Mainnet | ~880 GB (with txindex, block 969,304) | ~80 GB/year | 1.5 TB | gp3 | 6,000 |
+| Mainnet | ~970 GB (blocks 880 GB, txindex 74 GB, chainstate 14 GB; block 969,306) | ~100 GB/year | 1.5 TB | gp3 | 6,000 |
 | Testnet | ~50 GB | ~10 GB/year | 200 GB | gp3 | 3,000 |
 
 > Running multiple protocols? Each deployment creates an independent CloudFormation stack. Total costs are additive — use the tables above per protocol.
@@ -464,12 +484,12 @@ HA deployments perform rolling updates automatically, ensuring no RPC downtime d
 
 ### Storage
 - gp3 is sufficient for Bitcoin (10-minute block time, low write pressure)
-- 1.5 TB provides multi-year growth headroom with txindex
+- 1.5 TB leaves about 5 years of headroom at the current ~100 GB/year growth. Monitor `disk_used_percent` and [expand the volume](/docs/guides/deployment-guide) before it fills.
 
 ### Compute
 - Graviton instances cost less per hour than x86: `r8g.2xlarge` is 11% cheaper than `r7i.2xlarge`, and `r7g.2xlarge` is 19% cheaper. Graviton is also as fast or faster for Bitcoin Core; see [Choosing an instance type](#choosing-an-instance-type).
 - `r7g.2xlarge` has the lowest total compute cost for the initial sync ($3.62 vs $4.80 on `r7i.2xlarge`, us-east-1 on-demand).
-- Bitcoin IBD is the most compute-intensive phase; after sync, a smaller instance suffices
+- Bitcoin IBD is the most compute-intensive phase. After sync, `r8g.xlarge` handled single-client RPC as well as `r8g.2xlarge` at half the price; see [After initial sync](#after-initial-sync)
 
 See the [Deployment Guide](/docs/guides/deployment-guide) for detailed cost optimization strategies.
 
@@ -490,8 +510,10 @@ See the [Deployment Guide](/docs/guides/deployment-guide) for detailed cost opti
 npx cdk destroy bitcoin-mainnet-bitcoin-core-v-full
 
 # Delete HA Node
-npx cdk destroy bitcoin-mainnet-bitcoin-core-v-full-ha
+npx cdk destroy bitcoin-mainnet-bitcoin-core-v-full
 ```
+
+> **Warning:** `cdk destroy` also deletes the data volume and all synced chain data (about 970 GB on mainnet). This applies to both single-node and HA stacks. A new deployment starts Initial Block Download from scratch. To keep the chain data, create an EBS snapshot of the `/data` volume before destroying the stack.
 
 ## FAQ
 
