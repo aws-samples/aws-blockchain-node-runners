@@ -19,7 +19,7 @@
     - 14% faster sync from block 400k to tip
     - 4% faster full-block `getblock`
     - 2.8× transaction-lookup throughput
-  - The README adds a "Choosing an instance type" guide: `r8g` primary, `r7g.2xlarge` as the lowest-cost secondary, and `r7i` for hosts that need x86.
+  - The README adds a "Choosing an instance type" guide: `r8g` primary; `r7g.2xlarge` secondary, for regions without r8g or the lowest hourly price, covering all tested workloads; `r7i` for hosts that need x86, including where it beats r7g.
     - It explains that r7i's slower light-RPC results come from its default C6 idle state, with tuning guidance.
     - It also updates the measured IBD time (about 8–10 h).
   - No `node.sh` changes are needed: it already installs the aarch64 Bitcoin Core build when `CPU_TYPE="ARM_64"`.
@@ -29,7 +29,7 @@
   - It corrects the HA `cdk destroy` stack name, warns that `cdk destroy` deletes the data volume, and documents deleting the RPC credentials secret, which `cdk destroy` leaves behind (both verified on teardown).
   - It corrects the RPC credentials secret name in the RPC Authentication and Troubleshooting sections: `node.sh` stores it as `<stack-name>/bitcoin_rpc_credentials`, not `bitcoin_rpc_credentials`.
   - It adds a troubleshooting entry for a node that crash-loops after an interrupted first boot (re-run `node.sh`).
-  - It corrects "Upgrading Client Versions". Redeploying a single-node stack with a new `CLIENT_CONFIG` stops and starts the same instance without re-running node setup, so the node stays on the previous version; the README previously said the instance is replaced and upgraded.
+  - It corrects "Upgrading Client Versions". Redeploying a single-node stack with a new `CLIENT_CONFIG` stops and starts the same instance without re-running node setup, so the node stays on the previous version; the README previously said the instance is replaced and upgraded (tracked in #340).
 - **Ethereum**: bumped Reth `2.4.1` → `2.5.2` (Reth + Lighthouse archive), Besu `26.7.1` → `26.8.1`, and Teku `26.7.1` → `26.8.0` (Besu + Teku and Nethermind + Teku). Besu `26.8.1` carries breaking changes (a 1000-address cap on `eth_newFilter`/`eth_subscribe`, a 128 KiB tx-pool admission limit, removal of already-deprecated flags, and an `eth_estimateGas` result change) — none of the removed flags are used by the blueprint, and a mainnet smoke test confirmed it starts and syncs with the existing flag set. Teku `26.8.0` removes the long-deprecated `GetDepositSnapshot` Beacon API endpoint, which does not affect node operation. Configuration file names and matching `samples/` were updated accordingly.
 - **Solana**: bumped the default Agave configuration `4.2.1` → `4.2.2` (same stable `4.2.x` mainnet-beta line) and Frankendancer `0.1105.40200` → `0.1106.40201` (latest Frankendancer **Mainnet** release on the `0.x` line; bundled Agave submodule updated to `v4.2.1`, adds v1-transaction support). The `3.1.14`, `4.0.3`, and `4.1.2` Agave configurations remain available for pinning. Both clients build from source at the tag parsed from the configuration file name; both were smoke-tested on mainnet-beta.
 - **BNB Chain**: bumped BSC Geth `v1.7.7` → `v1.7.8` (routine patch, non-mandatory) and BSC Reth `v0.1.1` → `v0.1.2`. BSC Reth `v0.1.2` ships a state-root correctness fix for the **Pasteur** hardfork transition (not present in `v0.1.1`) plus a BEP-675 BidBlock MEV path; it builds from source and was smoke-tested on mainnet (loads the 48Club `reth.fast` snapshot and pipeline-syncs). No blueprint CLI flag changes.
