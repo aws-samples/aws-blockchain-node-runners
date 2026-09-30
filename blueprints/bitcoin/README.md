@@ -65,17 +65,49 @@ Note: HA nodes do not share state (wallet, mempool). The ALB uses session sticki
 
 | Network | Deployment | Instance Type | vCPUs | Memory | Storage |
 |---------|-----------|---------------|-------|--------|---------|
-| Mainnet | Single Node | r7i.2xlarge | 8 | 64 GB | 1.5 TB gp3 |
-| Mainnet | HA (2 nodes) | r7i.2xlarge | 8 each | 64 GB each | 1.5 TB gp3 each |
-| Testnet | Single Node | r7i.xlarge | 4 | 32 GB | 200 GB gp3 |
+| Mainnet | Single Node | r8g.2xlarge (ARM) | 8 | 64 GB | 1.5 TB gp3 |
+| Mainnet | HA (2 nodes) | r8g.2xlarge (ARM) | 8 each | 64 GB each | 1.5 TB gp3 each |
+| Testnet | Single Node | r8g.xlarge (ARM) | 4 | 32 GB | 200 GB gp3 |
 
-**ARM Alternative**: Use `r8g.2xlarge` for ~10% cost savings on mainnet.
+The samples use Graviton (`CPU_TYPE="ARM_64"`). Blueprint `node.sh` detects the architecture and installs the matching official Bitcoin Core build, so switching between ARM and x86 only changes `INSTANCE_TYPE` and `CPU_TYPE` in `.env`.
+
+#### Choosing an instance type
+
+These results come from a side-by-side mainnet test on 2026-09-30:
+- Bitcoin Core v31.1, `txindex=1`, 1.5 TB gp3 at 6,000 IOPS, us-east-1 on-demand pricing.
+- Sync time is from block 400,000 to tip.
+- RPC throughput is one sequential client on the node.
+
+| | **r8g.2xlarge** (primary) | **r7g.2xlarge** (secondary) | **r7i.2xlarge** (x86) |
+|---|---|---|---|
+| Processor | Graviton4, 8 cores | Graviton3, 8 cores | Sapphire Rapids, 4 cores / 8 threads |
+| Hourly price vs r7i | -11% | -19% | — |
+| Initial sync time | **7.8 h** | 8.5 h | 9.1 h |
+| Initial sync compute cost | $3.68 | **$3.62** | $4.80 |
+| Full-block RPC (`getblock` verbosity 2) | **7.7/s** | 6.3/s | 7.4/s |
+| Transaction lookup (`getrawtransaction` verbose) | **2,806/s** | 1,812/s | 1,003/s (2,261/s with C6 disabled) |
+
+- **r8g.2xlarge (primary):** the best choice for most nodes.
+  - Fastest initial sync and catch-up after downtime.
+  - Fastest full-block RPC, for block explorers and indexers.
+  - Fastest high-volume light RPC, for wallet backends, transaction lookups and broadcast.
+  - 11% cheaper per hour than r7i.
+- **r7g.2xlarge (secondary):** choose this when the lowest hourly price matters most.
+  - Suits a mostly idle synced node, or mostly light RPC. It also has the lowest total cost for the initial sync.
+  - Use it when r8g isn't available in your region or Availability Zone.
+  - Avoid it if the node mainly serves full decoded blocks: it's about 16% slower than r7i and 19% slower than r8g on `getblock` verbosity 2.
+- **r7i.2xlarge (x86):** choose this only when you need x86 on the host, such as x86-only sidecars or tooling, or an x86 fleet standard.
+  - With default settings, small RPC requests are slower on r7i because the vCPUs enter the deep C6 idle state (190 µs exit latency) between requests.
+  - For latency-sensitive light RPC on r7i, consider limiting C-states, for example the kernel boot parameter `intel_idle.max_cstate=1`. This trades Turbo Boost headroom for lower wakeup latency; see [Processor state control](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/processor_state_control.html).
+  - Graviton instances don't expose C-states to the OS, so they don't have this issue.
+
+Initial sync spends most of its time on one CPU thread (block validation below the `assumevalid` height), so single-core performance matters more than vCPU count. The final stretch above `assumevalid` verifies signatures on multiple threads, where physical core count helps.
 
 ### Storage Requirements
 
 | Network | Current Size | Growth Rate | Recommended | Type | IOPS |
 |---------|-------------|-------------|-------------|------|------|
-| Mainnet | ~650 GB (with txindex) | ~80 GB/year | 1.5 TB | gp3 | 6,000 |
+| Mainnet | ~880 GB (with txindex, block 969,304) | ~80 GB/year | 1.5 TB | gp3 | 6,000 |
 | Testnet | ~50 GB | ~10 GB/year | 200 GB | gp3 | 3,000 |
 
 > Running multiple protocols? Each deployment creates an independent CloudFormation stack. Total costs are additive — use the tables above per protocol.
@@ -123,7 +155,7 @@ For advanced options (HA mode, multiple stacks, maintenance), see the [Deploymen
 
 #### Step 3: Monitor Synchronization
 
-Initial Block Download (IBD) takes 12-48 hours depending on instance type and IOPS.
+Initial Block Download (IBD) from genesis took about 8–10 hours on the recommended 8-vCPU instances with 6,000 IOPS gp3 (measured with Bitcoin Core v31.1; `r8g.2xlarge` was fastest). Smaller instances, lower IOPS, or poor peers take longer.
 
 ```bash
 DASHBOARD=$(cat deploy-output-bitcoin-mainnet.json | jq -r '..|.DashboardName? | select(. != null)')
@@ -393,7 +425,7 @@ Common causes:
 
 - Increase `dbcache` (requires more RAM)
 - Ensure gp3 IOPS are sufficient (6,000+ recommended)
-- Bitcoin IBD is CPU-intensive — larger instance helps
+- Bitcoin IBD is mostly limited by one CPU thread (block validation). A faster core helps more than more vCPUs; `r8g.2xlarge` synced fastest in testing
 
 ### RPC Not Responding
 
@@ -435,7 +467,8 @@ HA deployments perform rolling updates automatically, ensuring no RPC downtime d
 - 1.5 TB provides multi-year growth headroom with txindex
 
 ### Compute
-- ARM instances (`r8g.2xlarge`) save ~10% vs x86
+- Graviton instances cost less per hour than x86: `r8g.2xlarge` is 11% cheaper than `r7i.2xlarge`, and `r7g.2xlarge` is 19% cheaper. Graviton is also as fast or faster for Bitcoin Core; see [Choosing an instance type](#choosing-an-instance-type).
+- `r7g.2xlarge` has the lowest total compute cost for the initial sync ($3.62 vs $4.80 on `r7i.2xlarge`, us-east-1 on-demand).
 - Bitcoin IBD is the most compute-intensive phase; after sync, a smaller instance suffices
 
 See the [Deployment Guide](/docs/guides/deployment-guide) for detailed cost optimization strategies.
@@ -449,6 +482,24 @@ See the [Deployment Guide](/docs/guides/deployment-guide) for detailed cost opti
 - **P2P port** (8333) open for Bitcoin network participation
 - **No SSH access** — use AWS Systems Manager Session Manager
 - **Encrypted EBS volumes** with IAM least-privilege roles
+
+### Amazon GuardDuty findings
+
+If GuardDuty is enabled, expect a `CryptoCurrency:EC2/BitcoinTool.B` finding on every Bitcoin node within minutes of it starting to sync.
+- GuardDuty raises it for any instance that talks the Bitcoin P2P protocol, including a normal full node that does no mining.
+- The finding keeps recurring for as long as the node runs.
+
+To keep it out of your findings without hiding the same finding on other instances, add a [suppression rule](https://docs.aws.amazon.com/guardduty/latest/ug/findings_suppression-rule.html). Scope it to the finding type and your node instances, for example by instance ID or by a tag you apply to them:
+
+```bash
+aws guardduty create-filter --region $AWS_REGION \
+    --detector-id $(aws guardduty list-detectors --region $AWS_REGION --query 'DetectorIds[0]' --output text) \
+    --name bitcoin-node-bitcointool \
+    --action ARCHIVE \
+    --finding-criteria '{"Criterion":{"type":{"Eq":["CryptoCurrency:EC2/BitcoinTool.B"]},"resource.instanceDetails.instanceId":{"Eq":["'"$INSTANCE_ID"'"]}}}'
+```
+
+Your organization's security tooling may also act on this finding, for example by isolating the instance automatically. If so, register the node with your security team before deploying.
 
 ## Cleaning Up
 
@@ -468,7 +519,7 @@ A: No. Bitcoin Core resumes from the existing chain data on the `/data` EBS volu
 
 **Q: How long does the initial sync take?**
 
-A: Initial Block Download (IBD) takes 12-48 hours on mainnet depending on instance type and IOPS. IBD is CPU- and I/O-intensive — a larger instance and 6,000+ IOPS speed it up.
+A: About 8–10 hours on mainnet with the recommended 8-vCPU instances and 6,000 IOPS gp3 (measured with Bitcoin Core v31.1). Most of IBD is limited by a single CPU thread, so single-core performance (`r8g.2xlarge` was fastest) matters more than adding vCPUs.
 
 **Q: Do I need RPC credentials to use the node locally?**
 
