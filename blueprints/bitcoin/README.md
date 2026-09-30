@@ -251,7 +251,7 @@ Bitcoin Core uses `rpcauth` for secure remote RPC access. This blueprint automat
 1. Generates a random username, password, and salt during node setup
 2. Computes `HMAC-SHA256(key=salt, message=password)` to create the hash
 3. Writes `rpcauth=username:salt$hash` to `bitcoin.conf`
-4. Stores `username:password` in AWS Secrets Manager as `bitcoin_rpc_credentials`
+4. Stores `username:password` in AWS Secrets Manager as `<stack-name>/bitcoin_rpc_credentials` (for example `bitcoin-mainnet-bitcoin-core-v-full/bitcoin_rpc_credentials`). In HA mode, all nodes share this secret.
 5. Saves credentials locally to `/data/.rpc-credentials` as a fallback
 
 The final `rpcauth` line in `bitcoin.conf` looks like this:
@@ -271,8 +271,9 @@ For a client to securely interact with the Bitcoin Core RPC endpoint from within
 From your CloudShell terminal:
 
 ```bash
+STACK_NAME=$(jq -r 'keys[0]' deploy-output-bitcoin-mainnet.json)
 export BTC_RPC_AUTH=$(aws secretsmanager get-secret-value \
-    --secret-id bitcoin_rpc_credentials \
+    --secret-id "$STACK_NAME/bitcoin_rpc_credentials" \
     --query SecretString --output text --region $AWS_REGION)
 echo "BTC_RPC_AUTH=$BTC_RPC_AUTH"
 ```
@@ -469,7 +470,7 @@ test -f /data/init-completed && echo "setup complete"
 
 1. Confirm service is running: `sudo systemctl status node`
 2. Check bitcoin.conf: `cat /data/bitcoin.conf`
-3. Verify RPC credentials: `aws secretsmanager get-secret-value --secret-id bitcoin_rpc_credentials`
+3. Verify RPC credentials: `aws secretsmanager get-secret-value --secret-id <stack-name>/bitcoin_rpc_credentials`
 4. Ensure security group allows port 8332 from your VPC CIDR
 
 ### Monitoring Logs
@@ -535,6 +536,16 @@ npx cdk destroy bitcoin-mainnet-bitcoin-core-v-full
 ```
 
 > **Warning:** `cdk destroy` also deletes the data volume and all synced chain data (about 970 GB on mainnet). This applies to both single-node and HA stacks. A new deployment starts Initial Block Download from scratch. To keep the chain data, create an EBS snapshot of the `/data` volume before destroying the stack.
+
+The RPC credentials secret is created by the node at first boot, not by CloudFormation, so `cdk destroy` leaves it behind. Delete it after destroying the stack:
+
+```bash
+aws secretsmanager delete-secret --region $AWS_REGION \
+    --secret-id bitcoin-mainnet-bitcoin-core-v-full/bitcoin_rpc_credentials \
+    --force-delete-without-recovery
+```
+
+The secret name is `<stack-name>/bitcoin_rpc_credentials`.
 
 ## FAQ
 
