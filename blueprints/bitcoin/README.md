@@ -114,12 +114,15 @@ A synced node can run on a smaller instance.
 - **Keep the 2xlarge for initial sync.** The xlarge's EBS baseline throughput (156 MB/s) is below the gp3 volume's 400 MB/s, and it has half the cores for signature checks. Also keep it for catching up after long downtime.
 - **Concurrency:** high-concurrency RPC on the xlarge wasn't tested.
 
-To resize a single-node deployment within the same architecture:
-1. Stop the instance.
-2. Change its instance type (EC2 console or `aws ec2 modify-instance-attribute --instance-type`).
-3. Start it.
+To resize a single-node deployment within the same architecture, change `INSTANCE_TYPE` in `.env` (for example `r8g.2xlarge` → `r8g.xlarge`) and redeploy:
 
-The data volume stays attached and the node resumes from its chain data. The CloudFormation stack still records the original instance type.
+```bash
+npx cdk deploy --json --outputs-file deploy-output-bitcoin-mainnet.json
+```
+
+- CloudFormation stops and starts the same instance with the new type. It isn't replaced, the data volume stays attached, and the node resumes from its chain data with no re-sync.
+- In testing, the node was offline for about a minute and back at the chain tip right after restart.
+- Resize through `cdk deploy` rather than changing the instance type in the EC2 console, so the stack and `.env` stay in sync.
 
 > **Note:** Don't change `CPU_TYPE` on an existing single-node stack with `cdk deploy`. The new architecture needs a new AMI, so CloudFormation replaces the instance. The replacement then fails because the data volume is still attached to the old instance, and the stack rolls back with the node unchanged. To move a node to a different architecture (for example x86 to Graviton), deploy a new stack and let it sync.
 

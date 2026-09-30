@@ -24,7 +24,7 @@
     - It also updates the measured IBD time (about 8–10 h).
   - No `node.sh` changes are needed: it already installs the aarch64 Bitcoin Core build when `CPU_TYPE="ARM_64"`.
   - Existing `.env` files are unaffected. To move a deployed node to Graviton, deploy a new stack: redeploying an existing single-node stack with a new `CPU_TYPE` replaces the instance, and the stack rolls back because the data volume is still attached to the old instance.
-  - The README adds post-sync right-sizing guidance: `r8g.xlarge` matched `r8g.2xlarge` on single-client RPC after sync.
+  - The README adds post-sync right-sizing guidance: `r8g.xlarge` matched `r8g.2xlarge` on single-client RPC after sync. It also explains how to resize in place by changing `INSTANCE_TYPE` and running `cdk deploy`, which stops and starts the same instance and keeps the chain data (verified on mainnet).
   - It corrects the mainnet size and growth rate (~970 GB total; ~100 GB/year, measured from the last year of blocks).
   - It corrects the HA `cdk destroy` stack name, and warns that `cdk destroy` deletes the data volume.
   - It adds a troubleshooting entry for a node that crash-loops after an interrupted first boot (re-run `node.sh`).
