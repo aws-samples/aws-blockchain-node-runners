@@ -22,7 +22,6 @@
   - The README adds a "Choosing an instance type" guide: `r8g` primary, `r7g.2xlarge` as the lowest-cost secondary, and `r7i` for hosts that need x86.
     - It explains that r7i's slower light-RPC results come from its default C6 idle state, with tuning guidance.
     - It also updates the mainnet chain size (~880 GB) and the measured IBD time (about 8–10 h).
-  - It also documents the expected GuardDuty `CryptoCurrency:EC2/BitcoinTool.B` finding on Bitcoin nodes, with a scoped suppression-rule example.
   - No `node.sh` changes are needed: it already installs the aarch64 Bitcoin Core build when `CPU_TYPE="ARM_64"`.
   - Existing `.env` files are unaffected; to move a deployed node, change `INSTANCE_TYPE` and `CPU_TYPE` and redeploy.
 - **Ethereum**: bumped Reth `2.4.1` → `2.5.2` (Reth + Lighthouse archive), Besu `26.7.1` → `26.8.1`, and Teku `26.7.1` → `26.8.0` (Besu + Teku and Nethermind + Teku). Besu `26.8.1` carries breaking changes (a 1000-address cap on `eth_newFilter`/`eth_subscribe`, a 128 KiB tx-pool admission limit, removal of already-deprecated flags, and an `eth_estimateGas` result change) — none of the removed flags are used by the blueprint, and a mainnet smoke test confirmed it starts and syncs with the existing flag set. Teku `26.8.0` removes the long-deprecated `GetDepositSnapshot` Beacon API endpoint, which does not affect node operation. Configuration file names and matching `samples/` were updated accordingly.

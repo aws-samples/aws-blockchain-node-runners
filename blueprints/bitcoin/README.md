@@ -483,24 +483,6 @@ See the [Deployment Guide](/docs/guides/deployment-guide) for detailed cost opti
 - **No SSH access** — use AWS Systems Manager Session Manager
 - **Encrypted EBS volumes** with IAM least-privilege roles
 
-### Amazon GuardDuty findings
-
-If GuardDuty is enabled, expect a `CryptoCurrency:EC2/BitcoinTool.B` finding on every Bitcoin node within minutes of it starting to sync.
-- GuardDuty raises it for any instance that talks the Bitcoin P2P protocol, including a normal full node that does no mining.
-- The finding keeps recurring for as long as the node runs.
-
-To keep it out of your findings without hiding the same finding on other instances, add a [suppression rule](https://docs.aws.amazon.com/guardduty/latest/ug/findings_suppression-rule.html). Scope it to the finding type and your node instances, for example by instance ID or by a tag you apply to them:
-
-```bash
-aws guardduty create-filter --region $AWS_REGION \
-    --detector-id $(aws guardduty list-detectors --region $AWS_REGION --query 'DetectorIds[0]' --output text) \
-    --name bitcoin-node-bitcointool \
-    --action ARCHIVE \
-    --finding-criteria '{"Criterion":{"type":{"Eq":["CryptoCurrency:EC2/BitcoinTool.B"]},"resource.instanceDetails.instanceId":{"Eq":["'"$INSTANCE_ID"'"]}}}'
-```
-
-Your organization's security tooling may also act on this finding, for example by isolating the instance automatically. If so, register the node with your security team before deploying.
-
 ## Cleaning Up
 
 ```bash
