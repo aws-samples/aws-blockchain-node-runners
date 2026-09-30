@@ -441,6 +441,21 @@ Common causes:
 - Insufficient disk space
 - Invalid bitcoin.conf syntax
 
+### Node Crash-Loops After an Interrupted First Boot
+
+**Symptom:** `journalctl -u node.service` repeats `specified config file "/data/bitcoin.conf" could not be opened`, and `/data/init-completed` doesn't exist.
+
+**Cause:** node setup runs only once, on the instance's first boot. If the instance is stopped or rebooted before setup finishes, it doesn't resume. The service is left without `bitcoin.conf`.
+
+Re-run the blueprint's setup script from an SSM session. It reuses the existing RPC credentials in Secrets Manager, then starts the service:
+
+```bash
+sudo systemctl stop node.service
+sudo /opt/blueprints/user-data/node.sh
+sudo systemctl start syncchecker.timer net-rules.service
+test -f /data/init-completed && echo "setup complete"
+```
+
 ### Slow Initial Sync
 
 - Increase `dbcache` (requires more RAM)
@@ -474,7 +489,10 @@ See the [Troubleshooting Guide](/docs/guides/troubleshooting) for detailed diagn
 2. Update `CLIENT_CONFIG` in `.env` to the new filename
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output-bitcoin-mainnet.json`
 
-Note: The instance will be replaced and Bitcoin Core will resume from the existing chain data on the EBS volume (no full re-sync required).
+> **Note (single-node):** Redeploying a single-node stack with a new `CLIENT_CONFIG` doesn't upgrade the running node.
+> - CloudFormation applies the new user data by stopping and starting the same instance; it isn't replaced. Node setup runs only on first boot, so it doesn't run again, and the node keeps running the previous Bitcoin Core version on the same chain data.
+> - To move to a new client version, deploy a new stack with the new configuration and let it sync.
+> - Changing `CPU_TYPE` on an existing stack fails and rolls back (see [After initial sync](#after-initial-sync)).
 
 ### Rolling Updates (HA Only)
 
