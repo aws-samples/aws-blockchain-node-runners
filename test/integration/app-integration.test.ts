@@ -387,7 +387,7 @@ describe('App Integration Tests with Dummy Protocol', () => {
             const requiredAssets = [
                 'user-data-ubuntu.sh',
                 'setup-storage.sh',
-                'cfn-hup-setup.sh',
+                'node-setup.sh',
                 'cw-agent.json'
             ];
 

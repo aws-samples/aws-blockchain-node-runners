@@ -14,8 +14,24 @@ import { ConfigurationLoader } from './configuration-loader';
 const REQUIRED_COMMON_ASSETS = [
     'setup-storage.sh',
     'node-setup.sh',
-    'cfn-hup-setup.sh',
     'cw-agent.json'
+];
+
+/**
+ * Blueprint files that are never needed on the instance and are left out of
+ * the protocol assets zip. The zip's hash is part of the instance user data,
+ * so without this a README or sample .env edit would reboot single-node
+ * stacks and re-run node setup on redeploy (issue #340). It also keeps local
+ * sample .env files out of S3.
+ */
+export const PROTOCOL_ASSET_EXCLUDE = [
+    '*.md',
+    'samples',
+    '.env*',
+    'doc',
+    'docs',
+    'node_modules',
+    '.git',
 ];
 
 /**
@@ -101,6 +117,7 @@ export class AssetsManager implements IAssetsManager {
         const protocolAssetsPath = this.getProtocolAssetssPath(protocolName);
         const assets = new Asset(this.scope, `ProtocolAssets-${protocolName}`, {
             path: protocolAssetsPath,
+            exclude: PROTOCOL_ASSET_EXCLUDE,
         });
 
         this.protocolAssets = assets;
