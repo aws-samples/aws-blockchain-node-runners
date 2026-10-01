@@ -151,6 +151,9 @@ if [ "$BASE_NODE_REF" = "main" ] || [ "$BASE_NODE_REF" = "master" ] || [ "$BASE_
 fi
 
 echo "Cloning $BASE_NODE_REPO at pinned ref '$BASE_NODE_REF'..."
+# Re-runs (config change / upgrade) start from a clean checkout of the new ref;
+# chain data lives on /data, not here.
+rm -rf "$BASE_NODE_DIR"
 git clone --depth 1 --branch "$BASE_NODE_REF" "$BASE_NODE_REPO" "$BASE_NODE_DIR"
 
 # Log the exact commit the pinned ref resolved to, for auditability.

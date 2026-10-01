@@ -54,6 +54,7 @@ install_client() {
     # --- Build reth-bsc from source ---
     echo "Building reth-bsc ${RETH_VERSION} from source..."
     cd /tmp
+    rm -rf reth-bsc-build
     git clone --branch "$RETH_VERSION" --depth 1 "$RETH_REPO" reth-bsc-build
     cd reth-bsc-build
 

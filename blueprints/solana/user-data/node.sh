@@ -99,6 +99,9 @@ if [ "${SOLANA_NODE_IDENTITY_SECRET_ARN:-none}" != "none" ]; then
         --output text \
         --region "$AWS_REGION" > /home/bcuser/config/validator-keypair.json
     echo "Node identity retrieved from Secrets Manager"
+elif [ -s /home/bcuser/config/validator-keypair.json ]; then
+    # Re-run (config change / client upgrade): keep the node's identity.
+    echo "Existing node identity found, keeping it"
 else
     echo "Generating new node identity keypair..."
     case "$CLIENT_TYPE" in
@@ -207,5 +210,9 @@ echo "Solana node service started"
 # Set up CloudWatch monitoring
 echo "Setting up CloudWatch monitoring..."
 /opt/blueprints/user-data/common/configure-monitoring.sh
+
+# Mark setup as complete (the validator itself writes
+# /data/data/init-completed once it has caught up)
+touch /data/init-completed
 
 echo "Solana node setup completed successfully"
