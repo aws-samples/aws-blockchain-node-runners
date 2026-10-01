@@ -308,11 +308,20 @@ See [Troubleshooting Guide](/docs/guides/troubleshooting) for detailed diagnosti
 ## Upgrades
 
 To upgrade the validator client version:
-1. Create new configuration script with updated version
-2. Update `CLIENT_CONFIG` and `CLIENT_VERSION` in `.env`
+1. Copy the configuration script to the new version, e.g. `agave-4.2.2-rpc-base.sh` → `agave-4.2.3-rpc-base.sh`
+2. Update `CLIENT_CONFIG` (and `CLIENT_VERSION`, if you use it) in `.env`
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output-{stack-name}.json`
 
-Note: Instance will be replaced and will need to re-sync from snapshots.
+The redeploy stops and starts the same instance and re-runs node setup, which rebuilds the client from source (30–60 minutes). The node keeps its identity keypair.
+
+- **Instance store:** the samples keep the ledger and accounts on instance store, which is erased by the stop/start that any redeploy causes. The node rebuilds its storage and syncs from snapshots again. With EBS data volumes, the ledger is kept.
+- Switching between Agave and Frankendancer, or between `rpc-base` and `rpc-extended`, changes the stack name, so `cdk deploy` creates a new stack.
+
+See [How a redeploy applies changes](/docs/guides/deployment-guide#how-a-redeploy-applies-changes-single-node) in the Deployment Guide.
+
+### Rolling Updates (HA Only)
+
+HA instances are replaced one at a time with a rolling update, keeping at least one in service. New instances start with empty data volumes and sync before they pass the ALB health check. See the [Deployment Guide](/docs/guides/deployment-guide#ha-deployments-rolling-updates).
 
 ## Cost Optimization
 
@@ -340,7 +349,7 @@ See [Deployment Guide](/docs/guides/deployment-guide) for security best practice
 ## FAQ
 
 **Q: When should I choose Frankendancer over Agave?**
-A: Frankendancer offers lower networking latency via AF_XDP kernel bypass and is used by many high-performance validators. Choose it if you want cutting-edge networking performance. Agave is the safer, more mature default. Both expose the same RPC API, so you can switch between them by changing `CLIENT_CONFIG` in your `.env` file and redeploying.
+A: Frankendancer offers lower networking latency via AF_XDP kernel bypass and is used by many high-performance validators. Choose it if you want cutting-edge networking performance. Agave is the safer, more mature default. Both expose the same RPC API, so you can switch between them by changing `CLIENT_CONFIG` in your `.env` file and redeploying. The client name is part of the stack name, so this deploys a new stack that syncs from scratch.
 
 **Q: How long does initial sync take?**
 A: 12-48 hours for mainnet-beta with automatic snapshot downloading. Sync time is similar for both Agave and Frankendancer.

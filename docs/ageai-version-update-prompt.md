@@ -17,7 +17,9 @@ This workflow helps you keep blockchain node client software up to date. It guid
 **Key principles (read before starting):**
 - All changes happen to SOURCE CODE, not to a running or deployed node.
 - The optional test deployment creates a NEW stack — it does NOT modify existing infrastructure.
-- Production upgrades follow a blue-green pattern: deploy a new node with updated code → wait for full sync → route traffic to the new node → delete the old node.
+- Upgrading a deployed node, two options:
+  - **In place (single-node, same client):** set `CLIENT_CONFIG` to the new version's file and redeploy the existing stack. The node is stopped, setup re-runs against the existing data, and it comes back on the new version without a re-sync (instance-store data is the exception). See "How a redeploy applies changes" in `docs/deployment-guide.md`.
+  - **Blue-green (HA, client switches, or when downtime isn't acceptable):** deploy a new node with updated code → wait for full sync → route traffic to the new node → delete the old node. Switching to a different client or configuration type always creates a new stack, because `CLIENT_CONFIG` is part of the stack name.
 - This is a GenAI agent prompt, not a CI/CD pipeline or scheduled automation.
 - The human is always in control — explicit approval is required before any file change and before any destructive action.
 
@@ -193,7 +195,7 @@ Once the node shows signs of life (started syncing or serving RPC):
 
 **If successful:**
 - Confirm the version update works in practice.
-- Remind the user: "All changes are to source code. To upgrade production: deploy a new node with the updated code → wait for full sync → route traffic to the new node → delete the old node. This is a blue-green deployment pattern."
+- Remind the user: "All changes are to source code. To upgrade a deployed single-node stack on the same client, point `CLIENT_CONFIG` at the new file and redeploy it (applied in place, a few minutes of downtime, longer for clients built from source). For HA, client switches or zero-downtime upgrades, use blue-green: deploy a new node with the updated code → wait for full sync → route traffic to the new node → delete the old node."
 - Offer to destroy the test stack (`npx cdk destroy <test-stack>`) to save costs, OR let the user keep it for extended evaluation (note it consumes AWS resources).
 - Offer to commit the source code changes.
 
