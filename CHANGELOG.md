@@ -15,16 +15,17 @@
 
 - **Bitcoin**: switched the recommended and sample instance types from x86 `r7i` to Graviton4.
   - Mainnet single-node and HA samples now use `r8g.2xlarge`; testnet uses `r8g.xlarge`. All samples set `CPU_TYPE="ARM_64"`.
-  - In a side-by-side mainnet test (Bitcoin Core v31.1), `r8g.2xlarge` beat `r7i.2xlarge` on every measure while costing 11% less per hour:
-    - 14% faster sync from block 400k to tip
-    - 4% faster full-block `getblock`
-    - 2.8× transaction-lookup throughput
+  - In side-by-side mainnet tests (Bitcoin Core v31.1), `r8g.2xlarge` beat `r7i.2xlarge` on every measure while costing 11% less per hour:
+    - 4–14% faster sync from block 400k to tip (two syncs)
+    - 1.5–1.7× RPC throughput under concurrent load (full blocks, transaction lookups and a mixed workload)
+    - with a single client: 4% faster full-block `getblock` and 2.8× transaction-lookup throughput
   - The README adds a "Choosing an instance type" guide: `r8g` primary; `r7g.2xlarge` secondary, for regions without r8g or the lowest hourly price, covering all tested workloads; `r7i` for hosts that need x86, including where it beats r7g.
     - It explains that r7i's slower light-RPC results come from its default C6 idle state, with tuning guidance.
     - It also updates the measured IBD time (about 8–10 h).
   - No `node.sh` changes are needed: it already installs the aarch64 Bitcoin Core build when `CPU_TYPE="ARM_64"`.
   - Existing `.env` files are unaffected. To move a deployed node to Graviton, deploy a new stack: redeploying an existing single-node stack with a new `CPU_TYPE` replaces the instance, and the stack rolls back because the data volume is still attached to the old instance.
-  - The README adds post-sync right-sizing guidance: `r8g.xlarge` matched `r8g.2xlarge` on single-client RPC after sync. It also explains how to resize in place by changing `INSTANCE_TYPE` and running `cdk deploy`, which stops and starts the same instance and keeps the chain data (verified on mainnet).
+  - The README adds an "Under concurrent load" section: peak throughput and latency for 2xlarge and xlarge on both architectures, and the network-baseline limit on sustained full-block serving.
+  - The README adds post-sync right-sizing guidance: `r8g.xlarge` matched `r8g.2xlarge` on single-client RPC after sync, and reaches about half its throughput under load. It also explains how to resize in place by changing `INSTANCE_TYPE` and running `cdk deploy`, which stops and starts the same instance and keeps the chain data (verified on mainnet).
   - It corrects the mainnet size and growth rate (~970 GB total; ~100 GB/year, measured from the last year of blocks).
   - It corrects the HA `cdk destroy` stack name, warns that `cdk destroy` deletes the data volume, and documents deleting the RPC credentials secret, which `cdk destroy` leaves behind (both verified on teardown).
   - It corrects the RPC credentials secret name in the RPC Authentication and Troubleshooting sections: `node.sh` stores it as `<stack-name>/bitcoin_rpc_credentials`, not `bitcoin_rpc_credentials`.

@@ -73,24 +73,26 @@ The samples use Graviton (`CPU_TYPE="ARM_64"`). Blueprint `node.sh` detects the 
 
 #### Choosing an instance type
 
-These results come from a side-by-side mainnet test on 2026-09-30:
+These results come from side-by-side mainnet tests in 2026-09/10:
 - Bitcoin Core v31.1, `txindex=1`, 1.5 TB gp3 at 6,000 IOPS, us-east-1 on-demand pricing.
-- Sync time is from block 400,000 to tip.
-- RPC throughput is one sequential client on the node.
+- Sync time is from block 400,000 to tip. Ranges are two separate syncs; r7g was synced once.
+- Single-client RPC is one sequential client on the node.
+- "Under load" is the peak throughput from a separate load-generator instance with 1–64 concurrent clients; see [Under concurrent load](#under-concurrent-load).
 
 | | **r8g.2xlarge** (primary) | **r7g.2xlarge** (secondary) | **r7i.2xlarge** (x86) |
 |---|---|---|---|
 | Processor | Graviton4, 8 cores | Graviton3, 8 cores | Sapphire Rapids, 4 cores / 8 threads |
 | Hourly price vs r7i | -11% | -19% | — |
-| Initial sync time | **7.8 h** | 8.5 h | 9.1 h |
-| Initial sync compute cost | $3.68 | **$3.62** | $4.80 |
-| Full-block RPC (`getblock` verbosity 2) | **7.7/s** | 6.3/s | 7.4/s |
-| Transaction lookup (`getrawtransaction` verbose) | **2,806/s** | 1,812/s | 1,003/s (2,261/s with C6 disabled) |
+| Initial sync time | **7.8–8.5 h** | 8.5 h | 8.9–9.1 h |
+| Initial sync compute cost | $3.68–3.99 | **$3.62** | $4.68–4.80 |
+| Full-block RPC (`getblock` verbosity 2), single client | **7.7/s** | 6.3/s | 7.4/s |
+| Full-block RPC, under load | **81/s** | not tested | 50/s |
+| Transaction lookup (`getrawtransaction` verbose), single client | **2,806/s** | 1,812/s | 1,003/s (2,261/s with C6 disabled) |
+| Transaction lookup, under load | **25,000/s** | not tested | 17,000/s |
 
 - **r8g.2xlarge (primary):** the best choice for most nodes.
-  - Fastest initial sync and catch-up after downtime.
-  - Fastest full-block RPC, for block explorers and indexers.
-  - Fastest high-volume light RPC, for wallet backends, transaction lookups and broadcast.
+  - Fastest initial sync and catch-up after downtime: 4–14% faster than r7i across two syncs, and about 30% faster on the multithreaded final stretch.
+  - Fastest RPC in every test. Under concurrent load it served 1.5–1.7× r7i's throughput, because it has 8 physical cores where r7i.2xlarge has 4 cores with hyperthreading.
   - 11% cheaper per hour than r7i.
 - **r7g.2xlarge (secondary):** the best choice where r8g isn't available in your region or Availability Zone, or when the lowest hourly price matters most.
   - It handles every workload tested, including heavy full-block serving.
@@ -106,13 +108,39 @@ These results come from a side-by-side mainnet test on 2026-09-30:
 
 Initial sync spends most of its time on one CPU thread (block validation below the `assumevalid` height), so single-core performance matters more than vCPU count. The final stretch above `assumevalid` verifies signatures on multiple threads, where physical core count helps.
 
+#### Under concurrent load
+
+The concurrency test used:
+- a separate load-generator instance in the same Availability Zone
+- 1–64 concurrent clients, 45 s per level
+- the default Bitcoin Core RPC settings (16 RPC threads)
+
+Peak throughput:
+
+| Workload | r8g.2xlarge | r7i.2xlarge | r8g.xlarge | r7i.xlarge |
+|---|---|---|---|---|
+| Full blocks (`getblock` verbosity 2) | **81/s** | 50/s | 41/s | 25/s |
+| Transaction lookups (`getrawtransaction` verbose) | **25,000/s** | 17,000/s | 15,300/s | 9,800/s |
+| Mixed, 90% lookups / 10% full blocks | **812/s** | 490/s | 400/s | 252/s |
+| Full-block p99 latency at 16 clients | **363 ms** | 625 ms | 793 ms | 1,193 ms |
+
+- **Full-block and mixed workloads are CPU-bound.** Throughput levels off once the number of clients reaches about the number of physical cores, and the host is then at 100% CPU. Beyond that, extra clients only add latency.
+  - r8g.2xlarge peaks at about 16 clients, and r7i.2xlarge at about 8.
+  - Each xlarge reaches half its 2xlarge's throughput, at half the price.
+- **Transaction lookups level off below full CPU.** r8g.2xlarge peaked at 74% CPU, which points to a limit inside Bitcoin Core rather than the instance.
+  - Going from xlarge to 2xlarge gives 1.6–1.7× the throughput here, not 2×.
+- **Network can limit sustained full-block serving.** Full decoded blocks are large (about 8.5 MB of JSON each on average). At peak, r8g.2xlarge sent about 680 MB/s, above its 3.75 Gbit/s (about 470 MB/s) baseline network bandwidth. Short bursts are covered by burst bandwidth.
+  - For sustained full-block serving to remote clients, size for the baseline: roughly 55 full blocks/s on r8g.2xlarge, and about 28/s on r8g.xlarge (1.875 Gbit/s baseline).
+
 #### After initial sync
 
 A synced node can run on a smaller instance.
 - **Tested:** `r8g.xlarge` (4 vCPU, 32 GB) kept up with the chain tip. On the single-client RPC benchmark it performed the same as `r8g.2xlarge` (`getblock` verbosity 2: 7.7/s; transaction lookups: 2,799/s) at half the hourly price.
 - **Memory:** bitcoind used about 6.4 GB of the 32 GB.
 - **Keep the 2xlarge for initial sync.** The xlarge's EBS baseline throughput (156 MB/s) is below the gp3 volume's 400 MB/s, and it has half the cores for signature checks. Also keep it for catching up after long downtime.
-- **Concurrency:** high-concurrency RPC on the xlarge wasn't tested.
+- **Under load,** `r8g.xlarge` peaked at about 41 full blocks/s and about 15,300 transaction lookups/s, roughly half the 2xlarge's full-block throughput (see [Under concurrent load](#under-concurrent-load)).
+  - Stay on the xlarge if your peak load fits within that.
+  - Choose the 2xlarge if you regularly run more than about 4 concurrent full-block clients or need lower tail latency.
 
 To resize a single-node deployment within the same architecture, change `INSTANCE_TYPE` in `.env` (for example `r8g.2xlarge` → `r8g.xlarge`) and redeploy:
 
