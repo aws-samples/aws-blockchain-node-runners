@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+import { Construct } from 'constructs';
 import { EnvironmentConfig, CFNandCDKUserDataConfig } from '../interfaces';
 
 /**
@@ -28,6 +29,13 @@ export interface IUserDataManager {
      * @returns The script with variables injected
      */
     injectVariables(script: string, environment: EnvironmentConfig, cfnandCDKUserDataConfig: CFNandCDKUserDataConfig): string;
+
+    /**
+     * Render the complete instance user data (variables injected, wrapped as a
+     * cloud-init per-boot MIME part). Fails if it would exceed the EC2 16 KB
+     * limit and warns on `scope` when close to it.
+     */
+    renderUserData(environment: EnvironmentConfig, cfnandCDKUserDataConfig: CFNandCDKUserDataConfig, scope?: Construct): string;
 
     /**
      * Load the universal user data script from the assets directory.

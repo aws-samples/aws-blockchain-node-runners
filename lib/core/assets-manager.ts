@@ -13,6 +13,7 @@ import { ConfigurationLoader } from './configuration-loader';
  */
 const REQUIRED_COMMON_ASSETS = [
     'setup-storage.sh',
+    'node-setup.sh',
     'cfn-hup-setup.sh',
     'cw-agent.json'
 ];
