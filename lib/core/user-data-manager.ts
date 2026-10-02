@@ -9,6 +9,21 @@ import {
     CFNandCDKUserDataConfig
 } from '../interfaces';
 import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
+
+/** EC2 limit on raw (pre-base64) user data. */
+export const USER_DATA_MAX_BYTES = 16384;
+/** Above this rendered size, synth adds a warning so growth is noticed early. */
+export const USER_DATA_WARN_BYTES = 15000;
+/**
+ * Upper bound used for a CloudFormation token (e.g. an asset S3 URL or a
+ * logical ID) when estimating the rendered user data size at synth time.
+ */
+const TOKEN_SIZE_ESTIMATE = 128;
+/** MIME boundary of the per-boot user data wrapper. */
+export const USER_DATA_MIME_BOUNDARY = '==NODE-RUNNER-BOUNDARY==';
+/** File name cloud-init gives the bootstrap in /var/lib/cloud/scripts/per-boot/. */
+export const USER_DATA_BOOTSTRAP_FILENAME = 'node-runner-bootstrap.sh';
 
 /**
  * UserDataManager handles loading and processing of user data scripts for EC2 instances.
@@ -52,6 +67,87 @@ export class UserDataManager implements IUserDataManager {
      * @returns The script with variables injected as stringified values of 1-s level parameters of the original objects
      */
     injectVariables(userDataScript: string, environment: EnvironmentConfig, cfnandCDKUserDataConfig: CFNandCDKUserDataConfig): string {
+        const { template, variables } = this.prepare(userDataScript, environment, cfnandCDKUserDataConfig);
+        return cdk.Fn.sub(template, variables);
+    }
+
+    /**
+     * Render the complete instance user data: the bootstrap script with
+     * variables injected, full-line comments removed (to save space), wrapped
+     * in a MIME part of type text/x-shellscript-per-boot so cloud-init runs it
+     * on every boot (see issue #340 and assets/common/user-data-ubuntu.sh).
+     *
+     * Fails synthesis if the rendered user data would exceed the EC2 16 KB
+     * limit (otherwise the deploy fails late, at instance launch), and adds a
+     * warning to `scope` above USER_DATA_WARN_BYTES.
+     */
+    renderUserData(environment: EnvironmentConfig, cfnandCDKUserDataConfig: CFNandCDKUserDataConfig, scope?: Construct): string {
+        const prepared = this.prepare(this.loadUserDataScript(), environment, cfnandCDKUserDataConfig);
+        const template = UserDataManager.wrapPerBootMultipart(UserDataManager.stripCommentLines(prepared.template));
+
+        const estimatedBytes = UserDataManager.estimateRenderedBytes(template, prepared.variables);
+        if (estimatedBytes > USER_DATA_MAX_BYTES) {
+            throw new Error(
+                `Rendered user data is about ${estimatedBytes} bytes, over the EC2 limit of ` +
+                `${USER_DATA_MAX_BYTES} bytes. Reduce the size or number of .env values ` +
+                `(e.g. CUSTOM_VARIABLES).`
+            );
+        }
+        if (scope && estimatedBytes > USER_DATA_WARN_BYTES) {
+            cdk.Annotations.of(scope).addWarningV2('node-runners:userDataSize',
+                `Rendered user data is about ${estimatedBytes} of ${USER_DATA_MAX_BYTES} bytes allowed by EC2.`);
+        }
+        return cdk.Fn.sub(template, prepared.variables);
+    }
+
+    /**
+     * Remove full-line shell comments (keeping the shebang). Runs after the
+     * ##FLATTENED_*## placeholders have been replaced, so it never removes a
+     * KEY='value' line.
+     */
+    static stripCommentLines(script: string): string {
+        return script
+            .split('\n')
+            .filter(line => !/^\s*#(?!!)/.test(line))
+            .join('\n');
+    }
+
+    /** Wrap a script in a single-part MIME message of type text/x-shellscript-per-boot. */
+    static wrapPerBootMultipart(script: string): string {
+        const b = USER_DATA_MIME_BOUNDARY;
+        return [
+            `Content-Type: multipart/mixed; boundary="${b}"`,
+            'MIME-Version: 1.0',
+            '',
+            `--${b}`,
+            'Content-Type: text/x-shellscript-per-boot; charset="us-ascii"',
+            'MIME-Version: 1.0',
+            'Content-Transfer-Encoding: 7bit',
+            `Content-Disposition: attachment; filename="${USER_DATA_BOOTSTRAP_FILENAME}"`,
+            '',
+            script.replace(/\n+$/, ''),
+            `--${b}--`,
+            '',
+        ].join('\n');
+    }
+
+    /**
+     * Estimate the byte size of an Fn::Sub template after CloudFormation
+     * substitutes the variables. Unresolved tokens count as TOKEN_SIZE_ESTIMATE.
+     */
+    static estimateRenderedBytes(template: string, variables: { [key: string]: string }): number {
+        const tokenPattern = /\$\{Token\[[^\]]+\]\}/g;
+        const sizeOf = (text: string) =>
+            Buffer.byteLength(text.replace(tokenPattern, 'x'.repeat(TOKEN_SIZE_ESTIMATE)), 'utf-8');
+        let total = sizeOf(template);
+        for (const [key, value] of Object.entries(variables)) {
+            const occurrences = template.split('${' + key + '}').length - 1;
+            total += occurrences * (sizeOf(value) - Buffer.byteLength('${' + key + '}'));
+        }
+        return total;
+    }
+
+    private prepare(userDataScript: string, environment: EnvironmentConfig, cfnandCDKUserDataConfig: CFNandCDKUserDataConfig): { template: string; variables: { [key: string]: string } } {
 
         const variables: { [key: string]: string } = {};
         
@@ -115,8 +211,7 @@ export class UserDataManager implements IUserDataManager {
             variables[key] = this.escapeForSingleQuotes(stringValue);
         }
         
-        const processedUserData = cdk.Fn.sub(userDataScript, variables);
-        return processedUserData;
+        return { template: userDataScript, variables };
     }
 
     /**

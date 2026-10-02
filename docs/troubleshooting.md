@@ -354,6 +354,38 @@ grep AWS_REGION .env
    - Security group rule conflicts
    - IAM permission issues
 
+### Redeploy Didn't Apply a Configuration Change (Single-Node)
+
+**Symptom**: `cdk deploy` finished with `UPDATE_COMPLETE`, but the node still runs the old client version or configuration.
+
+**How it should work**: a change to the instance user data makes CloudFormation stop and start the instance, and the node bootstrap then re-runs setup against the existing data. See [How a redeploy applies changes](/docs/guides/deployment-guide#how-a-redeploy-applies-changes-single-node).
+
+**Diagnosis** (on the instance):
+```bash
+# What the bootstrap decided on each boot: apply, skip, uninstall or reexec
+sudo grep -E "\[user-data-ubuntu\] (Boot action|Node deployment)" /var/log/cloud-init-output.log
+
+# The configuration the node is using now
+sudo grep -E "^(CLIENT_CONFIG|INSTANCE_TYPE)=" /etc/cdk_environment
+
+# Setup state (applied-fingerprint is written only after a successful setup)
+sudo ls -la /var/lib/node-runner/ /var/lib/cloud/scripts/per-boot/
+```
+
+**Causes and solutions**:
+
+1. **Setup is still running.** `cdk deploy` returns once the instance is running again, not when setup finishes. Clients built from source (Solana, Base, BNB Reth) take 30–60 minutes. Wait for `Node deployment completed successfully`.
+2. **Setup failed.** The log shows `Node deployment FAILED`. The bootstrap restarts the previous `node.service` (best effort) and retries setup on the next boot. Fix the cause shown above that line (often a download error), then reboot the instance or redeploy.
+3. **`Boot action: skip` after the change.** Only `INSTANCE_TYPE` changed (by design, it doesn't re-run setup), or the change didn't alter the user data. Check `cdk diff`: a change that doesn't show `UserData` won't reach the node.
+4. **A new stack was created instead.** Switching to a different client or configuration type changes the stack name, so `cdk deploy` created a separate stack. List stacks with `aws cloudformation list-stacks` and remove the one you don't need.
+5. **The stack was deployed with a framework version before 2.1.0 and hasn't been redeployed since.** The first redeploy with 2.1.0 or later installs the per-boot bootstrap.
+
+### Node Setup Retrying on Every Boot
+
+**Symptom**: Every boot shows `Boot action: apply` followed by `Node deployment FAILED`.
+
+**Solution**: setup is retried until it succeeds, so the node never stays half-configured. Look at the lines before the failure in `/var/log/cloud-init-output.log`. If storage setup failed during a re-apply, node setup is deliberately skipped, so the node is never started against the root volume. See [Volume Not Mounting](#volume-not-mounting).
+
 ## Node Operation Issues
 
 ### Node Not Starting
@@ -882,6 +914,8 @@ mount | grep /data
    sudo cat /var/log/cloud-init-output.log | grep -A 20 "setup-storage"
    ```
 
+   Storage setup never reformats a volume that already has a filesystem: it logs `already has a '<type>' filesystem, reusing it (no format)` and mounts it. If the detected type differs from `DATA_VOL_*_FILESYSTEM`, it logs a warning and mounts the volume with the detected type.
+
 4. **Verify Device Name**:
    ```bash
    # Device names may differ
@@ -1378,7 +1412,7 @@ sudo dmesg | grep -i "out of memory"
    ```
 
 4. **Node Not Ready**: Sync checker only runs after initial sync
-   - Check for `/data/data/init-completed` file
+   - Check for the blueprint's init-completed file (`/data/init-completed` for most blueprints; Solana's validator also writes `/data/data/init-completed` once caught up)
    - Wait for node to complete initial synchronization
    - View initialization progress in CloudWatch:
      ```bash

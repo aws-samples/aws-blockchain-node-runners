@@ -151,6 +151,9 @@ if [ "$BASE_NODE_REF" = "main" ] || [ "$BASE_NODE_REF" = "master" ] || [ "$BASE_
 fi
 
 echo "Cloning $BASE_NODE_REPO at pinned ref '$BASE_NODE_REF'..."
+# Re-runs (config change / upgrade) start from a clean checkout of the new ref;
+# chain data lives on /data, not here.
+rm -rf "$BASE_NODE_DIR"
 git clone --depth 1 --branch "$BASE_NODE_REF" "$BASE_NODE_REPO" "$BASE_NODE_DIR"
 
 # Log the exact commit the pinned ref resolved to, for auditability.
@@ -270,6 +273,9 @@ ExecStart=/usr/bin/docker compose up -d
 ExecStop=/usr/bin/docker compose down
 Restart=on-failure
 RestartSec=10
+# Give "docker compose down" time for the clients to flush state on
+# redeploys and instance stops (systemd's default stop timeout is 90s).
+TimeoutStopSec=600
 
 [Install]
 WantedBy=multi-user.target

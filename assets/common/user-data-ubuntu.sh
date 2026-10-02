@@ -2,13 +2,40 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+# Node bootstrap. CDK wraps this script in a MIME part of type
+# text/x-shellscript-per-boot, so cloud-init runs it on EVERY boot (it re-reads
+# user data from IMDS on each boot, so a stack update that changes UserData is
+# picked up on the stop/start CloudFormation performs).
+#
+# Each boot it rewrites /etc/cdk_environment, then a gate decides:
+#   skip   - config fingerprint matches the last successful setup and all data
+#            volumes are mounted (plain reboot, INSTANCE_TYPE resize)
+#   apply  - first boot, interrupted setup, changed config/assets, or missing
+#            data mounts: refresh assets, then run assets/common/node-setup.sh
+#            (storage setup is non-destructive; node.service is stopped and
+#            the blueprint's node.sh re-run against the existing data)
+#
+# NOTE: this file is a CloudFormation Fn::Sub template. Do not write a dollar
+# sign followed by an opening brace for shell variables; use plain $VAR, or
+# the Fn::Sub escape (dollar, brace, exclamation mark) for a literal.
+
 set +e
 
-# Create secure environment file for CDK-injected variables.
+SCRIPT_NAME="[user-data-ubuntu]"
+CDK_ENV_FILE="/etc/cdk_environment"
+STATE_DIR="/var/lib/node-runner"
+PER_BOOT_DIR="/var/lib/cloud/scripts/per-boot"
+PER_BOOT_MARKER="text/x-shellscript-per-boot"
+BOOTSTRAP_ASSETS_PATH="/opt/assets"
+PROTOCOL_ASSETS_PATH="/opt/blueprints"
+COMMON_ASSETS_PATH="$BOOTSTRAP_ASSETS_PATH/common"
+
+# Write the CDK-injected variables to /etc/cdk_environment, replacing (never
+# appending to) the previous file.
 #
 # Values are written as single-quoted assignments (KEY='value'). This is a
 # security boundary: it prevents the shell from expanding or executing any
-# value, both when this file is generated AND when it is later sourced — a
+# value, both when this file is generated AND when it is later sourced - a
 # malicious value like $(...) or one containing & ; | would otherwise run as
 # root. CDK single-quote-escapes every value before injection (see
 # UserDataManager.injectVariables).
@@ -16,9 +43,9 @@ set +e
 # The heredoc delimiter is single-quoted ('CDK_ENVIRONMENT_EOF') so the shell
 # performs NO expansion of the body at write time. CloudFormation has already
 # substituted the placeholders into the body before the instance runs.
-touch /etc/cdk_environment
-chmod 600 /etc/cdk_environment
-cat >> /etc/cdk_environment <<'CDK_ENVIRONMENT_EOF'
+write_cdk_environment() {
+    local tmp="$CDK_ENV_FILE.tmp"
+    (umask 077; cat > "$tmp" <<'CDK_ENVIRONMENT_EOF'
 #AWS Configuration
 AWS_ACCOUNT_ID='${AWS_ACCOUNT_ID}'
 AWS_REGION='${AWS_REGION}'
@@ -77,196 +104,197 @@ LIFECYCLE_HOOK_NAME='${LIFECYCLE_HOOK_NAME}'
 COMMON_ASSETS_S3_PATH='${COMMON_ASSETS_S3_PATH}'
 PROTOCOL_ASSETS_S3_PATH='${PROTOCOL_ASSETS_S3_PATH}'
 CDK_ENVIRONMENT_EOF
+    )
+    # HA snapshot staging appends the self-created staging volume ID; keep it
+    # so a later cleanup can still find an orphaned volume.
+    grep -E "^SNAPSHOT_STAGING_VOL_ID=vol-" "$CDK_ENV_FILE" 2>/dev/null >> "$tmp"
+    mv -f "$tmp" "$CDK_ENV_FILE"
+}
 
-# shellcheck source=/dev/null
-source /etc/cdk_environment
+imds_token() {
+    curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"
+}
 
-SCRIPT_NAME="[user-data-ubuntu]"
+# Fetch the instance's current user data from IMDS into $1 (retries briefly).
+fetch_imds_user_data() {
+    local out=$1 token attempt
+    for attempt in 1 2 3 4 5; do
+        token=$(imds_token)
+        if curl -sf -H "X-aws-ec2-metadata-token: $token" \
+            http://169.254.169.254/latest/user-data -o "$out"; then
+            return 0
+        fi
+        echo "$SCRIPT_NAME IMDS user data fetch failed (attempt $attempt/5)"
+        sleep 3
+    done
+    return 1
+}
 
-BOOTSTRAP_ASSETS_PATH="/opt/assets"
-PROTOCOL_ASSETS_PATH="/opt/blueprints"
-COMMON_ASSETS_PATH="$BOOTSTRAP_ASSETS_PATH/common"
+# Print the per-boot script part of a MIME user data file (empty if absent).
+extract_bootstrap_part() {
+    awk -v marker="$PER_BOOT_MARKER" '
+        state == 2 && /^--/ && index($0, boundary) == 3 { exit }
+        state == 2 { print; next }
+        state == 1 && $0 == "" { state = 2; next }
+        /^Content-Type: multipart\/mixed; boundary=/ { boundary = $0; sub(/.*boundary="?/, "", boundary); sub(/".*/, "", boundary) }
+        index($0, "Content-Type: " marker) == 1 { state = 1 }
+    ' "$1"
+}
 
-echo "$SCRIPT_NAME Getting instance metadata"
-TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
-ARCH=$(uname -m)
+# Fingerprint of a bootstrap script: everything except the INSTANCE_TYPE line,
+# so a same-architecture resize does not re-run setup. (The script embeds the
+# full environment and both asset S3 keys, which contain content hashes.)
+fingerprint() {
+    sed -e '$a\' "$1" | grep -v "^INSTANCE_TYPE='" | sha256sum | awk '{print $1}'
+}
 
-echo "$SCRIPT_NAME Installing basic packages"
-while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
-    sleep 5
-done
-apt-get -yqq update
-apt-get -yqq install jq unzip python3-pip python3-setuptools chrony wget
-
-echo "$SCRIPT_NAME Install CloudFormation helper scripts (cfn-signal, cfn-init, etc.)"
-echo "Installing CloudFormation helper scripts..."
-pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz --break-system-packages
-ln -sf /usr/local/bin/cfn-signal /usr/bin/cfn-signal 2>/dev/null || true
-ln -sf /usr/local/bin/cfn-init /usr/bin/cfn-init 2>/dev/null || true
-ln -sf /usr/local/bin/cfn-hup /usr/bin/cfn-hup 2>/dev/null || true
-
-echo "$SCRIPT_NAME Setting CloudWatch Agent binary URI based on architecture"
-if [ "$ARCH" == "x86_64" ]; then
-  CW_AGENT_BINARY_URI=https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-else
-  CW_AGENT_BINARY_URI=https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/arm64/latest/amazon-cloudwatch-agent.deb
-fi
-
-echo "$SCRIPT_NAME Installing AWS CLI"
-snap install aws-cli --classic
-
-echo "$SCRIPT_NAME Downloading and extracting assets if provided"
-if [[ "$COMMON_ASSETS_S3_PATH" != "none" ]]; then
-    echo "$SCRIPT_NAME Downloading bootstrap assets zip file"
-    cd /opt || exit 1
-    aws s3 cp "$COMMON_ASSETS_S3_PATH" ./assets.zip --region "$AWS_REGION"
-    unzip -q assets.zip -d $BOOTSTRAP_ASSETS_PATH
-fi
-
-if [[ "$PROTOCOL_ASSETS_S3_PATH" != "none" ]]; then
-    echo "$SCRIPT_NAME Downloading protocol assets zip file"
-    cd /opt || exit 1
-    aws s3 cp "$PROTOCOL_ASSETS_S3_PATH" ./blueprints.zip --region "$AWS_REGION"
-    unzip -q blueprints.zip -d $PROTOCOL_ASSETS_PATH
-fi
-
-echo "$SCRIPT_NAME Installing & configuring CloudWatch Agent"
-wget -q $CW_AGENT_BINARY_URI
-dpkg -i -E amazon-cloudwatch-agent.deb
-
-echo "$SCRIPT_NAME Configuring CloudWatch Agent with basic config if assets not available"
-mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/
-if [[ -f "$COMMON_ASSETS_PATH/cw-agent.json" ]]; then
-    cp $COMMON_ASSETS_PATH/cw-agent.json /opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json
-else
-    echo "$COMMON_ASSETS_PATH/cw-agent.json does not exist, continue with default config" 
-fi
-
-echo "$SCRIPT_NAME Starting CloudWatch Agent"
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
--a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/custom-amazon-cloudwatch-agent.json -m ec2 -s
-systemctl restart amazon-cloudwatch-agent
-
-systemctl daemon-reload
-
-echo "$SCRIPT_NAME Signaling CloudFormation completion for Single Node stack"
-if [[ "$LOGICAL_RESOURCE_ID" != "none" ]]; then
-    echo "Signaling CloudFormation stack completion..."
-    cfn-signal --stack "$STACK_NAME" --resource "$LOGICAL_RESOURCE_ID" --region "$AWS_REGION" || {
-        echo "cfn-signal failed, trying with full path..."
-        /usr/local/bin/cfn-signal --stack "$STACK_NAME" --resource "$LOGICAL_RESOURCE_ID" --region "$AWS_REGION"
-    }
-fi
-
-echo "$SCRIPT_NAME Createing bcuser for blockchain operations"
-groupadd -g 1002 bcuser 2>/dev/null || echo "bcuser group already exists"
-useradd -u 1002 -g 1002 -m -s /bin/bash bcuser 2>/dev/null || echo "bcuser already exists"
-usermod -aG bcuser bcuser
-
-echo "$SCRIPT_NAME Waiting for EBS volumes to be available before setting up storage"
-sleep 60
-
-echo "$SCRIPT_NAME Setting up storage volumes using the universal storage setup script"
-if [[ -f "$COMMON_ASSETS_PATH/setup-storage.sh" ]]; then
-    $COMMON_ASSETS_PATH/setup-storage.sh
-else
-    echo "WARNING: $SCRIPT_NAME Universal storage setup script not found, skipping storage setup"
-fi
-
-echo "$SCRIPT_NAME Setting up traffic shaping and sync scripts"
-# Create directory for traffic shaping scripts
-mkdir -p /opt/network
-
-# Copy universal traffic shaping scripts from common assets
-if [[ -f "$COMMON_ASSETS_PATH/network/net-rules-start.sh" ]]; then
-    cp "$COMMON_ASSETS_PATH/network/net-rules-start.sh" /opt/network/
-    chmod +x /opt/network/net-rules-start.sh
-else
-    echo "WARNING: $SCRIPT_NAME Universal net-rules-start.sh not found in common assets"
-fi
-    
-if [[ -f "$COMMON_ASSETS_PATH/network/net-rules-stop.sh" ]]; then
-    cp "$COMMON_ASSETS_PATH/network/net-rules-stop.sh" /opt/network/
-    chmod +x /opt/network/net-rules-stop.sh
-else
-    echo "WARNING: $SCRIPT_NAME Universal net-rules-stop.sh not found in common assets"
-fi
-
-    
-# Install systemd service for traffic shaping
-if [[ -f "$COMMON_ASSETS_PATH/network/net-rules.service" ]]; then
-    cp "$COMMON_ASSETS_PATH/network/net-rules.service" /etc/systemd/system/
-    systemctl daemon-reload
-    systemctl enable net-rules.service
-    systemctl start net-rules
-else
-    echo "WARNING: $SCRIPT_NAME net-rules.service not found in common assets"
-fi
-    
-# Set up systemd timer for syncchecker.sh
-if [[ -f "/opt/blueprints/user-data/syncchecker.sh" ]]; then
-    echo "Setting up systemd timer for syncchecker.sh..."
-    chmod +x /opt/blueprints/user-data/syncchecker.sh 
-    # Create systemd service for sync checker
-    cat > /etc/systemd/system/syncchecker.service << 'SYNCSERVICE'
-[Unit]
-Description=Network Traffic Shaping and Sync Checker
-After=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=/opt/blueprints/user-data/syncchecker.sh
-StandardOutput=journal
-StandardError=journal
-SYNCSERVICE
-        
-    # Create systemd timer for sync checker
-    cat > /etc/systemd/system/syncchecker.timer << SYNCTIMER
-[Unit]
-Description=Network Traffic Shaping and Sync Checker Timer
-Requires=syncchecker.service
-
-[Timer]
-OnBootSec=5min
-OnUnitActiveSec=${TRAFFIC_SHAPING_CHECK_INTERVAL_SEC}s
-
-[Install]
-WantedBy=timers.target
-SYNCTIMER
-        
-    systemctl daemon-reload
-    systemctl enable syncchecker.timer
-     systemctl start syncchecker.timer
-    echo "Systemd timer for syncchecker.sh configured and started"
-fi
-    
-echo "Traffic shaping and Sync Checker setup completed"
-
-echo "$SCRIPT_NAME Signal ASG lifecycle hook completion if in HA mode"
-# Signal early — before node.sh which may take hours (e.g. snapshot downloads).
-# The instance is ready for ASG; the node software will finish in the background.
-if [[ "$LIFECYCLE_HOOK_NAME" != "none" ]]; then
-    echo "Signaling ASG lifecycle hook to complete"
-    aws autoscaling complete-lifecycle-action \
-        --lifecycle-action-result CONTINUE \
-        --instance-id "$INSTANCE_ID" \
-        --lifecycle-hook-name "$LIFECYCLE_HOOK_NAME" \
-        --auto-scaling-group-name "$ASG_NAME" \
-        --region "$AWS_REGION"
-fi
-
-echo "$SCRIPT_NAME Execute protocol-specific node setup and start"
-if [[ -f "$PROTOCOL_ASSETS_PATH/user-data/node.sh" ]]; then
-    echo "Starting protocol-specific node setup for ${BLOCKCHAIN_PROTOCOL}"
-    chmod +x "$PROTOCOL_ASSETS_PATH/user-data/node.sh"
-    if "$PROTOCOL_ASSETS_PATH/user-data/node.sh" "$SNAPSHOT_ENABLED"; then
-        echo "$SCRIPT_NAME Node deployment completed successfully"
-    else
-        echo "$SCRIPT_NAME ERROR: Node deployment FAILED (exit code $?) — check /var/log/cloud-init-output.log and journalctl"
-        exit 1
+# Decide what this boot must do. Prints one of:
+#   uninstall - IMDS user data no longer contains a per-boot bootstrap (the
+#               stack was rolled back to an older framework version)
+#   reexec    - cloud-init ran a stale copy; run the IMDS version instead
+#   apply     - (re-)run setup
+#   skip      - nothing changed since the last successful setup
+# Args: <self script path> <IMDS user data file or empty if unavailable>
+bootstrap_action() {
+    local self=$1 imds=$2 fp i
+    # A re-exec'd copy already is the current version; don't compare again.
+    if [[ -n "$imds" && "$NODE_RUNNER_REEXEC" != "1" ]]; then
+        if ! grep -q "^Content-Type: $PER_BOOT_MARKER" "$imds"; then
+            echo uninstall; return
+        fi
+        extract_bootstrap_part "$imds" > "$STATE_DIR/current-bootstrap.sh"
+        if ! cmp -s <(sed -e '$a\' "$STATE_DIR/current-bootstrap.sh") <(sed -e '$a\' "$self"); then
+            echo reexec; return
+        fi
     fi
-else
-    echo "ERROR: $SCRIPT_NAME Protocol-specific node setup script not found at $PROTOCOL_ASSETS_PATH/user-data/node.sh"
-    exit 1
+    fp=$(fingerprint "$self")
+    if [[ "$(cat "$STATE_DIR/applied-fingerprint" 2>/dev/null)" != "$fp" ]]; then
+        echo apply; return
+    fi
+    for ((i = 1; i <= DATA_VOLUMES_COUNT; i++)); do
+        local -n mount_path_ref="DATA_VOL_$i""_MOUNT_PATH"
+        if [[ -n "$mount_path_ref" ]] && ! mountpoint -q "$mount_path_ref"; then
+            echo "$SCRIPT_NAME Data volume $mount_path_ref is not mounted" >&2
+            unset -n mount_path_ref
+            echo apply; return
+        fi
+        unset -n mount_path_ref
+    done
+    echo skip
+}
+
+install_base_packages() {
+    echo "$SCRIPT_NAME Installing basic packages"
+    while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+        sleep 5
+    done
+    apt-get -yqq update
+    apt-get -yqq install jq unzip python3-pip python3-setuptools chrony wget
+
+    if ! command -v cfn-signal >/dev/null 2>&1; then
+        echo "$SCRIPT_NAME Install CloudFormation helper scripts (cfn-signal, cfn-init, etc.)"
+        pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz --break-system-packages
+        ln -sf /usr/local/bin/cfn-signal /usr/bin/cfn-signal 2>/dev/null || true
+        ln -sf /usr/local/bin/cfn-init /usr/bin/cfn-init 2>/dev/null || true
+    fi
+
+    echo "$SCRIPT_NAME Installing AWS CLI"
+    snap install aws-cli --classic
+}
+
+# Download and extract assets, replacing any previous copy so changed or
+# removed blueprint files take effect.
+refresh_assets() {
+    echo "$SCRIPT_NAME Downloading and extracting assets if provided"
+    if [[ "$COMMON_ASSETS_S3_PATH" != "none" ]]; then
+        aws s3 cp "$COMMON_ASSETS_S3_PATH" /opt/assets.zip --region "$AWS_REGION" || return 1
+        rm -rf "$BOOTSTRAP_ASSETS_PATH"
+        unzip -q -o /opt/assets.zip -d "$BOOTSTRAP_ASSETS_PATH" || return 1
+    fi
+    if [[ "$PROTOCOL_ASSETS_S3_PATH" != "none" ]]; then
+        aws s3 cp "$PROTOCOL_ASSETS_S3_PATH" /opt/blueprints.zip --region "$AWS_REGION" || return 1
+        rm -rf "$PROTOCOL_ASSETS_PATH"
+        unzip -q -o /opt/blueprints.zip -d "$PROTOCOL_ASSETS_PATH" || return 1
+    fi
+}
+
+# $1 (tests only): path of this script; defaults to $0.
+main() {
+    local self=$0 imds_file="" action prev_fp="" rc
+    [[ -n "$1" ]] && self=$1
+    mkdir -p "$STATE_DIR"
+    chmod 700 "$STATE_DIR"
+
+    # Only one bootstrap at a time (a re-exec inherits the lock).
+    if [[ "$NODE_RUNNER_REEXEC" != "1" ]]; then
+        exec 9> "$STATE_DIR/bootstrap.lock"
+        if ! flock -n 9; then
+            echo "$SCRIPT_NAME Another bootstrap is running, exiting"
+            return 0
+        fi
+    fi
+
+    write_cdk_environment
+    # shellcheck source=/dev/null
+    source "$CDK_ENV_FILE"
+
+    if fetch_imds_user_data "$STATE_DIR/imds-user-data"; then
+        imds_file="$STATE_DIR/imds-user-data"
+    else
+        echo "WARNING: $SCRIPT_NAME could not read user data from IMDS, using the local copy"
+    fi
+
+    action=$(bootstrap_action "$self" "$imds_file")
+    echo "$SCRIPT_NAME Boot action: $action"
+    case "$action" in
+        uninstall)
+            # Rolled back to a framework version without per-boot bootstrap:
+            # stop running every boot (pre-#340 behaviour).
+            if [[ "$self" == "$PER_BOOT_DIR/"* ]]; then
+                rm -f "$self"
+            fi
+            return 0
+            ;;
+        reexec)
+            echo "$SCRIPT_NAME cloud-init ran a stale bootstrap; running the current one from IMDS"
+            install -m 700 "$STATE_DIR/current-bootstrap.sh" "$STATE_DIR/run-bootstrap.sh"
+            # Also fix the stale copy for the next boot (new inode via mv).
+            if [[ "$self" == "$PER_BOOT_DIR/"* ]]; then
+                install -m 700 "$STATE_DIR/current-bootstrap.sh" "$self.new" && mv -f "$self.new" "$self"
+            fi
+            NODE_RUNNER_REEXEC=1 exec "$STATE_DIR/run-bootstrap.sh"
+            ;;
+        skip)
+            echo "$SCRIPT_NAME Configuration unchanged and setup completed; nothing to do"
+            return 0
+            ;;
+    esac
+
+    [[ -f "$STATE_DIR/applied-fingerprint" ]] && prev_fp="true"
+    echo "$SCRIPT_NAME Applying node setup (re-apply: $prev_fp)"
+    install_base_packages
+    if refresh_assets && [[ -f "$COMMON_ASSETS_PATH/node-setup.sh" ]]; then
+        chmod +x "$COMMON_ASSETS_PATH/node-setup.sh"
+        STATE_DIR="$STATE_DIR" CDK_ENV_FILE="$CDK_ENV_FILE" "$COMMON_ASSETS_PATH/node-setup.sh" "$prev_fp"
+        rc=$?
+    else
+        echo "$SCRIPT_NAME ERROR: failed to download or extract assets"
+        rc=1
+    fi
+    if [[ $rc -eq 0 ]]; then
+        fingerprint "$self" > "$STATE_DIR/applied-fingerprint.tmp" \
+            && mv -f "$STATE_DIR/applied-fingerprint.tmp" "$STATE_DIR/applied-fingerprint"
+        echo "$SCRIPT_NAME Node deployment completed successfully"
+        return 0
+    fi
+    echo "$SCRIPT_NAME ERROR: Node deployment FAILED (exit code $rc) - check /var/log/cloud-init-output.log and journalctl; setup will be retried on next boot"
+    # Best effort: bring back whatever node.service is installed.
+    systemctl start node.service 2>/dev/null
+    return 1
+}
+
+# NODE_RUNNER_SOURCE_ONLY=1 lets unit tests load the functions without running.
+if [[ "$NODE_RUNNER_SOURCE_ONLY" != "1" ]]; then
+    main "$@"
+    exit $?
 fi

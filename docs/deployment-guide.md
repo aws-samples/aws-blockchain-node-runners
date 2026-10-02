@@ -556,51 +556,60 @@ Sample configurations for each protocol are available in the blueprint package's
 
 ### Updates
 
-1. **Update Node Version** (requires stack replacement):
+#### How a redeploy applies changes (single-node)
+
+Edit `.env` (or a blueprint file) and run `npx cdk deploy` again. The existing instance and its data volumes are reused; nothing is destroyed and the chain isn't re-synced.
+
+1. When the instance user data changes, CloudFormation **stops and starts the same instance**. The user data embeds every `.env` value and a content hash of the blueprint's scripts and configurations, so most changes alter it. Expect a few minutes of RPC downtime.
+2. On every boot, the node bootstrap compares the new configuration with the last one that was applied successfully:
+   - **Unchanged** (plain reboot, or only `INSTANCE_TYPE` changed): nothing re-runs. `/etc/cdk_environment` is refreshed.
+   - **Changed**: it downloads the new assets, re-runs storage setup (an existing filesystem is mounted, never reformatted), stops `node.service`, and re-runs the blueprint's `node.sh` against the existing `/data`. The node comes back on the new client version and configuration.
+   - **Setup never finished** (for example, the instance was stopped during first-boot setup): setup runs again on the next boot until it succeeds.
+3. `cdk deploy` reports `UPDATE_COMPLETE` once the instance is running again, **before** node setup has finished. Follow progress in `/var/log/cloud-init-output.log` (lines starting `[user-data-ubuntu] Boot action:` and `Node deployment completed successfully`).
+
+How long the node is down depends on the blueprint's `node.sh`: about a minute for clients that download a binary or pull an image, 30–60 minutes for clients built from source (Solana, Base, BNB Reth).
+
+#### Upgrading the client version
+
+1. Add a configuration file for the new version (for example, copy `geth-1.17.7-lighthouse-8.2.2-full.yml` to `geth-1.17.8-lighthouse-8.2.2-full.yml` and update the image tags).
+2. Set `CLIENT_CONFIG` in `.env` to the new file name.
+3. Redeploy:
    ```bash
-   # Update .env
-   CLIENT_VERSION="v1.15.0"
-   
-   # Destroy existing stack
-   npx cdk destroy
-   
-   # Deploy new stack with updated version
    npx cdk deploy --json --outputs-file deploy-output.json
    ```
-   
-   **Note**: Version updates require instance replacement. For single-node deployments, this causes downtime. For HA deployments, use rolling updates (see below).
 
-2. **Update Configuration** (non-instance changes):
-   ```bash
-   # Modify .env (e.g., HA health check settings)
-   # Deploy changes
-   npx cdk deploy --json --outputs-file deploy-output.json
-   ```
-   
-   **Note**: Some configuration changes (like health check settings) can be updated without destroying the stack. Instance-level changes require replacement.
+**Check data compatibility first.** An in-place upgrade starts the new client version on the existing chain data. Most patch and minor releases are fine, but some releases change the database format without migrating it (for example Reth 1.x → 2.x). Read the client's release notes. If the new version needs a fresh database, don't redeploy the existing stack: deploy the new version as a separate stack (set a different `STACK_NAME_PREFIX`), wait for it to sync, move your traffic, then destroy the old stack.
 
-3. **Rolling Updates** (HA only):
-   - For HA deployments, instance replacements happen automatically as rolling updates
-   - New instances launched with updated configuration
-   - Health checks verify new instances are healthy
-   - Old instances terminated after deregistration delay
-   - No downtime during the update process
+**The stack name contains `CLIENT_CONFIG` with version numbers and prerelease tags removed** (`<protocol>-<network>-<config>`, e.g. `ethereum-sepolia-geth-lighthouse-full`). So:
+
+- A **version change** of the same client and configuration type (`geth-1.17.7-…-full` → `geth-1.17.8-…-full`) keeps the stack name and is applied in place, as above. This includes moving between a release candidate or beta and a stable release (`lighthouse-8.3.0-rc.0` → `lighthouse-8.3.0`).
+- Switching to a **different client or configuration type** (`geth-…` → `reth-…`, `rpc-base` → `rpc-extended`) produces a different stack name, so `cdk deploy` creates a **new, separate stack** that syncs from scratch. Destroy the old stack when you no longer need it. A different client usually can't read the old client's data anyway.
+
+#### What a redeploy does not change in place
+
+- **`CPU_TYPE`** (x86_64 ↔ ARM_64) changes the AMI, so CloudFormation tries to replace the instance. The update fails because the data volume is still attached to the old instance, and the stack rolls back with the original node unharmed. Deploy a new stack instead.
+- **Instance store** (`DATA_VOL_*_TYPE="instance-store"`) is erased by every stop/start, including the one a redeploy causes. The node rebuilds its storage and syncs again (from a snapshot, if the blueprint supports one).
+- **Documentation-only edits** to a blueprint (`*.md`, `samples/`) don't change the user data and don't touch the instance.
+
+#### Upgrading the framework on an existing stack
+
+Pull the new framework version and redeploy with the same `.env`. The first redeploy after upgrading from a version without per-boot setup (before 2.1.0) changes the user data, so the node stops and starts once and setup re-runs against the existing data, applying the current `.env`. Rolling back to an older framework version afterwards is not supported for re-apply: the node keeps running, but later configuration changes are no longer applied.
+
+#### HA deployments (rolling updates)
+
+HA instances are replaced, not updated in place. A launch template change (any `.env` or blueprint change that affects user data, `INSTANCE_TYPE`, `CPU_TYPE`) triggers a rolling update: one instance at a time is replaced while at least one stays in service, with a 5-minute pause after each replacement. New instances start with empty data volumes and sync before they pass the ALB health check.
 
 ### Scaling
 
-1. **Vertical Scaling** (change instance type - requires stack replacement):
+1. **Vertical Scaling** (change instance type):
    ```bash
-   # Update .env
-   INSTANCE_TYPE="m6a.4xlarge"
-   
-   # Destroy existing stack
-   npx cdk destroy
-   
-   # Deploy with new instance type
+   # Update .env (same CPU architecture, e.g. m7g.2xlarge -> m7g.xlarge)
+   INSTANCE_TYPE="m7g.xlarge"
+
    npx cdk deploy --json --outputs-file deploy-output.json
    ```
-   
-   **Note**: Changing instance type requires instance replacement. For single-node, this causes downtime. For HA, rolling updates minimize downtime.
+
+   **Note**: On single-node stacks, CloudFormation stops the instance, changes its type and starts it again (about a minute of downtime). The data volume stays attached, node setup doesn't re-run, and the node resumes where it left off. Changing the CPU architecture (`CPU_TYPE`) is not supported in place; see [What a redeploy does not change in place](#what-a-redeploy-does-not-change-in-place). On HA stacks, a type change rolls out as a rolling update.
 
 2. **Horizontal Scaling** (HA only - no downtime):
    ```bash
