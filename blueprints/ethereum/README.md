@@ -390,7 +390,7 @@ See the [Troubleshooting Guide](/docs/guides/troubleshooting) for detailed diagn
 
 ### Upgrading Client Versions
 
-1. Copy the configuration file to the new versions and update the image tags, for example `geth-1.17.5-lighthouse-8.2.2-full.yml` → `geth-1.17.6-lighthouse-8.2.2-full.yml`
+1. Copy the configuration file to the new versions and update the image tags, for example `geth-1.17.7-lighthouse-8.2.2-full.yml` → `geth-1.17.8-lighthouse-8.2.2-full.yml`
 2. Update `CLIENT_CONFIG` in `.env` to the new file name
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output.json`
 

@@ -571,7 +571,7 @@ How long the node is down depends on the blueprint's `node.sh`: about a minute f
 
 #### Upgrading the client version
 
-1. Add a configuration file for the new version (for example, copy `geth-1.17.5-lighthouse-8.2.2-full.yml` to `geth-1.17.6-lighthouse-8.2.2-full.yml` and update the image tags).
+1. Add a configuration file for the new version (for example, copy `geth-1.17.7-lighthouse-8.2.2-full.yml` to `geth-1.17.8-lighthouse-8.2.2-full.yml` and update the image tags).
 2. Set `CLIENT_CONFIG` in `.env` to the new file name.
 3. Redeploy:
    ```bash
@@ -580,7 +580,7 @@ How long the node is down depends on the blueprint's `node.sh`: about a minute f
 
 **The stack name contains `CLIENT_CONFIG` with digits removed** (`<protocol>-<network>-<config>`, e.g. `ethereum-sepolia-geth-lighthouse-full`). So:
 
-- A **version change** of the same client and configuration type (`geth-1.17.5-…-full` → `geth-1.17.6-…-full`) keeps the stack name and is applied in place, as above.
+- A **version change** of the same client and configuration type (`geth-1.17.7-…-full` → `geth-1.17.8-…-full`) keeps the stack name and is applied in place, as above.
 - Switching to a **different client or configuration type** (`geth-…` → `reth-…`, `rpc-base` → `rpc-extended`) produces a different stack name, so `cdk deploy` creates a **new, separate stack** that syncs from scratch. Destroy the old stack when you no longer need it. A different client usually can't read the old client's data anyway.
 
 #### What a redeploy does not change in place

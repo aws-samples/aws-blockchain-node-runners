@@ -308,7 +308,7 @@ See [Troubleshooting Guide](/docs/guides/troubleshooting) for detailed diagnosti
 ## Upgrades
 
 To upgrade the validator client version:
-1. Copy the configuration script to the new version, e.g. `agave-4.2.2-rpc-base.sh` → `agave-4.2.3-rpc-base.sh`
+1. Copy the configuration script to the new version, e.g. `agave-4.3.0-rpc-base.sh` → `agave-4.3.1-rpc-base.sh`
 2. Update `CLIENT_CONFIG` (and `CLIENT_VERSION`, if you use it) in `.env`
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output-{stack-name}.json`
 
