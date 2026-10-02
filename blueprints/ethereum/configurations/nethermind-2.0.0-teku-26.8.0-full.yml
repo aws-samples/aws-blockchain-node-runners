@@ -5,18 +5,25 @@
 version: "3"
 services:
     execution:
-        image: nethermind/nethermind:1.39.3
+        image: nethermind/nethermind:2.0.0
         container_name: execution
         restart: always
         command:
             [
                 "--config=${BC_NETWORK}",
+                "--datadir=/var/lib/nethermind/data",
                 "--JsonRpc.Enabled=true",
                 "--JsonRpc.Host=${EC2_INTERNAL_IP}",
+                "--JsonRpc.Port=8545",
+                "--JsonRpc.WebSocketsPort=8546",
+                "--JsonRpc.EnabledModules=Eth,Subscribe,Trace,TxPool,Web3,Proof,Net,Parity,Debug,Admin,Health,Rpc",
                 "--JsonRpc.JwtSecretFile=/var/lib/nethermind/secrets/jwtsecret",
-                "--JsonRpc.EngineHost=0.0.0.0",
+                "--JsonRpc.EngineHost=127.0.0.1",
                 "--JsonRpc.EnginePort=8551",
-                "--datadir=/var/lib/nethermind/data",
+                "--HealthChecks.Enabled=true",
+                "--Metrics.Enabled=true",
+                "--Metrics.ExposeHost=${EC2_INTERNAL_IP}",
+                "--Metrics.ExposePort=6060",
                 "--Network.MaxActivePeers=50",
             ]
         volumes:
