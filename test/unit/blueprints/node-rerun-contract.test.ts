@@ -49,6 +49,20 @@ describe('blueprint node.sh re-run contract', () => {
         expect(nodeSh.indexOf('fdctl keys new')).toBeGreaterThan(guard);
     });
 
+    it.each(['ethereum', 'base'])('%s: node.service waits for docker compose down to finish', (blueprint) => {
+        const match = read(`${blueprint}/user-data/node.sh`).match(/^TimeoutStopSec=(\d+)$/m);
+        expect(match).not.toBeNull();
+        const timeoutSec = Number(match![1]);
+        // Longer than every client's compose stop_grace_period, so systemd
+        // never kills the stop while a client is still flushing state.
+        const configDir = path.join(BLUEPRINTS, blueprint, 'configurations');
+        for (const file of fs.readdirSync(configDir).filter(f => f.endsWith('.yml'))) {
+            for (const [, minutes] of fs.readFileSync(path.join(configDir, file), 'utf-8').matchAll(/stop_grace_period:\s*(\d+)m/g)) {
+                expect(timeoutSec).toBeGreaterThan(Number(minutes) * 60);
+            }
+        }
+    });
+
     it('base: re-clones into a clean directory', () => {
         const nodeSh = read('base/user-data/node.sh');
         const rm = nodeSh.indexOf('rm -rf "$BASE_NODE_DIR"');

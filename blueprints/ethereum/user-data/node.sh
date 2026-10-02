@@ -180,6 +180,10 @@ ExecStart=/usr/bin/docker compose -f /home/bcuser/ethereum-node/docker-compose.y
 ExecStop=/usr/bin/docker compose -f /home/bcuser/ethereum-node/docker-compose.yml down
 Restart=on-failure
 RestartSec=10
+# "docker compose down" gives each client its stop_grace_period (up to 8m in
+# configurations/*.yml) to flush state. Systemd's default 90s stop timeout
+# would cut that short on every redeploy and instance stop.
+TimeoutStopSec=600
 
 [Install]
 WantedBy=multi-user.target
