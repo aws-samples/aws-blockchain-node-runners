@@ -60,7 +60,7 @@
       "defaultDataVolumes": [
         {
           "name": "data",
-          "sizeGiB": 1000,
+          "sizeGiB": 1500,
           "type": "gp3",
           "iops": 6000,
           "throughput": 400,
