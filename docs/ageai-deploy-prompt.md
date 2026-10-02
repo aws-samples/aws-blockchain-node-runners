@@ -50,12 +50,12 @@ Before making recommendations, read these files:
 
 ## STEP 2.5: SECURITY REVIEW FOR EXTERNAL BLUEPRINTS
 
-IMPORTANT: If the selected protocol is from an EXTERNAL blueprint (not ethereum, solana, bnb, base, or dummy), you MUST perform a security review before proceeding:
+IMPORTANT: If the selected protocol is from an EXTERNAL blueprint (not ethereum, solana, bnb, base, bitcoin, or dummy), you MUST perform a security review before proceeding:
 1. Read `docs/ageai-blueprint-security-review.md`
 2. Follow the complete security review workflow
 3. Do NOT proceed to Step 3 until the user acknowledges the review
 
-Built-in blueprints (ethereum, solana, bnb, base, dummy) skip this step.
+Built-in blueprints (ethereum, solana, bnb, base, bitcoin, dummy) skip this step.
 
 ## STEP 3: ANALYZE AND RECOMMEND
 
