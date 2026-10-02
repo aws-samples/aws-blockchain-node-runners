@@ -8,6 +8,8 @@
 > - **HA:** the launch template changes, so every instance is replaced in a rolling update and each new node syncs from scratch.
 > - **Rollback:** after upgrading, redeploying with an older framework version leaves the node running, but configuration changes are no longer applied on redeploy.
 > - **Blueprint authors:** `node.sh` now re-runs on configuration changes. See the re-run contract in `blueprints/dummy/README.md`.
+> - **Client upgrades now happen in place:** bumping `CLIENT_CONFIG` to a new version of the same client starts it on the existing chain data. Check the release notes first; a release that needs a fresh database (as Reth 1.x → 2.x did) must be deployed as a separate stack instead. Older entries below that say "upgrading means deploying a new node" describe the previous behaviour.
+> - **Prerelease configurations:** prerelease tags no longer change the stack name. A stack deployed from the Sepolia RC configuration (`geth-1.17.7-lighthouse-8.3.0-rc.0-full.yml`) was named `…-geth-lighthouse-rc-full`; it's now `…-geth-lighthouse-full`, so the next deploy creates a new stack under the new name. Destroy the `-rc-` stack, or keep deploying it with the previous framework version.
 
 ### Security
 
@@ -67,6 +69,7 @@
   - Storage setup never reformats a device that already has a filesystem or RAID signature; it mounts it. RAID setup re-assembles existing arrays and only uses blank disks, and `mdadm.conf` no longer collects duplicate entries.
   - Full node setup moved from user data to `assets/common/node-setup.sh`. `cdk synth` now fails if the rendered user data would exceed the 16 KB EC2 limit and warns above 15 KB.
   - Changing `CPU_TYPE` is still not supported in place (the stack rolls back); deploy a new stack. Switching to a different client or configuration type also creates a new stack, because `CLIENT_CONFIG` is part of the stack name.
+  - The stack name now also ignores prerelease tags after a version (`-rc.0`, `-beta`, `-alpha.N`), so moving between a release candidate and a stable release (for example Lighthouse `8.3.0-rc.0` → `8.3.0` for the Sepolia Glamsterdam fork) is an in-place upgrade instead of a new stack. Names of configurations without a prerelease tag are unchanged.
 - **Blueprints (re-run safety, #340)**: Ethereum and Base set `TimeoutStopSec=600` on `node.service`, so systemd no longer cuts `docker compose down` off after its default 90 seconds while a client is still flushing state (the compose files give geth up to 8 minutes). Solana keeps an existing validator identity keypair instead of failing on regeneration; Base re-clones `base/node` into a clean directory; BSC Reth removes a leftover build directory; Dummy now runs its configuration as `node.service`, so the dummy node survives reboots.
 - **Docs**: the Upgrades sections of all blueprint READMEs, `docs/deployment-guide.md` (Updates and Vertical Scaling, which said a version or instance type change needed `cdk destroy`) and `docs/troubleshooting.md` describe the verified in-place behaviour. The Bitcoin "interrupted first boot" entry no longer needs a manual `node.sh` re-run.
 

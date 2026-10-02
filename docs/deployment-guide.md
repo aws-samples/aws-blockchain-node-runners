@@ -578,9 +578,11 @@ How long the node is down depends on the blueprint's `node.sh`: about a minute f
    npx cdk deploy --json --outputs-file deploy-output.json
    ```
 
-**The stack name contains `CLIENT_CONFIG` with digits removed** (`<protocol>-<network>-<config>`, e.g. `ethereum-sepolia-geth-lighthouse-full`). So:
+**Check data compatibility first.** An in-place upgrade starts the new client version on the existing chain data. Most patch and minor releases are fine, but some releases change the database format without migrating it (for example Reth 1.x → 2.x). Read the client's release notes. If the new version needs a fresh database, don't redeploy the existing stack: deploy the new version as a separate stack (set a different `STACK_NAME_PREFIX`), wait for it to sync, move your traffic, then destroy the old stack.
 
-- A **version change** of the same client and configuration type (`geth-1.17.7-…-full` → `geth-1.17.8-…-full`) keeps the stack name and is applied in place, as above.
+**The stack name contains `CLIENT_CONFIG` with version numbers and prerelease tags removed** (`<protocol>-<network>-<config>`, e.g. `ethereum-sepolia-geth-lighthouse-full`). So:
+
+- A **version change** of the same client and configuration type (`geth-1.17.7-…-full` → `geth-1.17.8-…-full`) keeps the stack name and is applied in place, as above. This includes moving between a release candidate or beta and a stable release (`lighthouse-8.3.0-rc.0` → `lighthouse-8.3.0`).
 - Switching to a **different client or configuration type** (`geth-…` → `reth-…`, `rpc-base` → `rpc-extended`) produces a different stack name, so `cdk deploy` creates a **new, separate stack** that syncs from scratch. Destroy the old stack when you no longer need it. A different client usually can't read the old client's data anyway.
 
 #### What a redeploy does not change in place

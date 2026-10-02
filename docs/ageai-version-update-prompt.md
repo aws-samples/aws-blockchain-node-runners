@@ -18,7 +18,7 @@ This workflow helps you keep blockchain node client software up to date. It guid
 - All changes happen to SOURCE CODE, not to a running or deployed node.
 - The optional test deployment creates a NEW stack — it does NOT modify existing infrastructure.
 - Upgrading a deployed node, two options:
-  - **In place (single-node, same client):** set `CLIENT_CONFIG` to the new version's file and redeploy the existing stack. The node is stopped, setup re-runs against the existing data, and it comes back on the new version without a re-sync (instance-store data is the exception). See "How a redeploy applies changes" in `docs/deployment-guide.md`.
+  - **In place (single-node, same client, data-compatible release — see Step 2d):** set `CLIENT_CONFIG` to the new version's file and redeploy the existing stack. The node is stopped, setup re-runs against the existing data, and it comes back on the new version without a re-sync (instance-store data is the exception). See "How a redeploy applies changes" in `docs/deployment-guide.md`.
   - **Blue-green (HA, client switches, or when downtime isn't acceptable):** deploy a new node with updated code → wait for full sync → route traffic to the new node → delete the old node. Switching to a different client or configuration type always creates a new stack, because `CLIENT_CONFIG` is part of the stack name.
 - This is a GenAI agent prompt, not a CI/CD pipeline or scheduled automation.
 - The human is always in control — explicit approval is required before any file change and before any destructive action.
@@ -87,7 +87,12 @@ If an upgrade is warranted, check compatibility BEFORE proposing any file modifi
 
 2c. **Breaking config changes:** Check release notes for CLI flags renamed, config file format changes, deprecated options removed, or new required flags. These affect the configuration script contents.
 
-2d. Report any compatibility concerns to the user BEFORE proceeding. If the check finds conflicts, do NOT proceed without a user decision.
+2d. **Existing-data compatibility (in-place upgrades):** single-node stacks apply a version bump in place: the new client version starts on the existing chain data (see "How a redeploy applies changes" in `docs/deployment-guide.md`). Check the release notes for database or storage-format changes, required migrations, or "resync required" notes, and classify the upgrade as either:
+   - **In place:** the new version opens the previous version's data (with or without an automatic migration). Operators redeploy the existing stack.
+   - **New node required:** the previous data can't be used (for example Reth 1.x → 2.x, Storage V2). Operators deploy the new version as a separate stack (different `STACK_NAME_PREFIX`), wait for sync, then destroy the old stack.
+   Record the classification in the Change Notification and in the `CHANGELOG.md` entry, so operators know which path to take.
+
+2e. Report any compatibility concerns to the user BEFORE proceeding. If the check finds conflicts, do NOT proceed without a user decision.
 
 ## STEP 3: CHANGE NOTIFICATION + APPROVAL GATE
 
@@ -103,6 +108,7 @@ Severity:         {patch | minor | major}
 Type:             {security ⚠️ | routine}
 Release notes:    {link}
 Compatibility:    {pass | concerns: <details>}
+Existing data:    {in place | new node required: <reason>}
 
 Affected artifacts:
   - configurations/{client}-{old}-{type}.{ext} → {client}-{new}-{type}.{ext}
@@ -195,7 +201,7 @@ Once the node shows signs of life (started syncing or serving RPC):
 
 **If successful:**
 - Confirm the version update works in practice.
-- Remind the user: "All changes are to source code. To upgrade a deployed single-node stack on the same client, point `CLIENT_CONFIG` at the new file and redeploy it (applied in place, a few minutes of downtime, longer for clients built from source). For HA, client switches or zero-downtime upgrades, use blue-green: deploy a new node with the updated code → wait for full sync → route traffic to the new node → delete the old node."
+- Remind the user: "All changes are to source code. To upgrade a deployed single-node stack on the same client (when Step 2d classified it as in place), point `CLIENT_CONFIG` at the new file and redeploy it (applied in place, a few minutes of downtime, longer for clients built from source). For HA, client switches or zero-downtime upgrades, use blue-green: deploy a new node with the updated code → wait for full sync → route traffic to the new node → delete the old node."
 - Offer to destroy the test stack (`npx cdk destroy <test-stack>`) to save costs, OR let the user keep it for extended evaluation (note it consumes AWS resources).
 - Offer to commit the source code changes.
 
