@@ -61,7 +61,7 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 - **Reth** - Rust-based execution client, high performance
 - **Erigon** - Efficient execution client with lower storage requirements
 - **Besu** - Java-based execution client by Hyperledger
-- **Nethermind** - .NET-based execution client
+- **Nethermind** - Perfect .NET execution client with extreme performance, fast sync, fast RPC, and a lightweight archive mode
 
 ### Consensus Clients
 - **Lighthouse** - Rust-based consensus client
@@ -78,7 +78,7 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 | erigon-&lt;version&gt;-caplin-archive.yml | Erigon | Caplin (built-in) | Lower storage, integrated consensus |
 | erigon-&lt;version&gt;-prysm-&lt;version&gt;-archive.yml | Erigon | Prysm | Client diversity with external CL |
 | besu-&lt;version&gt;-teku-&lt;version&gt;-full.yml | Besu | Teku | Enterprise deployments |
-| nethermind-&lt;version&gt;-teku-&lt;version&gt;-full.yml | Nethermind | Teku | .NET ecosystem |
+| nethermind-&lt;version&gt;-teku-&lt;version&gt;-full.yml | Nethermind | Teku | Performance, fast sync, fast RPC |
 
 > **Note:** Configuration file names include the pinned client versions (shown as `<version>` above). For the exact current filenames, run `ls node_modules/aws-bnr-blueprint-ethereum/configurations/`, or simply copy the matching sample from `samples/` — it already sets `CLIENT_CONFIG` for you.
 
@@ -152,6 +152,9 @@ cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-geth-lighthouse-
 # For mainnet Reth archive node
 cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-reth-lighthouse-archive .env
 
+# For mainnet Nethermind full node
+cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-nethermind-teku-full .env
+
 # For HA deployment
 cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-geth-lighthouse-full-ha .env
 ```
@@ -179,6 +182,9 @@ CLIENT_CONFIG="erigon-<version>-caplin-archive.yml"
 
 # Erigon with external Prysm consensus
 CLIENT_CONFIG="erigon-<version>-prysm-<version>-archive.yml"
+
+# Performance, fast sync, and fast RPC with Nethermind + Teku
+CLIENT_CONFIG="nethermind-<version>-teku-<version>-full.yml"
 ```
 
 #### Step 3: Deploy
@@ -293,6 +299,26 @@ ETH_CONSENSUS_SUPERNODE="false"
 **Note**: This setting only applies to Lighthouse-based configurations. Prysm, Teku, and Caplin (Erigon) handle PeerDAS differently and are not affected.
 
 **Important**: If you change this setting on an existing deployment from `false` to `true`, you must delete the beacon database and re-sync via checkpoint sync. Adding `--supernode` does not backfill historical data columns.
+
+### Nethermind Configuration Notes
+
+The Nethermind + Teku configuration runs Nethermind 2.x. Figures below are from the [Nethermind 2.0.0 release benchmarks](https://github.com/NethermindEth/nethermind/releases/tag/2.0.0), measured on Ethereum mainnet.
+
+- **Performance**: block processing at chain tip is 1.80× (8 vCPU) to 2.55× (16 vCPU) faster than the previous release, with p99 down from 1,646 ms to 208 ms on 16 vCPU. `eth_call` latency is 15–27% lower, and throughput is up to 36% higher on arm64.
+- **Fast sync**: a mainnet full node reaches chain tip in about 2–3 hours (128.6 min on 16 vCPU, 192 min on 8 vCPU).
+- **Lightweight archive**: Nethermind 2.x keeps archive history in the flat state database. A full mainnet archive is about 2.1 TB, and rolling-window or per-address retention can cut that further. This blueprint ships a full-node configuration.
+
+**Configuration defaults:**
+
+- **Flat state database**: new nodes sync into Nethermind's flat state layout, the default since 2.0.
+- **RPC endpoints**: HTTP JSON-RPC on port `8545` and WebSocket on port `8546`, both bound to the instance's internal IP. Enabled modules: `eth`, `subscribe`, `trace`, `txpool`, `web3`, `proof`, `net`, `parity`, `debug`, `admin`, `health`, `rpc`.
+- **Engine API**: bound to `127.0.0.1:8551`, so only the co-located consensus client can reach it.
+- **Health endpoint**: `GET http://<internal-ip>:8545/health` returns `200` when the node is synced and has peers, and `503` otherwise. For HA deployments, set `HA_ALB_HEALTHCHECK_PATH="/health"` so the load balancer routes traffic only to synced nodes. Size `HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN` to cover the initial sync.
+- **Prometheus metrics**: exposed on `http://<internal-ip>:6060/metrics`. The port is not opened in the security group.
+- **Snap serving**: fresh nodes also serve snap sync data to peers, which adds outbound P2P bandwidth. To turn it off, add `--Sync.SnapServingEnabled=false` to the execution command.
+- **`eth_getLogs` range**: by default a single `eth_getLogs` request can span at most 1,000 blocks. If your workload needs wider ranges, add `--Receipt.MaxBlockDepth=<blocks>` to the execution command.
+
+See the [Nethermind documentation](https://docs.nethermind.io/) for every available option.
 
 ### Snapshot Support
 
@@ -411,7 +437,7 @@ See the [Deployment Guide](/docs/guides/deployment-guide) for detailed cost opti
 
 **Q: Which client combination should I choose?**
 
-A: For most users, Geth + Lighthouse is recommended as it's the most tested and widely used. For faster sync, try Reth + Lighthouse. For lower storage, use Erigon + Lighthouse.
+A: For most users, Geth + Lighthouse is recommended as it's the most tested and widely used. For faster sync, try Reth + Lighthouse. For lower storage, use Erigon + Lighthouse. For performance, fast sync, and fast RPC, use Nethermind + Teku.
 
 **Q: How long does initial sync take?**
 
