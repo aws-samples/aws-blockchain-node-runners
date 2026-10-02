@@ -15,6 +15,10 @@
 
 - **Ethereum**: Hoodi testnet support. New sample `.env-hoodi-geth-lighthouse-full` (r7g.xlarge, 400 GB gp3), `hoodi` in the blueprint's `BC_NETWORKS`, and the Hoodi checkpoint-sync URL in the README. Verified on a real deployment (geth 1.17.5/1.17.6 + Lighthouse 8.2.2): about an hour to sync to the tip and about 115 GB on disk right after sync, so it's the quickest testnet for trying out upgrades.
 
+### Removed
+
+- **Ethereum**: Holesky testnet support. The Ethereum Foundation retired Holesky, and its checkpoint-sync endpoint (`checkpoint-sync.holesky.ethpandaops.io`) no longer resolves. `holesky` is removed from the blueprint's `BC_NETWORKS` and the README; no sample used it. Use Hoodi (or Sepolia) instead.
+
 ### Changed
 
 - **Ethereum**: upgraded Geth `1.17.5` → `1.17.7` (Geth + Lighthouse configuration) for Amsterdam/Glamsterdam readiness on the Sepolia testnet (fork activates 6 October 2026, 13:53:36 UTC). Upstream marks both `1.17.6` and `1.17.7` as Sepolia-fork-ready; `1.17.7` is a quick re-cut of `1.17.6` (which failed to publish to the Ubuntu PPA) plus minor fixes. No CLI flag or config changes affect this blueprint's command, so it is a drop-in image bump. Not smoke-tested — image-tag-only change, and mainnet is not forking on this date. **Note:** the Lighthouse consensus client in this configuration remains `8.2.2`, which is NOT Glamsterdam-ready for Sepolia; a Sepolia node on this configuration still needs a fork-ready Lighthouse (tracked separately, pending an RC-vs-stable decision).

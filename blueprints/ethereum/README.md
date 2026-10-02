@@ -271,9 +271,6 @@ ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.sepolia.ethpandaops.i
 
 # Hoodi
 ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.hoodi.ethpandaops.io"
-
-# Holesky
-ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.holesky.ethpandaops.io"
 ```
 
 Pick any provider from the maintained list — https://eth-clients.github.io/checkpoint-sync-endpoints/ — if one is unreachable. Endpoints do come and go (the previously used `beaconstate.info` domain stopped resolving).
