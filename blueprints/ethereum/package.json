@@ -17,6 +17,9 @@
         "name": "geth-1.17.7-lighthouse-8.2.2-full.yml"
       },
       {
+        "name": "geth-1.17.7-lighthouse-8.3.0-rc.0-full.yml"
+      },
+      {
         "name": "reth-2.5.2-lighthouse-8.2.2-archive.yml"
       },
       {

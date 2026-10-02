@@ -11,13 +11,13 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "agave-4.2.2-rpc-base.sh",
+    "defaultConfiguration": "agave-4.3.0-rpc-base.sh",
     "availableConfigurations": [
       {
-        "name": "agave-4.2.2-rpc-base.sh"
+        "name": "agave-4.3.0-rpc-base.sh"
       },
       {
-        "name": "agave-4.2.2-rpc-extended.sh"
+        "name": "agave-4.3.0-rpc-extended.sh"
       },
       {
         "name": "agave-4.0.3-rpc-base.sh"
