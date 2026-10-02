@@ -11,6 +11,14 @@
 - **Ethereum**: upgraded Teku `26.6.1` → `26.7.1` (Besu + Teku and Nethermind + Teku configurations). `26.7.1` is a strongly-recommended release containing security fixes.
 - **Docs website**: acknowledged and are tracking (no fix applied yet) 22 transitive `npm audit` advisories that all originate from `@docusaurus/core@3.10.2` in `website/`. They collapse to 5 underlying advisories: 17 "high" from `image-size@2.0.2` (CVE-2025-71319 / 71329 / 71330 — infinite-loop DoS in the ICNS/JXL/HEIF parsers, reached only at **build time** via `@docusaurus/mdx-loader`), and 5 "moderate" from the **dev-server-only** chain (`webpack-dev-server` → `express`/`qs` and `sockjs`/`uuid`, loaded only by `docusaurus start`). None reach the published static site or the deployed node infrastructure — the root CDK app reports **0** advisories, and these pre-date and are unrelated to the React bump below. `image-size` is effectively unmaintained (issues disabled upstream) with no published patch, so `npm audit fix` resolves none of them and `--force` would break the Docusaurus build. **Decision:** accept the low real-world risk and wait for an upstream `@docusaurus/core` release that swaps or patches `image-size`, rather than adopting an unofficial fork. Re-run `npm audit` in `website/` when bumping Docusaurus.
 
+### Added
+
+- **Ethereum**: Hoodi testnet support. New sample `.env-hoodi-geth-lighthouse-full` (r7g.xlarge, 400 GB gp3), `hoodi` in the blueprint's `BC_NETWORKS`, and the Hoodi checkpoint-sync URL in the README. Verified on a real deployment (geth 1.17.5/1.17.6 + Lighthouse 8.2.2): about an hour to sync to the tip and about 115 GB on disk right after sync, so it's the quickest testnet for trying out upgrades. It uses stable clients: Glamsterdam isn't scheduled on Hoodi yet (tentatively 27 October 2026), so the sample will need Glamsterdam-ready releases before Hoodi forks.
+
+### Removed
+
+- **Ethereum**: Holesky testnet support. The Ethereum Foundation retired Holesky, and its checkpoint-sync endpoint (`checkpoint-sync.holesky.ethpandaops.io`) no longer resolves. `holesky` is removed from the blueprint's `BC_NETWORKS` and the README; no sample used it. Use Hoodi (or Sepolia) instead.
+
 ### Changed
 
 - **Ethereum**: upgraded Geth `1.17.5` → `1.17.7` (Geth + Lighthouse configuration) for Amsterdam/Glamsterdam readiness on the Sepolia testnet (fork activates 6 October 2026, 13:53:36 UTC). Upstream marks both `1.17.6` and `1.17.7` as Sepolia-fork-ready; `1.17.7` is a quick re-cut of `1.17.6` (which failed to publish to the Ubuntu PPA) plus minor fixes. No CLI flag or config changes affect this blueprint's command, so it is a drop-in image bump. Not smoke-tested — image-tag-only change, and mainnet is not forking on this date. **Note:** the Lighthouse consensus client in this configuration remains `8.2.2`, which is NOT Glamsterdam-ready for Sepolia; a Sepolia node on this configuration still needs a fork-ready Lighthouse (tracked separately, pending an RC-vs-stable decision).
@@ -53,6 +61,8 @@
 - **Bitcoin**: Bitcoin Core `v31.0` → `v31.1`.
 
 ### Fixed
+
+- **Ethereum**: the Sepolia sample's data volume was far too small. `.env-sepolia-geth-lighthouse-full` provisioned 256 GB ("Sepolia requires ~100GB"), but a synced Sepolia geth + Lighthouse supernode node uses about 980 GB (measured 2 October 2026 with default flags: geth ~906 GB, of which ~673 GB is block history; Lighthouse ~74 GB). geth shuts itself down when the disk fills during its initial sync and then can't resume, so a node on the old sample never finished syncing. The sample now provisions 1.5 TB, and the README's instance and storage tables are corrected. The README adds a "Sepolia storage and history pruning" section: `prune-history --history.chain postprague` brings the node to ~570 GB (−42%, verified), `postmerge` saves almost nothing on Sepolia, and the section lists the RPC queries that fail for pruned blocks.
 
 - **Bitcoin**: aligned the documented mainnet data volume with the shipped samples. The README (architecture diagram, instance and storage tables, cost notes) and the blueprint's `defaultDataVolumes` in `package.json` said 1 TB / 1000 GiB, while every mainnet `samples/` file provisions 1500 GiB; they now all say 1.5 TB / 1500 GiB.
 - **AI deploy workflow**: `docs/ageai-deploy-prompt.md` omitted `bitcoin` from the built-in blueprint list in Step 2.5, so an assistant following it would demand an external-blueprint security review for the built-in Bitcoin blueprint. Bitcoin is now listed, matching `docs/ageai-blueprint-security-review.md`.
