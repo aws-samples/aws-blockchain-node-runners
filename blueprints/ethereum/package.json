@@ -11,10 +11,13 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "geth-1.17.5-lighthouse-8.2.2-full.yml",
+    "defaultConfiguration": "geth-1.17.7-lighthouse-8.2.2-full.yml",
     "availableConfigurations": [
       {
-        "name": "geth-1.17.5-lighthouse-8.2.2-full.yml"
+        "name": "geth-1.17.7-lighthouse-8.2.2-full.yml"
+      },
+      {
+        "name": "geth-1.17.7-lighthouse-8.3.0-rc.0-full.yml"
       },
       {
         "name": "reth-2.5.2-lighthouse-8.2.2-archive.yml"
@@ -23,7 +26,7 @@
         "name": "erigon-3.6.1-caplin-archive.yml"
       },
       {
-        "name": "erigon-3.6.1-prysm-7.1.8-archive.yml"
+        "name": "erigon-3.6.1-prysm-7.2.0-archive.yml"
       },
       {
         "name": "besu-26.8.1-teku-26.8.0-full.yml"

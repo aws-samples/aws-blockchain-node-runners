@@ -61,7 +61,7 @@ echo "Detected client type: $CLIENT_TYPE"
 # tags such as release candidates:
 #   "agave-3.1.14-rpc-base.sh"            -> "3.1.14"
 #   "agave-4.0.3-rpc-extended.sh"         -> "4.0.3"
-#   "agave-4.2.2-rpc-base.sh"             -> "4.2.2"
+#   "agave-4.3.0-rpc-base.sh"             -> "4.3.0"
 #   "frankendancer-0.1106.40201-rpc-base.sh" -> "0.1106.40201"
 BUILD_VERSION=$(echo "$CLIENT_CONFIG" | sed -E 's/^[a-z]+-(.+)-rpc-(base|extended)\.sh$/\1/')
 if [ -z "$BUILD_VERSION" ] || [ "$BUILD_VERSION" = "$CLIENT_CONFIG" ]; then
