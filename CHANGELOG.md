@@ -13,7 +13,7 @@
 
 ### Added
 
-- **Ethereum**: Hoodi testnet support. New sample `.env-hoodi-geth-lighthouse-full` (r7g.xlarge, 400 GB gp3), `hoodi` in the blueprint's `BC_NETWORKS`, and the Hoodi checkpoint-sync URL in the README. Verified on a real deployment (geth 1.17.5/1.17.6 + Lighthouse 8.2.2): about an hour to sync to the tip and about 115 GB on disk right after sync, so it's the quickest testnet for trying out upgrades.
+- **Ethereum**: Hoodi testnet support. New sample `.env-hoodi-geth-lighthouse-full` (r7g.xlarge, 400 GB gp3), `hoodi` in the blueprint's `BC_NETWORKS`, and the Hoodi checkpoint-sync URL in the README. Verified on a real deployment (geth 1.17.5/1.17.6 + Lighthouse 8.2.2): about an hour to sync to the tip and about 115 GB on disk right after sync, so it's the quickest testnet for trying out upgrades. It uses stable clients: Glamsterdam isn't scheduled on Hoodi yet (tentatively 27 October 2026), so the sample will need Glamsterdam-ready releases before Hoodi forks.
 
 ### Removed
 
