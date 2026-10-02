@@ -38,6 +38,7 @@
     "BC_NETWORKS": [
       "mainnet",
       "sepolia",
+      "hoodi",
       "holesky"
     ],
     "defaultInstanceTypes": {

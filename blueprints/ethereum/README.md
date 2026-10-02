@@ -92,6 +92,7 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 | Mainnet (Archive) | Single Node | i8g.4xlarge | 16 | 128 GB | 3.75 TB NVMe |
 | Mainnet (Full HA) | HA (2 nodes) | r7g.2xlarge | 8 each | 64 GB each | 2.5 TB gp3 each |
 | Sepolia | Single Node | r7g.xlarge | 4 | 32 GB | 256 GB gp3 |
+| Hoodi | Single Node | r7g.xlarge | 4 | 32 GB | 400 GB gp3 |
 
 *For cost estimates, use the [AWS Pricing Calculator](https://calculator.aws/) with your specific region and commitment level.
 
@@ -104,6 +105,7 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 | Mainnet | Full | ~2 TB | ~50 GB/month | 2.5 TB | gp3 | 8,000 | 700 MB/s |
 | Mainnet | Archive | ~3 TB | ~100 GB/month | 3.75 TB | Instance Store (NVMe) | 250K+ | 10+ GB/s |
 | Sepolia | Full | ~100 GB | ~5 GB/month | 256 GB | gp3 | 3,000 | 250 MB/s |
+| Hoodi | Full | ~115 GB (measured 2026-10) | not yet measured | 400 GB | gp3 | 3,000 | 250 MB/s |
 
 **Storage Type Selection**:
 - **Full Nodes**: Use gp3 EBS volumes for cost-effective persistent storage
@@ -157,6 +159,9 @@ cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-nethermind-teku-
 
 # For HA deployment
 cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-geth-lighthouse-full-ha .env
+
+# For a Hoodi testnet node (smallest and fastest to sync, about an hour)
+cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-hoodi-geth-lighthouse-full .env
 ```
 
 Edit `.env` with your AWS account details:
@@ -263,6 +268,9 @@ ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://beaconstate.ethstaker.cc"
 
 # Sepolia
 ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.sepolia.ethpandaops.io"
+
+# Hoodi
+ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.hoodi.ethpandaops.io"
 
 # Holesky
 ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.holesky.ethpandaops.io"
