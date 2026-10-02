@@ -62,6 +62,8 @@
 
 ### Fixed
 
+- **Ethereum**: the Sepolia sample's data volume was far too small. `.env-sepolia-geth-lighthouse-full` provisioned 256 GB ("Sepolia requires ~100GB"), but a synced Sepolia geth + Lighthouse supernode node uses about 980 GB (measured 2 October 2026 with default flags: geth ~906 GB, of which ~673 GB is block history; Lighthouse ~74 GB). geth shuts itself down when the disk fills during its initial sync and then can't resume, so a node on the old sample never finished syncing. The sample now provisions 1.5 TB, and the README's instance and storage tables are corrected. The README adds a "Sepolia storage and history pruning" section: `prune-history --history.chain postprague` brings the node to ~570 GB (−42%, verified), `postmerge` saves almost nothing on Sepolia, and the section lists the RPC queries that fail for pruned blocks.
+
 - **Bitcoin**: aligned the documented mainnet data volume with the shipped samples. The README (architecture diagram, instance and storage tables, cost notes) and the blueprint's `defaultDataVolumes` in `package.json` said 1 TB / 1000 GiB, while every mainnet `samples/` file provisions 1500 GiB; they now all say 1.5 TB / 1500 GiB.
 - **AI deploy workflow**: `docs/ageai-deploy-prompt.md` omitted `bitcoin` from the built-in blueprint list in Step 2.5, so an assistant following it would demand an external-blueprint security review for the built-in Bitcoin blueprint. Bitcoin is now listed, matching `docs/ageai-blueprint-security-review.md`.
 
