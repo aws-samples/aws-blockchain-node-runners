@@ -34,7 +34,7 @@ services:
         network_mode: host
 
     consensus:
-        image: gcr.io/prysmaticlabs/prysm/beacon-chain:v7.1.8
+        image: gcr.io/prysmaticlabs/prysm/beacon-chain:v7.2.0
         container_name: consensus
         restart: always
         user: "1002:1002"
