@@ -583,7 +583,7 @@ How long the node is down depends on the blueprint's `node.sh`: about a minute f
 **The stack name contains `CLIENT_CONFIG` with version numbers and prerelease tags removed** (`<protocol>-<network>-<config>`, e.g. `ethereum-sepolia-geth-lighthouse-full`). So:
 
 - A **version change** of the same client and configuration type (`geth-1.17.7-…-full` → `geth-1.17.8-…-full`) keeps the stack name and is applied in place, as above. This includes moving between a release candidate or beta and a stable release (`lighthouse-8.3.0-rc.0` → `lighthouse-8.3.0`).
-- Switching to a **different client or configuration type** (`geth-…` → `reth-…`, `rpc-base` → `rpc-extended`) produces a different stack name, so `cdk deploy` creates a **new, separate stack** that syncs from scratch. Destroy the old stack when you no longer need it. A different client usually can't read the old client's data anyway.
+- Switching to a **different client or configuration type** (`geth-…` → `reth-…`, `rpc-base` → `rpc-extended`) produces a different stack name, so `cdk deploy` creates a **new, separate stack** that syncs from scratch. The old stack keeps running, and billing, until you destroy it: once the new node is synced, run `npx cdk destroy` with the old `.env`. A different client usually can't read the old client's data anyway.
 
 #### What a redeploy does not change in place
 
@@ -597,7 +597,7 @@ Pull the new framework version and redeploy with the same `.env`. The first rede
 
 #### HA deployments (rolling updates)
 
-HA instances are replaced, not updated in place. A launch template change (any `.env` or blueprint change that affects user data, `INSTANCE_TYPE`, `CPU_TYPE`) triggers a rolling update: one instance at a time is replaced while at least one stays in service, with a 5-minute pause after each replacement. New instances start with empty data volumes and sync before they pass the ALB health check.
+HA instances are replaced, not updated in place. A launch template change (any `.env` or blueprint change that affects user data, `INSTANCE_TYPE`, `CPU_TYPE`) triggers a rolling update: one instance at a time is replaced while at least one stays in service, with a 5-minute pause after each replacement. New instances start with empty data volumes and must sync from scratch. The rolling update doesn't wait for that sync, and the default ALB health checks pass on nodes that are still syncing, so an update can replace every node within minutes and serve stale data until the new nodes catch up ([#353](https://github.com/aws-samples/aws-blockchain-node-runners/issues/353)). Until that's fixed, apply HA changes when stale or reduced RPC service is acceptable, or deploy a new HA stack and switch clients over once it has synced.
 
 ### Scaling
 
