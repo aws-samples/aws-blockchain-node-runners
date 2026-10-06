@@ -13,10 +13,9 @@ export interface IAssetsManager {
      * Upload common assets (universal scripts and configurations) to S3.
      * 
      * Common assets include:
-     * - user-data-ubuntu.sh: Universal user data script template
+     * - user-data-ubuntu.sh: Universal user data script template (per-boot bootstrap)
+     * - node-setup.sh: Full node setup, run by the bootstrap when it (re-)applies
      * - setup-storage.sh: Universal storage setup script
-     * - parse-custom-variables.sh: Script for parsing protocol-specific variables
-     * - cfn-hup-setup.sh: CloudFormation helper setup script
      * - cw-agent.json: CloudWatch agent configuration
      * 
      * @returns S3 path to the uploaded common assets
@@ -27,7 +26,8 @@ export interface IAssetsManager {
     /**
      * Upload protocol-specific assets to S3.
      * 
-     * Protocol assets include:
+     * Protocol assets include (Markdown docs, samples/ and .env files are
+     * excluded, so documentation edits don't change the instance user data):
      * - user-data/node.sh: Protocol-specific node initialization script
      * - user-data/common/: Protocol-specific helper scripts
      * - configurations/: Node configuration templates
@@ -43,10 +43,8 @@ export interface IAssetsManager {
      * Validate that common assets directory exists and contains required files.
      * 
      * Required files:
-     * - user-data-ubuntu.sh
      * - setup-storage.sh
-     * - parse-custom-variables.sh
-     * - cfn-hup-setup.sh
+     * - node-setup.sh
      * - cw-agent.json
      * 
      * @returns true if common assets are valid, false otherwise

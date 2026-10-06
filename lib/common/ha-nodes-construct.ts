@@ -143,9 +143,7 @@ export class HANodesConstruct extends constructs.Construct {
         }
 
         const userDataManager = new UserDataManager(userDataScriptPath);
-        const userDataScript = userDataManager.loadUserDataScript();
-
-        const processedUserData = userDataManager.injectVariables(userDataScript, environment, cfnandCDKUserDataConfig);
+        const processedUserData = userDataManager.renderUserData(environment, cfnandCDKUserDataConfig, this);
 
         // Use provided VPC or lookup default VPC
         this.vpc = providedVpc || ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });

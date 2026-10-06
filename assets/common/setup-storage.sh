@@ -35,6 +35,15 @@ make_fs() {
 
     local file_system=$1
     local volume_id=$2
+
+    # Last line of defence: refuse to format anything that already carries a
+    # filesystem or RAID signature, whatever the caller decided.
+    local existing_sig
+    existing_sig=$(get_device_signature "$volume_id")
+    if [[ -n "$existing_sig" ]]; then
+        echo "Error: $SCRIPT_NAME Refusing to format $volume_id: it already has a '$existing_sig' signature"
+        return 1
+    fi
     
     echo "$SCRIPT_NAME Creating $file_system filesystem on $volume_id"
     if [ "$file_system" == "ext4" ]; then
@@ -44,6 +53,57 @@ make_fs() {
         mkfs.xfs -f "$volume_id"
         return "$?"
     fi
+}
+
+# Print the filesystem (or RAID member) signature on a block device, or
+# nothing if the device is blank. blkid exits non-zero for blank devices.
+get_device_signature() {
+    blkid -o value -s TYPE "$1" 2>/dev/null || true
+}
+
+# Keep only blank disks (no filesystem, RAID superblock or other signature).
+# Used before RAID assembly: instance-store disks are blank after every
+# stop/start, so this never excludes a disk we should use, but it guarantees
+# that an EBS volume holding chain data is never pulled into a new array.
+# Input/output: space-separated disk names without /dev/ prefix.
+filter_blank_disks() {
+    local blank=()
+    local disk sig
+    for disk in $1; do
+        sig=$(get_device_signature "/dev/$disk")
+        if [[ -n "$sig" ]]; then
+            echo "$SCRIPT_NAME Skipping /dev/$disk: existing signature '$sig' (not blank)" >&2
+            continue
+        fi
+        blank+=("$disk")
+    done
+    echo "${blank[*]}"
+}
+
+# Write each currently active RAID array to mdadm.conf once (re-runs must not
+# append duplicate ARRAY lines).
+save_mdadm_conf() {
+    local conf="${MDADM_CONF:-/etc/mdadm/mdadm.conf}"
+    mkdir -p "$(dirname "$conf")"
+    touch "$conf"
+    local line
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        grep -qxF "$line" "$conf" || echo "$line" >> "$conf"
+    done < <(mdadm --detail --scan)
+}
+
+# Re-assemble and mount arrays that already exist (e.g. after a plain reboot,
+# where instance-store data survives) before ever considering creating new
+# ones. Returns 0 if every given mount path is mounted afterwards.
+try_reuse_existing_raid() {
+    mdadm --assemble --scan 2>/dev/null || true
+    mount -a 2>/dev/null || true
+    local mp
+    for mp in "$@"; do
+        mountpoint -q "$mp" || return 1
+    done
+    return 0
 }
 
 get_all_empty_nvme_disks() {
@@ -153,7 +213,7 @@ setup_volume() {
     esac
     
     echo "$SCRIPT_NAME Checking if $mount_path is mounted, and skip if it is"
-    if [ "$(df --output=target | grep -c "$mount_path")" -lt 1 ]; then
+    if ! mountpoint -q "$mount_path"; then
         
         # Determine volume ID based on size or use next available
         if [ -n "$volume_size_bytes" ]; then
@@ -172,12 +232,31 @@ setup_volume() {
         
         # Create the mount point
         mkdir -p "$mount_path"
-        
-        # Format the volume
-        make_fs "$file_system" "$VOLUME_ID"
-        
-        # Wait a bit for the filesystem to be ready
-        sleep 10
+
+        # NEVER reformat a volume that already has a filesystem: it may hold
+        # chain data (setup re-runs on config changes, and a data volume may be
+        # attached to a fresh instance). Mount whatever is there instead.
+        local existing_fs fresh_fs="false"
+        existing_fs=$(get_device_signature "$VOLUME_ID")
+        if [[ -n "$existing_fs" ]]; then
+            echo "$SCRIPT_NAME $VOLUME_ID already has a '$existing_fs' filesystem, reusing it (no format)"
+            if [[ "$existing_fs" != "$file_system" ]]; then
+                echo "WARNING: $SCRIPT_NAME configured filesystem is '$file_system' but $VOLUME_ID has '$existing_fs'; mounting as '$existing_fs'"
+                file_system="$existing_fs"
+                if [[ "$file_system" == "xfs" ]]; then
+                    FS_CONFIG="noatime,nodiratime,nodiscard,nofail"
+                else
+                    FS_CONFIG="defaults,nofail"
+                fi
+            fi
+        else
+            # Format the volume
+            make_fs "$file_system" "$VOLUME_ID"
+            fresh_fs="true"
+
+            # Wait a bit for the filesystem to be ready
+            sleep 10
+        fi
         
         # Get volume UUID for fstab
         VOLUME_UUID=$(lsblk -fn -o UUID "$VOLUME_ID")
@@ -203,9 +282,13 @@ setup_volume() {
         
         echo "$SCRIPT_NAME Mount all filesystems"
         mount -a
-        
-        echo "$SCRIPT_NAME Set ownership to bcuser user (universal default)"
-        chown -R bcuser:bcuser "$mount_path"
+
+        # A recursive chown over an existing multi-TB chain is slow and
+        # unnecessary; only set ownership on a freshly created filesystem.
+        if [[ "$fresh_fs" == "true" ]]; then
+            echo "$SCRIPT_NAME Set ownership to bcuser user (universal default)"
+            chown -R bcuser:bcuser "$mount_path"
+        fi
         
         echo "Successfully set up volume at $mount_path"
     else
@@ -250,10 +333,22 @@ setup_single_raid() {
             ;;
     esac
 
-    # Discover available NVMe drives
+    # Re-runs: never rebuild an array that is already in use or that can be
+    # re-assembled (instance-store data survives a plain reboot).
+    if mountpoint -q "$mount_path"; then
+        echo "$SCRIPT_NAME $mount_path is already mounted, skipping RAID setup"
+        return 0
+    fi
+    if try_reuse_existing_raid "$mount_path"; then
+        echo "$SCRIPT_NAME Re-assembled existing RAID array for $mount_path, skipping RAID creation"
+        return 0
+    fi
+
+    # Discover available NVMe drives. Only blank disks are candidates, so a
+    # disk that holds data (e.g. an EBS data volume) is never overwritten.
     echo "$SCRIPT_NAME Discovering available NVMe drives..."
     local nvme_disks_str
-    nvme_disks_str=$(get_all_empty_nvme_disks)
+    nvme_disks_str=$(filter_blank_disks "$(get_all_empty_nvme_disks)")
 
     local nvme_disks=()
     read -ra nvme_disks <<< "$nvme_disks_str"
@@ -308,8 +403,7 @@ setup_single_raid() {
 
     # Save RAID configuration
     echo "$SCRIPT_NAME Saving RAID configuration to /etc/mdadm/mdadm.conf"
-    mkdir -p /etc/mdadm
-    mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+    save_mdadm_conf
 
     # Set ownership
     echo "$SCRIPT_NAME Setting ownership of $mount_path to bcuser:bcuser"
@@ -355,10 +449,22 @@ setup_dual_raid() {
             ;;
     esac
 
-    # Discover available NVMe drives
+    # Re-runs: never rebuild arrays that are already in use or that can be
+    # re-assembled (instance-store data survives a plain reboot).
+    if mountpoint -q "$mount1" && mountpoint -q "$mount2"; then
+        echo "$SCRIPT_NAME $mount1 and $mount2 are already mounted, skipping RAID setup"
+        return 0
+    fi
+    if try_reuse_existing_raid "$mount1" "$mount2"; then
+        echo "$SCRIPT_NAME Re-assembled existing RAID arrays for $mount1 and $mount2, skipping RAID creation"
+        return 0
+    fi
+
+    # Discover available NVMe drives. Only blank disks are candidates, so a
+    # disk that holds data (e.g. an EBS data volume) is never overwritten.
     echo "$SCRIPT_NAME Discovering available NVMe drives..."
     local nvme_disks_str
-    nvme_disks_str=$(get_all_empty_nvme_disks)
+    nvme_disks_str=$(filter_blank_disks "$(get_all_empty_nvme_disks)")
 
     local nvme_disks=()
     read -ra nvme_disks <<< "$nvme_disks_str"
@@ -547,8 +653,7 @@ setup_dual_raid() {
 
     # Save RAID configuration
     echo "$SCRIPT_NAME Saving RAID configuration to /etc/mdadm/mdadm.conf"
-    mkdir -p /etc/mdadm
-    mdadm --detail --scan >> /etc/mdadm/mdadm.conf
+    save_mdadm_conf
 
     # Set ownership for both mount paths
     echo "$SCRIPT_NAME Setting ownership of $mount1 to bcuser:bcuser"

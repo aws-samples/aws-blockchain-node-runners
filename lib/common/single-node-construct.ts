@@ -98,6 +98,9 @@ export class SingleNodeConstruct extends constructs.Construct {
      */
     public readonly vpc: ec2.IVpc;
 
+    /** Rendered user data, consumed lazily by the instance's UserData. */
+    private renderedUserData = '';
+
     constructor(scope: constructs.Construct, id: string, props: SingleNodeProps) {
         super(scope, id);
 
@@ -128,6 +131,9 @@ export class SingleNodeConstruct extends constructs.Construct {
             instanceName: stackName,
             instanceType: new ec2.InstanceType(environment.INSTANCE_TYPE),
             machineImage: machineImage,
+            // Rendered lazily: the content needs the instance's logical ID and
+            // the asset locations, which exist only after this construct.
+            userData: ec2.UserData.custom(cdk.Lazy.string({ produce: () => this.renderedUserData })),
             vpc: this.vpc,
             availabilityZone: chosenAvailabilityZone,
             blockDevices: [
@@ -207,13 +213,11 @@ export class SingleNodeConstruct extends constructs.Construct {
             SNAPSHOT_STAGING_VOL_ID: snapshotStagingVolumeId,
         }
 
+        // Per-boot bootstrap (see assets/common/user-data-ubuntu.sh): a changed
+        // configuration is re-applied on the stop/start CloudFormation performs
+        // when UserData changes, reusing the attached data volumes.
         const userDataManager = new UserDataManager(userDataScriptPath);
-        const userDataScript = userDataManager.loadUserDataScript();
-
-        const processedUserData = userDataManager.injectVariables(userDataScript, environment, cfnandCDKUserDataConfig);
-
-        // Add user data script
-        this.instance.addUserData(processedUserData);
+        this.renderedUserData = userDataManager.renderUserData(environment, cfnandCDKUserDataConfig, this);
 
         // Store instance ID
         this.instanceId = this.instance.instanceId;

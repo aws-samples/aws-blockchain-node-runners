@@ -51,6 +51,8 @@ npm test -- --testNamePattern="should load protocol config"
 ```
 test/
 ├── unit/                        # Unit tests
+│   ├── assets/                 # Behaviour tests for the provisioning shell scripts (bash 4+)
+│   ├── blueprints/             # Blueprint checks, incl. the node.sh re-run contract
 │   ├── common/                 # CDK constructs tests
 │   ├── core/                   # Core components tests
 │   ├── interfaces/             # Interface tests
@@ -60,6 +62,8 @@ test/
 ```
 
 **Note**: Tests use the real `blueprints/dummy` configuration instead of mock fixtures to ensure tests reflect actual deployment scenarios.
+
+**Shell script tests** (`test/unit/assets/`) source the scripts in `assets/common/` with device, network and `systemctl` commands stubbed, and check behaviour such as "never reformat an existing volume" and the per-boot re-apply decision. They need bash 4 or later and are skipped otherwise, which includes macOS's default bash 3.2. CI (ubuntu-latest) always runs them. To run them on macOS, install a newer bash (`brew install bash`) or set `BASH_FOR_TESTS` to its path.
 
 ## Common Issues
 
