@@ -107,7 +107,7 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 | Sepolia | Full | ~920 GB (measured 2026-10; ~510 GB with post-Prague history) | not yet measured; expected to rise after Glamsterdam | 1.5 TB | gp3 | 3,000 | 250 MB/s |
 | Hoodi | Full | ~125 GB (measured 2026-10) | not yet measured | 200 GB | gp3 | 3,000 | 250 MB/s |
 
-The testnet sizes assume `ETH_CONSENSUS_SUPERNODE="false"`, the testnet samples' default. Supernode mode adds about 470–720 GB for blob data on any network (see [Supernode Mode](#supernode-mode-lighthouse--peerdas)): use 1 TB for Hoodi and 2 TB for Sepolia. The mainnet samples run supernode mode.
+These sizes assume `ETH_CONSENSUS_SUPERNODE="false"`, the default. Supernode mode adds about 470–720 GB for blob data on any network (see [Supernode Mode](#supernode-mode-lighthouse--peerdas)): use about 4 TB for a mainnet full node, 1 TB for Hoodi and 2 TB for Sepolia.
 
 **Storage Type Selection**:
 - **Full Nodes**: Use gp3 EBS volumes for cost-effective persistent storage
@@ -281,20 +281,20 @@ Pick any provider from the maintained list — https://eth-clients.github.io/che
 
 Since the Ethereum Fusaka upgrade (December 2025), PeerDAS (EIP-7594) replaced full blob distribution with Data Availability Sampling. Under PeerDAS, regular beacon nodes only store a small subset of data columns (typically 4 out of 128) and **cannot** serve full blobs via the `/eth/v1/beacon/blob_sidecars` API.
 
-The mainnet samples and the blueprint default enable `--supernode`, which stores all 128 data columns. The testnet samples (Hoodi, Sepolia) set `ETH_CONSENSUS_SUPERNODE="false"` to save disk. Supernode mode is required if:
+The blueprint default and all Lighthouse samples set `ETH_CONSENSUS_SUPERNODE="false"`: a regular node is enough for RPC and needs far less disk. Opt in to `--supernode`, which stores all 128 data columns, if:
 
 - The node serves as an L1 data source for L2 rollup nodes (Base, OP Stack, etc.)
 - You need the blob sidecars API to return complete blob data
 - You want to contribute to network-wide data availability
 
 ```bash
-# Default (mainnet samples): full supernode (128 columns), needed to serve blobs
+# Opt in: full supernode (128 columns), needed to serve blobs
 ETH_CONSENSUS_SUPERNODE="true"
 
 # Alternative: semi-supernode (64 columns) — enough to reconstruct blobs, lower bandwidth
 ETH_CONSENSUS_SUPERNODE="semi"
 
-# Regular node (4 columns, testnet samples): far less disk, but the blob API will NOT work
+# Default: regular node (4 columns), far less disk, but the blob API will NOT work
 ETH_CONSENSUS_SUPERNODE="false"
 ```
 
@@ -416,7 +416,7 @@ Ethereum nodes require significant memory. If experiencing OOM issues:
 
 If you see `BAD_REQUEST: Insufficient data columns to reconstruct blobs` when calling `/eth/v1/beacon/blob_sidecars/{slot}`:
 
-1. Verify `ETH_CONSENSUS_SUPERNODE` is set to `"true"` or `"semi"` in your `.env` file (the testnet samples set `"false"`)
+1. Verify `ETH_CONSENSUS_SUPERNODE` is set to `"true"` or `"semi"` in your `.env` file (the default is `"false"`)
 2. If you changed this setting on an existing deployment, you must re-sync the beacon:
 ```bash
 # Stop the node
