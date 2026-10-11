@@ -72,6 +72,7 @@ See [`blueprints/dummy/package.json`](https://github.com/aws-samples/aws-blockch
 | Bitcoin | `blueprints/bitcoin/` | Bitcoin network nodes |
 | BNB | `blueprints/bnb/` | BNB Smart Chain nodes |
 | Ethereum | `blueprints/ethereum/` | Ethereum execution and consensus clients |
+| Robinhood Chain | `blueprints/robinhood/` | Arbitrum Nitro Layer 2 (Orbit chain) |
 | Solana | `blueprints/solana/` | Solana validator and RPC nodes |
 | Dummy | `blueprints/dummy/` | Reference implementation for testing and development |
 

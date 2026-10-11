@@ -1,0 +1,42 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Robinhood Chain — Arbitrum Nitro Full Node
+#
+# Robinhood Chain is an Arbitrum Chain (Orbit L2) running Arbitrum Nitro.
+# The node runs as a single offchainlabs/nitro-node Docker container.
+# This file is a CONFIGURATION MARKER: it pins the Nitro image and the
+# per-network chain-config / genesis URLs that node.sh consumes as the single
+# source of truth. node.sh reads these keys with grep/sed and branches on
+# BC_NETWORK (mainnet vs testnet) — see blueprints/robinhood/user-data/node.sh.
+#
+# SECURITY: nitro_image MUST be a specific immutable tag (never "latest"),
+# because node.sh pulls and runs it as a service at boot. Bump via the
+# @version-update workflow.
+#
+# Reference: https://docs.robinhood.com/chain/run-a-full-node
+# Nitro image tags: https://hub.docker.com/r/offchainlabs/nitro-node/tags
+
+nitro_image: "offchainlabs/nitro-node:v3.11.5-7d41882"
+
+# RPC/WS/metrics API namespaces exposed by the node
+http_api: "net,web3,eth,arb"
+ws_api: "net,web3,eth,arb"
+
+# --- Mainnet (chainId 4663, parent chain = Ethereum mainnet) ---
+# Mainnet initializes from a custom genesis file (--init.genesis-json-file).
+mainnet_chain_info_url: "https://cdn.robinhood.com/assets/generated_assets/hoodchain_docsite/chain-node-configs/robinhood-chain-info.json"
+mainnet_genesis_url: "https://cdn.robinhood.com/assets/generated_assets/hoodchain_docsite/chain-node-configs/robinhood-genesis.json"
+mainnet_feed_url: "wss://feed.mainnet.chain.robinhood.com"
+mainnet_delayed_feed_url: "wss://delayed-feed.mainnet.chain.robinhood.com"
+# Sequencer RPC — a non-sequencing full node forwards transactions here
+# (Nitro requires --execution.forwarding-target; "null" would reject writes).
+mainnet_sequencer_url: "https://rpc.mainnet.chain.robinhood.com"
+
+# --- Testnet (chainId 46630, parent chain = Ethereum Sepolia) ---
+# Testnet has NO custom genesis (the --init.genesis-json-file flag is omitted).
+# Testnet additionally runs a local blob proxy in front of the Sepolia beacon
+# (see user-data/common/blob-proxy.py).
+testnet_chain_info_url: "https://cdn.robinhood.com/assets/generated_assets/hoodchain_docsite/chain-node-configs/robinhood-chain-testnet-info.json"
+testnet_feed_url: "wss://feed.testnet.chain.robinhood.com"
+testnet_sequencer_url: "https://rpc.testnet.chain.robinhood.com"

@@ -1,0 +1,76 @@
+{
+  "name": "aws-bnr-blueprint-robinhood",
+  "version": "2.0.0",
+  "description": "Robinhood Chain node runner — an Arbitrum Nitro L2 (mainnet chainId 4663, testnet chainId 46630) running the offchainlabs/nitro-node client via Docker",
+  "engines": {
+    "aws-blockchain-node-runners": ">=2.0.0"
+  },
+  "aws-blockchain-node-runner": {
+    "BLOCKCHAIN_PROTOCOL": "robinhood",
+    "supportedDeploymentModes": [
+      "single-node",
+      "ha-nodes"
+    ],
+    "defaultConfiguration": "nitro-v3.11.5-full.yml",
+    "availableConfigurations": [
+      {
+        "name": "nitro-v3.11.5-full.yml",
+        "version": "v3.11.5-7d41882"
+      }
+    ],
+    "BC_NETWORKS": [
+      "mainnet",
+      "testnet"
+    ],
+    "defaultInstanceTypes": {
+      "x86_64": "m6i.2xlarge",
+      "ARM_64": "m7g.2xlarge"
+    },
+    "requiredPorts": [
+      {
+        "port": 8547,
+        "protocol": "tcp",
+        "description": "Nitro JSON RPC",
+        "public": false
+      },
+      {
+        "port": 8548,
+        "protocol": "tcp",
+        "description": "Nitro WebSocket",
+        "public": false
+      },
+      {
+        "port": 6070,
+        "protocol": "tcp",
+        "description": "Nitro metrics endpoint",
+        "public": false
+      }
+    ],
+    "monitoring": {
+      "healthCheckPath": "/",
+      "metricsPort": 6070,
+      "clientNames": ["Nitro"]
+    },
+    "storage": {
+      "defaultDataVolumes": [
+        {
+          "name": "data",
+          "sizeGiB": 1000,
+          "type": "gp3",
+          "iops": 5000,
+          "throughput": 500,
+          "mountPath": "/data",
+          "fileSystem": "ext4"
+        }
+      ]
+    },
+    "snapshot": {
+      "enabled": false
+    },
+    "customEnvVarsNamePrefix": "ROBINHOOD",
+    "customEnvVars": [
+      "ROBINHOOD_L1_RPC_URL=https://your-ethereum-l1-rpc-url",
+      "ROBINHOOD_L1_BEACON_URL=https://your-ethereum-l1-beacon-url"
+    ]
+  }
+}

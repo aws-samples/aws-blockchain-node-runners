@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Robinhood Chain**: new built-in blueprint for Robinhood Chain, an Arbitrum Orbit Layer 2, mainnet (chain ID `4663`, settles to Ethereum) and testnet (`46630`, settles to Sepolia), in single-node and HA modes. Runs Arbitrum Nitro `v3.11.5` and restores Offchain Labs' published pruned snapshot on first start, including multi-part snapshots. Works with free, keyless L1 endpoints; testnet adds a local blob proxy for Sepolia's post-Glamsterdam blob API. Tested on mainnet and testnet: both reached chain head and stayed there.
+
 ### Security
 
 - **Ethereum**: upgraded Erigon `3.5.4` → `3.6.1` (both the Erigon + Caplin and Erigon + Prysm archive configurations). `3.6.1` is a bugfix + security release fixing two HIGH-severity `google.golang.org/grpc` CVEs, a Caplin peer-ban bypass, a downloader regression, and a `recsplit` index defect; upstream confirms it is a drop-in upgrade with no re-sync. Smoke-tested on mainnet (starts and syncs cleanly).
