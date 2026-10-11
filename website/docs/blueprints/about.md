@@ -68,6 +68,7 @@ See [`blueprints/dummy/package.json`](https://github.com/aws-samples/aws-blockch
 
 | Protocol | Directory | Description |
 |----------|-----------|-------------|
+| Arc | `blueprints/arc/` | Circle's Arc Layer 1 (execution and consensus clients) |
 | Base | `blueprints/base/` | OP Stack Layer 2 protocol |
 | Bitcoin | `blueprints/bitcoin/` | Bitcoin network nodes |
 | BNB | `blueprints/bnb/` | BNB Smart Chain nodes |

@@ -1,0 +1,67 @@
+{
+  "name": "aws-bnr-blueprint-arc",
+  "version": "2.0.0",
+  "description": "Arc node runner (Circle's stablecoin-native EVM L1; mainnet chainId 5042, testnet chainId 5042002) running arc-execution (Reth-based) and arc-consensus (Malachite-based) via Docker in follow mode",
+  "engines": {
+    "aws-blockchain-node-runners": ">=2.0.0"
+  },
+  "aws-blockchain-node-runner": {
+    "BLOCKCHAIN_PROTOCOL": "arc",
+    "supportedDeploymentModes": [
+      "single-node",
+      "ha-nodes"
+    ],
+    "defaultConfiguration": "arc-execution-0.8.1-arc-consensus-0.8.1-full.yml",
+    "availableConfigurations": [
+      {
+        "name": "arc-execution-0.8.1-arc-consensus-0.8.1-full.yml",
+        "version": "0.8.1"
+      }
+    ],
+    "BC_NETWORKS": [
+      "mainnet",
+      "testnet"
+    ],
+    "defaultInstanceTypes": {
+      "x86_64": "r7i.2xlarge",
+      "ARM_64": "r7g.2xlarge"
+    },
+    "requiredPorts": [
+      {
+        "port": 8545,
+        "protocol": "tcp",
+        "description": "Execution layer JSON RPC",
+        "public": false
+      },
+      {
+        "port": 8546,
+        "protocol": "tcp",
+        "description": "Execution layer WebSocket",
+        "public": false
+      }
+    ],
+    "monitoring": {
+      "healthCheckPath": "/",
+      "metricsPort": 9001,
+      "clientNames": ["arc-execution", "arc-consensus"]
+    },
+    "storage": {
+      "defaultDataVolumes": [
+        {
+          "name": "data",
+          "sizeGiB": 1000,
+          "type": "gp3",
+          "iops": 6000,
+          "throughput": 500,
+          "mountPath": "/data",
+          "fileSystem": "ext4"
+        }
+      ]
+    },
+    "snapshot": {
+      "enabled": false
+    },
+    "customEnvVarsNamePrefix": "ARC",
+    "customEnvVars": []
+  }
+}

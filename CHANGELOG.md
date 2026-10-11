@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Arc**: new built-in blueprint for Circle's Arc Layer 1, mainnet (chain ID `5042`) and testnet (`5042002`), in single-node and HA modes. Runs `arc-execution` + `arc-consensus` `0.8.1` in follow mode: the node follows Circle's public relay endpoints, so it needs no API keys, no L1 endpoint and no inbound P2P ports. On first start it restores Circle's matched execution and consensus snapshot pair once. Tested on mainnet and testnet: both reached chain head and stayed there.
+
 ### Security
 
 - **Ethereum**: upgraded Erigon `3.5.4` → `3.6.1` (both the Erigon + Caplin and Erigon + Prysm archive configurations). `3.6.1` is a bugfix + security release fixing two HIGH-severity `google.golang.org/grpc` CVEs, a Caplin peer-ban bypass, a downloader regression, and a `recsplit` index defect; upstream confirms it is a drop-in upgrade with no re-sync. Smoke-tested on mainnet (starts and syncs cleanly).

@@ -1,0 +1,101 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Arc Node - arc-execution (Reth-based EL) + arc-consensus (Malachite-based CL)
+# Full (pruned) node in follow mode.
+#
+# Arc is Circle's EVM-compatible L1 (mainnet chainId 5042, testnet 5042002).
+# The CL does not use P2P: it follows finalized blocks from Circle-run relay
+# endpoints (--follow.endpoint), verifies their signatures and drives the EL
+# through IPC sockets on the shared /data/arc/run directory.
+#
+# Placeholders substituted by user-data/node.sh with sed:
+#   ${ARC_CHAIN}              arc-mainnet | arc-testnet
+#   ${ARC_RPC_FORWARDER}      relay URL that broadcasts submitted transactions
+#   ${ARC_FOLLOW_ENDPOINTS}   one "- --follow.endpoint=..." line per relay
+#   ${EC2_INTERNAL_IP}        RPC/WS bind address (never 0.0.0.0)
+#   ${ARC_RPC_PORT} ${ARC_WS_PORT}
+#
+# node.sh also reads the two image tags below to run the one-time snapshot
+# restore (arc-snapshots ships inside the execution image) and CL key init.
+#
+# SECURITY: image tags MUST be pinned release versions, never "latest".
+# Both layers MUST run the same Arc release. Releases:
+#   https://github.com/circlefin/arc-node/releases
+# Reference compose (testnet-only upstream):
+#   https://github.com/circlefin/arc-node/blob/v0.8.1/deployments/docker-compose.yml
+---
+services:
+    execution:
+        image: docker.cloudsmith.io/circle/arc-network/arc-execution:0.8.1
+        container_name: execution
+        restart: always
+        # bcuser. The image's own "arc" user is uid 999, which on Ubuntu hosts
+        # collides with the CloudWatch agent's cwagent user.
+        user: "1002:1002"
+        command:
+            - node
+            - --chain=${ARC_CHAIN}
+            - --datadir=/data/execution
+            # --full is required on the first start from a pruned snapshot and
+            # keeps the node pruned afterwards.
+            - --full
+            - --disable-discovery
+            - --ipcpath=/run/arc/reth.ipc
+            - --auth-ipc
+            - --auth-ipc.path=/run/arc/auth.ipc
+            - --http
+            - --http.addr=${EC2_INTERNAL_IP}
+            - --http.port=${ARC_RPC_PORT}
+            - --http.api=eth,net,web3,rpc
+            - --http.corsdomain=*
+            - --ws
+            - --ws.addr=${EC2_INTERNAL_IP}
+            - --ws.port=${ARC_WS_PORT}
+            - --ws.api=eth,net,web3,rpc
+            # Hides pending-transaction RPCs (MEV vector) on a shared endpoint.
+            - --public-api
+            - --metrics=127.0.0.1:9001
+            - --enable-arc-rpc
+            - --rpc.forwarder=${ARC_RPC_FORWARDER}
+            - --log.file.directory=/data/execution/logs
+        volumes:
+            - /data/arc/execution:/data/execution
+            - /data/arc/run:/run/arc
+        stop_signal: SIGTERM
+        stop_grace_period: 5m
+        security_opt:
+            - no-new-privileges:true
+        network_mode: host
+
+    consensus:
+        image: docker.cloudsmith.io/circle/arc-network/arc-consensus:0.8.1
+        container_name: consensus
+        restart: always
+        user: "1002:1002"
+        command:
+            - start
+            - --home=/data/consensus
+            - --full
+            - --eth-socket=/run/arc/reth.ipc
+            - --execution-socket=/run/arc/auth.ipc
+            - --rpc.addr=127.0.0.1:31000
+            - --follow
+            # Placeholder: node.sh replaces this whole item with one
+            # --follow.endpoint=<endpoint> item per relay endpoint.
+            - ${ARC_FOLLOW_ENDPOINTS}
+            # Throttle execution to disk-write speed to bound EL memory during
+            # catch-up (upstream compose uses 50; docs default is 16).
+            - --execution-persistence-backpressure
+            - --execution-persistence-backpressure-threshold=50
+            - --metrics=127.0.0.1:29000
+        depends_on:
+            - execution
+        volumes:
+            - /data/arc/consensus:/data/consensus
+            - /data/arc/run:/run/arc
+        stop_signal: SIGTERM
+        stop_grace_period: 2m
+        security_opt:
+            - no-new-privileges:true
+        network_mode: host

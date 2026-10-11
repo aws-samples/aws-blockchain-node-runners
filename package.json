@@ -26,6 +26,7 @@
     "typescript": "~6.0.3"
   },
   "dependencies": {
+    "aws-bnr-blueprint-arc": "file:blueprints/arc",
     "aws-bnr-blueprint-base": "file:blueprints/base",
     "aws-bnr-blueprint-bitcoin": "file:blueprints/bitcoin",
     "aws-bnr-blueprint-bnb": "file:blueprints/bnb",
