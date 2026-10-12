@@ -1,0 +1,72 @@
+.protocols {
+  padding: 4rem 0;
+  width: 100%;
+}
+
+.sectionTitle {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.sectionSubtitle {
+  max-width: 640px;
+  margin: 0 auto 2.5rem;
+  opacity: 0.85;
+  font-size: 1.05rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.card {
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.cardName {
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.cardDetail {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.cardAction {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-style: dashed;
+}
+
+.cardAction:hover {
+  border-color: var(--ifm-color-primary);
+  transform: translateY(-2px);
+  color: inherit;
+  text-decoration: none;
+}
+
+.learnMoreLink {
+  display: inline-block;
+  font-weight: 600;
+}
+
+@media screen and (max-width: 996px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

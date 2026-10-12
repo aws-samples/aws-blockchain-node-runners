@@ -1,0 +1,58 @@
+.howItWorks {
+  padding: 4rem 0;
+  width: 100%;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.sectionTitle {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.sectionSubtitle {
+  max-width: 640px;
+  margin: 0 auto 3rem;
+  opacity: 0.85;
+  font-size: 1.05rem;
+}
+
+.step {
+  padding: 0 1rem 2rem;
+  height: 100%;
+}
+
+.stepNumber {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--ifm-color-primary);
+  font-family: var(--ifm-font-family-monospace);
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.stepTitle {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.stepDescription {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.stepDescription code {
+  font-size: 0.85em;
+  white-space: normal;
+}
+
+.learnMoreLink {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+@media screen and (max-width: 996px) {
+  .step {
+    padding-bottom: 2.5rem;
+  }
+}
