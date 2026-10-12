@@ -54,31 +54,30 @@ export default function HowItWorks() {
   return (
     <section className={styles.howItWorks}>
       <div className="container">
-        <div className="text--center">
-          <h2 className={styles.sectionTitle}>How Node Runners works</h2>
-          <p className={styles.sectionSubtitle}>
-            One universal CDK framework, a pluggable blueprint per protocol,
-            and an AI assistant that drives the whole workflow.
+        <div className={styles.sectionHead}>
+          <p className={styles.eyebrow}>How it works</p>
+          <h2 className={styles.sectionTitle}>
+            One universal CDK app, driven by AI
+          </h2>
+          <p className={styles.sectionLead}>
+            A pluggable blueprint per protocol, and an AI assistant that
+            drives the whole workflow from a plain-language request.
           </p>
         </div>
-        <div className="row">
+        <ol className={styles.flow}>
           {Steps.map((step) => (
-            <div key={step.number} className="col col--3">
-              <div className={styles.step}>
-                <div className={styles.stepNumber}>{step.number}</div>
-                <h3 className={styles.stepTitle}>{step.title}</h3>
-                <p className={styles.stepDescription}>{step.description}</p>
-              </div>
-            </div>
+            <li key={step.number} className={styles.flowStep}>
+              <span className={styles.flowN}>{step.number}</span>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </li>
           ))}
-        </div>
-        <div className="text--center">
-          <Link
-            className={styles.learnMoreLink}
-            to="/docs/getting-started/why-node-runners">
-            Why Node Runners instead of a managed RPC provider or DIY on EC2? →
-          </Link>
-        </div>
+        </ol>
+        <Link
+          className={styles.learnMoreLink}
+          to="/docs/getting-started/why-node-runners">
+          Why Node Runners instead of a managed RPC provider or DIY on EC2?
+        </Link>
       </div>
     </section>
   );

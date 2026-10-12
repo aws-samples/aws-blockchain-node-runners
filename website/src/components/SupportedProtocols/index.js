@@ -15,9 +15,12 @@ export default function SupportedProtocols() {
   return (
     <section className={styles.protocols}>
       <div className="container">
-        <div className="text--center">
-          <h2 className={styles.sectionTitle}>Six built-in blueprints, any protocol you add</h2>
-          <p className={styles.sectionSubtitle}>
+        <div className={styles.sectionHead}>
+          <p className={styles.eyebrow}>Blueprints</p>
+          <h2 className={styles.sectionTitle}>
+            Six built-in blueprints, any protocol you add
+          </h2>
+          <p className={styles.sectionLead}>
             Ships with five production protocols plus a Dummy reference
             blueprint for testing. Add your own without touching the CDK
             core — or install one a community member already published.
@@ -33,15 +36,13 @@ export default function SupportedProtocols() {
           <Link
             to="/docs/blueprints/about"
             className={clsx(styles.card, styles.cardAction)}>
-            <div className={styles.cardName}>+ Your Protocol</div>
+            <div className={styles.cardName}>+ Your protocol</div>
             <div className={styles.cardDetail}>Add a blueprint, no core changes</div>
           </Link>
         </div>
-        <div className="text--center">
-          <Link className={styles.learnMoreLink} to="/docs/blueprints/about">
-            Explore all blueprints →
-          </Link>
-        </div>
+        <Link className={styles.learnMoreLink} to="/docs/blueprints/about">
+          Explore all blueprints
+        </Link>
       </div>
     </section>
   );

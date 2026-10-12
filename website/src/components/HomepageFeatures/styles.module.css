@@ -1,45 +1,34 @@
 .features {
-    display: flex;
-    align-items: center;
-    padding: 2rem 0;
-    width: 100%;
-    /*background: whitesmoke;*/
-  }
+  padding: 4rem 0 1rem;
+  width: 100%;
+}
 
-  .featureSvg {
-    color: var(--ifm-color-primary);
-    height: 250px;
-    width: 250px;
-    transition: transform 0.3s ease-in-out;
-  }
+.featureList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  row-gap: 2.5rem;
+}
 
-  .featureUnicodeChar {
-    color: var(--ifm-color-primary);
-    font-size: 3em;
-  }
+.feature {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 2px solid var(--ifm-color-primary);
+}
 
-  .featureSvg:hover {
-    transform: scale(1.5); /* Zoom in slightly on hover */
-  }
+.feature h3 {
+  font-size: 1.375rem;
+}
 
-  /* Adding animation to feature items */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+.feature p {
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
+}
 
-  /* Apply animation to each feature item */
-  .row .col {
-    animation: fadeInUp 0.5s ease forwards;
-    animation-delay: 0.3s;
+@media screen and (max-width: 996px) {
+  .featureList {
+    row-gap: 2rem;
   }
-
-  .heading {
-    font-weight: bold;
-  }
+}

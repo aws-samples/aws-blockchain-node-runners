@@ -1,43 +1,59 @@
 .protocols {
-  padding: 4rem 0;
+  padding: 4.5rem 0;
   width: 100%;
 }
 
-.sectionTitle {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+.sectionHead {
+  display: grid;
+  gap: 1rem;
+  max-width: 42rem;
+  margin-bottom: 2.5rem;
 }
 
-.sectionSubtitle {
-  max-width: 640px;
-  margin: 0 auto 2.5rem;
-  opacity: 0.85;
-  font-size: 1.05rem;
+.eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8125rem;
+  color: var(--ifm-color-emphasis-600);
+  margin: 0;
+}
+
+.sectionTitle {
+  font-weight: 400;
+  margin: 0;
+}
+
+.sectionLead {
+  font-size: 1.125rem;
+  line-height: 1.4;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 1rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .card {
   border: 1px solid var(--ifm-color-emphasis-300);
-  border-radius: var(--ifm-global-radius);
+  border-radius: 0.5rem;
   padding: 1.25rem 1rem;
   text-align: center;
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
 .cardName {
-  font-weight: 700;
+  font-weight: 500;
   margin-bottom: 0.35rem;
 }
 
 .cardDetail {
   font-size: 0.8rem;
-  opacity: 0.75;
+  color: var(--ifm-color-emphasis-600);
 }
 
 .cardAction {
@@ -55,8 +71,30 @@
 }
 
 .learnMoreLink {
-  display: inline-block;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  font-weight: 500;
+}
+
+.learnMoreLink::after {
+  content: '';
+  flex: none;
+  width: 0.95em;
+  height: 0.95em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23161D26' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 8h11.5M9 3.5 13.5 8 9 12.5'/%3E%3C/svg%3E");
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  transition: transform 0.15s ease;
+}
+
+[data-theme='dark'] .learnMoreLink::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23FFFFFF' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 8h11.5M9 3.5 13.5 8 9 12.5'/%3E%3C/svg%3E");
+}
+
+.learnMoreLink:hover::after {
+  transform: translateX(0.2em);
 }
 
 @media screen and (max-width: 996px) {
