@@ -314,19 +314,25 @@ For more detailed troubleshooting, see the [Troubleshooting Guide](../../docs/tr
 
 ### Upgrading Node Configuration
 
-To update node configuration:
-
-1. Update configuration variables in `.env` file
+1. Update configuration variables in `.env` (for a new version, add a configuration script such as `dummy-1.0.1-rpc-base.sh` and point `CLIENT_CONFIG` at it)
 2. Redeploy: `npx cdk deploy --json --outputs-file deploy-output.json`
 
-Note: The instance will be replaced with the new configuration.
+On a single-node stack, the redeploy stops and starts the same instance, and node setup re-runs against the existing chain data on `/data`, so there's no re-sync. `cdk deploy` returns before setup has finished; watch `/var/log/cloud-init-output.log` for `Node deployment completed successfully`. See [How a redeploy applies changes](/docs/guides/deployment-guide#how-a-redeploy-applies-changes-single-node) in the Deployment Guide for the details, including which changes create a new stack instead.
+
+### Re-run Contract for Blueprint Authors
+
+Every blueprint's `user-data/node.sh` runs on first boot **and again whenever the configuration changes** on redeploy. On a re-run, `/etc/cdk_environment` has the new values, the new blueprint files are in `/opt/blueprints`, the data volumes are mounted with their existing data, and `node.service` has been stopped. `node.sh` must:
+
+- install or replace binaries and configuration to match the current `CLIENT_CONFIG`
+- guard one-time steps (snapshot download, genesis init, key generation) by checking for existing state, and never delete chain data
+- (re)write `node.service` and start it, and exit non-zero on failure (the framework retries setup on the next boot)
+- `touch /data/init-completed` when setup has finished
+
+`user-data/node.sh` in this blueprint is the reference implementation. Don't size the client from the hardware in `node.sh`: an `INSTANCE_TYPE` change doesn't re-run it. Compute such values when the service starts instead.
 
 ### Rolling Updates (HA Only)
 
-HA deployments perform rolling updates automatically:
-1. New instances launch with updated configuration
-2. Health checks verify new instances are healthy
-3. Old instances terminate after deregistration delay
+HA instances are replaced one at a time with a rolling update, keeping at least one in service. New instances start with empty data volumes and sync before they pass the ALB health check. See the [Deployment Guide](/docs/guides/deployment-guide#ha-deployments-rolling-updates).
 
 ## Cost Optimization
 
