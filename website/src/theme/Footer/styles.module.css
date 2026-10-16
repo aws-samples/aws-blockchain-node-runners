@@ -1,0 +1,98 @@
+.footer {
+  background: var(--aws-gray-1000);
+  padding: 4rem 0 1.5rem;
+  font-size: 0.9375rem;
+  color: var(--aws-gray-200);
+}
+
+.wrap {
+  max-width: 75rem;
+  margin: 0 auto;
+  padding: 0 2.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 3fr);
+  gap: 3rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.22);
+}
+
+.brand {
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+  max-width: 28rem;
+}
+
+.logo {
+  width: 3.375rem;
+  display: block;
+  height: auto;
+}
+
+.muted {
+  color: var(--aws-gray-450);
+  margin: 0;
+}
+
+.muted code {
+  background: rgb(255 255 255 / 0.1);
+  color: var(--aws-gray-150);
+  border: 0;
+  font-size: 0.9em;
+}
+
+.heading {
+  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 400;
+  margin-bottom: 0.75rem;
+  color: var(--aws-gray-400);
+}
+
+.grid ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.grid a {
+  color: var(--aws-gray-200);
+  text-decoration: none;
+}
+
+.grid a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.legal {
+  margin-top: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  color: var(--aws-gray-450);
+}
+
+@media screen and (max-width: 996px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .wrap {
+    padding: 0 1.25rem;
+  }
+
+  .footer {
+    padding: 3rem 0 1.25rem;
+  }
+}
