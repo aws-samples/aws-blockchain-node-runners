@@ -2,8 +2,21 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-# Dummy Protocol Node Initialization Script
-# This script performs generic node setup and then calls the configuration-specific script
+# Dummy Protocol Node Initialization Script (reference implementation)
+#
+# Installs the configuration selected by CLIENT_CONFIG as the "node" systemd
+# service and starts it.
+#
+# Re-run contract (all blueprints): the framework runs node.sh on first boot
+# AND again whenever the configuration changes on redeploy (new CLIENT_CONFIG,
+# changed blueprint files, other .env values), against the EXISTING /data and
+# with node.service already stopped. node.sh must therefore:
+#   - install or replace binaries/config to match the current CLIENT_CONFIG
+#   - guard one-time steps (snapshot download, genesis init, key generation)
+#     by checking for existing state, and never delete chain data
+#   - (re)write node.service and start it; exit non-zero on failure (the
+#     framework then retries on the next boot)
+#   - touch /data/init-completed once setup has finished
 
 set -euo pipefail
 
@@ -39,8 +52,10 @@ log "Found configuration script: $CONFIG_SCRIPT"
 # When SNAPSHOT_ENABLED=true and SNAPSHOT_STAGING_VOL_SIZE>0, exercise the full
 # staging mount -> extract -> cleanup lifecycle (using the real shared helper)
 # so the staging_cleanup fix can be validated cheaply. No-op otherwise.
+# One-time step: the staging volume is deleted afterwards, so skip on re-runs.
 STAGING_DEBUG_SCRIPT="/opt/blueprints/user-data/common/download-snapshot.sh"
-if [ -f "$STAGING_DEBUG_SCRIPT" ]; then
+STAGING_DEBUG_DONE="/data/.staging-debug-done"
+if [ -f "$STAGING_DEBUG_SCRIPT" ] && [ ! -f "$STAGING_DEBUG_DONE" ]; then
     log "Running snapshot staging debug path: $STAGING_DEBUG_SCRIPT"
     chmod +x "$STAGING_DEBUG_SCRIPT"
     if bash "$STAGING_DEBUG_SCRIPT" 2>&1 | tee -a "$LOG_FILE"; then
@@ -48,22 +63,48 @@ if [ -f "$STAGING_DEBUG_SCRIPT" ]; then
     else
         log "WARNING: Snapshot staging debug path exited non-zero (see STAGING DEBUG lines above)"
     fi
+    touch "$STAGING_DEBUG_DONE"
 fi
 
-# Make configuration script executable
-chmod +x "$CONFIG_SCRIPT"
+# Install the selected configuration as the service entrypoint (replaced on
+# every run so a changed CLIENT_CONFIG takes effect).
+mkdir -p /home/bcuser/bin
+cp "$CONFIG_SCRIPT" /home/bcuser/bin/start-node.sh
+chmod +x /home/bcuser/bin/start-node.sh
+log "Configuration script installed: $CLIENT_CONFIG"
 
-# Execute configuration-specific setup
-log "Executing configuration script: $CLIENT_CONFIG"
-if "$CONFIG_SCRIPT"; then
-    log "Configuration script completed successfully"
-else
-    log "ERROR: Configuration script failed with exit code $?"
+# Create systemd service. The dummy runs as root because its configuration
+# scripts write to /opt; a real blueprint should run its client as bcuser.
+cat > /etc/systemd/system/node.service <<EOF
+[Unit]
+Description=Dummy Protocol Node Service
+After=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10
+EnvironmentFile=/etc/cdk_environment
+ExecStart=/home/bcuser/bin/start-node.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and (re)start the node service
+systemctl daemon-reload
+systemctl enable node.service
+systemctl restart node.service
+
+sleep 5
+if ! systemctl is-active --quiet node.service; then
+    log "ERROR: node.service is not running"
+    journalctl -u node.service --no-pager -n 20 || true
     exit 1
 fi
 
+# Mark initialization as complete
+touch /data/init-completed
+
 log "Dummy Protocol Node initialization complete"
 log "Node is now running and publishing metrics"
-
-# Keep the script running (for systemd service if needed)
-wait
