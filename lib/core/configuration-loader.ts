@@ -155,7 +155,14 @@ export class ConfigurationLoader implements IConfigurationLoader {
   }
 
   /**
-   * Get stack name from deployment configuration
+   * Get stack name from deployment configuration.
+   *
+   * Version numbers are removed from CLIENT_CONFIG so a version bump of the
+   * same client keeps the stack name and is applied in place on redeploy
+   * (issue #340). Prerelease tags that follow a version (`-rc.0`, `-beta`,
+   * `-alpha.2`, ...) are removed too, so moving between a release candidate
+   * and a stable release (e.g. Lighthouse 8.3.0-rc.0 -> 8.3.0) is also an
+   * in-place upgrade instead of a new stack.
    */
   getStackName(deploymentConfig: DeploymentConfig): string {
     const protocolName = deploymentConfig.protocol.BLOCKCHAIN_PROTOCOL;
@@ -164,6 +171,7 @@ export class ConfigurationLoader implements IConfigurationLoader {
 
     const sanitizedClientConfig = clientConfig
       .replace(/\.(sh|yml|yaml)$/i, '')
+      .replace(/(\d)-(?:rc|beta|alpha|pre|preview)(?:[.-]?\d+)?(?=-|$)/gi, '$1')
       .replace(/[._]/g, '')
       .replace(/[^A-Za-z-]/g, '')
       .replace(/--+/g, '-');

@@ -294,6 +294,41 @@ describe('HANodesConstruct', () => {
     });
 
     describe('Auto Scaling Group Creation', () => {
+        it('keeps the rolling update policy that rolls out launch template changes (#340)', () => {
+            new HANodesConstruct(stack, 'TestHANodes', {
+                protocolConfig,
+                deploymentConfig,
+                userDataScriptPath: testUserDataScriptPath,
+                vpc: mockVpc,
+            });
+
+            Template.fromStack(stack).hasResource('AWS::AutoScaling::AutoScalingGroup', {
+                UpdatePolicy: {
+                    AutoScalingRollingUpdate: {
+                        MaxBatchSize: 1,
+                        MinInstancesInService: 1,
+                        PauseTime: 'PT5M',
+                    },
+                },
+            });
+        });
+
+        it('uses the same per-boot MIME user data in the launch template', () => {
+            new HANodesConstruct(stack, 'TestHANodes', {
+                protocolConfig,
+                deploymentConfig,
+                userDataScriptPath: testUserDataScriptPath,
+                vpc: mockVpc,
+            });
+
+            const lts = Template.fromStack(stack).findResources('AWS::EC2::LaunchTemplate');
+            const [lt] = Object.values(lts) as any[];
+            const [body, vars] = lt.Properties.LaunchTemplateData.UserData['Fn::Base64']['Fn::Sub'];
+            expect(body.startsWith('Content-Type: multipart/mixed; boundary="==NODE-RUNNER-BOUNDARY=="')).toBe(true);
+            expect(body).toContain('Content-Type: text/x-shellscript-per-boot');
+            expect(vars.LIFECYCLE_HOOK_NAME).not.toBe('none');
+        });
+
         it('should create an Auto Scaling Group', () => {
             new HANodesConstruct(stack, 'TestHANodes', {
                 protocolConfig,

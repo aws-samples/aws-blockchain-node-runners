@@ -120,6 +120,44 @@ describe('SingleNodeConstruct', () => {
                 UserData: Match.anyValue(),
             });
         });
+
+        it('uses per-boot MIME user data so a changed configuration is re-applied in place (#340)', () => {
+            new SingleNodeConstruct(stack, 'TestNode', {
+                protocolConfig,
+                deploymentConfig,
+                userDataScriptPath: testUserDataScriptPath,
+                vpc: mockVpc,
+            });
+
+            const instances = Template.fromStack(stack).findResources('AWS::EC2::Instance');
+            const [instance] = Object.values(instances) as any[];
+            const [body, vars] = instance.Properties.UserData['Fn::Base64']['Fn::Sub'];
+            expect(body.startsWith('Content-Type: multipart/mixed; boundary="==NODE-RUNNER-BOUNDARY=="')).toBe(true);
+            expect(body).toContain('Content-Type: text/x-shellscript-per-boot');
+            // Rendered once, without the default "#!/bin/bash" prefix CDK adds for addUserData().
+            expect(body.match(/#!\/bin\/bash/g)).toHaveLength(1);
+            // The instance signals its own logical ID; no replacement on user data change.
+            expect(vars.LOGICAL_RESOURCE_ID).toBe(Object.keys(instances)[0]);
+            expect(instance.Properties).not.toHaveProperty('UserDataCausesReplacement');
+        });
+
+        it('keeps the logical ID stable when user data changes (stop/start, not replacement)', () => {
+            const ids = ['dummy-1.0.0-rpc-base.sh', 'dummy-1.0.0-rpc-extended.sh'].map((clientConfig, i) => {
+                const s = new cdk.Stack(new cdk.App(), `StableIdStack${i}`, { env: { account: '123456789012', region: 'us-east-1' } });
+                const vpc = new ec2.Vpc(s, 'MockVPC', { maxAzs: 2 });
+                new SingleNodeConstruct(s, 'TestNode', {
+                    protocolConfig,
+                    deploymentConfig: {
+                        ...deploymentConfig,
+                        environment: { ...deploymentConfig.environment, CLIENT_CONFIG: clientConfig },
+                    },
+                    userDataScriptPath: testUserDataScriptPath,
+                    vpc,
+                });
+                return Object.keys(Template.fromStack(s).findResources('AWS::EC2::Instance'));
+            });
+            expect(ids[0]).toEqual(ids[1]);
+        });
     });
 
     describe('Security Group Creation', () => {
