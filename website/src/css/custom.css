@@ -1,30 +1,88 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * AWS brand foundation for this site, adapted from the AWS Design
+ * Documentation (2025-02-18) brand palette and type system.
+ *
+ * This is a public aws-samples repository: no brand font files ship
+ * here. System font stacks stand in for the AWS brand typeface and
+ * the AWS brand monospace typeface.
+ *
+ * - Blue is the accent (distinct from the Mint/Green used on the
+ *   Blockchain Snapshots landing page, so sibling AWS samples don't
+ *   look identical).
+ * - Gray 850 / white remain the anchor colors; the accent stays out of
+ *   body copy and is used sparingly for links, numerals, and rules.
  */
-
-/* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* AWS brand palette (subset): Gray, Blue */
+  --aws-gray-50: #fcfcfd;
+  --aws-gray-100: #f9f9fb;
+  --aws-gray-150: #f6f6f9;
+  --aws-gray-200: #f3f3f7;
+  --aws-gray-250: #ebebf0;
+  --aws-gray-300: #dedee3;
+  --aws-gray-350: #ccccd1;
+  --aws-gray-400: #b4b4bb;
+  --aws-gray-450: #a4a4ad;
+  --aws-gray-500: #8c8c94;
+  --aws-gray-600: #656871;
+  --aws-gray-650: #424650;
+  --aws-gray-700: #333843;
+  --aws-gray-750: #232b37;
+  --aws-gray-800: #1b232d;
+  --aws-gray-850: #161d26;
+  --aws-gray-900: #131920;
+  --aws-gray-950: #0f141a;
+  --aws-gray-1000: #06080a;
+
+  --aws-blue-50: #f0fbff;
+  --aws-blue-100: #d1f1ff;
+  --aws-blue-200: #b8e7ff;
+  --aws-blue-300: #75cfff;
+  --aws-blue-400: #42b4ff;
+  --aws-blue-500: #0099ff;
+  --aws-blue-600: #006ce0;
+  --aws-blue-700: #004a9e;
+  --aws-blue-800: #003b8f;
+  --aws-blue-900: #002a66;
+  --aws-blue-950: #00204d;
+  --aws-blue-1000: #001129;
+
+  /* System font stacks standing in for the AWS brand typefaces */
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+    Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --ifm-font-family-base: var(--font-display);
+  --ifm-font-family-monospace: var(--font-mono);
+
+  --ifm-color-primary: var(--aws-blue-600);
+  --ifm-color-primary-dark: var(--aws-blue-700);
+  --ifm-color-primary-darker: var(--aws-blue-800);
+  --ifm-color-primary-darkest: var(--aws-blue-900);
+  --ifm-color-primary-light: var(--aws-blue-500);
+  --ifm-color-primary-lighter: var(--aws-blue-400);
+  --ifm-color-primary-lightest: var(--aws-blue-300);
+
+  --ifm-heading-font-weight: 400;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-color-primary: var(--aws-blue-400);
+  --ifm-color-primary-dark: var(--aws-blue-500);
+  --ifm-color-primary-darker: var(--aws-blue-600);
+  --ifm-color-primary-darkest: var(--aws-blue-700);
+  --ifm-color-primary-light: var(--aws-blue-300);
+  --ifm-color-primary-lighter: var(--aws-blue-200);
+  --ifm-color-primary-lightest: var(--aws-blue-100);
+  --ifm-background-color: var(--aws-gray-950);
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+h1, h2, h3, h4 {
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }

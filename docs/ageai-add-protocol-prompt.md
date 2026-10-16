@@ -269,6 +269,15 @@ Create the protocol-level initialization script. This script handles concerns co
 
 node.sh must NOT contain client-specific logic (binary URLs, version numbers, runtime flags). All of that belongs in the configuration script.
 
+**Re-run contract (required):** the framework runs node.sh on first boot AND again on every redeploy that changes the configuration (new `CLIENT_CONFIG`, changed blueprint files, other `.env` values), against the existing `/data` and with `node.service` already stopped. node.sh and the configuration script's install phase must therefore:
+- Install or replace binaries and configuration to match the current `CLIENT_CONFIG` (overwrite, don't assume a clean machine)
+- Guard one-time steps by checking for existing state: snapshot download (`/data/snapshot_downloaded`), genesis init (data directory exists), key or identity generation (key file exists), secrets (reuse an existing `<STACK_NAME>/...` secret)
+- Never format, delete or move chain data; `rm -rf` only build or checkout directories before re-creating them
+- (Re)write `node.service` and start it; exit non-zero on failure (the framework retries setup on the next boot)
+- Not size the client from the hardware in node.sh (`INSTANCE_TYPE` changes don't re-run it); compute such values in the service's start script
+
+See the "Re-run Contract for Blueprint Authors" section of `blueprints/dummy/README.md` and `blueprints/dummy/user-data/node.sh`.
+
 If multiple client configurations share common logic (e.g. snapshot download), extract it into `user-data/common/` as a shared helper script.
 
 **Snapshot Staging for Large Snapshots**: If the protocol has large snapshots where `compressed_size + extracted_size > available /data space`, the blueprint's `download-snapshot.sh` should:
@@ -314,7 +323,7 @@ Create comprehensive README following this exact structure:
    - Step 5: Verify Node Operation
 6. **Configuration Options**: Protocol-specific variables and settings
 7. **Troubleshooting**: Node Not Starting, Metrics Not Appearing, Health Check Failures, reference to main Troubleshooting Guide
-8. **Upgrades**: Upgrading Node Configuration, Rolling Updates (HA Only)
+8. **Upgrades**: Upgrading Client Versions (single-node redeploys re-apply the new configuration in place on the existing data; link to the Deployment Guide section "How a redeploy applies changes", note the client build time and any instance-store re-sync), Rolling Updates (HA Only)
 9. **Cost Optimization**: Storage, Compute, Network
 10. **Security Considerations**: List of security best practices
 11. **FAQ**: Common questions in Q&A format (not collapsible)
