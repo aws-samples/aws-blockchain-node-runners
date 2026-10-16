@@ -4,46 +4,40 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'AI-Guided Deployment',
-    Icon: "🤖",
+    title: 'AI-guided deployment',
     description: (
-       <span>
-        Use AI assistants to deploy, configure, and troubleshoot blockchain nodes with guided workflows
-       </span>
+      <>
+        Use AI assistants to deploy, configure, and troubleshoot blockchain
+        nodes with guided workflows.
+      </>
     ),
   },
   {
-    title: 'Rapid Experimentation',
-    Icon: "⚡",
+    title: 'Rapid experimentation',
     description: (
-      <span>
-          Spin up nodes for any supported protocol in minutes using pre-built blueprints and sample configurations
-      </span>
+      <>
+        Spin up nodes for any supported protocol in minutes using pre-built
+        blueprints and sample configurations.
+      </>
     ),
   },
   {
-    title: 'Universal Architecture',
-    Icon: "🏗️",
+    title: 'Universal architecture',
     description: (
-        <span>
-            One CDK framework supporting multiple protocols through a pluggable blueprint system
-        </span>
+      <>
+        One CDK framework supporting multiple protocols through a pluggable
+        blueprint system.
+      </>
     ),
   },
 ];
 
-function Feature({Icon, title, description}) {
+function Feature({title, description}) {
   return (
-    <div className={clsx('col col--4')}>
-      <div className="text--center">
-        {/* <svg className={styles.featureSvg} style={{width: '40%'}} role="img" /> */}
-        <span className={styles.featureUnicodeChar}>{Icon}</span>
-      </div>
-      <div className="text--center padding-horiz--md">
-        <h2><b>{title}</b></h2>
-        <p>{description}</p>
-      </div>
-    </div>
+    <li className={clsx('col col--4', styles.feature)}>
+      <h3>{title}</h3>
+      <p>{description}</p>
+    </li>
   );
 }
 
@@ -51,11 +45,11 @@ export default function HomepageFeatures() {
   return (
     <section className={styles.features}>
       <div className="container">
-        <div className="row">
+        <ul className={clsx('row', styles.featureList)}>
           {FeatureList.map((props, idx) => (
             <Feature key={idx} {...props} />
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

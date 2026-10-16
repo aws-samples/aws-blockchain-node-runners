@@ -789,6 +789,38 @@ describe('ConfigurationLoader', () => {
         expect(stackName).toBe(`dummy-testnet-dummy-rpc-base`);
       });
 
+      it.each([
+        ['geth-1.17.7-lighthouse-8.2.2-full.yml', 'geth-1.17.8-lighthouse-8.3.0-full.yml'],
+        ['geth-1.17.7-lighthouse-8.3.0-rc.0-full.yml', 'geth-1.17.7-lighthouse-8.3.0-full.yml'],
+        ['geth-1.17.7-lighthouse-8.3.0-rc1-full.yml', 'geth-1.17.7-lighthouse-8.2.2-full.yml'],
+        ['bsc-reth-v0.1.2-beta-full.sh', 'bsc-reth-v0.1.3-full.sh'],
+        ['bsc-reth-v0.1.2-beta.3-full.sh', 'bsc-reth-v0.1.2-alpha-full.sh'],
+        ['nethermind-1.39.3-teku-26.8.0-full.yml', 'nethermind-2.0.0-teku-26.8.0-full.yml'],
+      ])('keeps the stack name for version and prerelease changes: %s -> %s (in-place upgrade)', (from, to) => {
+        const protocolConfig = configLoader.loadProtocolConfig('dummy');
+        const name = (clientConfig: string) => {
+          const envConfig = configLoader.loadEnvironmentConfig(singleNodeEnvPath);
+          envConfig.CLIENT_CONFIG = clientConfig;
+          return configLoader.getStackName({ protocol: protocolConfig, environment: envConfig });
+        };
+        expect(name(to)).toBe(name(from));
+        expect(name(from)).not.toMatch(/rc|beta|alpha/);
+      });
+
+      it.each([
+        ['geth-1.17.7-lighthouse-8.2.2-full.yml', 'reth-2.5.2-lighthouse-8.2.2-archive.yml'],
+        ['dummy-1.0.0-rpc-base.sh', 'dummy-1.0.0-rpc-extended.sh'],
+        ['agave-4.3.0-rpc-base.sh', 'frankendancer-0.1106.40201-rpc-base.sh'],
+      ])('changes the stack name for a different client or configuration type: %s -> %s', (from, to) => {
+        const protocolConfig = configLoader.loadProtocolConfig('dummy');
+        const name = (clientConfig: string) => {
+          const envConfig = configLoader.loadEnvironmentConfig(singleNodeEnvPath);
+          envConfig.CLIENT_CONFIG = clientConfig;
+          return configLoader.getStackName({ protocol: protocolConfig, environment: envConfig });
+        };
+        expect(name(to)).not.toBe(name(from));
+      });
+
       it('should produce identical prefix behavior for single-node and ha-nodes modes', () => {
         const protocolConfig = configLoader.loadProtocolConfig('dummy');
 
