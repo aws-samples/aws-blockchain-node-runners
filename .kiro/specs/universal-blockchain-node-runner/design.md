@@ -272,7 +272,7 @@ Example (Ethereum):
       { "name": "reth-1.10.2-lighthouse-8.1.0-archive.yml", "version": "v1.10.2-v8.1.0" },
       { "name": "erigon-3.3.7-prysm-7.1.2-archive.yml", "version": "v3.3.7-v7.1.2" }
     ],
-    "BC_NETWORKS": ["mainnet", "sepolia", "holesky"],
+    "BC_NETWORKS": ["mainnet", "sepolia", "hoodi"],
     "defaultInstanceTypes": { "x86_64": "r7g.2xlarge", "ARM_64": "r7g.2xlarge" },
     "requiredPorts": [
       { "port": 8545, "protocol": "tcp", "description": "JSON RPC", "public": false },

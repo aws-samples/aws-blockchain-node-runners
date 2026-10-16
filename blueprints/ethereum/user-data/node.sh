@@ -129,18 +129,18 @@ chown bcuser:bcuser /home/bcuser/ethereum-node/docker-compose.yml
 
 # Resolve supernode flag for Lighthouse consensus client
 # Options: "true" (--supernode), "semi" (--semi-supernode), "false" or empty (no flag)
-# Default: enabled (--supernode) for full blob serving capability post-Pectra/PeerDAS
+# Default: disabled. An RPC node doesn't need blob columns; serving blobs is opt-in
+# because a supernode needs ~470-720 GB more disk.
 ETH_CONSENSUS_SUPERNODE_FLAG=""
-if [ "$ETH_CONSENSUS_SUPERNODE" = "semi" ]; then
-    ETH_CONSENSUS_SUPERNODE_FLAG="--semi-supernode"
-    echo "Consensus supernode mode: semi (64 data columns)"
-elif [ "$ETH_CONSENSUS_SUPERNODE" = "false" ]; then
-    ETH_CONSENSUS_SUPERNODE_FLAG=""
-    echo "Consensus supernode mode: disabled (4 data columns - blob API will NOT work)"
-else
-    # Default to --supernode (includes "true" and unset)
+if [ "$ETH_CONSENSUS_SUPERNODE" = "true" ]; then
     ETH_CONSENSUS_SUPERNODE_FLAG="--supernode"
     echo "Consensus supernode mode: full (128 data columns)"
+elif [ "$ETH_CONSENSUS_SUPERNODE" = "semi" ]; then
+    ETH_CONSENSUS_SUPERNODE_FLAG="--semi-supernode"
+    echo "Consensus supernode mode: semi (64 data columns)"
+else
+    # "false" and unset
+    echo "Consensus supernode mode: disabled (4 data columns - blob API will NOT work)"
 fi
 
 # Substitute environment variables in docker-compose file using sed
@@ -160,7 +160,7 @@ echo "Configuration variables:"
 echo "  BC_NETWORK: $BC_NETWORK"
 echo "  EC2_INTERNAL_IP: $EC2_INTERNAL_IP"
 echo "  ETH_CONSENSUS_CHECKPOINT_SYNC_URL: $ETH_CONSENSUS_CHECKPOINT_SYNC_URL"
-echo "  ETH_CONSENSUS_SUPERNODE: ${ETH_CONSENSUS_SUPERNODE:-true} (flag: ${ETH_CONSENSUS_SUPERNODE_FLAG:-none})"
+echo "  ETH_CONSENSUS_SUPERNODE: ${ETH_CONSENSUS_SUPERNODE:-false} (flag: ${ETH_CONSENSUS_SUPERNODE_FLAG:-none})"
 
 # Create systemd service for the node
 cat > /etc/systemd/system/node.service <<EOF

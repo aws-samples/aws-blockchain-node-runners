@@ -132,6 +132,8 @@ BASE_L1_RPC_URL="https://your-ethereum-l1-rpc"
 BASE_L1_BEACON_URL="https://your-ethereum-beacon-api"
 ```
 
+`BASE_L1_BEACON_URL` must serve blobs (`/eth/v1/beacon/blob_sidecars`). If it points at an Ethereum node deployed with this repository, deploy that node with `ETH_CONSENSUS_SUPERNODE="true"` (or `"semi"`) and size its volume for the extra blob data: the Ethereum blueprint defaults to `"false"`, which can't serve blobs. See "Supernode Mode" in the Ethereum README.
+
 #### Step 2: Choose Network
 
 ```bash

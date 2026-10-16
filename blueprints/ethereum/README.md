@@ -91,7 +91,8 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 | Mainnet (Full) | Single Node | r7g.2xlarge | 8 | 64 GB | 2.5 TB gp3 |
 | Mainnet (Archive) | Single Node | i8g.4xlarge | 16 | 128 GB | 3.75 TB NVMe |
 | Mainnet (Full HA) | HA (2 nodes) | r7g.2xlarge | 8 each | 64 GB each | 2.5 TB gp3 each |
-| Sepolia | Single Node | r7g.xlarge | 4 | 32 GB | 256 GB gp3 |
+| Sepolia | Single Node | r7g.xlarge | 4 | 32 GB | 1.5 TB gp3 |
+| Hoodi | Single Node | r7g.xlarge | 4 | 32 GB | 200 GB gp3 |
 
 *For cost estimates, use the [AWS Pricing Calculator](https://calculator.aws/) with your specific region and commitment level.
 
@@ -103,7 +104,10 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 |---------|-----------|-------------|-------------|-------------|------|------|------------|
 | Mainnet | Full | ~2 TB | ~50 GB/month | 2.5 TB | gp3 | 8,000 | 700 MB/s |
 | Mainnet | Archive | ~3 TB | ~100 GB/month | 3.75 TB | Instance Store (NVMe) | 250K+ | 10+ GB/s |
-| Sepolia | Full | ~100 GB | ~5 GB/month | 256 GB | gp3 | 3,000 | 250 MB/s |
+| Sepolia | Full | ~920 GB (measured 2026-10; ~510 GB with post-Prague history) | not yet measured; expected to rise after Glamsterdam | 1.5 TB | gp3 | 3,000 | 250 MB/s |
+| Hoodi | Full | ~125 GB (measured 2026-10) | not yet measured | 200 GB | gp3 | 3,000 | 250 MB/s |
+
+These sizes assume `ETH_CONSENSUS_SUPERNODE="false"`, the default. Supernode mode adds about 470–720 GB for blob data on any network (see [Supernode Mode](#supernode-mode-lighthouse--peerdas)): use about 4 TB for a mainnet full node, 1 TB for Hoodi and 2 TB for Sepolia.
 
 **Storage Type Selection**:
 - **Full Nodes**: Use gp3 EBS volumes for cost-effective persistent storage
@@ -157,6 +161,9 @@ cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-nethermind-teku-
 
 # For HA deployment
 cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-mainnet-geth-lighthouse-full-ha .env
+
+# For a Hoodi testnet node (smallest and fastest to sync, about an hour)
+cp node_modules/aws-bnr-blueprint-ethereum/samples/.env-hoodi-geth-lighthouse-full .env
 ```
 
 Edit `.env` with your AWS account details:
@@ -264,41 +271,41 @@ ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://beaconstate.ethstaker.cc"
 # Sepolia
 ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.sepolia.ethpandaops.io"
 
-# Holesky
-ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.holesky.ethpandaops.io"
+# Hoodi
+ETH_CONSENSUS_CHECKPOINT_SYNC_URL="https://checkpoint-sync.hoodi.ethpandaops.io"
 ```
 
 Pick any provider from the maintained list — https://eth-clients.github.io/checkpoint-sync-endpoints/ — if one is unreachable. Endpoints do come and go (the previously used `beaconstate.info` domain stopped resolving).
 
 ### Supernode Mode (Lighthouse — PeerDAS)
 
-After the Ethereum Pectra upgrade (May 2025), PeerDAS (EIP-7594) replaced full blob distribution with Data Availability Sampling. Under PeerDAS, regular beacon nodes only store a small subset of data columns (typically 4 out of 128) and **cannot** serve full blobs via the `/eth/v1/beacon/blob_sidecars` API.
+Since the Ethereum Fusaka upgrade (December 2025), PeerDAS (EIP-7594) replaced full blob distribution with Data Availability Sampling. Under PeerDAS, regular beacon nodes only store a small subset of data columns (typically 4 out of 128) and **cannot** serve full blobs via the `/eth/v1/beacon/blob_sidecars` API.
 
-This blueprint enables `--supernode` by default on all Lighthouse configurations, which stores all 128 data columns. This is required if:
+The blueprint default and all Lighthouse samples set `ETH_CONSENSUS_SUPERNODE="false"`: a regular node is enough for RPC and needs far less disk. Opt in to `--supernode`, which stores all 128 data columns, if:
 
 - The node serves as an L1 data source for L2 rollup nodes (Base, OP Stack, etc.)
 - You need the blob sidecars API to return complete blob data
 - You want to contribute to network-wide data availability
 
 ```bash
-# Default: full supernode (128 columns) — recommended
+# Opt in: full supernode (128 columns), needed to serve blobs
 ETH_CONSENSUS_SUPERNODE="true"
 
 # Alternative: semi-supernode (64 columns) — enough to reconstruct blobs, lower bandwidth
 ETH_CONSENSUS_SUPERNODE="semi"
 
-# Disable: regular node (4 columns) — blob API will NOT work
+# Default: regular node (4 columns), far less disk, but the blob API will NOT work
 ETH_CONSENSUS_SUPERNODE="false"
 ```
 
 **Resource impact of supernode mode:**
 - Bandwidth: ~30x more blob-related P2P traffic (~5-15 MB/s additional sustained)
-- Storage: ~50-100 GB extra for the full column set over the ~18-day retention window
+- Storage: Lighthouse keeps blob data for the ~18-day retention window (4,096 epochs, a protocol minimum) and prunes older data. Measured on Hoodi in October 2026 at about 13.5 blobs per block: 0.265 MB per blob for all 128 columns, about 25 GB per day, so **~470 GB** for the full window, and up to ~720 GB if blocks stay at the 21-blob maximum. Semi-supernode needs about half that. A regular node (`"false"`, 4 columns) needs about 1/32: ~15 GB (up to ~23 GB). After a checkpoint sync, Lighthouse backfills the whole window within hours, so a new node reaches this size quickly.
 - CPU/Memory: negligible impact
 
 **Note**: This setting only applies to Lighthouse-based configurations. Prysm, Teku, and Caplin (Erigon) handle PeerDAS differently and are not affected.
 
-**Important**: If you change this setting on an existing deployment from `false` to `true`, you must delete the beacon database and re-sync via checkpoint sync. Adding `--supernode` does not backfill historical data columns.
+**Important**: Changing this setting on an existing deployment, in either direction, needs the beacon database deleted and a re-sync via checkpoint sync (see [Blob Sidecars API Returns Error](#blob-sidecars-api-returns-error-lighthouse) for the commands). Adding `--supernode` does not backfill historical data columns, and Lighthouse ignores a reduction: it logs `Reducing CGC is currently not supported without a resync and will have no effect` and keeps all columns. Check the effective value with `curl http://<ip>:5052/eth/v1/node/identity | jq .data.metadata.custody_group_count` (128 for a supernode, 4 for a regular node). Checkpoint sync takes a few minutes; the execution data is untouched.
 
 ### Nethermind Configuration Notes
 
@@ -319,6 +326,47 @@ The Nethermind + Teku configuration runs Nethermind 2.x. Figures below are from 
 - **`eth_getLogs` range**: by default a single `eth_getLogs` request can span at most 1,000 blocks. If your workload needs wider ranges, add `--Receipt.MaxBlockDepth=<blocks>` to the execution command.
 
 See the [Nethermind documentation](https://docs.nethermind.io/) for every available option.
+
+### Sepolia Storage and History Pruning
+
+Measured on 2 October 2026 with geth 1.17.5 and Lighthouse 8.2.2 (`--supernode`), default flags, a few hours after sync, at the chain tip (about 11.83M blocks). Breakdown from `geth db inspect`:
+
+| Data | Size |
+|---|---|
+| geth block history (ancient store: bodies 538 GiB, receipts 128 GiB, headers 6 GiB) | ~673 GB |
+| geth state and indexes (storage trie 143 GiB, storage snapshot 77 GiB, contract code 39 GiB, account trie and snapshot 35 GiB, transaction index 7 GiB) | ~233 GB |
+| Lighthouse beacon database (supernode, before blob data had built up) | ~74 GB |
+| **Total on disk** | **~980 GB** |
+
+The Lighthouse figure was measured before blob storage reached its steady state. With the sample's `ETH_CONSENSUS_SUPERNODE="false"`, expect ~15 GB instead, so ~920 GB in total. With supernode mode, expect ~470–720 GB (see [Supernode Mode](#supernode-mode-lighthouse--peerdas)). The totals below are for the measured node.
+
+This is a full node, not an archive node (`gcmode=full`, 90,000 blocks of state history). Most of the space is block bodies and receipts, which geth keeps back to genesis by default (`--history.chain=all`).
+
+geth can drop old block history with `prune-history`, which runs offline (stop the node first) and takes seconds:
+
+| Option | Keeps blocks from | Total on disk | Saving |
+|---|---|---|---|
+| Default (`all`) | genesis | ~980 GB | — |
+| `postmerge` | 1,450,409 (the Merge) | ~980 GB | ~0: Sepolia's pre-Merge history is tiny |
+| `postprague` | 7,836,331 (Prague, March 2025) | ~570 GB | ~410 GB (42%) |
+
+```bash
+# On the instance, as root
+systemctl stop node.service
+docker run --rm -v /data/execution:/var/lib/geth/data ethereum/client-go:<version> \
+  --sepolia --datadir /var/lib/geth/data prune-history --history.chain postprague
+systemctl start node.service
+```
+
+After pruning, geth starts normally with the blueprint's unchanged flags and logs `Chain history is pruned earliest=7,836,331`. In testing it then upgraded in place to a new geth and Lighthouse release on the pruned data.
+
+**What pruning breaks:** for blocks before the prune point, the node returns `pruned history unavailable` (error code `4444`) for:
+- `eth_getBlockByNumber` and `eth_getBlockByHash`, even with `fullTx=false`
+- `eth_getBlockReceipts`, `eth_getTransactionReceipt`
+- `eth_getLogs` ranges that include those blocks
+- `eth_getTransactionByHash` (the transaction index already covers only the last 2,350,000 blocks by default, so older lookups fail either way)
+
+Headers, state at recent blocks, and everything from the prune point onward keep working. Pruning can't be undone without re-importing history, so keep `all` if you serve historical blocks, receipts or logs (indexers, explorers, backfills).
 
 ### Snapshot Support
 
@@ -368,7 +416,7 @@ Ethereum nodes require significant memory. If experiencing OOM issues:
 
 If you see `BAD_REQUEST: Insufficient data columns to reconstruct blobs` when calling `/eth/v1/beacon/blob_sidecars/{slot}`:
 
-1. Verify `ETH_CONSENSUS_SUPERNODE` is set to `"true"` in your `.env` file
+1. Verify `ETH_CONSENSUS_SUPERNODE` is set to `"true"` or `"semi"` in your `.env` file (the default is `"false"`)
 2. If you changed this setting on an existing deployment, you must re-sync the beacon:
 ```bash
 # Stop the node
