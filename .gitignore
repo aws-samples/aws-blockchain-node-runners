@@ -53,3 +53,5 @@ coverage
 # Kiro per-task execution metadata (session IDs, timestamps) is local IDE
 # state, not project content. Re-exclude it from the otherwise-tracked spec dir.
 .kiro/specs/universal-blockchain-node-runner/**/tasks.meta.json
+
+.agents
