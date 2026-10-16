@@ -30,7 +30,9 @@ describe('UserDataManager Integration', () => {
             expect(script).toBeDefined();
             expect(script).toContain('#!/bin/bash');
             expect(script).toContain('cdk_environment');
-            expect(script).toContain('CloudWatch Agent');
+            // Full setup (CloudWatch agent, storage, node.sh) lives in node-setup.sh,
+            // which the per-boot bootstrap runs when its gate decides to apply.
+            expect(script).toContain('node-setup.sh');
         });
 
         it('should inject variables using CDK Fn.sub format', () => {
@@ -188,12 +190,13 @@ describe('UserDataManager Integration', () => {
             // Verify bash script structure
             expect(script.startsWith('#!/bin/bash')).toBe(true);
 
-            // Verify environment file creation
-            expect(script).toContain('/etc/cdk_environment');
-            expect(script).toContain('chmod 600');
+            // Verify environment file creation (owner-only, rewritten each boot)
+            expect(script).toContain('CDK_ENV_FILE="/etc/cdk_environment"');
+            expect(script).toContain('umask 077; cat > "$tmp"');
+            expect(script).not.toContain('cat >> /etc/cdk_environment');
 
             // Verify source command
-            expect(script).toContain('source /etc/cdk_environment');
+            expect(script).toContain('source "$CDK_ENV_FILE"');
         });
 
         it('should handle special characters in snapshot URL', () => {
