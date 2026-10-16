@@ -26,7 +26,9 @@ describe('Ethereum Protocol Configuration', () => {
 
             expect(protocolConfig.BC_NETWORKS).toContain('mainnet');
             expect(protocolConfig.BC_NETWORKS).toContain('sepolia');
-            expect(protocolConfig.BC_NETWORKS).toContain('holesky');
+            expect(protocolConfig.BC_NETWORKS).toContain('hoodi');
+            // Holesky was retired by the Ethereum Foundation.
+            expect(protocolConfig.BC_NETWORKS).not.toContain('holesky');
         });
 
         it('should have multiple client configurations', () => {
