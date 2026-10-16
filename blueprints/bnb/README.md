@@ -212,11 +212,16 @@ The client version is taken from the configuration file name (the single source 
 2. Update `CLIENT_CONFIG` in `.env` to the new filename
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output-bnb-mainnet.json`
 
-Note: The instance will be replaced. If snapshot download is enabled, the new instance restores chain data from a recent snapshot rather than syncing from genesis.
+On a single-node stack, the redeploy stops and starts the same instance, and node setup re-runs against the existing chain data on `/data`, so there's no re-sync. `cdk deploy` returns before setup has finished; watch `/var/log/cloud-init-output.log` for `Node deployment completed successfully`. See [How a redeploy applies changes](/docs/guides/deployment-guide#how-a-redeploy-applies-changes-single-node) in the Deployment Guide for the details, including which changes create a new stack instead.
+
+- BSC Geth downloads a release binary (a few minutes of downtime). BSC Reth is built from source (30–60 minutes).
+- Genesis init and the snapshot download are skipped when chain data already exists.
+- Switching between Geth and Reth changes the stack name, so it creates a new stack; the two clients can't share data.
+- **Instance store:** the samples keep `/data` on instance store, which is erased by the stop/start that any redeploy causes. The node then restores from a snapshot (if enabled) or syncs from genesis.
 
 ### Rolling Updates (HA Only)
 
-HA deployments perform rolling updates automatically, ensuring no RPC downtime during client upgrades. See the [Deployment Guide](/docs/guides/deployment-guide) for details.
+HA instances are replaced one at a time with a rolling update, keeping at least one in service. New instances start with empty data volumes and sync before they pass the ALB health check. See the [Deployment Guide](/docs/guides/deployment-guide#ha-deployments-rolling-updates).
 
 ## Cost Optimization
 

@@ -137,3 +137,7 @@ STATE_UPDATE_PID=$!
 echo "State update loop started with PID: $STATE_UPDATE_PID"
 
 echo "Dummy base configuration applied successfully"
+
+# Run in the foreground as node.service's main process; the background loops
+# above are its children and are stopped with the service.
+wait

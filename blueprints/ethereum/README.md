@@ -390,17 +390,20 @@ See the [Troubleshooting Guide](/docs/guides/troubleshooting) for detailed diagn
 
 ### Upgrading Client Versions
 
-To upgrade to newer client versions:
-
-1. Update `CLIENT_CONFIG` in `.env` to new configuration file
-2. Create new docker-compose file with updated versions
+1. Copy the configuration file to the new versions and update the image tags, for example `geth-1.17.7-lighthouse-8.2.2-full.yml` → `geth-1.17.8-lighthouse-8.2.2-full.yml`
+2. Update `CLIENT_CONFIG` in `.env` to the new file name
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output.json`
 
-Note: The instance will be replaced with the new configuration.
+On a single-node stack, the redeploy stops and starts the same instance, and node setup re-runs against the existing chain data on `/data`, so there's no re-sync. `cdk deploy` returns before setup has finished; watch `/var/log/cloud-init-output.log` for `Node deployment completed successfully`. See [How a redeploy applies changes](/docs/guides/deployment-guide#how-a-redeploy-applies-changes-single-node) in the Deployment Guide for the details, including which changes create a new stack instead.
+
+- The node is down for a minute or two while the containers are recreated with the new images.
+- Keep the same execution and consensus clients: a version bump keeps the stack name, including a move between a release candidate and a stable release (`lighthouse-8.3.0-rc.0` → `lighthouse-8.3.0`). Switching clients (for example geth → reth) changes the stack name, so `cdk deploy` creates a new stack that syncs from scratch.
+- Check the release notes for database format changes first. A release that can't open the previous version's data (Reth 1.x → 2.x was one) needs a new node: deploy it as a separate stack with a different `STACK_NAME_PREFIX`, let it sync, then destroy the old one.
+- Upgrade after the execution client has finished its initial snap sync. In testing, geth restarted in the middle of its initial snap sync failed to start again (`missing trie node`) and had to re-sync. That happens with any restart, not only an upgrade.
 
 ### Rolling Updates (HA Only)
 
-HA deployments perform rolling updates automatically, ensuring no RPC downtime during client upgrades. See the [Deployment Guide](/docs/guides/deployment-guide) for details.
+HA instances are replaced one at a time with a rolling update, keeping at least one in service. New instances start with empty data volumes and sync before they pass the ALB health check. See the [Deployment Guide](/docs/guides/deployment-guide#ha-deployments-rolling-updates).
 
 ## Cost Optimization
 
@@ -445,7 +448,7 @@ A: With checkpoint sync: 6-24 hours. Without checkpoint sync: 2-7 days depending
 
 **Q: Can I switch client combinations?**
 
-A: Yes, but you'll need to resync from scratch. Update CLIENT_CONFIG and redeploy. You can deploy multiple clients in paralell on their own nodes.
+A: Yes, but you'll need to resync from scratch. Update CLIENT_CONFIG and redeploy; because the client names are part of the stack name, this creates a new stack. You can deploy multiple clients in paralell on their own nodes.
 
 **Q: Do I need to run both execution and consensus clients?**
 

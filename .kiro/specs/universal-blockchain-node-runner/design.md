@@ -182,9 +182,9 @@ aws-blockchain-node-runners/
 │       └── ha-nodes-stack.ts
 ├── assets/
 │   └── common/
-│       ├── user-data-ubuntu.sh
+│       ├── user-data-ubuntu.sh       # per-boot bootstrap (env file + re-apply gate)
+│       ├── node-setup.sh             # full setup, run by the bootstrap when it applies
 │       ├── setup-storage.sh
-│       ├── cfn-hup-setup.sh
 │       └── cw-agent.json
 ├── blueprints/                       # Built-in blueprints (each is a local NPM package)
 │   ├── ethereum/
@@ -739,8 +739,8 @@ Handles EBS volume formatting, mounting, and filesystem setup. Reads the flatten
 - Mounts volumes
 - Updates /etc/fstab for persistence
 
-#### cfn-hup-setup.sh
-Installs and configures CloudFormation helper scripts for stack updates and signaling.
+#### node-setup.sh
+Full node setup (CloudWatch agent, cfn-signal once per instance, bcuser, storage, traffic shaping and sync checker units, HA lifecycle hook, then the blueprint's `node.sh` with `node.service` stopped). Run by the per-boot bootstrap in `user-data-ubuntu.sh` on first boot and whenever the configuration changes; see "Per-Boot Bootstrap and In-Place Re-apply" below.
 
 #### cw-agent.json
 CloudWatch agent configuration template for collecting system and application metrics, including systemd service logs.
@@ -1124,6 +1124,18 @@ interface CFNandCDKUserDataConfig {
   PROTOCOL_ASSETS_S3_PATH: string; // S3 path to protocol-specific assets
 }
 ```
+
+### Per-Boot Bootstrap and In-Place Re-apply
+
+`UserDataManager.renderUserData()` wraps `user-data-ubuntu.sh` (variables injected, full-line comments removed) in a single MIME part of type `text/x-shellscript-per-boot`, so cloud-init runs it on every boot. cloud-init re-reads user data from IMDS on each boot, so the new user data from a stack update is used on the stop/start CloudFormation performs. Synth fails above the 16 KB EC2 user data limit and warns above 15 KB.
+
+Each boot the bootstrap rewrites `/etc/cdk_environment`, then decides:
+- **skip**: the fingerprint (SHA-256 of the bootstrap without its `INSTANCE_TYPE` line; it embeds every `.env` value and both asset S3 keys) matches `/var/lib/node-runner/applied-fingerprint`, and every `DATA_VOL_*_MOUNT_PATH` is mounted
+- **apply**: otherwise; downloads assets and runs `assets/common/node-setup.sh`. The fingerprint is written only when that succeeds, so a failed or interrupted setup retries on the next boot
+- **uninstall**: IMDS user data no longer contains a per-boot part (rolled back to an older framework version); the script removes itself
+- **reexec**: cloud-init ran a copy that differs from IMDS; run the IMDS version
+
+The success state lives on the root volume. Blueprints must keep `node.sh` safe to re-run against existing data (see the re-run contract in `blueprints/dummy/README.md`). The excerpt below shows the original first-boot script and is kept for history.
 
 ### User Data Script Structure
 
