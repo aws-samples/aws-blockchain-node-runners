@@ -7,7 +7,7 @@ import styles from './styles.module.css';
 // a brand column with the AWS logo and a disclaimer paragraph, two link
 // columns (Project, Ecosystem), and a legal line.
 export default function Footer() {
-  const logo = useBaseUrl('img/aws-logo-white.svg');
+  const logo = useBaseUrl('img/cube-logo-white.svg');
   const year = new Date().getFullYear();
 
   return (

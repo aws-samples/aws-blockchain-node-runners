@@ -23,7 +23,7 @@ function HomepageHeader() {
             Deploy a blockchain node on AWS by describing it
           </h1>
           <p className={styles.heroLead}>
-            One CDK framework. Six protocol blueprints, from Ethereum to
+            One CDK framework. Five protocol blueprints, from Ethereum to
             Solana. Tell your AI assistant what you need, and Node Runners
             picks the instance type, provisions the stack, and keeps it
             healthy.

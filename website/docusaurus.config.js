@@ -9,7 +9,7 @@ const darkCodeTheme = themes.dracula;
 const config = {
   title: 'AWS Blockchain Node Runners',
   tagline: 'AI-driven blockchain node infrastructure experimentation on AWS',
-  //favicon: 'img/favicon.ico',
+  //favicon: 'img/cube-logo-white.svg',
 
   // Set the production url of your site here
   url: 'https://aws-samples.github.io',
