@@ -148,7 +148,7 @@ To resize a single-node deployment within the same architecture, change `INSTANC
 npx cdk deploy --json --outputs-file deploy-output-bitcoin-mainnet.json
 ```
 
-- CloudFormation stops and starts the same instance with the new type. It isn't replaced, the data volume stays attached, and the node resumes from its chain data with no re-sync.
+- CloudFormation stops and starts the same instance with the new type. It isn't replaced, the data volume stays attached, node setup doesn't re-run, and the node resumes from its chain data with no re-sync.
 - In testing, the node was offline for about a minute and back at the chain tip right after restart.
 - Resize through `cdk deploy` rather than changing the instance type in the EC2 console, so the stack and `.env` stay in sync.
 
@@ -477,16 +477,9 @@ Common causes:
 
 **Symptom:** `journalctl -u node.service` repeats `specified config file "/data/bitcoin.conf" could not be opened`, and `/data/init-completed` doesn't exist.
 
-**Cause:** node setup runs only once, on the instance's first boot. If the instance is stopped or rebooted before setup finishes, it doesn't resume. The service is left without `bitcoin.conf`.
+**Cause:** the instance was stopped or rebooted before node setup finished.
 
-Re-run the blueprint's setup script from an SSM session. It reuses the existing RPC credentials in Secrets Manager, then starts the service:
-
-```bash
-sudo systemctl stop node.service
-sudo /opt/blueprints/user-data/node.sh
-sudo systemctl start syncchecker.timer net-rules.service
-test -f /data/init-completed && echo "setup complete"
-```
+Setup re-runs automatically on every boot until it succeeds, so reboot the instance (or wait for the next boot) and check `/var/log/cloud-init-output.log` for `Node deployment completed successfully`. Stacks deployed with a framework version before 2.1.0 don't retry; redeploy them with the current version once.
 
 ### Slow Initial Sync
 
@@ -517,18 +510,18 @@ See the [Troubleshooting Guide](/docs/guides/troubleshooting) for detailed diagn
 
 ### Upgrading Client Versions
 
-1. Update the image tag / version in the configuration `.yml` file
+1. Copy the configuration `.yml` file to the new version, e.g. `bitcoin-core-v31.1-full.yml` → `bitcoin-core-v31.2-full.yml`
 2. Update `CLIENT_CONFIG` in `.env` to the new filename
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output-bitcoin-mainnet.json`
 
-> **Note (single-node):** Redeploying a single-node stack with a new `CLIENT_CONFIG` doesn't upgrade the running node.
-> - CloudFormation applies the new user data by stopping and starting the same instance; it isn't replaced. Node setup runs only on first boot, so it doesn't run again, and the node keeps running the previous Bitcoin Core version on the same chain data.
-> - To move to a new client version, deploy a new stack with the new configuration and let it sync.
-> - Changing `CPU_TYPE` on an existing stack fails and rolls back (see [After initial sync](#after-initial-sync)).
+On a single-node stack, the redeploy stops and starts the same instance, and node setup re-runs against the existing chain data on `/data`, so there's no re-sync. `cdk deploy` returns before setup has finished; watch `/var/log/cloud-init-output.log` for `Node deployment completed successfully`. See [How a redeploy applies changes](/docs/guides/deployment-guide#how-a-redeploy-applies-changes-single-node) in the Deployment Guide for the details, including which changes create a new stack instead.
+
+- Node setup downloads and verifies the new Bitcoin Core release, keeps the RPC credentials in Secrets Manager, and regenerates `bitcoin.conf`.
+- Changing `CPU_TYPE` on an existing stack fails and rolls back (see [After initial sync](#after-initial-sync)).
 
 ### Rolling Updates (HA Only)
 
-HA deployments perform rolling updates automatically, ensuring no RPC downtime during client upgrades. See the [Deployment Guide](/docs/guides/deployment-guide) for details.
+HA instances are replaced one at a time with a rolling update, keeping at least one in service. New instances start with empty data volumes and sync before they pass the ALB health check. See the [Deployment Guide](/docs/guides/deployment-guide#ha-deployments-rolling-updates).
 
 ## Cost Optimization
 

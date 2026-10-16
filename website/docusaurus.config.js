@@ -9,7 +9,7 @@ const darkCodeTheme = themes.dracula;
 const config = {
   title: 'AWS Blockchain Node Runners',
   tagline: 'AI-driven blockchain node infrastructure experimentation on AWS',
-  //favicon: 'img/favicon.ico',
+  //favicon: 'img/cube-logo-white.svg',
 
   // Set the production url of your site here
   url: 'https://aws-samples.github.io',
@@ -77,7 +77,7 @@ const config = {
       // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
-        title: '▣-▣-▣ Node Runners',
+        title: 'Blockchain Node Runners on AWS',
         items: [
           {
             type: 'doc',
@@ -112,35 +112,6 @@ const config = {
       },
       footer: {
         style: 'dark',
-        links: [
-          {
-            title: 'Documentation',
-            items: [
-              {
-                label: 'Getting Started',
-                to: '/docs/getting-started/intro',
-              },
-              {
-                label: 'Configuration Reference',
-                to: '/docs/guides/configuration-reference',
-              },
-            ],
-          },
-          {
-            title: 'Community',
-            items: [
-              {
-                label: 'GitHub',
-                href: 'https://github.com/aws-samples/aws-blockchain-node-runners',
-              },
-              {
-                label: 'Contribution Guide',
-                href: 'https://github.com/aws-samples/aws-blockchain-node-runners/blob/main/CONTRIBUTING.md',
-              },
-            ],
-          },
-        ],
-        copyright: `Built with ❤️ at AWS  <br/> © ${new Date().getFullYear()} Amazon.com, Inc. or its affiliates. All Rights Reserved.`,
       },
       prism: {
         theme: lightCodeTheme,
