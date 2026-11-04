@@ -22,6 +22,7 @@ This workflow helps you keep blockchain node client software up to date. It guid
   - **Blue-green (HA, client switches, or when downtime isn't acceptable):** deploy a new node with updated code → wait for full sync → route traffic to the new node → delete the old node. Switching to a different client or configuration type always creates a new stack, because `CLIENT_CONFIG` is part of the stack name.
 - This is a GenAI agent prompt, not a CI/CD pipeline or scheduled automation.
 - The human is always in control — explicit approval is required before any file change and before any destructive action.
+- **Maintenance crew (`docs/maintenance-crew.md`):** when this workflow runs inside a human-started maintenance round, the crew's Version Scout runs Steps 1-3 (discovery, compatibility, change notification) unattended across the in-scope blueprints and stops. Steps 4-5 run only for a bump the maintainer approved in the round's Decision Table, in the crew's own worktree, and end with a pushed branch; the maintainer opens the PR. Step 6 (test deployment) is the crew's Smoke Tester, again only after approval. The approval gates of this document are not removed; the Decision Table is where they are answered.
 
 ## PREREQUISITES CHECK
 

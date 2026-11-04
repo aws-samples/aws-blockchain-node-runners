@@ -27,7 +27,9 @@ Consult the [CONTRIBUTING](https://github.com/aws-samples/aws-blockchain-node-ru
 - [ ] I have run `npx cdk synth` with a sample `.env` (e.g. from `blueprints/dummy/samples/`) and it succeeds
 - [ ] I have run pre-commit hooks: `npm run run-pre-commit`
 
-### New Blueprint Checklist (if adding a protocol)
+### New Blueprint Checklist (built-in blueprints only)
+
+<!-- New protocols from outside the core team are published as external blueprints and listed in the Community Blueprints Catalog, not merged here: see CONTRIBUTING.md and the "Community Blueprint Submission" issue template. This checklist applies only when a maintainer adds a built-in blueprint. -->
 
 - [ ] Blueprint follows the structure of `blueprints/dummy/` (reference implementation)
 - [ ] Blueprint README follows the standard template (matches Dummy section titles and ordering)

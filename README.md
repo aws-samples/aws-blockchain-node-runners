@@ -177,6 +177,16 @@ The AI recommends infrastructure options, generates your configuration, deploys 
 
 For the full step-by-step walkthrough, see the [Getting Started guide](https://aws-samples.github.io/aws-blockchain-node-runners/docs/getting-started/quickstart).
 
+### Maintaining your fork with an agent crew
+
+If you maintain a fork of this repository, a small crew of [Kiro Crew](https://github.com/kirodotdev/KiroCrew) agents can do the recurring maintenance with you: triage Dependabot and community pull requests, discover and risk-rate new blockchain client releases, prepare version-bump branches with local validation, and smoke-test risky upgrades on a test AWS account. The crew reads and analyses on its own and never decides: repository and AWS changes wait for your approval, and every action on GitHub (approve, merge, open a PR) stays your own click. The agent definitions live in `.kiro/agents/` and `.kiro/skills/`; run
+
+```
+@setup-maintenance-crew
+```
+
+to set up the environment, and read [`docs/maintenance-crew.md`](docs/maintenance-crew.md) for what the crew does and how approval is enforced.
+
 ## Manual Deployment
 
 Prefer to deploy without AI assistance? You can clone the repo, configure a `.env`, and run the standard CDK commands yourself.
