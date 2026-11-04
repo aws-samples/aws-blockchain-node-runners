@@ -78,7 +78,7 @@ describe('blueprint node.sh re-run contract', () => {
     });
 
     it('bnb and base: one-time genesis and snapshot steps are guarded', () => {
-        for (const config of ['bsc-geth-v1.7.8-full.sh', 'bsc-reth-v0.1.2-full.sh']) {
+        for (const config of ['bsc-geth-v1.8.2-full.sh', 'bsc-reth-v0.1.2-full.sh']) {
             const text = read(`bnb/configurations/${config}`);
             if (text.includes(' init ')) {
                 expect(text).toMatch(/if \[ ! -d \/data\/[a-z]+ \]/);
