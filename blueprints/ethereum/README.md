@@ -323,7 +323,7 @@ The Nethermind + Teku configuration runs Nethermind 2.x. Figures below are from 
 - **Health endpoint**: `GET http://<internal-ip>:8545/health` returns `200` when the node is synced and has peers, and `503` otherwise. For HA deployments, set `HA_ALB_HEALTHCHECK_PATH="/health"` so the load balancer routes traffic only to synced nodes. Size `HA_ALB_HEALTHCHECK_GRACE_PERIOD_MIN` to cover the initial sync.
 - **Prometheus metrics**: exposed on `http://<internal-ip>:6060/metrics`. The port is not opened in the security group.
 - **Snap serving**: fresh nodes also serve snap sync data to peers, which adds outbound P2P bandwidth. To turn it off, add `--Sync.SnapServingEnabled=false` to the execution command.
-- **`eth_getLogs` range**: by default a single `eth_getLogs` request can span at most 1,000 blocks. If your workload needs wider ranges, add `--Receipt.MaxBlockDepth=<blocks>` to the execution command.
+- **`eth_getLogs` range**: by default a single `eth_getLogs` or `eth_getFilterLogs` request can span at most 10,000 blocks (the 2.1 default). If your workload needs wider ranges, add `--Receipt.MaxBlockDepth=<blocks>` to the execution command.
 
 See the [Nethermind documentation](https://docs.nethermind.io/) for every available option.
 
