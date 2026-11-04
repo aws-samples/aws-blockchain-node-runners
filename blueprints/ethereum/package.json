@@ -26,10 +26,10 @@
         "name": "erigon-3.6.1-prysm-7.2.0-archive.yml"
       },
       {
-        "name": "besu-26.8.1-teku-26.8.0-full.yml"
+        "name": "besu-26.11.0-teku-26.10.3-full.yml"
       },
       {
-        "name": "nethermind-2.0.0-teku-26.8.0-full.yml"
+        "name": "nethermind-2.2.2-teku-26.10.3-full.yml"
       }
     ],
     "BC_NETWORKS": [
