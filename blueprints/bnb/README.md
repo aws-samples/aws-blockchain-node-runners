@@ -208,7 +208,7 @@ See [Troubleshooting Guide](/docs/guides/troubleshooting) for detailed diagnosti
 
 The client version is taken from the configuration file name (the single source of truth), so an upgrade is just a rename plus a config switch:
 
-1. Rename the configuration script to the new version, e.g. `bsc-geth-<old-version>-full.sh` → `bsc-geth-<new-version>-full.sh` (for BSC Reth, include the `-beta` suffix, e.g. `bsc-reth-<new-version>-beta-full.sh`)
+1. Rename the configuration script to the new version, e.g. `bsc-geth-<old-version>-full.sh` → `bsc-geth-<new-version>-full.sh` (for BSC Reth, keep any upstream tag suffix such as `-fix` in the version, e.g. `bsc-reth-<new-version>-full.sh`)
 2. Update `CLIENT_CONFIG` in `.env` to the new filename
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output-bnb-mainnet.json`
 

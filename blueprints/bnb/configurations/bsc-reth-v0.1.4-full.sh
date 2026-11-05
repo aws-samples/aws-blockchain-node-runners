@@ -9,7 +9,7 @@
 #   no args   — runs reth-bsc with full-node flags (systemd entrypoint)
 #
 # The client version is derived from CLIENT_CONFIG (the configuration file
-# name, e.g. "bsc-reth-v0.1.2-full.sh" -> "v0.1.2"), which is the
+# name, e.g. "bsc-reth-v0.1.4-full.sh" -> "v0.1.4"), which is the
 # single source of truth. The upstream tag suffix (e.g. "-beta", "-fix") is
 # part of the version and is carried in the file name.
 #
@@ -73,7 +73,11 @@ install_client() {
     # reth.fast = fast/minimal node snapshot (~458 GiB compressed).
     # 48Club currently publishes only the "fast" type for the reth client.
     local SNAPSHOT_TYPE="${BNB_SNAPSHOT_TYPE:-fast}"
-    /opt/blueprints/user-data/common/download-snapshot.sh reth "$SNAPSHOT_TYPE" || true
+    # Invoke via bash: the execute bit is lost when the CDK asset is zipped on Windows.
+    # The helper exits 0 when it skips (not enabled, not mainnet, already done).
+    if ! bash /opt/blueprints/user-data/common/download-snapshot.sh reth "$SNAPSHOT_TYPE"; then
+        echo "WARNING: snapshot download failed; the node will sync from genesis" >&2
+    fi
 
     echo "BSC Reth ${RETH_VERSION} full node installation complete"
 }
