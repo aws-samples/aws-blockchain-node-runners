@@ -9,7 +9,7 @@
 #   no args   — runs geth with full-node flags (systemd entrypoint)
 #
 # The client version is derived from CLIENT_CONFIG (the configuration file
-# name, e.g. "bsc-geth-v1.7.8-full.sh" -> "v1.7.8"), which is the single
+# name, e.g. "bsc-geth-v1.8.2-full.sh" -> "v1.8.2"), which is the single
 # source of truth.
 #
 # Runtime flags match the 48Club geth.local snapshot requirements.
@@ -77,7 +77,11 @@ install_client() {
     # geth.local = full node with complete state (MPT + snapshot), ~1 TiB
     # geth.none  = fast node with snapshot-only state, ~365 GiB
     local SNAPSHOT_TYPE="${BNB_SNAPSHOT_TYPE:-local}"
-    /opt/blueprints/user-data/common/download-snapshot.sh geth "$SNAPSHOT_TYPE" || true
+    # Invoke via bash: the execute bit is lost when the CDK asset is zipped on Windows.
+    # The helper exits 0 when it skips (not enabled, not mainnet, already done).
+    if ! bash /opt/blueprints/user-data/common/download-snapshot.sh geth "$SNAPSHOT_TYPE"; then
+        echo "WARNING: snapshot download failed; the node will sync from genesis" >&2
+    fi
 
     # --- Download BSC network configuration (config.toml + genesis.json) ---
     # Map the deployment network name to the asset name used in BSC GitHub
@@ -93,6 +97,23 @@ install_client() {
     local NETWORK_URL="https://github.com/bnb-chain/bsc/releases/download/${BSC_VERSION}/${NETWORK_ASSET}.zip"
     echo "Downloading from $NETWORK_URL"
     curl -fsSL -o "/tmp/${NETWORK_ASSET}.zip" "$NETWORK_URL"
+
+    # Verify the archive against the SHA256 digest in the GitHub release metadata
+    local NETWORK_EXPECTED_SHA NETWORK_ACTUAL_SHA
+    NETWORK_EXPECTED_SHA=$(echo "$RELEASE_JSON" | jq -r ".assets[] | select(.name==\"${NETWORK_ASSET}.zip\") | .digest" | sed 's/^sha256://')
+    if [ -n "$NETWORK_EXPECTED_SHA" ] && [ "$NETWORK_EXPECTED_SHA" != "null" ]; then
+        echo "Verifying ${NETWORK_ASSET}.zip SHA256 checksum..."
+        NETWORK_ACTUAL_SHA=$(sha256sum "/tmp/${NETWORK_ASSET}.zip" | awk '{print $1}')
+        if [ "$NETWORK_EXPECTED_SHA" != "$NETWORK_ACTUAL_SHA" ]; then
+            echo "ERROR: Checksum mismatch for ${NETWORK_ASSET}.zip! Expected: $NETWORK_EXPECTED_SHA, Got: $NETWORK_ACTUAL_SHA"
+            rm -f "/tmp/${NETWORK_ASSET}.zip"
+            exit 1
+        fi
+        echo "Network configuration checksum verification passed"
+    else
+        echo "WARNING: No checksum available for ${NETWORK_ASSET}.zip in release metadata, skipping verification"
+    fi
+
     apt-get update -qq && apt-get install -y -qq unzip
     unzip -o "/tmp/${NETWORK_ASSET}.zip" -d /tmp/bsc-config-extract/
     find /tmp/bsc-config-extract -name "config.toml" -exec cp {} /home/bcuser/bsc-config/ \;

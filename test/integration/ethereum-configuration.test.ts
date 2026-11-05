@@ -37,7 +37,7 @@ describe('Ethereum Protocol Configuration', () => {
             expect(protocolConfig.availableConfigurations.length).toBeGreaterThan(0);
 
             const gethLighthouse = protocolConfig.availableConfigurations.find(
-                c => c.name === 'geth-1.17.7-lighthouse-8.2.2-full.yml'
+                c => c.name === 'geth-1.17.10-lighthouse-8.3.2-full.yml'
             );
             expect(gethLighthouse).toBeDefined();
         });
@@ -80,7 +80,7 @@ describe('Ethereum Protocol Configuration', () => {
             expect(envConfig.BLOCKCHAIN_PROTOCOL).toBe('ethereum');
             expect(envConfig.DEPLOYMENT_MODE).toBe(DeploymentMode.SINGLE_NODE);
             expect(envConfig.BC_NETWORK).toBe('mainnet');
-            expect(envConfig.CLIENT_CONFIG).toBe('geth-1.17.7-lighthouse-8.2.2-full.yml');
+            expect(envConfig.CLIENT_CONFIG).toBe('geth-1.17.10-lighthouse-8.3.2-full.yml');
         });
 
         it('should have custom ETH variables', () => {
