@@ -1,6 +1,7 @@
 # Custom Semgrep rules to flag prompt-injection / instruction-override content
 # embedded in AI prompt files. This repo ships AI-driven workflows (the ageai-*
-# docs and .kiro/prompts), where a malicious PR could slip adversarial
+# docs and .kiro/prompts) and the maintenance crew's agent specs and skills
+# (.kiro/agents, .kiro/skills), where a malicious PR could slip adversarial
 # instructions into a prompt that an AI agent later executes.
 #
 # No off-the-shelf SAST/secret/IaC scanner understands prompt injection, so
@@ -25,6 +26,8 @@ rules:
       include:
         - "docs/ageai-*.md"
         - ".kiro/prompts/*.md"
+        - ".kiro/agents/*.json"
+        - ".kiro/skills/**/*.md"
     patterns:
       - pattern-regex: (?i)\b(ignore|disregard|forget|override)\b[^.\n]{0,40}\b(all\s+)?(the\s+)?(previous|prior|above|preceding|earlier|system)\b[^.\n]{0,20}\b(instruction|instructions|prompt|prompts|context|rule|rules|direction|directions)\b
 
@@ -38,6 +41,8 @@ rules:
       include:
         - "docs/ageai-*.md"
         - ".kiro/prompts/*.md"
+        - ".kiro/agents/*.json"
+        - ".kiro/skills/**/*.md"
     patterns:
       - pattern-regex: (?i)\b(reveal|print|show|repeat|output|expose|disclose|dump|leak)\b[^.\n]{0,40}\b(your|the|its)\b[^.\n]{0,20}\b(system\s+)?(prompt|instructions|rules|configuration|guidelines)\b
 
@@ -51,6 +56,8 @@ rules:
       include:
         - "docs/ageai-*.md"
         - ".kiro/prompts/*.md"
+        - ".kiro/agents/*.json"
+        - ".kiro/skills/**/*.md"
     patterns:
       - pattern-regex: (?i)\b(do\s+not|don't|never|without)\b[^.\n]{0,30}\b(tell|telling|inform|informing|notify|notifying|reveal|revealing|mention|mentioning|show|showing)\b[^.\n]{0,20}\b(the\s+)?user\b
 
@@ -64,6 +71,8 @@ rules:
       include:
         - "docs/ageai-*.md"
         - ".kiro/prompts/*.md"
+        - ".kiro/agents/*.json"
+        - ".kiro/skills/**/*.md"
     patterns:
       - pattern-regex: (?i)\b(send|post|upload|transmit|exfiltrate|leak|forward|email|curl|wget|fetch)\b[^.\n]{0,60}\b(secret|secrets|credential|credentials|api[_-]?key|api[_-]?keys|access[_-]?key|token|tokens|password|passwords|private[_-]?key|env(ironment)?\s+variable|aws_secret)\b
 
@@ -77,5 +86,7 @@ rules:
       include:
         - "docs/ageai-*.md"
         - ".kiro/prompts/*.md"
+        - ".kiro/agents/*.json"
+        - ".kiro/skills/**/*.md"
     patterns:
       - pattern-regex: (?i)(\bdeveloper\s+mode\b|\bjailbreak\b|\bDAN\s+mode\b|\bunrestricted\s+(mode|assistant|ai)\b|\b(bypass|ignore|disable|turn\s+off)\b[^.\n]{0,30}\b(safety|guardrail|guardrails|restriction|restrictions|filter|filters|content\s+polic)\w*)

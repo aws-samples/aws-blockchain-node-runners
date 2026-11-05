@@ -9,14 +9,22 @@ contributor-facing summary that links here.
 
 ## Context this is tuned for
 
-- **One maintainer** with push access, plus **occasional community PRs** (mostly
-  new blueprints) submitted from forks.
+- **One active maintainer**, a pool of organisation collaborators who can
+  approve, plus **occasional community PRs** (mostly new blueprints) submitted
+  from forks. An agentic **maintenance crew** (`docs/maintenance-crew.md`)
+  triages PRs and prepares version-bump branches; it never approves, merges or
+  opens a PR, so every write to GitHub is a human's click.
 - **Two risk tiers** of change:
   - **Low risk** — the docs website (`website/`) and Markdown docs (`docs/`,
     `README.md`, `CHANGELOG.md`). Cannot break a customer deployment.
   - **High risk** — everything that affects a deployment or the supply chain:
     `lib/`, `blueprints/**` (non-doc), `test/`, root configs (`package.json`,
-    `tsconfig.json`, `cdk.json`, `app.ts`), and `.github/**`.
+    `tsconfig.json`, `cdk.json`, `app.ts`), `.github/**`, and the
+    **agent-instruction paths** `.kiro/agents/**`, `.kiro/skills/**`,
+    `.kiro/prompts/**`, `docs/ageai-*.md`: these are instructions AI agents
+    execute, and an agent spec launches MCP servers and grants permissions for
+    everyone who runs the crew. They get human review whoever opened the PR
+    and are never a crew merge candidate.
 - Keep process light. Trunk-based, not Gitflow. Don't add ceremony that a
   solo/small-team repo doesn't need.
 
@@ -31,6 +39,7 @@ Trunk-based development around a single integration branch.
 | `gh-pages` | **Legacy** Docusaurus deploy branch (pre-first-party-Pages). | No longer written — the site now deploys via the first-party Pages artifact model in `website-deploy.yaml`. Delete once the first-party deploy is verified. |
 | `feat/*`, `fix/*`, `docs/*`, `chore/*`, `ci/*` | Short-lived working branches for non-trivial work. | Branch from `main`, open a PR, delete after merge. |
 | `dependabot/*` | Automated dependency PRs. | Managed by Dependabot; merge or close, don't push to them. |
+| `chore/<protocol>-<client>-<version>` | Client version bumps prepared by the maintenance crew. | Pushed by Version Scout after approval; the maintainer opens the PR; squash-merge, delete after merge. |
 
 - Community contributors work from **forks** and target `main`.
 - Keep working branches short-lived; rebase or merge `main` in to stay current.
@@ -82,32 +91,39 @@ a blueprint `package.json` `"aws-blockchain-node-runner"` field, the deployment
 workflow, or anything that forces users to change config or redeploy MUST carry
 `BREAKING CHANGE:` and a `CHANGELOG.md` entry.
 
-## When to open a PR vs. commit directly to `main`
+## Everything reaches `main` through a PR
 
-The deciding factor is **which CI runs**. `build-and-test` and `CodeQL` run on
-both push and PR, but the security and lint scanners are **PR-only**:
+The branch rule on `main` applies to everyone, administrators included ("Do not
+allow bypassing the above settings" is enabled), so nobody can push to `main`
+directly. Every change is a PR with one approval from a collaborator who is not
+its author and green required checks. The risk tiers below decide how much
+review a PR gets, not whether it needs one. If a PR ever lands with no review
+recorded, check that setting first: it is the one that makes the rest hold.
 
-- `ASH Security Scan` — PR only (advisory, posts a comment)
-- `Dependency Review` — PR only (blocks on HIGH/CRITICAL)
-- `pre-commit` (ShellCheck, secret/format hooks) — PR only
-- `website-test-deployment` — PR only
+Which CI runs is still worth knowing: `build-and-test` and `CodeQL` run on both
+push and PR; the security and lint scanners are **PR-only** and therefore run on
+every change now:
 
-So **a direct push to `main` skips ASH, dependency review, and pre-commit
-entirely.** Anything you'd want those scanners to inspect must go through a PR.
+- `ASH Security Scan` — advisory, posts a comment (read the run log too: a scan
+  that failed to run also reports "no findings", see `ci-workflows.md`)
+- `Dependency Review` — blocks on HIGH/CRITICAL
+- `pre-commit` (ShellCheck, secret/format hooks)
+- `website-test-deployment`
 
-| Change | Path / nature | Route |
-|--------|---------------|-------|
-| Docs & website content | `website/`, `docs/`, `README.md`, `CHANGELOG.md`, code comments, typo fixes | Maintainer **may commit directly** to `main`. Build still runs on push; website redeploys automatically. |
+| Change | Path / nature | Review |
+|--------|---------------|--------|
+| Docs & website content | `website/`, `docs/`, `README.md`, `CHANGELOG.md`, code comments, typo fixes | **PR required**; a light review is enough. Website redeploys on merge. |
 | Blueprint config or logic | `blueprints/**` (non-doc): user-data, CDK wiring, sample `.env`, `package.json` | **PR required** — affects deployments and is scanned by ASH/dep-review. |
 | CDK framework | `lib/`, `app.ts`, `test/`, root configs | **PR required** — core deployment contract; needs full check suite. |
 | CI / workflows / scanners | `.github/**`, `.pre-commit-config.yaml`, `dependabot.yml` | **PR required** — so the changed workflow and the security suite run before it lands; lets SHA-pin changes be reviewed. |
-| Security-sensitive | IAM, security groups, secrets handling, auth, anything ASH/CodeQL would flag | **PR required, no exceptions** — even for the maintainer. |
-| Dependency bumps | `package*.json`, action SHAs | Via **Dependabot PRs** (weekly, grouped). |
-| New community blueprint | external contributor | **PR from a fork** (contributors have no push access regardless). |
+| Agent instructions | `.kiro/agents/**`, `.kiro/skills/**`, `.kiro/prompts/**`, `docs/ageai-*.md` | **PR required, human review whoever opened it** — call out any change to `mcpServers`, `command`, `args`, `env` or `permissions` in an agent spec. |
+| Security-sensitive | IAM, security groups, secrets handling, auth, anything ASH/CodeQL would flag | **PR required, careful review** — even for the maintainer. |
+| Dependency bumps | `package*.json`, action SHAs | Via **Dependabot PRs** (weekly, grouped). The maintenance crew classifies them; the maintainer approves and squash-merges in the GitHub UI. |
+| Client version bumps | `blueprints/<protocol>/**` configs, `CHANGELOG.md` | Branch pushed by the crew's Version Scout after approval; the maintainer opens the PR; another collaborator approves. |
+| New community blueprint | external contributor | **PR from a fork**; redirected to the Community Catalog per `CONTRIBUTING.md` unless adopted as built-in. |
 
-Rule of thumb: **low-risk docs can go straight to `main`; anything that can
-change a deployment, touch the supply chain, or trip a security scanner goes
-through a PR.** When unsure, open a PR — it's cheap and runs the full suite.
+Rule of thumb: **everything goes through a PR; the tier decides how hard to
+look.** When unsure, ask for a second reviewer.
 
 ## Versioning
 
@@ -169,28 +185,37 @@ is reasonable, but keep it manual and simple while the repo is solo-maintained.
 
 ## Branch protection (`main`)
 
-Configure a GitHub **Ruleset** on `main` (and a deletion/force-push block on
-`v1`). Tuned so the maintainer keeps low-friction direct docs commits while the
-supply chain stays protected:
+What is configured on `main` (classic branch protection; `v1` has a
+deletion/force-push block only):
 
-- **Block force pushes** and **restrict deletion** — the highest-value, zero-cost
-  protections. No bypass.
-- **Require status checks to pass:** `build-and-test` and `CodeQL` (add
-  `website-test-deployment` for website PRs). Keep **ASH** and
-  **Dependency Review** advisory for now — promote them to required only after a
-  burn-in confirms a low false-positive rate, and distinguish "scan failed to
-  run" from "scan found findings" (see `ci-workflows.md`).
-- **Require a pull request before merging** for non-bypass actors (this is how
-  community/fork PRs are gated), but keep the **maintainer on the bypass list**
-  so low-risk docs commits can go directly to `main` per the table above.
-- **Required approvals: 0** while solo (you can't approve your own PR). When a
-  second maintainer joins, raise to 1 and add a `CODEOWNERS` file.
+- **Block force pushes** and **restrict deletion.**
+- **Require a pull request before merging** with **one approving review**.
+  GitHub never counts the author's own approval, so every PR, the maintainer's
+  included, needs a second collaborator.
+- **Require status checks to pass:** `Build, test, and validate CDK synthesis`
+  (the `build-and-test` job) and `Analyze TypeScript` (the `CodeQL` job).
+  GitHub names required checks by **job**, not workflow. Neither workflow has a
+  `paths:` filter; adding one would deadlock PRs that touch nothing it watches.
+  **ASH** and **Dependency Review** stay advisory until a burn-in confirms a low
+  false-positive rate and "scan failed to run" is distinguishable from "scan
+  found findings" (see `ci-workflows.md`).
 - **Require linear history** — pairs with squash-merge.
-- **Signed commits:** recommended if commit signing is set up (SSH/GPG/gitsign).
-  The first-party Pages deploy publishes an artifact rather than pushing commits,
-  so a signed-commits rule on `main` won't interfere with the website deploy.
-  Dependabot's commits are signed by GitHub. Optional while solo; enable once
-  your own signing is configured.
+- **Do not allow bypassing the above settings: enabled.** Administrators are
+  bound by the rule like everyone else. The maintenance crew cannot merge anyway
+  (its GitHub access is read-only), so this setting costs nothing and keeps the
+  maintainer's own clicks under the same rule. Verify with
+  `gh api repos/aws-samples/aws-blockchain-node-runners/branches/main/protection --jq .enforce_admins.enabled`
+  (expected `true`).
+- **Signed commits:** optional. Dependabot's commits are signed by GitHub; the
+  first-party Pages deploy publishes an artifact, so a signed-commits rule
+  would not interfere with it.
 
-Revisit these when the contributor base grows: require approvals, add
-`CODEOWNERS`, and consider promoting ASH to a blocking check.
+**Maintenance crew and identities.** The crew's GitHub token is read-only and
+the crew holds no GitHub write tool; its only GitHub write is `git push` of a
+bump branch, which prompts the maintainer first. The maintainer approves and
+merges Dependabot PRs in the GitHub UI after the crew's Decision Table, opens
+bump PRs from crew-pushed branches (so another collaborator approves them), and
+posts any drafted comment. See `docs/maintenance-crew.md`.
+
+Revisit when the contributor base grows: add `CODEOWNERS` for the
+agent-instruction paths, and consider promoting ASH to a blocking check.
