@@ -1,0 +1,280 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" role="img" aria-labelledby="t d">
+  <title id="t">What a maintenance round looks like</title>
+  <desc id="d">Animated overview of one maintenance round: you start it, PR Triage and Version Scout collect read-only, you tick a Decision Table, GitHub clicks are yours while pushes and deploys run in prompted worker sessions, a read-only Check-In polls the test stack, and a private Round Report is written.</desc>
+  <defs>
+    <marker id="aGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#8c8c94"/></marker>
+    <marker id="aBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#42b4ff"/></marker>
+    <marker id="aLight" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#b8e7ff"/></marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .box { fill: #1b232d; stroke: #424650; stroke-width: 1.5; }
+      .ext { fill: #131920; stroke: #424650; stroke-width: 1.5; stroke-dasharray: 5 4; }
+      .title { font-size: 14px; font-weight: 600; fill: #f3f3f7; }
+      .sub { font-size: 11px; fill: #a4a4ad; }
+      .tag { font-size: 11px; fill: #ccccd1; }
+      .you { font-size: 11px; font-weight: 600; fill: #75cfff; }
+      .caption { font-size: 15px; fill: #f3f3f7; text-anchor: middle; }
+      .phase { font-size: 12px; fill: #dedee3; text-anchor: middle; }
+      .flow { stroke: #8c8c94; stroke-width: 1.5; fill: none; marker-end: url(#aGray); }
+      .flowYou { stroke: #42b4ff; stroke-width: 2; fill: none; marker-end: url(#aBlue); }
+      .flowWrite { stroke: #b8e7ff; stroke-width: 2; fill: none; marker-end: url(#aLight); }
+      .prompt { font-size: 11px; font-weight: 600; fill: #f0fbff; }
+    </style>
+  </defs>
+
+  <!-- master clock, 30 s loop -->
+  <rect width="0" height="0" fill="none"><animate id="loop" attributeName="width" from="0" to="0" dur="30s" repeatCount="indefinite"/></rect>
+
+  <rect width="960" height="560" rx="12" fill="#161d26"/>
+  <text x="480" y="36" text-anchor="middle" font-size="20" fill="#f3f3f7">What a maintenance round looks like</text>
+
+  <!-- ===== Actors ===== -->
+  <g id="you">
+    <circle cx="90" cy="150" r="18" fill="#003b8f" stroke="#42b4ff" stroke-width="1.5"/>
+    <path d="M62 196 a28 28 0 0 1 56 0" fill="#003b8f" stroke="#42b4ff" stroke-width="1.5"/>
+    <text x="90" y="222" text-anchor="middle" class="title">You</text>
+    <text x="90" y="237" text-anchor="middle" class="sub">the maintainer</text>
+  </g>
+
+  <g id="lead">
+    <rect x="230" y="130" width="170" height="80" rx="8" class="box">
+      <animate attributeName="stroke" values="#424650;#42b4ff;#42b4ff;#424650" keyTimes="0;0.04;0.96;1" begin="loop.begin+0.5s" dur="29s"/>
+    </rect>
+    <text x="315" y="163" text-anchor="middle" class="title">Maintainer Lead</text>
+    <text x="315" y="181" text-anchor="middle" class="sub">coordinates and records;</text>
+    <text x="315" y="196" text-anchor="middle" class="sub">never writes to GitHub or AWS</text>
+  </g>
+
+  <g id="workers">
+    <rect x="520" y="60" width="160" height="50" rx="8" class="box">
+      <animate attributeName="stroke" values="#424650;#b8e7ff;#b8e7ff;#424650" keyTimes="0;0.05;0.95;1" begin="loop.begin+3.5s" dur="5.5s"/>
+    </rect>
+    <text x="600" y="81" text-anchor="middle" class="title">PR Triage</text>
+    <text x="600" y="97" text-anchor="middle" class="sub">reads, classifies, drafts replies</text>
+
+    <rect x="520" y="145" width="160" height="50" rx="8" class="box">
+      <animate attributeName="stroke" values="#424650;#b8e7ff;#b8e7ff;#424650" keyTimes="0;0.05;0.95;1" begin="loop.begin+3.5s" dur="5.5s"/>
+      <animate attributeName="stroke" values="#424650;#b8e7ff;#b8e7ff;#424650" keyTimes="0;0.05;0.95;1" begin="loop.begin+16.3s" dur="3s"/>
+    </rect>
+    <text x="600" y="166" text-anchor="middle" class="title">Version Scout</text>
+    <text x="600" y="182" text-anchor="middle" class="sub">bumps in its own worktree</text>
+
+    <rect x="520" y="230" width="160" height="50" rx="8" class="box">
+      <animate attributeName="stroke" values="#424650;#b8e7ff;#b8e7ff;#424650" keyTimes="0;0.05;0.95;1" begin="loop.begin+19.3s" dur="2.7s"/>
+    </rect>
+    <text x="600" y="251" text-anchor="middle" class="title">Smoke Tester</text>
+    <text x="600" y="267" text-anchor="middle" class="sub">deploys to the test account</text>
+
+    <!-- Check-In (phase 4) -->
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.92;1" begin="loop.begin+22.2s" dur="4.8s"/>
+      <rect x="520" y="315" width="160" height="44" rx="8" class="box" stroke-dasharray="4 3"/>
+      <circle cx="545" cy="337" r="9" fill="none" stroke="#a4a4ad" stroke-width="1.5"/>
+      <path d="M545 331 v6 h5" fill="none" stroke="#a4a4ad" stroke-width="1.5"/>
+      <text x="612" y="333" text-anchor="middle" class="title" font-size="12">Check-In cron</text>
+      <text x="612" y="348" text-anchor="middle" class="sub">read-only, every 30 min</text>
+    </g>
+  </g>
+
+  <g id="external">
+    <rect x="790" y="60" width="130" height="70" rx="8" class="ext"/>
+    <text x="855" y="88" text-anchor="middle" class="title">GitHub</text>
+    <text x="855" y="105" text-anchor="middle" class="sub">PRs, releases, main</text>
+    <text x="855" y="119" text-anchor="middle" class="sub">crew token: read-only</text>
+
+    <rect x="790" y="220" width="130" height="70" rx="8" class="ext"/>
+    <text x="855" y="248" text-anchor="middle" class="title">Test AWS account</text>
+    <text x="855" y="265" text-anchor="middle" class="sub">checked by account ID</text>
+    <text x="855" y="279" text-anchor="middle" class="sub">testnet stacks</text>
+  </g>
+
+  <!-- legend -->
+  <g font-size="11" fill="#a4a4ad">
+    <line x1="60" y1="395" x2="88" y2="395" class="flowYou"/><text x="96" y="399">your click</text>
+    <line x1="170" y1="395" x2="198" y2="395" class="flowWrite"/><text x="206" y="399">crew write, prompts you first</text>
+    <line x1="370" y1="395" x2="398" y2="395" class="flow"/><text x="406" y="399">read-only</text>
+  </g>
+
+  <!-- ===== Phase 0: start (0-3s) ===== -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" begin="loop.begin+0.3s" dur="2.9s"/>
+    <rect x="110" y="128" width="116" height="24" rx="12" fill="#003b8f" stroke="#42b4ff"/>
+    <text x="168" y="144" text-anchor="middle" class="mono" font-size="11" fill="#d1f1ff">@maintenance-round</text>
+    <path d="M118 172 L226 172" class="flowYou"/>
+  </g>
+
+  <!-- ===== Phase 1: collect (3-9s) ===== -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+3.3s" dur="5.5s"/>
+    <path d="M402 150 C 460 150, 470 85, 516 85" class="flow"/>
+    <path d="M402 170 L516 170" class="flow"/>
+    <text x="446" y="118" class="tag">dispatch</text>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+4.5s" dur="3.5s"/>
+    <path d="M684 85 L786 93" class="flow" stroke-dasharray="5 4"/>
+    <path d="M684 170 C 730 170, 740 110, 786 102" class="flow" stroke-dasharray="5 4"/>
+    <text x="700" y="140" class="tag">open PRs, check runs</text>
+    <text x="700" y="155" class="tag">upstream releases</text>
+  </g>
+  <circle r="4.5" fill="#b8e7ff" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+3.5s" dur="1.2s"/>
+    <animateMotion path="M402 150 C 460 150, 470 85, 516 85" begin="loop.begin+3.5s" dur="1.2s"/>
+  </circle>
+  <circle r="4.5" fill="#b8e7ff" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+3.5s" dur="1.2s"/>
+    <animateMotion path="M402 170 L516 170" begin="loop.begin+3.5s" dur="1.2s"/>
+  </circle>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+7.2s" dur="1.8s"/>
+    <text x="428" y="203" class="tag">findings, risk ratings</text>
+  </g>
+  <circle r="4.5" fill="#42b4ff" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+7.2s" dur="1.3s"/>
+    <animateMotion path="M516 95 C 470 95, 460 190, 402 190" begin="loop.begin+7.2s" dur="1.3s"/>
+  </circle>
+  <circle r="4.5" fill="#42b4ff" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+7.4s" dur="1.3s"/>
+    <animateMotion path="M516 180 L402 190" begin="loop.begin+7.4s" dur="1.3s"/>
+  </circle>
+
+  <!-- ===== Phase 2: decide (9-14.5s) ===== -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.92;1" begin="loop.begin+9s" dur="5.5s"/>
+    <rect x="150" y="248" width="356" height="126" rx="8" fill="#1b232d" stroke="#42b4ff" stroke-width="1.5"/>
+    <path d="M150 256 a8 8 0 0 1 8 -8 h340 a8 8 0 0 1 8 8 v16 h-356 z" fill="#006ce0"/>
+    <text x="162" y="265" font-size="12" font-weight="600" fill="#ffffff">Decision Table</text>
+    <text x="494" y="265" font-size="11" fill="#d1f1ff" text-anchor="end">tick = approve</text>
+    <g font-size="12" fill="#f3f3f7">
+      <text x="186" y="291">#374 Dependabot, checks green</text>
+      <text x="494" y="291" fill="#a4a4ad" font-size="11" text-anchor="end">Merge</text>
+      <text x="186" y="312">geth 1.17.7 → 1.17.8 (patch)</text>
+      <text x="494" y="312" fill="#a4a4ad" font-size="11" text-anchor="end">Push branch</text>
+      <text x="186" y="333">reth 2.5.2 → 2.6.0 (High)</text>
+      <text x="494" y="333" fill="#a4a4ad" font-size="11" text-anchor="end">PR, then smoke</text>
+      <text x="186" y="354">#380 community blueprint</text>
+      <text x="494" y="354" fill="#a4a4ad" font-size="11" text-anchor="end">Redirect</text>
+    </g>
+    <rect x="162" y="281" width="13" height="13" rx="2" fill="#131920" stroke="#8c8c94"/>
+    <rect x="162" y="302" width="13" height="13" rx="2" fill="#131920" stroke="#8c8c94"/>
+    <rect x="162" y="323" width="13" height="13" rx="2" fill="#131920" stroke="#8c8c94"/>
+    <rect x="162" y="344" width="13" height="13" rx="2" fill="#131920" stroke="#8c8c94"/>
+  </g>
+  <g fill="none" stroke="#42b4ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M164 288 l4 4 l6 -8" opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+11s" dur="3.5s"/></path>
+    <path d="M164 309 l4 4 l6 -8" opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+11.6s" dur="2.9s"/></path>
+    <path d="M164 330 l4 4 l6 -8" opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+12.2s" dur="2.3s"/></path>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+12.8s" dur="1.7s"/>
+    <text x="328" y="368" font-size="11" fill="#a4a4ad" text-anchor="middle">unticked = rejected</text>
+  </g>
+
+  <!-- ===== Phase 3: execute (14.5-22s) ===== -->
+  <!-- 3a: your GitHub click -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+14.5s" dur="2.4s"/>
+    <path d="M108 140 C 280 50, 620 50, 786 80" class="flowYou"/>
+    <text x="440" y="54" class="you" text-anchor="middle">your click: approve and squash-merge #374</text>
+  </g>
+  <!-- 3b: bump pushed by Version Scout, PR opened by you -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+16.5s" dur="2.8s"/>
+    <path d="M402 170 L516 170" class="flow"/>
+    <text x="458" y="162" class="tag" text-anchor="middle">prepare + validate</text>
+    <path d="M684 175 C 730 175, 740 118, 786 110" class="flowWrite"/>
+    <text x="703" y="152" class="tag">git push bump branch</text>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" begin="loop.begin+17.2s" dur="1.9s"/>
+    <rect x="610" y="198" width="92" height="20" rx="10" fill="#004a9e" stroke="#75cfff"/>
+    <text x="656" y="212" text-anchor="middle" class="prompt">Allow push? ✓</text>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" begin="loop.begin+18.3s" dur="1.2s"/>
+    <text x="700" y="44" class="you">your click: open the PR</text>
+  </g>
+  <!-- 3c: smoke test deploy -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+19.3s" dur="2.7s"/>
+    <path d="M402 190 C 460 190, 470 255, 516 255" class="flow"/>
+    <text x="412" y="222" class="tag">deploy, after you</text><text x="412" y="236" class="tag">confirm the cost</text>
+    <path d="M684 255 L786 255" class="flowWrite"/>
+    <text x="735" y="247" class="tag mono" text-anchor="middle">cdk deploy</text>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" begin="loop.begin+20s" dur="1.9s"/>
+    <rect x="604" y="284" width="104" height="20" rx="10" fill="#004a9e" stroke="#75cfff"/>
+    <text x="656" y="298" text-anchor="middle" class="prompt">Allow deploy? ✓</text>
+  </g>
+
+  <!-- ===== Phase 4: check-in (22-27s) ===== -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" begin="loop.begin+22s" dur="1.6s"/>
+    <rect x="236" y="218" width="158" height="20" rx="10" fill="#004a9e" stroke="#75cfff"/>
+    <text x="315" y="232" text-anchor="middle" class="prompt">Register Check-In? ✓</text>
+  </g>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+22.8s" dur="3.6s"/>
+    <path d="M684 337 C 740 337, 760 300, 786 285" class="flow" stroke-dasharray="3 3"/>
+    <text x="735" y="352" class="tag" text-anchor="middle">healthcheck</text>
+  </g>
+  <circle r="4" fill="#8c8c94" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+23s" dur="1s" repeatCount="3"/>
+    <animateMotion path="M684 337 C 740 337, 760 300, 786 285" begin="loop.begin+23s" dur="1s" repeatCount="3"/>
+  </circle>
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" begin="loop.begin+24.8s" dur="2.2s"/>
+    <path d="M516 337 C 470 337, 440 230, 402 205" class="flow" stroke-dasharray="3 3"/>
+    <rect x="402" y="296" width="84" height="20" rx="10" fill="#131920" stroke="#75cfff"/>
+    <text x="444" y="310" text-anchor="middle" font-size="11" font-weight="600" fill="#b8e7ff">passed ✓</text>
+    <text x="430" y="336" text-anchor="middle" class="you">your command:</text><text x="430" y="350" text-anchor="middle" class="you">delete-stack</text>
+  </g>
+
+  <!-- ===== Phase 5: report (27-30s) ===== -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" begin="loop.begin+27s" dur="2.9s"/>
+    <path d="M278 262 h34 l14 14 v44 h-48 z" fill="#1b232d" stroke="#a4a4ad" stroke-width="1.5"/>
+    <path d="M312 262 v14 h14" fill="none" stroke="#a4a4ad" stroke-width="1.5"/>
+    <line x1="286" y1="290" x2="316" y2="290" stroke="#656871"/>
+    <line x1="286" y1="298" x2="316" y2="298" stroke="#656871"/>
+    <line x1="286" y1="306" x2="308" y2="306" stroke="#656871"/>
+    <text x="302" y="338" text-anchor="middle" class="title" font-size="12">Round Report</text>
+    <text x="302" y="353" text-anchor="middle" class="sub">private, outside the repo</text>
+    <path d="M226 190 C 250 220, 260 240, 275 258" class="flow"/>
+  </g>
+
+  <!-- ===== Phase bar ===== -->
+  <g font-size="12">
+    <rect x="60" y="430" width="140" height="34" rx="6" fill="#232b37"><animate attributeName="fill" values="#232b37;#004a9e;#004a9e;#232b37" keyTimes="0;0.05;0.95;1" begin="loop.begin+0s" dur="3s"/></rect>
+    <text x="130" y="452" class="phase">0  Start</text>
+    <rect x="204" y="430" width="140" height="34" rx="6" fill="#232b37"><animate attributeName="fill" values="#232b37;#004a9e;#004a9e;#232b37" keyTimes="0;0.05;0.95;1" begin="loop.begin+3s" dur="6s"/></rect>
+    <text x="274" y="452" class="phase">1  Collect</text>
+    <rect x="348" y="430" width="140" height="34" rx="6" fill="#232b37"><animate attributeName="fill" values="#232b37;#004a9e;#004a9e;#232b37" keyTimes="0;0.05;0.95;1" begin="loop.begin+9s" dur="5.5s"/></rect>
+    <text x="418" y="452" class="phase">2  Decide</text>
+    <rect x="492" y="430" width="140" height="34" rx="6" fill="#232b37"><animate attributeName="fill" values="#232b37;#004a9e;#004a9e;#232b37" keyTimes="0;0.05;0.95;1" begin="loop.begin+14.5s" dur="7.5s"/></rect>
+    <text x="562" y="452" class="phase">3  Execute</text>
+    <rect x="636" y="430" width="140" height="34" rx="6" fill="#232b37"><animate attributeName="fill" values="#232b37;#004a9e;#004a9e;#232b37" keyTimes="0;0.05;0.95;1" begin="loop.begin+22s" dur="5s"/></rect>
+    <text x="706" y="452" class="phase">4  Check-In</text>
+    <rect x="780" y="430" width="120" height="34" rx="6" fill="#232b37"><animate attributeName="fill" values="#232b37;#004a9e;#004a9e;#232b37" keyTimes="0;0.05;0.95;1" begin="loop.begin+27s" dur="3s"/></rect>
+    <text x="840" y="452" class="phase">5  Report</text>
+  </g>
+
+  <!-- ===== Captions ===== -->
+  <g>
+    <text x="480" y="505" class="caption" opacity="0">You start a round with @maintenance-round in the Lead's chat. Nothing runs on a schedule.
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+0s" dur="3s"/></text>
+    <text x="480" y="505" class="caption" opacity="0">Collect: PR Triage and Version Scout read GitHub in parallel and report back. Read-only.
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+3s" dur="6s"/></text>
+    <text x="480" y="505" class="caption" opacity="0">Decide: one Decision Table. You tick what you approve; anything unticked is rejected.
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+9s" dur="5.5s"/></text>
+    <text x="480" y="505" class="caption" opacity="0">Execute: GitHub clicks are yours. Pushes and deploys run in workers, and each one prompts you again.
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+14.5s" dur="7.5s"/></text>
+    <text x="480" y="505" class="caption" opacity="0">Check-In: a read-only cron polls the healthcheck every 30 minutes. Destroying the stack is your command.
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+22s" dur="5s"/></text>
+    <text x="480" y="505" class="caption" opacity="0">Report: a private Round Report records every recommendation, your decision, and what ran.
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+27s" dur="3s"/></text>
+  </g>
+  <text x="480" y="536" text-anchor="middle" font-size="11" fill="#656871">30-second loop · every write the crew makes is behind a prompt you answer; every GitHub change is your own click</text>
+</svg>
