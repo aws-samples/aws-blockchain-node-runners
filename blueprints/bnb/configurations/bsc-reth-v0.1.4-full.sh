@@ -73,7 +73,11 @@ install_client() {
     # reth.fast = fast/minimal node snapshot (~458 GiB compressed).
     # 48Club currently publishes only the "fast" type for the reth client.
     local SNAPSHOT_TYPE="${BNB_SNAPSHOT_TYPE:-fast}"
-    /opt/blueprints/user-data/common/download-snapshot.sh reth "$SNAPSHOT_TYPE" || true
+    # Invoke via bash: the execute bit is lost when the CDK asset is zipped on Windows.
+    # The helper exits 0 when it skips (not enabled, not mainnet, already done).
+    if ! bash /opt/blueprints/user-data/common/download-snapshot.sh reth "$SNAPSHOT_TYPE"; then
+        echo "WARNING: snapshot download failed; the node will sync from genesis" >&2
+    fi
 
     echo "BSC Reth ${RETH_VERSION} full node installation complete"
 }
