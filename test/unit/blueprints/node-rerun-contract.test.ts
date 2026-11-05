@@ -71,14 +71,14 @@ describe('blueprint node.sh re-run contract', () => {
     });
 
     it('bnb reth: removes a leftover build directory before cloning', () => {
-        const config = read('bnb/configurations/bsc-reth-v0.1.2-full.sh');
+        const config = read('bnb/configurations/bsc-reth-v0.1.4-full.sh');
         const rm = config.indexOf('rm -rf reth-bsc-build');
         expect(rm).toBeGreaterThan(-1);
         expect(rm).toBeLessThan(config.indexOf('git clone --branch "$RETH_VERSION"'));
     });
 
     it('bnb and base: one-time genesis and snapshot steps are guarded', () => {
-        for (const config of ['bsc-geth-v1.7.8-full.sh', 'bsc-reth-v0.1.2-full.sh']) {
+        for (const config of ['bsc-geth-v1.8.2-full.sh', 'bsc-reth-v0.1.4-full.sh']) {
             const text = read(`bnb/configurations/${config}`);
             if (text.includes(' init ')) {
                 expect(text).toMatch(/if \[ ! -d \/data\/[a-z]+ \]/);
