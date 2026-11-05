@@ -68,11 +68,12 @@
         "match": [
           "kirocrew-core/task_run", "kirocrew-core/workflow_run", "kirocrew-core/workflow_author", "kirocrew-core/register_hook",
           "kirocrew-core/set_project", "kirocrew-core/reset_conversation", "kirocrew-core/deploy_artifact", "kirocrew-core/browser",
-          "kirocrew-cron/cron_add", "kirocrew-cron/cron_update", "kirocrew-cron/cron_trigger", "kirocrew-cron/cron_remove_all",
+          "kirocrew-cron/cron_update", "kirocrew-cron/cron_trigger", "kirocrew-cron/cron_remove_all",
           "kirocrew-dashboard/session_close", "kirocrew-dashboard/session_stop", "kirocrew-dashboard/session_set_model", "kirocrew-dashboard/session_adopt"
         ],
         "effect": "deny"
-      }
+      },
+      { "capability": "mcp", "match": ["kirocrew-cron/cron_add"], "effect": "ask" }
     ]
   }
 }

@@ -85,6 +85,10 @@ A PR changing `.kiro/agents/**`, `.kiro/skills/**`, `.kiro/prompts/**` or `docs/
 - Do not push to a fork branch, even when "allow edits from maintainers" is on.
 - Do not post comments or reviews. Draft; the maintainer posts.
 
+## Reporting
+
+The Lead reads your final message through a tool that cuts long replies, so write **summary first**: a table with one row per PR (number, class, recommendation, head SHA, one-line reason) at the top, then one short section per PR, the whole message under 4000 characters. Full community briefs and drafted replies go into a second message only when the Lead asks for that PR. `work_report` gets the one-line verdicts (500-character summary).
+
 ## What the maintainer does with your output
 
 You have no execution step. For every PR your row carries the recommendation, the reason, the head SHA you classified, and whatever text the maintainer will need: for a merge, the squash-commit subject to use; for a close, the drafted comment; for a community PR, the drafted reply. The Lead re-reads each ticked PR before handing it to the maintainer and compares the head SHA and checks against your row; a mismatch sends the PR back for re-classification, so report the SHA exactly.

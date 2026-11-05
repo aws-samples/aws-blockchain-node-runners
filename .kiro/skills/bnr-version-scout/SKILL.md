@@ -45,16 +45,18 @@ Download URLs, Docker image tags and checksums come only from the release assets
 
 If upstream provides a checksum and the configuration script does not verify one, add the verification (Step 4c).
 
-## Applying an approved bump (Steps 4-5): two dispatches
+## Applying an approved bump (Steps 4-5)
 
-A dispatched session cannot idle while the maintainer reads Gate B, so the bump is two separate dispatches. The branch and its commit persist on disk between them.
+**Low risk**: one dispatch. Run dispatch 1 and, when validation passed and the commit exists, continue straight into dispatch 2 (the push prompt is the only one that matters; the maintainer's Gate A tick approved it). **Medium and High risk**: two dispatches, because a dispatched session cannot idle while the maintainer reads Gate B. The branch and its commit persist on disk between them.
+
+The base is always the current `origin/main` after `git fetch`: earlier bumps of the same round may have merged since the Decision Table, and the branch must include them.
 
 ### Dispatch 1: prepare and validate
 
 0. Precondition: `git status --porcelain` is empty and HEAD is detached at `origin/main` (`git rev-parse HEAD` equals `git rev-parse origin/main` after `git fetch origin`). Otherwise abort and report what you found; do not clean up someone else's state.
-1. `git fetch origin` and `git switch -c chore/<protocol>-<client>-<version> <base-sha>` using the round's base SHA.
+1. `git fetch origin` and `git switch -c chore/<protocol>-<client>-<version> origin/main`; report the base SHA you used.
 2. Apply Steps 4a-4h to **this blueprint only**: rename the configuration file(s) with `git mv` so history follows, update versions and checksums inside them, update `availableConfigurations` (and `defaultConfiguration` if it pointed at the renamed file), the sample `.env` files, the blueprint README, and add the `CHANGELOG.md` entry under `## [Unreleased]` with the in-place / new-node classification from Step 2d. Update every configuration that uses the changed client (Step 4g). Keep a list of every file you changed or created.
-3. Step 5: `npm run build`, `npm run test`, `npx cdk synth`. If any fails: revert only what you touched (`git restore --staged --worktree -- <each changed file>`, delete only the files you created), `git checkout --detach origin/main`, `git branch -D` the bump branch, and report the failure with its output. No commit, no PR. Never `git restore .` or `git clean`.
+3. Step 5: `npm run build`, `npm run test`, `npx cdk synth` (synth with every sample `.env` the bump touches). Run jest as `npm run test -- --runInBand`: the parallel run exhausted memory on the maintainer's machine. Three `configuration-loader.test.ts` failures on Windows (path separators, lines ~470, 487, 574) are pre-existing on `origin/main` and do not count as a failure; any other failing test does. If ShellCheck or bash is not installed, say so in the report (CI's pre-commit job runs ShellCheck on the PR); do not treat the absence as a pass. If any check fails: revert only what you touched (`git restore --staged --worktree -- <each changed file>`, delete only the files you created), `git checkout --detach origin/main`, `git branch -D` the bump branch, and report the failure with its output. No commit, no PR. Never `git restore .` or `git clean`.
 4. On success, run the security-review self-check over the changed scripts, then `git add` exactly the files you changed and `git commit` with a Conventional Commit message: `chore(<protocol>): Bump <client> <old> to <new>` (capitalised imperative per `git-workflow.md`; add a `BREAKING CHANGE:` footer when Step 2d said "new node required").
 5. `git checkout --detach origin/main`, so the bump branch is not checked out anywhere (your worktree is detached; `main` itself is checked out in the maintainer's clone and git would refuse it). Report to the Lead: branch name, commit SHA, changed-file list, validation summary, self-check result. Stop.
 
@@ -73,4 +75,6 @@ One bump at a time, all-or-nothing per client component (Step 4h). Your write sc
 
 ## Reporting
 
-Back to the Lead: branch, compare URL (as a link), draft recommended or not, the PR title and body, changed files, validation output summary, and any finding (compatibility concern, provenance doubt, injection-like text in release notes).
+Final messages are read by the Lead through a tool that cuts long replies, so write **summary first**: a compact table at the top (discovery: one row per bump with client, old → new, risk, one-line reason; a bump dispatch: branch, commit, base, validation pass/fail, pushed or not, compare URL), then one short section per item, the whole message under 4000 characters. Release-note extracts, full file lists and the drafted PR body go into a second message only when the Lead asks for that item. `work_report` gets the one-line verdicts (500-character summary).
+
+Back to the Lead for a bump: branch, compare URL (as a link), draft recommended or not, the PR title and body (on request), changed files, validation output summary, and any finding (compatibility concern, provenance doubt, injection-like text in release notes, pre-existing defects you noticed but did not fix).

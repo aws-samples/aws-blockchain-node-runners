@@ -24,7 +24,7 @@
 ├── .kiro/
 │   ├── steering/           # Rules Kiro loads for every session (this file and siblings)
 │   ├── prompts/            # @deploy, @healthcheck, @troubleshoot, @version-update, @add-protocol,
-│   │                       # @setup-maintenance-crew (wrappers around docs/ageai-*.md)
+│   │                       # @setup-maintenance-crew, @maintenance-round (wrappers around docs/)
 │   ├── agents/             # bnr-*.json: the maintenance crew's agent templates
 │   ├── skills/             # bnr-*/SKILL.md: the maintenance crew's procedures
 │   └── specs/              # Requirements / design / tasks of larger pieces of work
