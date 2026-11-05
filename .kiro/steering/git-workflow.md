@@ -93,11 +93,12 @@ workflow, or anything that forces users to change config or redeploy MUST carry
 
 ## Everything reaches `main` through a PR
 
-Since November 2026 the branch rule on `main` has **no bypass** ("Do not allow
-bypassing the above settings" is on), so nobody, the maintainer included, can
-push to `main` directly. Every change is a PR with one approval from a
-collaborator who is not its author and green required checks. The risk tiers
-below now decide how much review a PR gets, not whether it needs one.
+The branch rule on `main` applies to everyone, administrators included ("Do not
+allow bypassing the above settings" is enabled), so nobody can push to `main`
+directly. Every change is a PR with one approval from a collaborator who is not
+its author and green required checks. The risk tiers below decide how much
+review a PR gets, not whether it needs one. If a PR ever lands with no review
+recorded, check that setting first: it is the one that makes the rest hold.
 
 Which CI runs is still worth knowing: `build-and-test` and `CodeQL` run on both
 push and PR; the security and lint scanners are **PR-only** and therefore run on
@@ -199,10 +200,12 @@ deletion/force-push block only):
   false-positive rate and "scan failed to run" is distinguishable from "scan
   found findings" (see `ci-workflows.md`).
 - **Require linear history** — pairs with squash-merge.
-- **Do not allow bypassing the above settings: on.** Administrators are bound
-  by the rule like everyone else. The maintenance crew cannot merge anyway (its
-  GitHub access is read-only), so this setting costs nothing and keeps the
-  maintainer's own clicks under the same rule.
+- **Do not allow bypassing the above settings: enabled.** Administrators are
+  bound by the rule like everyone else. The maintenance crew cannot merge anyway
+  (its GitHub access is read-only), so this setting costs nothing and keeps the
+  maintainer's own clicks under the same rule. Verify with
+  `gh api repos/aws-samples/aws-blockchain-node-runners/branches/main/protection --jq .enforce_admins.enabled`
+  (expected `true`).
 - **Signed commits:** optional. Dependabot's commits are signed by GitHub; the
   first-party Pages deploy publishes an artifact, so a signed-commits rule
   would not interfere with it.

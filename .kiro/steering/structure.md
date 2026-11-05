@@ -27,7 +27,8 @@
 │   │                       # @setup-maintenance-crew, @maintenance-round (wrappers around docs/)
 │   ├── agents/             # bnr-*.json: the maintenance crew's agent templates
 │   ├── skills/             # bnr-*/SKILL.md: the maintenance crew's procedures
-│   └── specs/              # Requirements / design / tasks of larger pieces of work
+│   └── specs/              # Requirements / design / tasks of larger pieces of work; only the
+│                           # universal-blockchain-node-runner spec is published (others gitignored)
 └── .github/                # Workflows, Dependabot, Semgrep prompt-injection rules, PR template
 ```
 
@@ -60,7 +61,7 @@ Run as root on every deployed instance. Treat changes as high risk (see `git-wor
 - `steering/`: always-on rules for Kiro sessions
 - `prompts/`: one-line `@` wrappers; the procedure text lives in `docs/ageai-*.md`
 - `agents/` and `skills/`: the maintenance crew (`docs/maintenance-crew.md`). These files are instructions an agent executes and an agent spec launches MCP servers for whoever runs it: every change gets human review, and they are covered by the Semgrep prompt-injection rules in `.github/semgrep/`.
-- `specs/`: requirements, design and task lists for larger pieces of work
+- `specs/`: requirements, design and task lists for larger pieces of work. Only `universal-blockchain-node-runner/` is published; every other spec (the maintenance crew's included) is gitignored and lives on the maintainer's machine, so do not look for it in the repository
 
 ## File Naming Conventions
 - **Stacks**: `*-stack.ts` (e.g., `single-node-stack.ts`)
