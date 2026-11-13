@@ -510,7 +510,7 @@ See the [Troubleshooting Guide](/docs/guides/troubleshooting) for detailed diagn
 
 ### Upgrading Client Versions
 
-1. Copy the configuration `.yml` file to the new version, e.g. `bitcoin-core-v31.1-full.yml` → `bitcoin-core-v31.2-full.yml`
+1. Copy the configuration `.yml` file to the new version, e.g. `bitcoin-core-v31.2-full.yml` → `bitcoin-core-v31.3-full.yml`
 2. Update `CLIENT_CONFIG` in `.env` to the new filename
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output-bitcoin-mainnet.json`
 
