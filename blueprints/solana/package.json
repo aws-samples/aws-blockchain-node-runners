@@ -38,10 +38,10 @@
         "name": "agave-3.1.14-rpc-extended.sh"
       },
       {
-        "name": "frankendancer-0.1106.40201-rpc-base.sh"
+        "name": "frankendancer-0.1204.40300-rpc-base.sh"
       },
       {
-        "name": "frankendancer-0.1106.40201-rpc-extended.sh"
+        "name": "frankendancer-0.1204.40300-rpc-extended.sh"
       }
     ],
     "BC_NETWORKS": [

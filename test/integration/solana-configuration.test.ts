@@ -84,12 +84,12 @@ describe('Solana Protocol Configuration', () => {
             expect(agave412Extended).toBeDefined();
 
             const fdBase = protocolConfig.availableConfigurations.find(
-                c => c.name === 'frankendancer-0.1106.40201-rpc-base.sh'
+                c => c.name === 'frankendancer-0.1204.40300-rpc-base.sh'
             );
             expect(fdBase).toBeDefined();
 
             const fdExtended = protocolConfig.availableConfigurations.find(
-                c => c.name === 'frankendancer-0.1106.40201-rpc-extended.sh'
+                c => c.name === 'frankendancer-0.1204.40300-rpc-extended.sh'
             );
             expect(fdExtended).toBeDefined();
         });

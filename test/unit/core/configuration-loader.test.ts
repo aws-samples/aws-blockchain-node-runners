@@ -810,7 +810,7 @@ describe('ConfigurationLoader', () => {
       it.each([
         ['geth-1.17.7-lighthouse-8.2.2-full.yml', 'reth-2.5.2-lighthouse-8.2.2-archive.yml'],
         ['dummy-1.0.0-rpc-base.sh', 'dummy-1.0.0-rpc-extended.sh'],
-        ['agave-4.3.2-rpc-base.sh', 'frankendancer-0.1106.40201-rpc-base.sh'],
+        ['agave-4.3.2-rpc-base.sh', 'frankendancer-0.1204.40300-rpc-base.sh'],
       ])('changes the stack name for a different client or configuration type: %s -> %s', (from, to) => {
         const protocolConfig = configLoader.loadProtocolConfig('dummy');
         const name = (clientConfig: string) => {
