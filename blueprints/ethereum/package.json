@@ -11,13 +11,13 @@
       "single-node",
       "ha-nodes"
     ],
-    "defaultConfiguration": "geth-1.17.10-lighthouse-8.3.2-full.yml",
+    "defaultConfiguration": "geth-1.17.10-lighthouse-8.3.3-full.yml",
     "availableConfigurations": [
       {
-        "name": "geth-1.17.10-lighthouse-8.3.2-full.yml"
+        "name": "geth-1.17.10-lighthouse-8.3.3-full.yml"
       },
       {
-        "name": "reth-2.9.0-lighthouse-8.3.2-archive.yml"
+        "name": "reth-2.9.0-lighthouse-8.3.3-archive.yml"
       },
       {
         "name": "erigon-3.8.1-caplin-archive.yml"
