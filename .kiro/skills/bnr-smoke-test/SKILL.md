@@ -1,6 +1,6 @@
 ---
 name: bnr-smoke-test
-description: How the Smoke Tester deploys an approved client version bump to the test AWS account from its own worktree, hands the long wait to a read-only Check-In cron, health-checks, troubleshoots, and destroys the stack by name - following the deploy, healthcheck and troubleshooting workflows in docs/. GitHub access is read-only.
+description: How the Smoke Tester deploys an approved client version bump to the test AWS account from its own worktree, runs read-only Check-In healthchecks on the Lead's request, troubleshoots, and confirms the maintainer's deletion of the stack - following the deploy, healthcheck and troubleshooting workflows in docs/. GitHub access is read-only.
 ---
 
 # Smoke test
@@ -48,23 +48,24 @@ Input: the approved proposal.
 2. Before deploying on Windows, confirm no tracked shell script is checked out with CRLF: `git ls-files --eol -- '*.sh'` must show no `w/crlf`. If it does, stop and report: the instance bootstrap re-executes these scripts and fails with `cannot execute: required file not found`, the stack rolls back after 15 minutes, and CDK reuses the already-uploaded asset on the next deploy because the asset hash ignores line endings. The fix is a `*.sh text eol=lf` attribute (repository `.gitattributes`, or `.git/info/attributes` locally) followed by re-checking out the scripts **in this worktree only** (`git rm --cached -r -q -- '*.sh'` then `git checkout -- '*.sh'`); the maintainer applies it. Never run `git checkout -- .`, `git restore .` or any checkout in the maintainer's clone: it discards their uncommitted work.
 3. `npx cdk deploy --tags bnr:crew-round=<round-id> --require-approval never --outputs-file deploy-output.json --profile <aws_profile>` from the worktree (raises the one deploy prompt in this session; the `.env` names the account and region but the CDK CLI still needs the profile for credentials). Record stack name and region from the output. Under PowerShell `cdk deploy` can exit 1 (CDK writes progress to stderr) while CloudFormation has created the stack: the exit code is not the verdict, the stack status is.
 4. Wait for `CREATE_COMPLETE` (`aws cloudformation wait stack-create-complete`, then `describe-stacks` for the status), then read the instance id from the stack outputs or `aws ec2 describe-instances` filtered on the stack tag. On `ROLLBACK_COMPLETE` or a failed create, read the stack events for the cause, report it with the exact removal command (`aws cloudformation delete-stack --stack-name <stack> --profile <aws_profile> --region <region>`) and stop; register nothing for a dead stack.
-5. Report to the Lead and stop. **You do not register the Check-In**: the Lead does, so that the job belongs to the Lead's chat, where the wake's results are delivered and where the job can be listed and removed. Your report carries everything the Lead needs for that, one per line: `stack=<name>`, `region=`, `instance_id=`, `created_at=<CREATE_COMPLETE time, ISO>`, `blueprint=`, `client=`, `network=`, `pr_url=` (or `none`), `deadline=<absolute ISO time, from the approved proposal>`, `every=<seconds, 1800 unless the proposal said otherwise>`, `healthcheck_doc=<absolute path of docs/ageai-healthcheck-prompt.md in the clone>`, and the removal command for the stack. The round ends with the test "running".
+5. Report to the Lead and **stay in this session**: the Lead sends every later Check-In on this stack here, because you hold the worktree, the stack facts and the credentials context. You do not register any cron job; the Lead registers a nudge that reminds it to ask you. Your report, one per line: `stack=<name>`, `region=`, `instance_id=`, `created_at=<CREATE_COMPLETE time, ISO>`, `blueprint=`, `client=`, `network=`, `pr_url=` (or `none`), `deadline=<absolute ISO time, from the approved proposal>`, `healthcheck_doc=<absolute path of docs/ageai-healthcheck-prompt.md in the clone>`, and the removal command for the stack. The round ends with the test "running".
 
-## Check-In wake
+## Check-In (on the Lead's request)
 
-The Check-In is a cron job the **Lead** registers right after your deploy report, naming this agent template so the wake runs with these rules. The wake procedure (account check, read-only healthcheck, the four verdicts, report to the Lead chat only on change or terminal state, the `delete-stack` command on failure or deadline) is in the `bnr-smoke-tester` agent prompt, because a headless wake cannot read this file. If you are reading this in a wake, the project directory was unexpectedly present; follow the agent prompt regardless.
+The Lead sends "Check-In on stack <name>" into this session about 10 minutes after `CREATE_COMPLETE` and every 15 minutes after that until the test concludes or the deadline passes. Each time:
 
-## After the test (dispatched by the Lead)
+1. `aws sts get-caller-identity --profile <aws_profile>` must still return `test_account_id`; if the profile's credentials have expired, report `credentials expired` and stop (that is a finding, not a verdict).
+2. Run the healthcheck **read-only** per `docs/ageai-healthcheck-prompt.md`: `aws cloudformation describe-stacks`, `aws ec2 describe-instances`, `aws ssm get-*`/`describe-*`, `aws logs describe-*`/`get-*`/`filter-log-events`/`tail`, `aws cloudwatch get-*`. Read the node service's journal tail from its log group, the block or slot height now and at the previous check, peer or connection counts, and the last error lines. Nothing that changes the instance or the stack.
+3. Verdict: **passed** (service running, no restarts, height rising, no error loops); **failed** only with evidence (service restarting, stack in a ROLLBACK or FAILED state, repeated error lines); **in progress** (snapshot download or sync going, no errors; this includes height 0 with the service up for the first 45 minutes after start, because peer discovery and header download come first); **not verified** (deadline passed while in progress, or height unchanged for more than 45 minutes with no error: say `no sync progress`).
+4. Reply with the verdict on the first line, then the numbers and the time of this check. Each AWS read prompts in this tab on the default backend; the maintainer answers them.
 
-You have no chat of your own. When the Check-In has reported a terminal verdict, the Lead raises the follow-up in its own chat (Gate D at the start of the next round, or sooner if the maintainer asks) and dispatches you with the verdict and the approved action:
+## After the test (on the Lead's request)
 
-- **Passed:** the Lead proposes destroying the stack (Gate D). Dispatched after approval:
-  `aws cloudformation delete-stack --stack-name <stack> --profile <aws_profile> --region <region>` (prompts), then `aws cloudformation wait stack-delete-complete --stack-name <stack> --profile <aws_profile> --region <region>` and confirm. In your report, recommend marking the draft PR ready; the Lead passes that to the maintainer, who does it in the GitHub UI.
-- **Failed:** dispatched first for diagnosis: run the troubleshooting workflow (`docs/troubleshooting.md`) read-only against the stack, report root cause and evidence, leave the PR a draft, and suggest whether the bump should be closed or fixed; the Lead then raises destroy (Gate D) and dispatches you again for it.
-- **Not verified:** report; the Lead raises destroy; the PR stays a draft.
-- The Check-In job is the Lead's; the Lead removes it. You have no job to remove.
+- **Passed or not verified:** the Lead raises Gate D in its chat and posts the removal command for the **maintainer** to run (Kiro Crew's built-in rule refuses `aws cloudformation delete-stack` from every agent shell). When the Lead asks, confirm the deletion: `aws cloudformation describe-stacks --stack-name <stack>` returns "does not exist", or `aws cloudformation wait stack-delete-complete ...` returns. For a passed test in the draft flow, recommend marking the draft PR ready; the Lead passes that to the maintainer.
+- **Failed:** when asked, run the troubleshooting workflow (`docs/troubleshooting.md`) read-only against the stack, report root cause and evidence, leave the PR a draft, and suggest whether the bump should be closed or fixed; the destroy follows as above.
+- The nudge job is the Lead's; you have no job to remove.
 
-Destroy is always by stack name through CloudFormation, never `cdk destroy`: hours later the worktree may hold a different checkout, and the stack must still go.
+You never run `delete-stack` or `cdk destroy`: destroys are the maintainer's, by stack name.
 
 ## Reporting
 
