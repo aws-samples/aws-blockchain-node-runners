@@ -7,7 +7,7 @@ Set up the Kiro Crew environment for the agentic maintenance crew that triages p
 This prompt guides you through placing every artifact the crew needs outside the repository where Kiro Crew expects it:
 - The GitHub token in the Kiro Crew secrets vault (you type it, the agent never sees it)
 - The `github-mcp-server` binary, verified against its release checksums
-- The four agent specs copied to `~/.kiro/agents/`, and the two git worktrees two of them work in
+- The five agent specs copied to `~/.kiro/agents/`, and the three git worktrees three of them work in
 - Project trust and the denied-command rule in the Kiro Crew dashboard
 - A one-time Git Credential Manager sign-in as the crew's GitHub identity
 - The local steering file with your AWS profile, test account ID and Round Report directory
@@ -28,6 +28,6 @@ Read the file `docs/ageai-setup-maintenance-crew-prompt.md` and follow the step-
 
 ## Expected Outcome
 
-- The four agents (Maintainer Lead, PR Triage, Version Scout, Smoke Tester) available as custom agents in Kiro Crew, with the Lead's chat open
+- The five agents (Maintainer Lead, PR Triage, Version Scout, Smoke Tester, Fixer) available as custom agents in Kiro Crew, with the Lead's chat open
 - A verification report, item by item
 - No change to any tracked file in the repository (`git status` stays clean)

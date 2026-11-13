@@ -25,7 +25,7 @@
 │   ├── steering/           # Rules Kiro loads for every session (this file and siblings)
 │   ├── prompts/            # @deploy, @healthcheck, @troubleshoot, @version-update, @add-protocol,
 │   │                       # @setup-maintenance-crew, @maintenance-round (wrappers around docs/)
-│   ├── agents/             # bnr-*.json: the maintenance crew's agent templates
+│   ├── agents/             # bnr-*.json: the maintenance crew's five agent templates
 │   ├── skills/             # bnr-*/SKILL.md: the maintenance crew's procedures
 │   └── specs/              # Requirements / design / tasks of larger pieces of work; only the
 │                           # universal-blockchain-node-runner spec is published (others gitignored)
