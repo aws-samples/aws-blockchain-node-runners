@@ -208,7 +208,7 @@ See [Troubleshooting Guide](/docs/guides/troubleshooting) for detailed diagnosti
 
 The client version is taken from the configuration file name (the single source of truth), so an upgrade is just a rename plus a config switch:
 
-1. Rename the configuration script to the new version, e.g. `bsc-geth-<old-version>-full.sh` → `bsc-geth-<new-version>-full.sh` (for BSC Reth, keep any upstream tag suffix such as `-fix` in the version, e.g. `bsc-reth-<new-version>-full.sh`)
+1. Rename the configuration script to the new version, e.g. `bsc-geth-<old-version>-full.sh` → `bsc-geth-<new-version>-full.sh` (for BSC Reth, keep any upstream tag suffix such as `-hotfix` in the version, e.g. `bsc-reth-v0.1.4-full.sh` → `bsc-reth-v0.1.4-hotfix-full.sh`)
 2. Update `CLIENT_CONFIG` in `.env` to the new filename
 3. Redeploy: `npx cdk deploy --json --outputs-file deploy-output-bnb-mainnet.json`
 
@@ -217,6 +217,7 @@ On a single-node stack, the redeploy stops and starts the same instance, and nod
 - BSC Geth downloads a release binary (a few minutes of downtime). BSC Reth is built from source (30–60 minutes).
 - Genesis init and the snapshot download are skipped when chain data already exists.
 - Switching between Geth and Reth changes the stack name, so it creates a new stack; the two clients can't share data.
+- A BSC Reth tag suffix other than a prerelease tag (`-rc`, `-beta`, `-alpha`) is part of the stack name. Moving to or from a `-hotfix` configuration creates a new stack; destroy the old one after the new node has synced.
 - **Instance store:** the samples keep `/data` on instance store, which is erased by the stop/start that any redeploy causes. The node then restores from a snapshot (if enabled) or syncs from genesis.
 
 ### Rolling Updates (HA Only)
@@ -275,7 +276,7 @@ A: BSC geth logs to hourly-rotated files in `/data/bsc.log*` rather than journal
 
 > Column legend — **Repo**: canonical `owner/repo` (link goes to the releases page). **Query method**: `releases/latest` = newest non-prerelease via GitHub API (`https://api.github.com/repos/{repo}/releases/latest`); `tags` = list `/tags` and pick the highest matching semver; `releases` = list `/releases` and pick the newest matching the prerelease policy; `pinned-file` = read the named file at the given ref. **Version line**: constrains updates to a release line (`*` = any). **Prereleases**: whether beta/RC tags are eligible.
 >
-> Note: `BSC Reth` is built from `bnb-chain/reth-bsc` (the repo the configuration script clones), and it only publishes `-beta` tags — so the newest beta is its effective stable channel.
+> Note: `BSC Reth` is built from `bnb-chain/reth-bsc` (the repo the configuration script clones). Its current releases are stable (not marked pre-release); some carry a suffix such as `-hotfix`, which stays part of the version in the configuration file name.
 
 - [BNB Chain Documentation](https://docs.bnbchain.org)
 - [BSC GitHub](https://github.com/bnb-chain/bsc)
