@@ -77,6 +77,7 @@
 - **BNB Chain**: BSC Reth `v0.0.10-beta` → `v0.1.1`. `v0.1.1` is a **mandatory** upgrade for the BSC mainnet Pasteur hardfork (activates 2026-08-25); nodes still on an older binary at activation will fork off the canonical chain. `v0.1.1` also **renamed the `--maxpeers` CLI flag to `--max-peers`**, so the `bsc-reth` run command was updated to match (the old flag now aborts startup with `INVALIDARGUMENT`). BSC Geth is bumped to `v1.7.7` separately for the Pasteur hardfork (see above).
 - **Base**: base/node `v1.1.1` → `v1.2.0` (`base-reth-v1.2.0-full.yml`, via `base_node_tag`). `v1.2.0` is a required Base upgrade that moves base-reth-node to **Storage V2**; new deployments download a V2 snapshot automatically, and because the Base blueprint uses ephemeral instance-store every deploy is a fresh sync.
 - **Bitcoin**: Bitcoin Core `v31.0` → `v31.1`.
+- **Bitcoin**: Bitcoin Core `v31.1` → `v31.2` (`bitcoin-core-v31.2-full.yml`, the default and used by all three samples). Bug-fix release: BIP 323 reserves version bits 5–28, so the node no longer warns about unknown soft-fork deployments that set them; the chainstate is compacted regularly and LevelDB seek compaction is disabled; the embedded asmap is updated; several P2P and network fixes. **Existing data: in place** (no database migration or re-sync). No options set in `bitcoin.conf` by `node.sh` changed. `node.sh` still downloads the release from bitcoincore.org and checks it against `SHA256SUMS` at boot.
 
 ### Fixed
 
