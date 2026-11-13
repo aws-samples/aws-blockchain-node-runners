@@ -36,7 +36,7 @@
       "args": [
         "stdio",
         "--read-only",
-        "--toolsets=context,repos,pull_requests,actions"
+        "--toolsets=context,repos,pull_requests,issues,actions"
       ],
       "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "secret://BNR_CREW_GITHUB_TOKEN" }
     }
@@ -59,13 +59,15 @@
           "kirocrew-work/work_ledger_read", "kirocrew-work/work_ledger_record", "kirocrew-work/work_ledger_rebuild", "kirocrew-work/work_brief",
           "github/get_me", "github/list_pull_requests", "github/pull_request_read", "github/search_pull_requests",
           "github/get_commit", "github/list_commits", "github/get_file_contents", "github/list_branches",
-          "github/actions_list", "github/actions_get", "github/get_job_logs"
+          "github/actions_list", "github/actions_get", "github/get_job_logs",
+          "github/list_issues", "github/issue_read", "github/search_issues"
         ],
         "effect": "allow"
       },
       {
         "capability": "mcp",
         "match": [
+          "github/issue_write", "github/add_issue_comment", "github/sub_issue_write", "github/add_sub_issue", "github/remove_sub_issue", "github/reprioritize_sub_issue", "github/assign_copilot_to_issue",
           "kirocrew-core/task_run", "kirocrew-core/workflow_run", "kirocrew-core/workflow_author", "kirocrew-core/register_hook",
           "kirocrew-core/set_project", "kirocrew-core/reset_conversation", "kirocrew-core/deploy_artifact", "kirocrew-core/browser",
           "kirocrew-cron/cron_update", "kirocrew-cron/cron_trigger", "kirocrew-cron/cron_remove_all",

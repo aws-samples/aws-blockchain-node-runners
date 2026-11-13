@@ -37,6 +37,7 @@ The maintainer may scope a round: everything (default), PRs only, versions only,
    - crew-tagged stacks that still exist: a dispatched Smoke Tester session lists them (`aws cloudformation describe-stacks --profile <aws_profile>`, keeping those whose tags include `bnr:crew-round`), to raise again in this round's Decision Table;
    - the running agreement rate (items where the maintainer's decision matched the recommendation / items decided);
    - open **findings** (defects noticed by a worker or a Check-In and not yet fixed): each becomes a Fix row in this round's Decision Table, unless the previous report marks it as fixed or declined.
+   Also count the issues opened since the previous round (`list_issues` with `since`) and put the number in the Decision Table header; PR Triage reviews the catalog submissions among them, and anything else is listed under Notes so an unlabelled one is at least seen.
 3. Confirm the GitHub identity: call `get_me` in your own chat (your read-only GitHub server is mounted) and record the login. Stop the round if the server fails to start (vault entry missing or token expired) and say so plainly. A read-only token is all the crew needs. If the token expires **mid-round** (a `401 Bad credentials` from any GitHub tool, round 4 at 05:55 UTC): record "GitHub reads degraded from <time>" once in the report, do not retry MCP calls, let workers take provenance from `git fetch` and public release pages, record PR numbers the maintainer reports as "maintainer-reported", and verify them after the token is renewed. The round goes on; only GitHub reads are affected.
 4. If smoke tests are in scope: a dispatched Smoke Tester session runs `aws sts get-caller-identity --profile <aws_profile>` and compares the account to `test_account_id`. Mismatch stops all AWS work in the round.
 
@@ -44,7 +45,7 @@ The maintainer may scope a round: everything (default), PRs only, versions only,
 
 Dispatch two work-ledger items at once and wait for both:
 
-- **PR triage** (`bnr-pr-triage`, folder `clone_folder` or `spawn_run` cwd `clone_path`): classify every open PR per that skill. Output: one row per PR with class, recommendation, reason; for non-Dependabot PRs the review brief and, for community PRs, the drafted reply.
+- **PR triage** (`bnr-pr-triage`, folder `clone_folder` or `spawn_run` cwd `clone_path`): classify every open PR per that skill, and review every open Community Blueprint Submission issue (label `community-blueprint` or title `[Blueprint]`) for the catalog. Output: one row per PR with class, recommendation, reason; for non-Dependabot PRs the review brief and, for community PRs, the drafted reply; one Catalog row per submission with its brief, drafted catalog table row and drafted reply.
 - **Version discovery** (`bnr-version-scout`, folder `scout_folder` or `spawn_run` cwd `scout_worktree_path`): Steps 1-3 of the version-update workflow across all in-scope blueprints. Output: one Change Notification per proposed bump with its risk level, plus flags (pinned release candidates, ambiguous release lines, security releases).
 
 A failed item is retried alone; the other result stands.
@@ -75,6 +76,7 @@ Types and what ticking them means:
 | PR merge | approve and squash-merge with the subject from the brief | the maintainer, in the GitHub UI (3a) |
 | PR close | close and post the drafted comment | the maintainer, in the GitHub UI (3a) |
 | PR review | the drafted reply is agreed; nothing else this round | the maintainer, if they post it |
+| Catalog | a Community Blueprint Submission issue: ticked means the maintainer labels it `community-blueprint`, posts the drafted reply, and, for *list in catalog*, a **Fix** row follows for the `website/docs/blueprints/community.mdx` table row (the Fixer prepares it; the maintainer opens the PR, merges, and closes the issue) | the maintainer, in the GitHub UI; the Fixer for the catalog PR |
 | Bump, **Low** risk | prepare, validate and **push in one dispatch** (the tick is the push approval; no Gate B); the maintainer opens the PR | Version Scout; the maintainer opens |
 | Bump, **Medium/High** | prepare and validate; **Gate B** before the push; the maintainer opens the PR. With a smoke test the row names the flow: **"PR, then smoke"** (default: the maintainer merges, the smoke runs against `origin/main`) or **"Draft PR + smoke"** (the branch is smoked before merge and the maintainer marks it ready afterwards) | Version Scout pushes; the maintainer opens |
 | Smoke | deploy on the test account (Gate C before the deploy itself) from the ref the bump row named: `origin/main` after merge, or `origin/<branch>` for the draft flow | Smoke Tester |

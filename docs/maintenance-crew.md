@@ -22,11 +22,11 @@ It reuses the GenAI workflows this repository already ships (`docs/ageai-*.md`) 
 
 ## What a round looks like
 
-![Animated overview of a maintenance round: you start it, two workers collect read-only, you tick a Decision Table, GitHub clicks stay yours while pushes and deploys prompt you, a read-only Check-In polls the test stack, and a private Round Report is written](assets/maintenance-round.svg)
+![Animated overview of a maintenance round: you start it, two workers collect read-only, you tick a Decision Table, GitHub clicks stay yours while pushes, fixes and deploys prompt you, a nudge cron reminds the Lead to have the Smoke Tester health-check the test stack, you delete the stack, and a private Round Report is written](assets/maintenance-round.svg)
 
 You open the Maintainer Lead's chat and send `@maintenance-round`, optionally with a scope: `PRs only`, `versions only`, a blueprint name, or `shadow`. The Lead then:
 
-1. **Collects**, in two parallel worker sessions. PR Triage classifies every open pull request. Version Scout compares each blueprint's pinned client versions with upstream releases and rates each possible bump Low, Medium or High.
+1. **Collects**, in two parallel worker sessions. PR Triage classifies every open pull request and reviews any community blueprint submitted for the catalog. Version Scout compares each blueprint's pinned client versions with upstream releases and rates each possible bump Low, Medium or High.
 2. **Presents one Decision Table** as a multi-select card. Each row is a recommendation with its reason: merge this Dependabot PR, close that failing one, open a PR for this patch bump, smoke-test that major bump, fix this defect the last smoke test exposed, redirect this community blueprint PR to the Community Catalog, destroy that leftover test stack. You tick what you approve. Unticked is rejected, and so is any answer that is not a clear yes.
 3. **Executes only ticked rows**, one at a time.
    - **GitHub actions are yours.** For each ticked PR row the Lead re-checks the PR, posts the link with the action and any drafted comment, and you approve, merge, close or comment in the GitHub UI. For a pushed bump branch it posts the compare link and you open the PR. The Lead reads the result back and records it.
@@ -41,7 +41,7 @@ Rounds start only when you ask. Nothing is scheduled except the Check-In after a
 | Agent | Does | Writes |
 |---|---|---|
 | Maintainer Lead | Runs the round, dispatches workers, presents the Decision Table, hands GitHub actions to you | The Round Report; the Check-In cron job |
-| PR Triage | Classifies PRs, writes review briefs and drafted replies | Nothing |
+| PR Triage | Classifies PRs, reviews community blueprint submissions for the catalog, writes review briefs and drafted replies | Nothing |
 | Version Scout | Runs `docs/ageai-version-update-prompt.md` Steps 1–5 in its own worktree | Files under `blueprints/<protocol>/` and `CHANGELOG.md`; `git push` of the bump branch |
 | Smoke Tester | Deploys a bump to the test account, runs the healthcheck as the Check-In, troubleshoots | `cdk deploy`; the smoke worktree's `.env` and CDK output. Destroys are yours |
 | Fixer | Turns one finding from a round (a script that fails silently, a stale sample, a missing check) into a fix branch with a regression test | Files under `blueprints/`, `assets/`, `lib/`, `test/`, `docs/` and `CHANGELOG.md` in its own worktree; `git push` of the fix branch after your second confirmation. Never CI, agent instructions or dependencies: those fixes come back to you as a write-up |
@@ -56,6 +56,7 @@ The crew never writes to GitHub through the API (every agent's GitHub MCP server
 - **Dependabot with a failing check**: the failing step and probable cause, plus a proposal (close with a drafted comment, wait for upstream, or a fix you make).
 - **A collaborator's PR**: never a merge candidate; checks, mergeability, risk tier and sensitive-path flags.
 - **A community PR**: never a merge candidate; a review brief (author association, template checklist, linked issue, Conventional Commit title, checks, sensitive paths) and a drafted reply. A PR adding a directory under `blueprints/` is recommended for redirection to the Community Catalog, per `CONTRIBUTING.md`.
+- **A Community Blueprint Submission issue** (the catalog route `CONTRIBUTING.md` points to): the only issues the crew reads. PR Triage checks the submitted repository read-only against the catalog's listing criteria (public, blueprint structure, README, a look at the scripts) and drafts the catalog table row and the reply. You label the issue, post the reply, and the Fixer prepares the one-row `community.mdx` PR for you to open.
 - **Anything touching `.kiro/agents/`, `.kiro/skills/`, `.kiro/prompts/` or `docs/ageai-*.md`**: human review whoever opened it. These files are instructions to AI agents.
 
 ### How a version bump is rated

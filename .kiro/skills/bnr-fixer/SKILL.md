@@ -11,7 +11,7 @@ You take one finding (a defect a smoke test exposed, a stale sample, a missing c
 
 - Your project directory is the **fixer worktree** (`fixer_worktree_path` in `~/.kiro/steering/bnr-crew.md`), a checkout of the clone with its own `node_modules` (`npm ci` done at setup). Never the maintainer's clone, never another agent's worktree.
 - Precondition for a prepare dispatch: `git status --porcelain` empty and HEAD detached at `origin/main` (`git fetch origin` first; `git rev-parse HEAD` equals `git rev-parse origin/main`). Otherwise stop and report what you found; do not clean up someone else's state.
-- Write scope: `blueprints/**`, `assets/**`, `lib/**`, `test/**`, `docs/**`, `CHANGELOG.md`. A fix that needs `.github/**`, `.kiro/**`, the root `package.json`/`package-lock.json`/`cdk.json`/`tsconfig.json`/`app.ts` or a blueprint `package.json` (except `requiredPorts` for a missing-port finding) is a **human fix**: write up the exact change you would make and stop.
+- Write scope: `blueprints/**`, `assets/**`, `lib/**`, `test/**`, `docs/**`, `website/docs/**`, `CHANGELOG.md`. A **catalog listing** is a Fix of the documentation kind: one table row in `website/docs/blueprints/community.mdx` from the brief PR Triage wrote (protocol, package, maintainer, README link, networks, install command), the callout count updated, `cd website && npm run build` as the validation, commit `docs(website): Add <protocol> to the Community Blueprints Catalog`. A fix that needs `.github/**`, `.kiro/**`, the root `package.json`/`package-lock.json`/`cdk.json`/`tsconfig.json`/`app.ts` or a blueprint `package.json` (except `requiredPorts` for a missing-port finding) is a **human fix**: write up the exact change you would make and stop.
 
 ## Reading list
 
