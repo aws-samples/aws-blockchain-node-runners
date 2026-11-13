@@ -9,8 +9,8 @@
 #   no args   — runs reth-bsc with full-node flags (systemd entrypoint)
 #
 # The client version is derived from CLIENT_CONFIG (the configuration file
-# name, e.g. "bsc-reth-v0.1.4-full.sh" -> "v0.1.4"), which is the
-# single source of truth. The upstream tag suffix (e.g. "-beta", "-fix") is
+# name, e.g. "bsc-reth-v0.1.4-hotfix-full.sh" -> "v0.1.4-hotfix"), which is the
+# single source of truth. The upstream tag suffix (e.g. "-beta", "-hotfix") is
 # part of the version and is carried in the file name.
 #
 # reth-bsc is built from source because the project does not publish
