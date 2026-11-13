@@ -4,7 +4,7 @@ A small team of [Kiro Crew](https://github.com/kirodotdev/KiroCrew) agents that 
 
 The crew reads and analyses on its own. It never decides. Every change to AWS or to the repository waits for your explicit approval, and every change on GitHub (approve, merge, close, open a PR) is your own click, prepared and recorded by the crew. The crew's GitHub access is read-only.
 
-It reuses the GenAI workflows this repository already ships (`docs/ageai-*.md`) and adds four agent definitions, four skills, two prompts, a setup procedure and this page. No scripts, no new dependencies, no state in the repository.
+It reuses the GenAI workflows this repository already ships (`docs/ageai-*.md`) and adds five agent definitions, five skills, two prompts, a setup procedure and this page. No scripts, no new dependencies, no state in the repository.
 
 ## Before you start
 
@@ -18,19 +18,19 @@ It reuses the GenAI workflows this repository already ships (`docs/ageai-*.md`) 
 - A GitHub account for a **read-only** token (your own is fine; see "Identity and token").
 - A separate **test AWS account** with a named CLI profile, CDK-bootstrapped in your region, ideally with an AWS Budgets alarm.
 - Branch protection on `main`: pull request required, one approving review, required status checks `Build, test, and validate CDK synthesis` and `Analyze TypeScript`, linear history.
-- Your clone and the two worktrees setup creates must lie under a directory in Kiro Crew's `agent.subagent_cwd_allowed_roots` (default `~/workspace` and siblings).
+- Your clone and the three worktrees setup creates must lie under a directory in Kiro Crew's `agent.subagent_cwd_allowed_roots` (default `~/workspace` and siblings).
 
 ## What a round looks like
 
-![Animated overview of a maintenance round: you start it, two workers collect read-only, you tick a Decision Table, GitHub clicks stay yours while pushes and deploys prompt you, a read-only Check-In polls the test stack, and a private Round Report is written](assets/maintenance-round.svg)
+![Animated overview of a maintenance round: you start it, two workers collect read-only, you tick a Decision Table, GitHub clicks stay yours while pushes, fixes and deploys prompt you, a nudge cron reminds the Lead to have the Smoke Tester health-check the test stack, you delete the stack, and a private Round Report is written](assets/maintenance-round.svg)
 
 You open the Maintainer Lead's chat and send `@maintenance-round`, optionally with a scope: `PRs only`, `versions only`, a blueprint name, or `shadow`. The Lead then:
 
-1. **Collects**, in two parallel worker sessions. PR Triage classifies every open pull request. Version Scout compares each blueprint's pinned client versions with upstream releases and rates each possible bump Low, Medium or High.
-2. **Presents one Decision Table** as a multi-select card. Each row is a recommendation with its reason: merge this Dependabot PR, close that failing one, open a PR for this patch bump, smoke-test that major bump, redirect this community blueprint PR to the Community Catalog, destroy that leftover test stack. You tick what you approve. Unticked is rejected, and so is any answer that is not a clear yes.
+1. **Collects**, in two parallel worker sessions. PR Triage classifies every open pull request and reviews any community blueprint submitted for the catalog. Version Scout compares each blueprint's pinned client versions with upstream releases and rates each possible bump Low, Medium or High.
+2. **Presents one Decision Table** as a multi-select card. Each row is a recommendation with its reason: merge this Dependabot PR, close that failing one, open a PR for this patch bump, smoke-test that major bump, fix this defect the last smoke test exposed, redirect this community blueprint PR to the Community Catalog, destroy that leftover test stack. You tick what you approve. Unticked is rejected, and so is any answer that is not a clear yes.
 3. **Executes only ticked rows**, one at a time.
    - **GitHub actions are yours.** For each ticked PR row the Lead re-checks the PR, posts the link with the action and any drafted comment, and you approve, merge, close or comment in the GitHub UI. For a pushed bump branch it posts the compare link and you open the PR. The Lead reads the result back and records it.
-   - **Repository and AWS work runs in worker sessions.** Version Scout prepares a bump branch in its own worktree, validates it (`npm run build`, `npm run test`, `npx cdk synth`) and pushes it: Low risk in one step, Medium and High after a second confirmation with the changed-file list in front of you. The Smoke Tester deploys a test stack after you confirm the stack, network, instance type and cost. Each push and deploy raises its own approval prompt in the worker session, so a misread card cannot write without a second click.
+   - **Repository and AWS work runs in worker sessions.** Version Scout prepares a bump branch in its own worktree, validates it (`npm run build`, `npm run test`, `npx cdk synth`) and pushes it: Low risk in one step, Medium and High after a second confirmation with the changed-file list in front of you. The Fixer does the same for one finding at a time: it confirms the finding against the code, writes a test that fails, makes the smallest change that passes it, validates, and pushes after your second confirmation; you open the PR. The Smoke Tester deploys a test stack after you confirm the stack, network, instance type and cost. Each push and deploy raises its own approval prompt in the worker session, so a misread card cannot write without a second click.
 4. **Checks on the running node.** After a deploy, the Lead registers a small reminder job (one prompt in the Lead's chat) that wakes 10 minutes after the stack is up and every 15 minutes after that. Each wake only tells the Lead a check is due; the Lead then asks the Smoke Tester session that deployed the stack to run the healthcheck, and that session's AWS reads prompt in its tab for you to allow. No crew session runs unattended. A check ends with passed, failed or in progress; the test ends at the first conclusive verdict or at the deadline you approved (12 hours by default, a cost cap). The Lead then proposes destroying the stack and removes the reminder. **Destroying the stack is yours**: Kiro Crew's built-in rule refuses `aws cloudformation delete-stack` from every agent shell, so you run the command the Lead posts and it confirms `DELETE_COMPLETE`. If the bump went in as a draft PR and the test passed, the Lead asks you to mark it ready. Keep the Lead's chat and the deploy session open while a smoke test runs.
 5. **Writes a private Round Report** in a directory you chose at setup: every recommendation, your decision, what was executed, links, stacks still running. Reports stay out of the repository because they describe unapplied security releases, failed upgrades and your test infrastructure.
 
@@ -41,9 +41,10 @@ Rounds start only when you ask. Nothing is scheduled except the Check-In after a
 | Agent | Does | Writes |
 |---|---|---|
 | Maintainer Lead | Runs the round, dispatches workers, presents the Decision Table, hands GitHub actions to you | The Round Report; the Check-In cron job |
-| PR Triage | Classifies PRs, writes review briefs and drafted replies | Nothing |
+| PR Triage | Classifies PRs, reviews community blueprint submissions for the catalog, writes review briefs and drafted replies | Nothing |
 | Version Scout | Runs `docs/ageai-version-update-prompt.md` Steps 1–5 in its own worktree | Files under `blueprints/<protocol>/` and `CHANGELOG.md`; `git push` of the bump branch |
 | Smoke Tester | Deploys a bump to the test account, runs the healthcheck as the Check-In, troubleshoots | `cdk deploy`; the smoke worktree's `.env` and CDK output. Destroys are yours |
+| Fixer | Turns one finding from a round (a script that fails silently, a stale sample, a missing check) into a fix branch with a regression test | Files under `blueprints/`, `assets/`, `lib/`, `test/`, `docs/` and `CHANGELOG.md` in its own worktree; `git push` of the fix branch after your second confirmation. Never CI, agent instructions or dependencies: those fixes come back to you as a write-up |
 
 Agent specs live in `.kiro/agents/bnr-*.json`, skills in `.kiro/skills/bnr-*/SKILL.md`.
 
@@ -55,6 +56,7 @@ The crew never writes to GitHub through the API (every agent's GitHub MCP server
 - **Dependabot with a failing check**: the failing step and probable cause, plus a proposal (close with a drafted comment, wait for upstream, or a fix you make).
 - **A collaborator's PR**: never a merge candidate; checks, mergeability, risk tier and sensitive-path flags.
 - **A community PR**: never a merge candidate; a review brief (author association, template checklist, linked issue, Conventional Commit title, checks, sensitive paths) and a drafted reply. A PR adding a directory under `blueprints/` is recommended for redirection to the Community Catalog, per `CONTRIBUTING.md`.
+- **A Community Blueprint Submission issue** (the catalog route `CONTRIBUTING.md` points to): the only issues the crew reads. PR Triage checks the submitted repository read-only against the catalog's listing criteria (public, blueprint structure, README, a look at the scripts) and drafts the catalog table row and the reply. You label the issue, post the reply, and the Fixer prepares the one-row `community.mdx` PR for you to open.
 - **Anything touching `.kiro/agents/`, `.kiro/skills/`, `.kiro/prompts/` or `docs/ageai-*.md`**: human review whoever opened it. These files are instructions to AI agents.
 
 ### How a version bump is rated
@@ -89,7 +91,7 @@ Three rules keep those layers intact:
 
 **Which Kiro backend you run matters for prompt count, not for safety.** `agent.acp_backend` empty (the default) is KAS; `kiro` is kiro-cli. Deny and ask rules behave the same on both. kiro-cli honours the `allow` rules for local git, npm and in-scope file writes, so a bump costs one or two prompts and a round runs by itself up to the next gate. KAS withholds those allows, so each such call prompts in the worker tab (10 to 15 per bump) and the round waits for you at every one. Start on the default; for regular rounds `kirocrew config set agent.acp_backend kiro` and a restart switches, and back again the same way. Do not work around KAS prompts with Trust.
 
-The four agents are plain Kiro agent templates. Do not register them as Kiro Crew crewmates: crewmate chats run on a shared conductor that ignores a template's permission rules, and the Lead could then no longer dispatch the others.
+The five agents are plain Kiro agent templates. Do not register them as Kiro Crew crewmates: crewmate chats run on a shared conductor that ignores a template's permission rules, and the Lead could then no longer dispatch the others.
 
 ## Identity and token
 
@@ -108,8 +110,8 @@ Run `@setup-maintenance-crew` from Kiro with the clone as project directory. It 
 1. The token in the vault as `BNR_CREW_GITHUB_TOKEN`.
 2. `github-mcp-server` on `PATH`.
 3. Copies of `.kiro/agents/bnr-*.json` and `.kiro/skills/bnr-*/` in `~/.kiro/agents/` and `~/.kiro/skills/`. Kiro Crew resolves the agents the Lead dispatches, and the headless Check-In, from there. Re-copy after a `git pull` that changes either directory.
-4. Two worktrees next to the clone, `bnr-scout` and `bnr-smoke`, each with `npm ci`. Version Scout and the Smoke Tester work there, never in your clone.
-5. Project trust for the clone and both worktrees when the dashboard asks (skill trust and MCP trust are separate prompts).
+4. Three worktrees next to the clone, `bnr-scout`, `bnr-smoke` and `bnr-fixer`, each with `npm ci`. Version Scout, the Smoke Tester and the Fixer work there, never in your clone.
+5. Project trust for the clone and each worktree when the dashboard asks (skill trust and MCP trust are separate prompts).
 6. One denied-command rule (Settings → Security): `gh\s+(pr\s+(merge|review|close|ready)|api\s+.*(-X|--method)\b)`.
 7. A Git credential for `github.com` stored once with `git credential-manager github login`, and `credential.interactive=false`, so a worker's `git push` either works or fails fast.
 8. The steering file `~/.kiro/steering/bnr-crew.md`, loaded by every Kiro session on the machine (it holds no secret):
@@ -125,12 +127,14 @@ Run `@setup-maintenance-crew` from Kiro with the clone as project directory. It 
    - clone_path: <absolute path of the clone>
    - scout_worktree_path: <absolute path of bnr-scout>
    - smoke_worktree_path: <absolute path of bnr-smoke>
+   - fixer_worktree_path: <absolute path of bnr-fixer>
    - round_reports_path: <absolute path of a directory outside every checkout>
    - clone_folder: bnr-clone
    - scout_folder: bnr-scout
    - smoke_folder: bnr-smoke
+   - fixer_folder: bnr-fixer
    ```
-9. Three sidebar folders in the dashboard (`bnr-clone`, `bnr-scout`, `bnr-smoke`), each with its project directory set. A worker session takes its working directory from the folder the Lead files it into.
+9. Four sidebar folders in the dashboard (`bnr-clone`, `bnr-scout`, `bnr-smoke`, `bnr-fixer`), each with its project directory set. A worker session takes its working directory from the folder the Lead files it into.
 10. The Lead's chat: new chat → Custom agents → `bnr-maintainer-lead`, project directory the clone, approval mode Normal.
 
 **Verify** in the Lead's chat: ask it to call `get_me` (the login must be the crew's account; this also proves the binary, the vault reference and the token) and to load its skill with `skill_search` (`bnr-maintenance-round` must be found). Then `aws sts get-caller-identity --profile <aws_profile>` must return `test_account_id`, and `gh pr merge` in any chat must be refused.

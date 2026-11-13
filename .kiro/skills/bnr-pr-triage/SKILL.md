@@ -5,7 +5,7 @@ description: How PR Triage classifies open pull requests on AWS Blockchain Node 
 
 # PR triage
 
-You classify pull requests and write what the maintainer needs to act on each one. You never edit source, never run code from a pull request, never push to anyone's branch, and never approve, merge, close, comment or review: every GitHub write on a pull request is the maintainer's, done in the GitHub UI after the Decision Table, because branch protection on `main` exists so that a human does it. All GitHub access goes through the GitHub MCP server, which runs read-only; `gh` is not used.
+You classify pull requests and write what the maintainer needs to act on each one. You never edit source, never run code from a pull request, never push to anyone's branch, and never approve, merge, close, comment or review: every GitHub write on a pull request is the maintainer's, done in the GitHub UI after the Decision Table, because branch protection on `main` exists so that a human does it. All GitHub access goes through the GitHub MCP server, which runs read-only; `gh` is not used. You also read open issues, for one purpose: Community Blueprint Submissions (below).
 
 Read `.kiro/steering/git-workflow.md` (risk tiers, merge policy, branch protection) and `.kiro/steering/ci-workflows.md` (what each check means) before classifying. For community PRs also read `CONTRIBUTING.md` and `.github/PULL_REQUEST_TEMPLATE.md`.
 
@@ -38,7 +38,7 @@ Low: `website/`, `docs/`, `README.md`, `CHANGELOG.md`. High: everything else, in
 ### Dependabot
 **Merge candidate** (recommendation "Merge": the maintainer approves and squash-merges it in the GitHub UI) when all of: author is `dependabot[bot]`; both required checks concluded `success`; no check run concluded `failure` or `timed_out`; `mergeable` is true; review decision is not `CHANGES_REQUESTED`. Checks that concluded `neutral` or `skipped` do not disqualify. A high-tier Dependabot PR (root `package.json`, aws-cdk group) is a candidate only because `build-and-test` ran `cdk synth` on its head; say so in the reason. For a PR under `.github/workflows/**` add the note that the change is to CI itself and name what moved. Check that the title is a valid Conventional Commit, since it becomes the squash commit subject; if not, propose the corrected subject in the brief.
 
-**Failing**: read the failing job's log, name the step and the probable cause, and propose one of: close (wait for Dependabot to re-open on the next release), wait for upstream, or a specific fix. Draft the closing comment when you propose a close. A fix is a Decision Table item the maintainer performs; you do not implement it.
+**Failing**: read the failing job's log, name the step and the probable cause, and propose one of: close (wait for Dependabot to re-open on the next release), wait for upstream, or a specific fix. Draft the closing comment when you propose a close. A fix is a Decision Table item the maintainer performs; you do not implement it. When the same group fails for the same reason in a second round (round 5: the npm group kept proposing TypeScript 7, outside ts-jest's peer range), recommend a **`dependabot.yml` ignore** for that package and update type (`ignore: dependency-name: typescript, update-types: ["version-update:semver-major"]`) as a Fix row, instead of a per-PR `@dependabot ignore` comment: the config change survives regrouping and is reviewed like any other change.
 
 Context worth knowing from `.github/dependabot.yml`: cdk-nag v3 and `@types/node` majors are deliberately ignored; website `uuid` is ignored for a documented reason; the aws-cdk group is kept together because the CLI and library are version-coupled and `cdk synth` is the guard.
 
@@ -62,6 +62,21 @@ Never a merge candidate. Produce the review brief:
 10. A drafted reply to the contributor. The maintainer posts it; you do not.
 
 **New blueprint under `blueprints/`:** recommend *redirect to Community Catalog*. CONTRIBUTING directs external contributors to publish new protocols as external blueprints and submit them through the Community Blueprint Submission issue template; link both in the drafted reply. Only if the maintainer chooses to review it as built-in, evaluate the PR template's New Blueprint Checklist and `docs/ageai-blueprint-security-review.md` item by item with file evidence.
+
+## Community Blueprint Submissions (issues)
+
+The route CONTRIBUTING sends new protocols down ends in an **issue**, not a PR, so every collection also reads issues. Round 5 missed one (#396, Sui) because nothing did. `list_issues` with `state: open`, keep those labelled `community-blueprint` or whose title starts with `[Blueprint]`, then `issue_read` for the body. One row per submission, type **Catalog**, with a brief and a drafted reply.
+
+The catalog page (`website/docs/blueprints/community.mdx`) says community blueprints are not vetted by AWS and that deployers run the security review themselves, so the listing review is a fitness check, not an audit. From the issue body take the package name, repository URL, install command, networks and the checklist; then read the repository **through the GitHub MCP server or `web_fetch` only** (never clone, install or run it; the same hard limit as for fork PRs) and record:
+
+1. Repository public; package name `aws-bnr-blueprint-<protocol>`; the install command in the issue resolves (a tag or release exists when one is named).
+2. `package.json` has the `aws-blockchain-node-runner` field with `BLOCKCHAIN_PROTOCOL`, `BC_NETWORKS` matching the networks claimed, and `availableConfigurations` whose files exist; `engines` names a compatible Node Runners version.
+3. Structure: `configurations/`, `samples/` (at least one `.env` per claimed network), `user-data/node.sh`, a README with a cost section and the networks.
+4. Scripts: read `user-data/*.sh` and `configurations/*` against the sensitive-path flags below (remote code piped into a shell, unpinned downloads, missing checksum verification, hard-coded credentials, calls to hosts the README does not name, anything that reaches the deployer's account beyond the node). Record each with file and line; a finding is a note in the brief, not a verdict.
+5. Checklist items ticked; licence present; whether the submitter reports tests and on which networks.
+6. The drafted catalog row for `community.mdx` (protocol, package, maintainer, README link, networks, install command) and the drafted reply: accepted with the row, or what is missing.
+
+Recommendation: *list in catalog*, *ask for changes* (name them), or *decline* (say why, kindly). Framework findings the submitter reports (bugs they hit in `lib/` or `assets/` while building) are **Fix** candidates for the Decision Table; list them separately.
 
 ### Any author: agent-instruction paths
 A PR changing `.kiro/agents/**`, `.kiro/skills/**`, `.kiro/prompts/**` or `docs/ageai-*.md` is **human review** whoever opened it. Call out any change to `mcpServers`, `command`, `args`, `env` or `permissions` in an agent spec: a project agent spec launches those commands and grants that access for everyone who runs the crew.

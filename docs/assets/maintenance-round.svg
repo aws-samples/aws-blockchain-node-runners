@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" role="img" aria-labelledby="t d">
   <title id="t">What a maintenance round looks like</title>
-  <desc id="d">Animated overview of one maintenance round: you start it, PR Triage and Version Scout collect read-only, you tick a Decision Table, GitHub clicks are yours while pushes and deploys run in prompted worker sessions, a read-only Check-In polls the test stack, and a private Round Report is written.</desc>
+  <desc id="d">Animated overview of one maintenance round: you start it, PR Triage and Version Scout collect read-only, you tick a Decision Table, GitHub clicks are yours while pushes, fixes and deploys run in prompted worker sessions, a nudge cron reminds the Lead to have the Smoke Tester health-check the test stack, you delete the stack, and a private Round Report is written.</desc>
   <defs>
     <marker id="aGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#8c8c94"/></marker>
     <marker id="aBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#42b4ff"/></marker>
@@ -62,18 +62,24 @@
 
     <rect x="520" y="230" width="160" height="50" rx="8" class="box">
       <animate attributeName="stroke" values="#424650;#b8e7ff;#b8e7ff;#424650" keyTimes="0;0.05;0.95;1" begin="loop.begin+19.3s" dur="2.7s"/>
+      <animate attributeName="stroke" values="#424650;#b8e7ff;#b8e7ff;#424650" keyTimes="0;0.05;0.95;1" begin="loop.begin+23.4s" dur="2.4s"/>
     </rect>
     <text x="600" y="251" text-anchor="middle" class="title">Smoke Tester</text>
-    <text x="600" y="267" text-anchor="middle" class="sub">deploys to the test account</text>
+    <text x="600" y="267" text-anchor="middle" class="sub">deploys, health-checks; never deletes</text>
 
-    <!-- Check-In (phase 4) -->
+    <rect x="520" y="315" width="160" height="44" rx="8" class="box">
+      <animate attributeName="stroke" values="#424650;#b8e7ff;#b8e7ff;#424650" keyTimes="0;0.05;0.95;1" begin="loop.begin+17.4s" dur="1.8s"/>
+    </rect>
+    <text x="600" y="333" text-anchor="middle" class="title" font-size="12">Fixer</text>
+    <text x="600" y="348" text-anchor="middle" class="sub">one finding, one fix branch with a test</text>
+
+    <!-- Check-In nudge (phase 4): a cron that only reminds the Lead -->
     <g opacity="0">
-      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.92;1" begin="loop.begin+22.2s" dur="4.8s"/>
-      <rect x="520" y="315" width="160" height="44" rx="8" class="box" stroke-dasharray="4 3"/>
-      <circle cx="545" cy="337" r="9" fill="none" stroke="#a4a4ad" stroke-width="1.5"/>
-      <path d="M545 331 v6 h5" fill="none" stroke="#a4a4ad" stroke-width="1.5"/>
-      <text x="612" y="333" text-anchor="middle" class="title" font-size="12">Check-In cron</text>
-      <text x="612" y="348" text-anchor="middle" class="sub">read-only, every 30 min</text>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.92;1" begin="loop.begin+22s" dur="4.6s"/>
+      <rect x="230" y="222" width="170" height="20" rx="10" class="box" stroke-dasharray="4 3"/>
+      <circle cx="246" cy="232" r="6" fill="none" stroke="#a4a4ad" stroke-width="1.3"/>
+      <path d="M246 228 v4 h3" fill="none" stroke="#a4a4ad" stroke-width="1.3"/>
+      <text x="322" y="236" text-anchor="middle" class="sub" font-size="10.5">nudge cron: "Check-In due" (+10 min, then 15)</text>
     </g>
   </g>
 
@@ -153,8 +159,8 @@
       <text x="494" y="312" fill="#a4a4ad" font-size="11" text-anchor="end">Push branch</text>
       <text x="186" y="333">reth 2.5.2 → 2.6.0 (High)</text>
       <text x="494" y="333" fill="#a4a4ad" font-size="11" text-anchor="end">PR, then smoke</text>
-      <text x="186" y="354">#380 community blueprint</text>
-      <text x="494" y="354" fill="#a4a4ad" font-size="11" text-anchor="end">Redirect</text>
+      <text x="186" y="354">node.sh keeps a trailing CR in config values</text>
+      <text x="494" y="354" fill="#a4a4ad" font-size="11" text-anchor="end">Fix</text>
     </g>
     <rect x="162" y="281" width="13" height="13" rx="2" fill="#131920" stroke="#8c8c94"/>
     <rect x="162" y="302" width="13" height="13" rx="2" fill="#131920" stroke="#8c8c94"/>
@@ -165,6 +171,7 @@
     <path d="M164 288 l4 4 l6 -8" opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+11s" dur="3.5s"/></path>
     <path d="M164 309 l4 4 l6 -8" opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+11.6s" dur="2.9s"/></path>
     <path d="M164 330 l4 4 l6 -8" opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+12.2s" dur="2.3s"/></path>
+    <path d="M164 351 l4 4 l6 -8" opacity="0"><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+12.7s" dur="1.8s"/></path>
   </g>
   <g opacity="0">
     <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+12.8s" dur="1.7s"/>
@@ -193,7 +200,14 @@
   </g>
   <g opacity="0">
     <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" begin="loop.begin+18.3s" dur="1.2s"/>
-    <text x="700" y="44" class="you">your click: open the PR</text>
+    <text x="700" y="44" class="you">your click: open the PRs</text>
+  </g>
+  <!-- 3e: fix branch by the Fixer -->
+  <g opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" begin="loop.begin+17.4s" dur="1.8s"/>
+    <path d="M402 195 C 460 195, 470 337, 516 337" class="flow"/>
+    <text x="700" y="372" class="tag">git push fix branch</text>
+    <path d="M684 337 C 740 337, 760 135, 786 125" class="flowWrite"/>
   </g>
   <!-- 3c: smoke test deploy -->
   <g opacity="0">
@@ -209,24 +223,20 @@
     <text x="656" y="298" text-anchor="middle" class="prompt">Allow deploy? ✓</text>
   </g>
 
-  <!-- ===== Phase 4: check-in (22-27s) ===== -->
+  <!-- ===== Phase 4: check-in (22-27s): nudge -> Lead asks the Smoke Tester -> read-only healthcheck ===== -->
   <g opacity="0">
-    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" begin="loop.begin+22s" dur="1.6s"/>
-    <rect x="236" y="218" width="158" height="20" rx="10" fill="#004a9e" stroke="#75cfff"/>
-    <text x="315" y="232" text-anchor="middle" class="prompt">Register Check-In? ✓</text>
-  </g>
-  <g opacity="0">
-    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+22.8s" dur="3.6s"/>
-    <path d="M684 337 C 740 337, 760 300, 786 285" class="flow" stroke-dasharray="3 3"/>
-    <text x="735" y="352" class="tag" text-anchor="middle">healthcheck</text>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+23.2s" dur="3.4s"/>
+    <path d="M402 200 C 460 200, 470 262, 516 262" class="flow"/>
+    <text x="440" y="222" class="tag" text-anchor="middle">Check-In on stack</text>
+    <path d="M684 262 L786 262" class="flow" stroke-dasharray="3 3"/>
+    <text x="735" y="254" class="tag" text-anchor="middle">healthcheck, read-only</text>
   </g>
   <circle r="4" fill="#8c8c94" opacity="0">
-    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+23s" dur="1s" repeatCount="3"/>
-    <animateMotion path="M684 337 C 740 337, 760 300, 786 285" begin="loop.begin+23s" dur="1s" repeatCount="3"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+23.6s" dur="0.9s" repeatCount="3"/>
+    <animateMotion path="M684 262 L786 262" begin="loop.begin+23.6s" dur="0.9s" repeatCount="3"/>
   </circle>
   <g opacity="0">
-    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" begin="loop.begin+24.8s" dur="2.2s"/>
-    <path d="M516 337 C 470 337, 440 230, 402 205" class="flow" stroke-dasharray="3 3"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" begin="loop.begin+25s" dur="2s"/>
     <rect x="402" y="296" width="84" height="20" rx="10" fill="#131920" stroke="#75cfff"/>
     <text x="444" y="310" text-anchor="middle" font-size="11" font-weight="600" fill="#b8e7ff">passed ✓</text>
     <text x="430" y="336" text-anchor="middle" class="you">your command:</text><text x="430" y="350" text-anchor="middle" class="you">delete-stack</text>
@@ -269,9 +279,9 @@
       <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+3s" dur="6s"/></text>
     <text x="480" y="505" class="caption" opacity="0">Decide: one Decision Table. You tick what you approve; anything unticked is rejected.
       <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+9s" dur="5.5s"/></text>
-    <text x="480" y="505" class="caption" opacity="0">Execute: GitHub clicks are yours. Pushes and deploys run in workers, and each one prompts you again.
+    <text x="480" y="505" class="caption" opacity="0">Execute: GitHub clicks are yours. Bumps, fixes and deploys run in workers, and each push or deploy prompts you again.
       <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+14.5s" dur="7.5s"/></text>
-    <text x="480" y="505" class="caption" opacity="0">Check-In: a read-only cron polls the healthcheck every 30 minutes. Destroying the stack is your command.
+    <text x="480" y="505" class="caption" opacity="0">Check-In: a cron only reminds the Lead; the Smoke Tester health-checks read-only while you watch. Deleting the stack is your command.
       <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.95;1" begin="loop.begin+22s" dur="5s"/></text>
     <text x="480" y="505" class="caption" opacity="0">Report: a private Round Report records every recommendation, your decision, and what ran.
       <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" begin="loop.begin+27s" dur="3s"/></text>
