@@ -5,7 +5,7 @@
 version: "3"
 services:
     execution:
-        image: ghcr.io/paradigmxyz/reth:v2.9.0
+        image: ghcr.io/paradigmxyz/reth:v2.10.1
         container_name: execution
         restart: always
         pid: host
