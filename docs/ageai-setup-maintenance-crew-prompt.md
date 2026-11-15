@@ -6,7 +6,7 @@ This workflow sets up, verifies and (if asked) tears down the Kiro Crew environm
 
 **Who this is for:** a maintainer of this repository or of a fork, running this prompt from Kiro CLI, the Kiro IDE or a Kiro Crew chat whose project directory is the clone.
 
-**What it touches:** only artifacts **outside** the repository: the Kiro Crew data home, `~/.kiro/agents/`, `~/.kiro/steering/`, two sibling worktree directories, and Kiro Crew dashboard settings the user confirms by hand. It never modifies a tracked file; `git status` in the clone must be unchanged at the end.
+**What it touches:** only artifacts **outside** the repository: the Kiro Crew data home, two Kiro Crew settings (`kirocrew config set`, after asking), `~/.kiro/agents/`, `~/.kiro/skills/`, `~/.kiro/steering/`, three sibling worktree directories, and Kiro Crew dashboard settings the user confirms by hand. It never modifies a tracked file; `git status` in the clone must be unchanged at the end.
 
 **Key principles:**
 - Never ask for, accept, display or write a secret value: not the GitHub token, not an AWS credential. The vault is written by the user in the dashboard; AWS is reached only through a named profile.
@@ -23,11 +23,11 @@ Gather, read-only, and show the user a table of what you found:
 1. Operating system and shell.
 2. `kirocrew --version`; the Kiro Crew data home (`KIROCREW_HOME` or `~/.kiro/crew`); whether the `kirocrew` on `PATH` serves that home (some editions refuse another install's home and say so). If it refuses, stop: the user must fix `PATH` or `KIROCREW_HOME` first.
 3. `kiro-cli --version`.
-4. Kiro Crew version 0.11 or later (earlier releases ran crewmates differently and are not supported). Settings, via `kirocrew config get`: `agent.acp_backend` (empty means KAS, the default since 0.11; `kiro` means kiro-cli; both are supported, see Step 4b), `agent.session_control` (must be `true`, the default; the Lead's `session_create` depends on it), `agent.subagent_cwd_allowed_roots`, `agent.tool_approval_timeout_secs`.
+4. Kiro Crew version 0.11 or later (earlier releases ran crewmates differently and are not supported). Settings, via `kirocrew config get`: `agent.acp_backend` (empty means KAS, the default since 0.11; `kiro` means kiro-cli; the crew is set up on `kiro`, see Step 4b), `agent.tool_approval_timeout_secs` (default 600; the crew uses 3600, Step 4b), `agent.session_control` (must be `true`, the default; the Lead's `session_create` depends on it), `agent.subagent_cwd_allowed_roots`. Record the current values of the first two verbatim: teardown restores them.
 5. The clone's path and `origin` remote (`git remote get-url origin`); the repository the crew will maintain is derived from it. Confirm the clone lies under one of the allowed roots from step 4.
 6. `node --version` (20 or later), `aws --version`, `git --version`, `github-mcp-server --version` on `PATH`; `git credential-manager --version` and `git credential-manager github list` (which accounts are stored; prints no secret). Also `shellcheck --version` and `bash --version`: both optional, but without them Version Scout cannot lint the shell scripts it edits and says so in each report (CI's pre-commit job runs ShellCheck on the PR). Report free memory as well: under about 8 GB the test suite must run with `--runInBand`, which the skills already do.
 7. Leftovers from an older setup: `kirocrew agent list` rows whose `KIRO_AGENT` is a `bnr-*` spec or whose name is `maintainer-lead`, `pr-triage`, `version-scout` or `smoke-tester`; files under `~/.kiro/mates/agents/` with those names. The crew does not use crewmates (they ignore the specs' permission rules), so these are to be removed in Step 5.
-8. Which setup steps are already complete: vault entry present (step 2 below), binary present and at the pinned version, `~/.kiro/agents/bnr-*.json` present and identical to the repository's, worktrees present, steering file present with all keys, Git Credential Manager signed in, denied-command rule present (dashboard).
+8. Which setup steps are already complete: vault entry present (step 2 below), binary present and at the pinned version, `~/.kiro/agents/bnr-*.json` present and identical to the repository's, the two Kiro Crew settings at the crew's values (Step 4b), worktrees present, steering file present with all keys, Git Credential Manager signed in, denied-command rule present (dashboard).
 
 Then present the plan: the steps still pending, in order, and ask to proceed.
 
@@ -59,9 +59,16 @@ Kiro Crew resolves the agent names the Lead dispatches (`bnr-pr-triage`, `bnr-ve
 2. For each missing or different file, ask, then copy. Never edit the repository's copy.
 3. Tell the user to re-run this step after any `git pull` that changes `.kiro/agents/` or `.kiro/skills/`.
 
-## STEP 4b: BACKEND (read-only, informational)
+## STEP 4b: KIRO CREW SETTINGS
 
-Tell the user which backend the crew will run on, from `agent.acp_backend` (Phase 0 item 4), and what it means: on **KAS** (empty value, the default) the specs' `deny` and `ask` rules apply but shell and file-write `allow` rules do not, so each shell command and local write in a worker session prompts (a bump costs 10 to 15 prompts, read-only commands included); on **kiro-cli** (`kiro`) the `allow` rules make those silent (a bump costs about 2 prompts). Every security layer holds on both. Do not change the setting yourself. If the user wants kiro-cli, tell them the command (`kirocrew config set agent.acp_backend kiro`, then restart Kiro Crew) and that it is reversible; otherwise continue on the default.
+Two settings decide how many prompts a round costs. Every security layer holds whatever their values; the specs' `deny` and `ask` rules apply on both backends.
+
+1. **Backend.** On **KAS** (`agent.acp_backend` empty, the default) the specs' shell and file-write `allow` rules are withheld, so each shell command, local write and read-only AWS call in a worker session prompts: 10 to 15 prompts per bump, 6 to 8 per Check-In. On **kiro-cli** (`kiro`) the `allow` rules make those silent, and a bump costs one prompt (the push), a Check-In none. If the value is not already `kiro`, explain this, ask, then run `kirocrew config set agent.acp_backend kiro`.
+2. **Approval timeout.** A prompt in a worker session that nobody answers within `agent.tool_approval_timeout_secs` fails and the step has to be redone. The default 600 s lost report writes and worker steps in the first rounds. If the value is below 3600, ask, then run `kirocrew config set agent.tool_approval_timeout_secs 3600`.
+3. Both settings take effect at the next Kiro Crew start. Tell the user to **restart Kiro Crew after this setup finishes** (not now: a restart ends this session), and record the restart as pending for Step 10.
+4. Both are reversible with the same command and the values recorded in Phase 0 item 4; teardown does that.
+
+**Re-configuring later.** After a Kiro Crew update or a change of machine, re-run this step alone: `kirocrew config get agent.acp_backend` must print `kiro` and `kirocrew config get agent.tool_approval_timeout_secs` must print `3600`. A round on KAS shows itself as a prompt for every worker command; the Lead's skill tells it to say so at the start of the round.
 
 ## STEP 5: NO CREWMATES (remove leftovers)
 
@@ -77,7 +84,7 @@ Three sibling checkouts of the clone, so Version Scout, the Smoke Tester and the
 
 1. Propose `../bnr-scout`, `../bnr-smoke` and `../bnr-fixer` next to the clone (or paths the user prefers). Ask, then from the clone run `git worktree add --detach <path> origin/main` for each that does not exist.
 2. In each worktree run `npm ci` (not `npm install`: `package-lock.json` must stay untouched). Ask first; it takes a few minutes.
-3. Confirm `git -C <path> status --porcelain` is empty for both.
+3. Confirm `git -C <path> status --porcelain` is empty for each.
 4. On Windows, make sure every file that ships to an instance is checked out with LF endings: if `git -C <path> ls-files --eol -- '*.sh' '*.yml' '*.yaml' '*.json' '*.service'` shows any `w/crlf`, ask, then write `*.sh text eol=lf`, `*.yml text eol=lf`, `*.yaml text eol=lf`, `*.json text eol=lf`, `*.service text eol=lf` into the clone's `.git/info/attributes` (shared by its worktrees) and re-check out **only those files, only in the worktrees**: `git -C <worktree> rm --cached -r -q -- <the same patterns>` then `git -C <worktree> checkout -- <the same patterns>`, after confirming `git -C <worktree> status --porcelain` is empty. A CRLF `.yml` is as bad as a CRLF `.sh`: the trailing `\r` ends up inside every config value and the client crash-loops. **Never run `git checkout -- .` or `git restore .` in the clone**: it overwrites every uncommitted change the maintainer has there (this happened once and cost a day's edits). The clone's own scripts do not need LF; nothing deploys from it. A CRLF `.sh` makes the deployed instance's bootstrap fail and the stack roll back.
 
 ## STEP 7: TRUST AND MCP ROUTING (dashboard)
@@ -129,7 +136,7 @@ and a note **without a colon**, such as "bnr maintenance crew - the crew never w
    - PR Triage reads in `clone_path` and never writes there; Version Scout works in `scout_worktree_path`;
      the Smoke Tester works in `smoke_worktree_path`; the Fixer works in `fixer_worktree_path`.
    ```
-3. For `round_reports_path` propose `<Kiro Crew data home>/workspace/maintenance/rounds`; ask, then create the directory if it does not exist.
+3. For `round_reports_path` propose `~/.kiro/crew/workspace/maintenance/rounds` (the default data home's workspace); ask, then create the directory if it does not exist. The Lead's spec allows file writes under exactly that path, so on the kiro-cli backend the Round Report is written without a prompt. Any other directory outside every checkout works too (for example when `KIROCREW_HOME` is elsewhere), but then each report write prompts in the Lead's chat; say so if the user chooses one.
 4. Tell the user this file loads into every Kiro session on the machine (that is how the headless Check-In sees it); it holds no secret.
 
 ## STEP 9b: GIT CREDENTIALS
@@ -158,14 +165,14 @@ Run every check you can and report pass/fail per line:
 | MCP binary | `github-mcp-server --version` on `PATH` is 2.0.3 |
 | Agent specs and skills | `~/.kiro/agents/bnr-*.json` and `~/.kiro/skills/bnr-*/SKILL.md` present and byte-identical to the clone's |
 | No crewmates | `kirocrew agent list` shows no row bound to a `bnr-*` spec |
-| Settings | `agent.session_control` is `true`; `agent.acp_backend` reported as KAS or kiro-cli together with its prompt consequence |
+| Settings | `agent.session_control` is `true`; `agent.acp_backend` is `kiro`; `agent.tool_approval_timeout_secs` is `3600`; if either was changed in this run, the Kiro Crew restart is still pending and the values apply after it |
 | Allowed roots | clone, `bnr-scout`, `bnr-smoke`, `bnr-fixer` all under `agent.subagent_cwd_allowed_roots` |
-| Approval timeout | report `agent.tool_approval_timeout_secs` and that write prompts appear in worker sessions and expire after it |
+| Report path | `round_reports_path` is `~/.kiro/crew/workspace/maintenance/rounds` (prompt-free report writes) or the user accepted that another path prompts |
 | Git credentials | `git credential-manager github list` names the crew's account; `git config --global credential.interactive` is `false` |
 | Denied commands | `gh pr merge --help` refused by policy |
 | Branch protection on `main` | read-only `gh api repos/<owner>/<repo>/branches/main/protection` (or ask the user to check): one required approval; required status checks `Build, test, and validate CDK synthesis` and `Analyze TypeScript`; linear history. Report the "Do not allow bypassing" state and recommend enabling it: the crew cannot merge, so it costs nothing |
 | Steering file | present, all twelve keys set, no placeholders; `round_reports_path` exists |
-| Sidebar folders | the three `*_folder` names exist with the matching project directories (user confirms, or `chat_folder_tree`) |
+| Sidebar folders | the four `*_folder` names exist with the matching project directories (user confirms, or `chat_folder_tree`) |
 
 Two checks you cannot run from here, because they need the Lead's own session with the vault token. Ask the user to do them in the **Lead's chat** (Step 9c) and tell you the result:
 - "Call `get_me` and tell me the login." It must be the crew's account. One success proves three things at once: the gateway found `github-mcp-server` on its own `PATH` (which the shell check above cannot prove for a service-started gateway), the `secret://` reference resolved, and the token authenticates. No separate binary check is needed there.
@@ -177,10 +184,11 @@ Finish with: `git -C <clone> status --porcelain` must be empty (this workflow ch
 
 List, then remove one at a time after confirmation:
 1. Any `bnr-smoke-*` cron jobs: `kirocrew cron list`, then `kirocrew cron remove <id>`.
-2. Worktrees: `git -C <clone> worktree remove <bnr-scout>` and `<bnr-smoke>` (add `--force` only if the user confirms discarding their contents).
+2. Worktrees: `git -C <clone> worktree remove <bnr-scout>`, `<bnr-smoke>` and `<bnr-fixer>` (add `--force` only if the user confirms discarding their contents).
 3. `~/.kiro/agents/bnr-*.json`, `~/.kiro/skills/bnr-*/` and `~/.kiro/steering/bnr-crew.md`; the Round Reports directory only if the user wants the history gone.
 4. Git credentials: `git credential-manager github logout` (by the user) and `git config --global --unset credential.interactive` if the user wants the default back.
-5. Dashboard, by the user: the vault entry `BNR_CREW_GITHUB_TOKEN`, any MCP routing for `github`, the denied-command rule, the project trusts, the three sidebar folders, the Lead's chat.
+4b. Kiro Crew settings, if the user wants the previous values back: `kirocrew config set agent.acp_backend <previous value>` and `kirocrew config set agent.tool_approval_timeout_secs <previous value>` (Phase 0 item 4; `""` for the KAS default and `600` if they were not recorded), then a Kiro Crew restart.
+5. Dashboard, by the user: the vault entry `BNR_CREW_GITHUB_TOKEN`, any MCP routing for `github`, the denied-command rule, the project trusts, the four sidebar folders, the Lead's chat.
 6. Any crewmates or `~/.kiro/mates/agents/` files an older setup left (Step 5).
 7. Optionally the `github-mcp-server` binary.
 
