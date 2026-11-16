@@ -60,7 +60,7 @@
       {
         "capability": "shell",
         "match": [
-          "gh *", "npx cdk destroy*", "cdk destroy*", "npm install*", "git push *", "cat *", "type *", "Get-Content *", "more *",
+          "gh *", "npx cdk destroy*", "cdk destroy*", "aws cloudformation delete-stack*", "aws ec2 terminate-instances*", "npm install*", "git push *", "cat *", "type *", "Get-Content *", "more *",
           "aws logs delete-*", "aws logs put-*", "aws logs create-*", "aws logs associate-*", "aws logs disassociate-*", "aws logs tag-*", "aws logs untag-*", "aws logs cancel-*",
           "aws cloudwatch delete-*", "aws cloudwatch put-*", "aws cloudwatch set-*", "aws cloudwatch enable-*", "aws cloudwatch disable-*", "aws cloudwatch tag-*", "aws cloudwatch untag-*", "aws cloudwatch start-*", "aws cloudwatch stop-*"
         ],
