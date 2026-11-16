@@ -57,17 +57,17 @@ Input: the approved proposal.
 
 ## Check-In (on the Lead's request)
 
-The Lead sends "Check-In on stack <name>" into this session about 10 minutes after `CREATE_COMPLETE` and every 15 minutes after that until the test concludes or the deadline passes. Each time:
+The Lead sends "Check-In on stack <name>" into this session about 10 minutes after `CREATE_COMPLETE` and every 30 minutes after that until the test concludes or the deadline passes (or whenever the maintainer asks for a check). Each time:
 
 1. `aws sts get-caller-identity --profile <aws_profile>` must still return `test_account_id`; if the profile's credentials have expired, report `credentials expired` and stop (that is a finding, not a verdict).
 2. Run the healthcheck **read-only** per `docs/ageai-healthcheck-prompt.md`: `aws cloudformation describe-stacks`, `aws ec2 describe-instances`, `aws ssm get-*`/`describe-*`, `aws logs describe-*`/`get-*`/`filter-log-events`/`tail`, `aws cloudwatch get-*`. Read the node service's journal tail from its log group, the block or slot height now and at the previous check, peer or connection counts, and the last error lines. Nothing that changes the instance or the stack.
 3. Verdict: **passed** (service running, no restarts, height rising, no error loops); **failed** only with evidence (service restarting, stack in a ROLLBACK or FAILED state, repeated error lines); **in progress** (snapshot download or sync going, no errors; this includes height 0 with the service up for the first 45 minutes after start, because peer discovery and header download come first); **not verified** (deadline passed while in progress, or height unchanged for more than 45 minutes with no error: say `no sync progress`).
-4. Reply with the verdict on the first line, then the numbers and the time of this check. Each AWS read prompts in this tab on the default backend; the maintainer answers them.
+4. Reply with the verdict on the first line, then the numbers and the time of this check. On the kiro-cli backend these AWS reads run without a prompt (your spec allows them); on KAS each one prompts in this tab and the maintainer answers.
 
 ## After the test (on the Lead's request)
 
 - **Passed or not verified:** the Lead raises Gate D in its chat and posts the removal command for the **maintainer** to run (Kiro Crew's built-in rule refuses `aws cloudformation delete-stack` from every agent shell). When the Lead asks, confirm the deletion: `aws cloudformation describe-stacks --stack-name <stack>` returns "does not exist", or `aws cloudformation wait stack-delete-complete ...` returns. For a passed test in the draft flow, recommend marking the draft PR ready; the Lead passes that to the maintainer.
-- **Failed:** when asked, run the troubleshooting workflow (`docs/troubleshooting.md`) read-only against the stack, report root cause and evidence, leave the PR a draft, and suggest whether the bump should be closed or fixed; the destroy follows as above.
+- **Failed:** when asked, run the troubleshooting workflow (`docs/troubleshooting.md`) read-only against the stack and report root cause and evidence in a form the Lead can turn into a Fix row: the file and line (or the log line) at fault, whether the defect is in this repository or in the upstream client, the files you expect a fix to change, and what test would prove it. Leave the PR a draft and say whether the bump should be closed or fixed; the Lead may dispatch the Fixer for it in the same round, after the maintainer agrees. The destroy follows as above.
 - The nudge job is the Lead's; you have no job to remove.
 
 You never run `delete-stack` or `cdk destroy`: destroys are the maintainer's, by stack name.
