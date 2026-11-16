@@ -86,15 +86,6 @@ jobs:
       - name: Run ASH scan on changed files
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          # Stage our custom prompt-injection Semgrep rules inside the scan dir so
-          # ASH's bundled Semgrep scanner can load them. The container mounts this
-          # directory, so a path relative to the scan root resolves inside it.
-          # The rule file lives in the repo (version-controlled) but isn't part of
-          # the copied changed-file set, so copy it in explicitly.
-          mkdir -p /tmp/ash-scan/.ash/semgrep-rules
-          cp "$GITHUB_WORKSPACE/.github/semgrep/prompt-injection.yml" \
-             /tmp/ash-scan/.ash/semgrep-rules/prompt-injection.yml
-
           cd /tmp/ash-scan
           cat > .ash_config.yaml << 'EOF'
           reporters:
@@ -103,33 +94,76 @@ jobs:
               options:
                 include_detailed_findings: true
                 max_detailed_findings: 100
-            # flat-json is ASH's native machine-readable report. The
-            # prompt-injection gate below parses it (reports/ash.flat.json) to
-            # decide, per rule ID, whether to block. Enabling reporters here
+            # flat-json is ASH's native machine-readable report, kept for the
+            # artifact and the comment workflow. Enabling reporters here
             # overrides ASH's defaults, so it must be listed explicitly.
             flat-json:
               enabled: true
           scanners:
             semgrep:
+              # ASH's bundled Semgrep runs its default 'p/ci' ruleset. The
+              # repository's own prompt-injection rules are NOT loaded through
+              # ASH: its scanner option is a single `config` value, and since
+              # v3.8.0 it refuses a rule file that sits inside the scanned tree
+              # (so a PR cannot choose the rules it is scanned with) and rejects
+              # unknown option keys. The step "Prompt-injection scan" below runs
+              # those rules with Semgrep directly, from the checkout.
               enabled: true
-              options:
-                # Keep ASH's default CI ruleset and add our custom prompt-injection
-                # rules. The custom rules are path-scoped (docs/ageai-*.md and
-                # .kiro/prompts/*.md) via paths.include, so they only evaluate the
-                # prompt files when those files are part of the PR diff.
-                rules:
-                  - 'p/ci'
-                  - '.ash/semgrep-rules/prompt-injection.yml'
           EOF
           ash --mode container --config .ash_config.yaml 2>&1 | tee /tmp/ash-output.log
         # Kept non-blocking on purpose: a raw ASH exit code can't tell "found a
         # finding" from "the scanner crashed". All findings are surfaced as a PR
         # comment by the companion "ASH Security Scan - Post Comments" workflow.
-        # The explicit "Prompt-injection gate" step below makes the only blocking
-        # decision — narrowly, on the four ERROR-severity prompt-injection rules —
-        # by parsing the flat-json report, so infra flakiness never masquerades as
-        # a clean pass.
+        # The only blocking decision is the "Prompt-injection gate" step below,
+        # which reads the direct Semgrep report, not ASH's.
         continue-on-error: true
+
+      # The repository's prompt-injection rules, run with Semgrep directly so the
+      # gate does not depend on how ASH wires scanner options (a floating @v3
+      # install changed that twice). Runs from the checkout, on the changed files
+      # only; the rule file's own paths.include narrows it further to the AI
+      # prompt paths. Semgrep exits 1 on findings, so the exit code is captured
+      # and the gate reads the JSON instead.
+      - name: Prompt-injection scan
+        if: steps.changed-files.outputs.any_changed == 'true'
+        id: prompt-scan
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          set -uo pipefail
+          PROMPT_FILES=()
+          for f in $ALL_CHANGED_FILES; do
+            case "$f" in
+              docs/ageai-*.md|.kiro/prompts/*.md|.kiro/agents/*.json|.kiro/skills/*/*.md|.kiro/skills/*/*/*.md)
+                [ -f "$f" ] && PROMPT_FILES+=("$f") ;;
+            esac
+          done
+          if [ "${#PROMPT_FILES[@]}" -eq 0 ]; then
+            echo "applicable=false" >> "$GITHUB_OUTPUT"
+            echo "No AI prompt files changed — prompt-injection scan not applicable."
+            exit 0
+          fi
+          echo "applicable=true" >> "$GITHUB_OUTPUT"
+          printf 'Prompt files to scan:\n'; printf '  %s\n' "${PROMPT_FILES[@]}"
+
+          # Pinned on purpose: the gate is a security control and should not
+          # change behaviour because PyPI published a new Semgrep overnight.
+          # Bump deliberately when reviewing the rule file.
+          pip install --quiet 'semgrep==1.185.0'
+          semgrep --version
+
+          # --no-rewrite-rule-ids keeps the rule ids as written in the YAML, so
+          # the gate matches them exactly instead of a path-derived prefix.
+          # Findings suppressed with an inline `nosemgrep: <rule-id>` are left
+          # out of the JSON by Semgrep itself (the auditable escape hatch).
+          SEMGREP_EXIT=0
+          semgrep scan \
+            --config .github/semgrep/prompt-injection.yml \
+            --metrics=off --no-rewrite-rule-ids --no-git-ignore \
+            --json --output /tmp/prompt-injection.json \
+            "${PROMPT_FILES[@]}" 2>&1 | tee /tmp/prompt-injection.log || SEMGREP_EXIT=$?
+          echo "exit_code=${SEMGREP_EXIT}" >> "$GITHUB_OUTPUT"
+          exit 0
 
       - name: Process scan results
         if: steps.changed-files.outputs.any_changed == 'true'
@@ -185,81 +219,79 @@ jobs:
             /tmp/pr_comment.md
             /tmp/pr_number.txt
             /tmp/pr_sha.txt
+            /tmp/prompt-injection.json
+            /tmp/prompt-injection.log
           retention-days: 7
 
       # Narrow blocking gate. Runs AFTER the artifact upload so the companion
       # comment workflow still receives its input even when this step fails the
       # job. Only the four ERROR-severity prompt-injection rules block; the
-      # WARNING jailbreak rule and every other ASH finding stay advisory
-      # (surfaced in the PR comment). The gate can only ever fire on PRs that
-      # modify AI prompt files (docs/ageai-*.md, .kiro/prompts/*.md) — the same
-      # paths the custom rules are scoped to — so it has near-zero blast radius
-      # for unrelated contributions.
+      # WARNING jailbreak rule and every ASH finding stay advisory (surfaced in
+      # the PR comment). The gate can only ever fire on PRs that modify AI
+      # prompt files (docs/ageai-*.md, .kiro/prompts/*.md, .kiro/agents/*.json,
+      # .kiro/skills/**/*.md) — the same paths the rules are scoped to — so it
+      # has near-zero blast radius for unrelated contributions.
       - name: Prompt-injection gate
         if: steps.changed-files.outputs.any_changed == 'true'
         env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+          APPLICABLE: ${{ steps.prompt-scan.outputs.applicable }}
+          SEMGREP_EXIT: ${{ steps.prompt-scan.outputs.exit_code }}
         run: |
           set -euo pipefail
 
-          # The four ERROR-severity rule IDs from
-          # .github/semgrep/prompt-injection.yml. The fifth rule
-          # (prompt-injection-jailbreak-or-safety-bypass, WARNING) is
-          # intentionally excluded — it is the fuzziest matcher and stays
-          # advisory-only.
-          BLOCKING_RULES='prompt-injection-instruction-override|prompt-injection-reveal-system-prompt|prompt-injection-hide-from-user|prompt-injection-secret-exfiltration'
-
-          # Did this PR touch any in-scope AI prompt file? Mirror the rules'
-          # paths.include globs. The gate only engages when it did.
-          PROMPT_FILES_CHANGED=false
-          for f in $ALL_CHANGED_FILES; do
-            case "$f" in
-              docs/ageai-*.md|.kiro/prompts/*.md) PROMPT_FILES_CHANGED=true ;;
-            esac
-          done
-
-          if [ "$PROMPT_FILES_CHANGED" != "true" ]; then
+          if [ "$APPLICABLE" != "true" ]; then
             echo "No AI prompt files changed — prompt-injection gate not applicable."
             exit 0
           fi
 
           echo "AI prompt file(s) changed — enforcing prompt-injection gate."
 
-          # ASH writes its native machine-readable report here. Locate it rather
-          # than hard-coding the full path so a minor ASH layout change doesn't
-          # silently break the gate.
-          FLAT_JSON=$(find /tmp/ash-scan -type f -name 'ash.flat.json' 2>/dev/null | head -1 || true)
+          # The four ERROR-severity rule IDs from
+          # .github/semgrep/prompt-injection.yml. The fifth rule
+          # (prompt-injection-jailbreak-or-safety-bypass, WARNING) is
+          # intentionally excluded — it is the fuzziest matcher and stays
+          # advisory-only.
+          BLOCKING_RULES='^(prompt-injection-instruction-override|prompt-injection-reveal-system-prompt|prompt-injection-hide-from-user|prompt-injection-secret-exfiltration)$'
+
+          REPORT=/tmp/prompt-injection.json
 
           # Distinguish "scan failed to run" from "scan found nothing". A PR that
           # edits a prompt file MUST have a parseable report; if it doesn't, the
           # scan didn't actually vet the prompt — fail closed instead of treating
-          # a non-existent result as a clean pass.
-          if [ -z "$FLAT_JSON" ] || [ ! -s "$FLAT_JSON" ] || ! jq -e . "$FLAT_JSON" >/dev/null 2>&1; then
-            echo "::error::ASH produced no parseable results for a PR that modified AI prompt files. This is a scan-failed-to-run state, not a clean pass. Re-run the scan; if it keeps failing, investigate before merging."
+          # a non-existent result as a clean pass. Semgrep exits 0 (clean) or 1
+          # (findings) when it ran; anything else is an error.
+          if [ ! -s "$REPORT" ] || ! jq -e . "$REPORT" >/dev/null 2>&1 || { [ "${SEMGREP_EXIT:-99}" != "0" ] && [ "${SEMGREP_EXIT:-99}" != "1" ]; }; then
+            echo "::error::Semgrep produced no parseable results for a PR that modified AI prompt files (exit code ${SEMGREP_EXIT:-?}). This is a scan-failed-to-run state, not a clean pass. Re-run the scan; if it keeps failing, investigate before merging (see prompt-injection.log in the ash-security-results artifact)."
             exit 1
           fi
 
-          # Count non-suppressed findings from the blocking rule IDs. Matching on
-          # both rule_id and title guards against scanner-specific id namespacing.
-          # is_suppressed == true means an inline `nosemgrep: <rule-id>` accepted
-          # the finding — those do not block (the auditable escape hatch).
+          # Semgrep also reports rule-file and target errors in .errors; a rule
+          # that failed to parse would silently scan nothing, so treat that as
+          # not run too.
+          ERRORS=$(jq '[.errors[]? | select((.level // "error") == "error")] | length' "$REPORT")
+          if [ "${ERRORS:-0}" -gt 0 ]; then
+            echo "::error::Semgrep reported ${ERRORS} error(s) while running the prompt-injection rules; the scan is not trustworthy. Details:"
+            jq -r '.errors[]? | "  - \(.type // "error"): \(.message // .long_msg // "?")"' "$REPORT"
+            exit 1
+          fi
+
           HITS=$(jq --arg re "$BLOCKING_RULES" '
-            [ .findings[]
-              | select(.is_suppressed != true)
-              | select(((.rule_id // "") | test($re)) or ((.title // "") | test($re)))
-            ] | length
-          ' "$FLAT_JSON")
+            [ .results[] | select(.check_id | test($re)) ] | length
+          ' "$REPORT")
 
           if [ "${HITS:-0}" -gt 0 ]; then
             echo "::error::Prompt-injection finding(s) detected in an AI prompt file (${HITS} blocking). Review the flagged content. If it is a legitimate false positive, add an inline 'nosemgrep: <rule-id>' comment with justification on the offending line."
             echo "Blocking findings:"
             jq -r --arg re "$BLOCKING_RULES" '
-              .findings[]
-              | select(.is_suppressed != true)
-              | select(((.rule_id // "") | test($re)) or ((.title // "") | test($re)))
-              | "  - \(.rule_id // .title) @ \(.file_path // "?"):\(.line_start // "?")"
-            ' "$FLAT_JSON"
+              .results[] | select(.check_id | test($re))
+              | "  - \(.check_id) @ \(.path):\(.start.line)"
+            ' "$REPORT"
             exit 1
+          fi
+
+          ADVISORY=$(jq '[.results[] | select(.extra.severity != "ERROR")] | length' "$REPORT")
+          if [ "${ADVISORY:-0}" -gt 0 ]; then
+            echo "::warning::${ADVISORY} advisory (WARNING-severity) prompt-injection finding(s); not blocking. See prompt-injection.json in the artifact."
           fi
 
           echo "✅ No blocking prompt-injection findings in changed prompt files."

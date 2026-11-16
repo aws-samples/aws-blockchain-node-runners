@@ -84,7 +84,12 @@ Conventional Commit subject, and the body is the squash commit body.
 
 **Footers:** link issues with GitHub keywords (`Fixes #123`, `Closes #123`, or
 `Refs #123`). Mark incompatible changes with a `BREAKING CHANGE:` footer (or a
-`!` after the type, e.g. `feat!:`) — this is what flags a MAJOR bump.
+`!` after the type, e.g. `feat!:`) — this is what flags a MAJOR bump. A commit
+written by a maintenance-crew agent carries `Prepared-by: <agent> (Kiro Crew)`
+(for example `Prepared-by: bnr-version-scout (Kiro Crew)`), both on the branch
+commit and as the last line of the PR body so the squash commit keeps it; the
+author and pusher are still the maintainer. `git log --format='%h %(trailers:key=Prepared-by,valueonly)'`
+lists which commits on `main` an agent prepared.
 
 **Breaking-change discipline:** any commit that changes a `.env` variable name,
 a blueprint `package.json` `"aws-blockchain-node-runner"` field, the deployment
