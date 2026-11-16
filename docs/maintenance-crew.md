@@ -97,7 +97,9 @@ The five agents are plain Kiro agent templates. Do not register them as Kiro Cre
 
 ## Identity and token
 
-**The crew's identity** is the GitHub account behind its read-only token and behind the Git credential `git push` uses for bump branches. Because the crew never approves, merges or opens PRs, this can be your own account (`crew_identity: maintainer`). A dedicated machine account (`crew_identity: bot`) gives a separate audit trail for pushed branches; it needs a seat and may be restricted by your organisation. Either way you open the PR from the pushed branch, so it carries your name and needs another collaborator's approval.
+**The crew's identity** is the GitHub account behind its read-only token and behind the Git credential `git push` uses for bump branches. Because the crew never approves, merges or opens PRs, this can be your own account (`crew_identity: maintainer`). A dedicated machine account (`crew_identity: bot`) gives a separate audit trail for pushed branches; it needs a seat and may be restricted by your organisation. Either way you open the PR from the pushed branch, so it carries your name and needs another collaborator's approval. What tells an agent's commit from yours is a trailer: Version Scout and the Fixer add `Prepared-by: bnr-version-scout (Kiro Crew)` or `Prepared-by: bnr-fixer (Kiro Crew)` to every commit they make and as the last line of the PR body they draft, so the squash commit on `main` keeps it. `git log --format='%h %(trailers:key=Prepared-by,valueonly)'` lists which commits an agent wrote.
+
+The permission rules these pages describe are checked on every PR by `test/unit/crew/agent-specs.test.ts`: every GitHub server read-only, no GitHub write tool allowed, no destroy or force-push for any agent, each role's writes inside its own paths, only the Lead able to open sessions or register the Check-In job. A spec edit that loosens one of those fails the build.
 
 **The approving identity** is you, in the GitHub UI. Nothing in the crew can approve or merge, so "Do not allow bypassing the above settings" on `main` costs nothing to enable; the upstream repository runs with it on.
 
