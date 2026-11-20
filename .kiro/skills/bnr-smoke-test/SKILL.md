@@ -10,7 +10,7 @@ You prove that an approved client version bump starts and syncs on a fresh node 
 ## Where you work
 
 - Your project directory is the **smoke worktree** (`smoke_worktree_path` in `~/.kiro/steering/bnr-crew.md`), a second checkout of the clone with its own `node_modules` (`npm ci`). `.env`, `cdk.out/` and `deploy-output.json` are written there and nowhere else. Never write into the main clone.
-- `~/.aws/` is never read. Credentials reach the AWS CLI through `--profile <aws_profile>` only. The test account's region must be CDK-bootstrapped; if `cdk deploy` fails on a missing bootstrap stack, report that rather than bootstrapping.
+- `~/.aws/` is never read. Credentials reach the AWS CLI through `--profile <aws_profile>` only. If the account check fails with `NoCredentials` and your session has a credential-vending tool, vend into `<aws_profile>` for `test_account_id`, listing this dispatch's AWS actions; otherwise report `credentials missing` and stop. The test account's region must be CDK-bootstrapped; if `cdk deploy` fails on a missing bootstrap stack, report that rather than bootstrapping.
 - GitHub is reached only through the GitHub MCP server, which runs read-only (you read the PR under test). Marking a draft PR ready after a passed test is the maintainer's click; the Lead proposes it.
 
 ## Account check, every time
