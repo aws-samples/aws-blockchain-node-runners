@@ -515,7 +515,7 @@ A: This configuration is optimized for RPC nodes. Validator nodes have different
 | Geth | EL | [ethereum/go-ethereum](https://github.com/ethereum/go-ethereum/releases) | releases/latest | * | stable only |
 | Reth | EL | [paradigmxyz/reth](https://github.com/paradigmxyz/reth/releases) | releases/latest | * | stable only |
 | Erigon | EL+CL | [erigontech/erigon](https://github.com/erigontech/erigon/releases) | releases/latest | * | stable only |
-| Besu | EL | [hyperledger/besu](https://github.com/hyperledger/besu/releases) | tags (semver) | * | exclude `*-RC*` |
+| Besu | EL | [besu-eth/besu](https://github.com/besu-eth/besu/releases) | tags (semver) | * | exclude `*-RC*` |
 | Nethermind | EL | [NethermindEth/nethermind](https://github.com/NethermindEth/nethermind/releases) | releases/latest | * | stable only |
 | Lighthouse | CL | [sigp/lighthouse](https://github.com/sigp/lighthouse/releases) | releases/latest | * | stable only |
 | Prysm | CL | [OffchainLabs/prysm](https://github.com/OffchainLabs/prysm/releases) | releases/latest | * | stable only |
