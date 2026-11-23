@@ -5,7 +5,7 @@
  * Environment configuration interfaces loaded from .env files
  */
 
-import { DeploymentMode, CpuType } from './enums';
+import { DeploymentMode, CpuType, SnapshotProvider } from './enums';
 import { HAConfig } from './ha-config';
 import { StorageVolumeConfig } from './protocol-config';
 
@@ -32,6 +32,10 @@ export interface EnvironmentConfig {
   SNAPSHOT_ENABLED: boolean;
   SNAPSHOT_DOWNLOAD_URL?: string;
   SNAPSHOT_STAGING_VOL_SIZE?: number;  // Size in GiB for temp staging volume (0 = disabled)
+  SNAPSHOT_PROVIDER?: SnapshotProvider;  // Default: blueprint
+  // Blockchain Snapshots on AWS ID, resolved at synth from the selected
+  // configuration's blockchainSnapshots mapping (not set in .env)
+  SNAPSHOT_ID?: string;
   
   // Traffic Shaping Configuration
   TRAFFIC_SHAPING_ENABLED: boolean;
@@ -90,6 +94,8 @@ export const ENVIRONMENT_CONFIG_DEFAULTS = {
   SNAPSHOT_ENABLED: false,
   SNAPSHOT_DOWNLOAD_URL: '',
   SNAPSHOT_STAGING_VOL_SIZE: 0,
+  SNAPSHOT_PROVIDER: SnapshotProvider.BLUEPRINT,
+  SNAPSHOT_ID: '',
   
   // Traffic Shaping Configuration
   TRAFFIC_SHAPING_ENABLED: false,

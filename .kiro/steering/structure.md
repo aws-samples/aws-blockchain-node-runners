@@ -13,12 +13,14 @@
 │   ├── base/, bitcoin/, bnb/, ethereum/, solana/
 │   └── dummy/              # Test blueprint used by CI and smoke tests
 ├── assets/common/          # Scripts shipped to every instance: node-setup.sh, setup-storage.sh,
-│                           # snapshot-staging.sh, user-data-ubuntu.sh, network/ rules, cw-agent.json
+│                           # snapshot-staging.sh, blockchain-snapshots.sh, user-data-ubuntu.sh,
+│                           # network/ rules, cw-agent.json
 ├── test/
 │   ├── unit/               # Mirrors lib/ plus assets/, blueprints/, security/
 │   └── integration/        # App and per-blueprint configuration tests
 ├── docs/                   # Guides (deployment, configuration, troubleshooting, testing,
-│                           # snapshot staging, traffic shaping), the ageai-*.md AI workflows,
+│                           # snapshot staging, Blockchain Snapshots on AWS, traffic shaping),
+│                           # the ageai-*.md AI workflows,
 │                           # and maintenance-crew.md
 ├── website/                # Docusaurus documentation site (own package.json)
 ├── .kiro/

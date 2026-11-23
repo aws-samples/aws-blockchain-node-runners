@@ -936,8 +936,8 @@ enum CpuType {
  * Configuration for a specific blockchain client/version combination
  */
 interface Configuration {
-  name: string;
-  version: string;
+  name: string;   // file in configurations/; the name carries the client versions
+  blockchainSnapshots?: Record<string, string>;  // BC_NETWORK -> Blockchain Snapshots on AWS ID
 }
 
 /**
@@ -1072,6 +1072,9 @@ interface EnvironmentConfig {
   // Snapshot Configuration
   SNAPSHOT_ENABLED: boolean;
   SNAPSHOT_DOWNLOAD_URL?: string;
+  SNAPSHOT_STAGING_VOL_SIZE?: number;
+  SNAPSHOT_PROVIDER?: SnapshotProvider;  // "blueprint" (default) | "blockchain-snapshots"
+  SNAPSHOT_ID?: string;                  // resolved at synth from blockchainSnapshots
   
   // Storage Configuration
   DATA_VOLUMES_COUNT: number;
@@ -1903,3 +1906,25 @@ Rule of thumb: `SNAPSHOT_STAGING_VOL_SIZE` ≈ 1.1× compressed archive size. Ex
 ### Testing Strategy
 
 Jest (CDK wiring) via `ConfigurationLoader` + real `dummy` protocol and `cdk synth`/`Template` assertions: staging-enabled → gp3 `AWS::EC2::Volume` (`Purpose=snapshot-staging`), `AWS::EC2::VolumeAttachment` at `/dev/xvdz`, IAM granting Detach/Delete scoped to volume+instance, `SNAPSHOT_STAGING_VOL_ID` injected; staging-disabled → none produced; HA grants self-management actions. Bash lifecycle validated by the Dummy debug path (real `staging_cleanup()`, `STAGING DEBUG: PASS/FAIL`). Static: `shellcheck -S warning`, `npm run build`, `npm run test`, `npx cdk synth`. End-to-end proof requires a real small (~10 GiB) dummy staging deploy in a sandbox account confirming the volume is deleted afterward.
+
+## Blockchain Snapshots on AWS (SNAPSHOT_PROVIDER=blockchain-snapshots)
+
+Restores a node from [Blockchain Snapshots on AWS](https://awslabs.github.io/blockchain-snapshots/) at first boot. User guide: `docs/blockchain-snapshots.md`.
+
+**Selection.** The user sets only `SNAPSHOT_ENABLED=true` and `SNAPSHOT_PROVIDER=blockchain-snapshots`. Each configuration in a blueprint's `availableConfigurations` may carry `blockchainSnapshots` (`BC_NETWORK` -> snapshot ID). `ConfigurationLoader.resolveBlockchainSnapshot()` looks up the ID for the selected `CLIENT_CONFIG` and `BC_NETWORK` and stores it in `SNAPSHOT_ID`, which reaches `/etc/cdk_environment`. Mapping a configuration asserts that the snapshot's client and node type match it (full-node snapshots never map to archive configurations).
+
+**Synth-time checks**, failing synthesis:
+- `AWS_REGION` in `BlockchainSnapshotsRegions` (`lib/interfaces/constants.ts`, mirroring `dist/regions.json` at the pinned commit); `SNAPSHOT_STAGING_VOL_SIZE` = 0; a mapping exists.
+- `assertS3GatewayEndpoint()` (`lib/common/blockchain-snapshots.ts`), the first check in both constructs: a Cloud Control context lookup (`AWS::EC2::VPCEndpoint`, matching `VpcId`, `ServiceName=com.amazonaws.<region>.s3`, `VpcEndpointType=Gateway`) must return endpoints whose `RouteTableIds` cover the route tables of the instance subnets (single-node: the public subnet in the chosen AZ; HA: all public subnets). The stack never creates the endpoint. Dummy values (VPC or endpoint lookup not yet performed) pass, so the CLI can run the lookups; a failure prints the `cdk context --reset` key, because the result is cached in `cdk.context.json`.
+
+**IAM.** `grantBlockchainSnapshotsRead()`: `s3:ListBucket` on `arn:aws:s3:::blockchain-snapshots-<region>`, `s3:GetObject` on its objects.
+
+**Instance side** (`assets/common/blockchain-snapshots.sh <output-dir>`, called by the blueprint's `node.sh` before `node.service` starts): bucket reachability check (`head-bucket`) before anything else; apt dependencies (`git python3-boto3 python3-zstandard zstd tar curl`), not the tool's `--setup` (which downloads unpinned mountpoint-s3 and AWS CLI); `git fetch --depth 1` of the pinned `BLOCKCHAIN_SNAPSHOTS_COMMIT` and a `rev-parse HEAD` equality check; `runuser -u bcuser -- env -i ... snapshot.sh --snapshot $SNAPSHOT_ID --region $AWS_REGION --registry <checkout>/dist/regions.json --source s3 --out <output-dir> --json`. Markers `<output-dir>.snapshot-restored` (holds the JSON result) and `<output-dir>.snapshot-in-progress` make re-runs idempotent; a non-empty output directory without markers is never touched; an interrupted restore is deleted before the retry (the tool checks free space before clearing its output). A failure exits non-zero, so node setup stops and the bootstrap retries on the next boot.
+
+**Blueprints.** Ethereum: output is the client's database directory under `/data/execution` (the snapshots are ethPandaOps builds whose root is that directory): `geth/` for Geth, `nethermind_db/` for Nethermind, the data directory itself for Reth; mapped: Geth full (mainnet, hoodi), Nethermind full (mainnet), Reth full (mainnet; a separate `--full` configuration). Solana: output `/data/data/ledger` (archive-set delivery; the validator unpacks the archives); every Agave and Frankendancer configuration maps `mainnet-beta`; while `/data/data/ledger.snapshot-restored` exists and `/data/data/init-completed` does not, the Agave scripts add `--no-snapshot-fetch` and the Frankendancer scripts set `[consensus] snapshot_fetch = false`. `node.sh` removes the restored `genesis.tar.bz2` unless `genesis.bin` exists: Agave fetches genesis only when the archive is absent and unpacks `genesis.bin` only after its own fetch, so the archive alone makes bootstrap retry forever.
+
+**Pin updates** are maintainer-reviewed version bumps: review the upstream diff, update `BLOCKCHAIN_SNAPSHOTS_COMMIT` and, if `dist/regions.json` changed, `BlockchainSnapshotsRegions`.
+
+### Testing Strategy
+
+Jest: `test/unit/common/blockchain-snapshots.test.ts` (mapping resolution and rejection on the real ethereum and solana blueprints, validation errors, mapping structure validation, user-data injection, endpoint check pass/fail via supplied VPC, AZ and Cloud Control context, IAM scope, no lookup or grant without the provider, blueprint wiring); `test/unit/assets/blockchain-snapshots.test.ts` (script order, pinned-commit refusal, markers, retry, never overwriting foreign data, with stubbed system commands). End-to-end proof requires real deploys in a snapshot Region with an S3 gateway endpoint.

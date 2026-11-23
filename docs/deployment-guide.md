@@ -63,6 +63,8 @@ This guide covers different deployment scenarios for the Universal Blockchain No
    aws sts get-caller-identity
    ```
 
+5. **Blockchain Snapshots on AWS (optional)**: to restore a node with `SNAPSHOT_PROVIDER="blockchain-snapshots"`, deploy in `us-east-1`, `us-east-2`, `eu-west-1` or `ap-northeast-1`, into a VPC with an Amazon S3 gateway endpoint on the instances' subnets. Synthesis fails without one. See [Blockchain Snapshots on AWS](/docs/guides/blockchain-snapshots#prerequisites).
+
 ## Quick Start
 
 ### 1. Clone and Install

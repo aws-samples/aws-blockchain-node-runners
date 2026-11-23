@@ -14,34 +14,64 @@
     "defaultConfiguration": "agave-4.3.2-rpc-base.sh",
     "availableConfigurations": [
       {
-        "name": "agave-4.3.2-rpc-base.sh"
+        "name": "agave-4.3.2-rpc-base.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       },
       {
-        "name": "agave-4.3.2-rpc-extended.sh"
+        "name": "agave-4.3.2-rpc-extended.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       },
       {
-        "name": "agave-4.0.3-rpc-base.sh"
+        "name": "agave-4.0.3-rpc-base.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       },
       {
-        "name": "agave-4.0.3-rpc-extended.sh"
+        "name": "agave-4.0.3-rpc-extended.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       },
       {
-        "name": "agave-4.1.2-rpc-base.sh"
+        "name": "agave-4.1.2-rpc-base.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       },
       {
-        "name": "agave-4.1.2-rpc-extended.sh"
+        "name": "agave-4.1.2-rpc-extended.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       },
       {
-        "name": "agave-3.1.14-rpc-base.sh"
+        "name": "agave-3.1.14-rpc-base.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       },
       {
-        "name": "agave-3.1.14-rpc-extended.sh"
+        "name": "agave-3.1.14-rpc-extended.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       },
       {
-        "name": "frankendancer-0.1204.40300-rpc-base.sh"
+        "name": "frankendancer-0.1204.40300-rpc-base.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       },
       {
-        "name": "frankendancer-0.1204.40300-rpc-extended.sh"
+        "name": "frankendancer-0.1204.40300-rpc-extended.sh",
+        "blockchainSnapshots": {
+          "mainnet-beta": "solana-mainnet-agave"
+        }
       }
     ],
     "BC_NETWORKS": [

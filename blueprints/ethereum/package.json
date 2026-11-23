@@ -14,10 +14,20 @@
     "defaultConfiguration": "geth-1.17.10-lighthouse-8.3.3-full.yml",
     "availableConfigurations": [
       {
-        "name": "geth-1.17.10-lighthouse-8.3.3-full.yml"
+        "name": "geth-1.17.10-lighthouse-8.3.3-full.yml",
+        "blockchainSnapshots": {
+          "mainnet": "ethereum-mainnet-geth",
+          "hoodi": "ethereum-hoodi-geth"
+        }
       },
       {
         "name": "reth-2.10.1-lighthouse-8.3.3-archive.yml"
+      },
+      {
+        "name": "reth-2.10.1-lighthouse-8.3.3-full.yml",
+        "blockchainSnapshots": {
+          "mainnet": "ethereum-mainnet-reth"
+        }
       },
       {
         "name": "erigon-3.8.2-caplin-archive.yml"
@@ -29,7 +39,10 @@
         "name": "besu-26.11.1-teku-26.10.3-full.yml"
       },
       {
-        "name": "nethermind-2.2.2-teku-26.10.3-full.yml"
+        "name": "nethermind-2.2.2-teku-26.10.3-full.yml",
+        "blockchainSnapshots": {
+          "mainnet": "ethereum-mainnet-nethermind"
+        }
       }
     ],
     "BC_NETWORKS": [

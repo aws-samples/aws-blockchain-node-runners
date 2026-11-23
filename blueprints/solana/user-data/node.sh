@@ -128,6 +128,59 @@ chown -R bcuser:bcuser /accounts
 # Create symlink for convenience
 ln -sf /data/data/ledger /home/bcuser/ledger 2>/dev/null || true
 
+# Restore from Blockchain Snapshots on AWS. The Solana snapshot is a set of
+# archives (full, incremental, genesis) that the validator unpacks itself, so
+# they go into the ledger directory, where it looks for local snapshots. The
+# Agave configurations then start with --no-snapshot-fetch, and the
+# Frankendancer ones with snapshot_fetch = false (see configurations/).
+LEDGER=/data/data/ledger
+
+# The incremental archive is published to a fixed S3 key that is overwritten
+# about hourly, so it can change between the catalog read and its download at
+# the end of a restore. The file then holds a newer bank than its name
+# (incremental-snapshot-<base>-<slot>-<hash>) says, and the validator refuses
+# to start ("snapshot slot mismatch"). Remove such a file: the validator then
+# starts from the full archive and replays the extra slots.
+remove_mismatched_incremental() {
+    local archive named bank
+    for archive in "$LEDGER"/incremental-snapshot-*.tar.zst; do
+        [ -f "$archive" ] || continue
+        named=$(basename "$archive" | cut -d- -f4)
+        bank=$(zstd -dc "$archive" 2>/dev/null | tar -tf - 2>/dev/null \
+            | sed -n 's#^snapshots/\([0-9][0-9]*\)/\1$#\1#p' | head -1)
+        if [ "$bank" != "$named" ]; then
+            echo "WARNING: $archive holds bank ${bank:-unknown}, not slot $named; removing it and starting from the full snapshot"
+            rm -f "$archive"
+        fi
+    done
+}
+
+restore_solana_snapshot() {
+    bash /opt/assets/common/blockchain-snapshots.sh "$LEDGER" || return 1
+    # The fixes below apply to the restored files before the first start only.
+    if [ ! -f "$LEDGER.snapshot-restored" ] || [ -f /data/data/init-completed ]; then
+        return 0
+    fi
+    remove_mismatched_incremental
+    # The snapshot set includes genesis.tar.bz2. Agave fetches genesis only
+    # when that archive is absent, and unpacks genesis.bin only after its own
+    # fetch, so with the archive alone it retries "Failed to load genesis
+    # config" forever. Remove it so the validator downloads genesis and checks
+    # it against the expected genesis hash, as on any fresh node.
+    if [ ! -f "$LEDGER/genesis.bin" ]; then
+        rm -f "$LEDGER/genesis.tar.bz2"
+    fi
+    # Partial files left by retried S3 downloads (<archive>.<random suffix>)
+    rm -f "$LEDGER"/snapshot-*.tar.zst.* "$LEDGER"/incremental-snapshot-*.tar.zst.*
+}
+
+if [ "$SNAPSHOT_ENABLED" = "true" ] && [ "${SNAPSHOT_PROVIDER:-}" = "blockchain-snapshots" ]; then
+    if ! restore_solana_snapshot; then
+        echo "ERROR: snapshot restore failed; not starting the node. Reboot the instance to retry."
+        exit 1
+    fi
+fi
+
 # Copy configuration script to bcuser bin
 CONFIG_SCRIPT="/opt/blueprints/configurations/${CLIENT_CONFIG}"
 if [ ! -f "$CONFIG_SCRIPT" ]; then

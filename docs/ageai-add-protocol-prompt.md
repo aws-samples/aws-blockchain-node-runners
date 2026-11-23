@@ -143,7 +143,7 @@ The `"aws-blockchain-node-runner"` field contains protocol-specific configuratio
 - `BLOCKCHAIN_PROTOCOL`: Lowercase protocol name
 - `supportedDeploymentModes`: Array of supported modes
 - `defaultConfiguration`: Default configuration file name
-- `availableConfigurations`: Array of configuration objects
+- `availableConfigurations`: Array of configuration objects (`name`, plus an optional `blockchainSnapshots` map from `BC_NETWORK` to a [Blockchain Snapshots on AWS](/docs/guides/blockchain-snapshots) snapshot ID when the catalog has a snapshot for that client and node type)
 - `BC_NETWORKS`: Array of supported networks
 - `defaultInstanceTypes`: x86_64 and ARM_64 recommendations
 - `requiredPorts`: Array of port objects (port, protocol, description, public)
@@ -289,6 +289,8 @@ If multiple client configurations share common logic (e.g. snapshot download), e
 6. Call `staging_cleanup()` after successful extraction
 
 See `blueprints/base/user-data/common/download-snapshot.sh` for a working example and [docs/snapshot-staging.md](/docs/guides/snapshot-staging) for volume sizing guidance.
+
+**Blockchain Snapshots on AWS**: If the [catalog](https://awslabs.github.io/blockchain-snapshots/) has a snapshot for the protocol's client, add `blockchainSnapshots` to the matching configurations in `package.json` and call the shared helper from `node.sh` before starting `node.service`, guarded by `SNAPSHOT_ENABLED=true` and `SNAPSHOT_PROVIDER=blockchain-snapshots`: `bash /opt/assets/common/blockchain-snapshots.sh /data/<client-database-dir>` (check the snapshot's layout: the Ethereum snapshots hold the client's database directory, such as Geth's `<datadir>/geth`). Map only configurations with the same client and node type as the snapshot. See "Adding Snapshots to a Blueprint" in [docs/blockchain-snapshots.md](/docs/guides/blockchain-snapshots#adding-snapshots-to-a-blueprint) and `blueprints/ethereum/user-data/node.sh`.
 
 Follow the pattern from `blueprints/bnb/user-data/node.sh` (native binary) or `blueprints/ethereum/user-data/node.sh` (Docker-based).
 

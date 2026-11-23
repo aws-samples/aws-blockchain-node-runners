@@ -6,7 +6,8 @@ import * as path from 'path';
 import { 
     IUserDataManager, 
     EnvironmentConfig, 
-    CFNandCDKUserDataConfig
+    CFNandCDKUserDataConfig,
+    SnapshotProvider,
 } from '../interfaces';
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
@@ -192,7 +193,11 @@ export class UserDataManager implements IUserDataManager {
         // single-quote-escaped because user-data-ubuntu.sh wraps every
         // placeholder as '${KEY}', so the rendered file contains KEY='value'
         // and the shell never expands the value (at write time or on source).
+        // Optional snapshot keys get defaults: every placeholder in the
+        // template must have a value or Fn::Sub fails at deploy.
         for (const [key, value] of Object.entries({ 
+            SNAPSHOT_PROVIDER: SnapshotProvider.BLUEPRINT,
+            SNAPSHOT_ID: '',
             ...environmentOnlyConfig, 
             ...cfnandCDKUserDataConfig, 
             ...HA_CONFIG

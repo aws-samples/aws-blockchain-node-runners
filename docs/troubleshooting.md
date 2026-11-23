@@ -886,6 +886,45 @@ aws ec2 describe-volumes \
 
 To validate the staging cleanup lifecycle cheaply, use the dummy debug path documented in [Snapshot Staging Guide](/docs/guides/snapshot-staging#testing-the-staging-lifecycle-dummy-blueprint) and look for the `STAGING DEBUG: PASS` line in `cloud-init-output`.
 
+### Blockchain Snapshots on AWS: Synthesis Fails
+
+**Symptom**: `npx cdk synth` or `npx cdk deploy` stops with an error that starts with `SNAPSHOT_PROVIDER=blockchain-snapshots:` or `Snapshot configuration validation failed`.
+
+**Cause and solution**, by message:
+
+| Message | Cause | Solution |
+|---------|-------|----------|
+| `VPC vpc-... has no Amazon S3 gateway endpoint` | The target VPC has no S3 gateway endpoint | Create one (see [Prerequisites](/docs/guides/blockchain-snapshots#prerequisites)), run the `npx cdk context --reset ...` command from the error, synthesize again |
+| `... are not associated with route table(s) ... of subnet(s) ...` | The endpoint exists but doesn't serve the instances' subnets | Add the listed route tables to the endpoint (`aws ec2 modify-vpc-endpoint --vpc-endpoint-id vpce-... --add-route-table-ids rtb-...`), reset the context key, synthesize again |
+| `is not available in AWS_REGION` | No snapshots in that Region | Deploy in `us-east-1`, `us-east-2`, `eu-west-1` or `ap-northeast-1` |
+| `No Blockchain Snapshots on AWS snapshot for CLIENT_CONFIG` | No snapshot for this client, node type or network | Pick a supported combination from the list in the error, or remove `SNAPSHOT_PROVIDER` |
+| `SNAPSHOT_STAGING_VOL_SIZE must be 0` | Staging volumes are for blueprint downloads only | Set `SNAPSHOT_STAGING_VOL_SIZE="0"` |
+
+The endpoint lookup is cached in `cdk.context.json`. Resetting the key forces a fresh lookup; without it, synthesis keeps reporting the old result.
+
+### Blockchain Snapshots on AWS: Restore Failed
+
+**Symptom**: The node never starts. `cloud-init-output` shows `ERROR: [blockchain-snapshots]` and `Node deployment FAILED`.
+
+**Diagnosis**:
+```bash
+export INSTANCE_ID=$(cat $DEPLOY_FILE | jq -r '..|.InstanceId? | select(. != null)')
+aws logs tail /aws/ec2/blockchain-nodes/cloud-init-output \
+  --log-stream-names $INSTANCE_ID --filter-pattern "blockchain-snapshots"
+```
+
+**Cause and solution**, by message:
+
+| Message | Cause | Solution |
+|---------|-------|----------|
+| `cannot reach s3://blockchain-snapshots-<region>` | No S3 gateway endpoint on the instance's subnet route table (for example, removed after synthesis), or the instance role lacks access | Fix the endpoint, then reboot the instance |
+| `could not fetch commit ...` | The instance can't reach GitHub | Check outbound HTTPS from the subnet, then reboot |
+| `is not the pinned ...` | The fetched tool is not the pinned commit | Do not work around this: report it to the maintainers |
+| `not enough free space at ...: need ..., have ...` | The data volume is smaller than the extracted snapshot | Increase `DATA_VOL_1_SIZE` (or use a larger instance-store type) and redeploy |
+| `catalog does not match` or `catalog snapshot size is stale` | A new snapshot was published during the restore | Reboot to retry |
+
+The bootstrap retries setup on every boot until it succeeds, and the restore starts over if it was interrupted (see [Re-runs and Retries](/docs/guides/blockchain-snapshots#re-runs-and-retries)). Reboot with `aws ec2 reboot-instances --instance-ids $INSTANCE_ID`.
+
 ### Volume Not Mounting
 
 **Symptom**: Volume exists but not mounted

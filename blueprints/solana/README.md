@@ -257,6 +257,12 @@ By default, a new identity keypair is generated on first start. To use an existi
 
 See [Configuration Reference](/docs/guides/configuration-reference) for all available options.
 
+### Blockchain Snapshots on AWS
+
+Agave and Frankendancer nodes on `mainnet-beta` can start from a [Blockchain Snapshots on AWS](/docs/guides/blockchain-snapshots) snapshot (`solana-mainnet-agave`) instead of one fetched from peers. Set `SNAPSHOT_ENABLED="true"` and `SNAPSHOT_PROVIDER="blockchain-snapshots"` in `.env` (the mainnet-beta samples carry these lines commented out). You need one of the snapshot Regions (`us-east-1`, `us-east-2`, `eu-west-1`, `ap-northeast-1`) and an S3 gateway VPC endpoint in the target VPC; synthesis fails without them.
+
+The full and incremental snapshot archives are downloaded into the ledger directory (`/data/data/ledger`) before the validator starts. Until its first start completes, the validator doesn't fetch a snapshot from peers (`--no-snapshot-fetch` for Agave, `snapshot_fetch = false` for Frankendancer), so it loads the restored snapshot and catches up from there. Testnet and devnet have no snapshot.
+
 ### Traffic Shaping
 
 Traffic shaping reduces outbound data transfer by over 85%:

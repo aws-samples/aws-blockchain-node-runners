@@ -142,7 +142,7 @@ After approval, update ONLY what's necessary. Keep changes minimal — no refact
 
 4c. **Checksums:** Where the script verifies a checksum (e.g. `sha256sum`), update the expected hash from the upstream release artifacts. If no checksum is currently verified and upstream provides one, ADD verification.
 
-4d. **Update `availableConfigurations`** in `blueprints/{protocol}/package.json` (both the `name` and `version` fields). Update `defaultConfiguration` if it pointed at the renamed file.
+4d. **Update `availableConfigurations`** in `blueprints/{protocol}/package.json` (both the `name` and `version` fields). Keep the entry's other fields, such as `blockchainSnapshots`. Update `defaultConfiguration` if it pointed at the renamed file.
 
 4e. **Update sample `.env` files:** change the `CLIENT_CONFIG` value (and any header comments referencing the configuration filename) in affected `blueprints/{protocol}/samples/.env-*` files.
 
@@ -182,6 +182,8 @@ After local validation passes, offer an optional test deployment. The user decid
 6c. **Snapshot-based nodes (base, bnb, bitcoin):** Snapshot download can take hours. You MUST wait for download completion before assessing whether the node starts at all. Report progress periodically. Do NOT declare failure during the download phase.
 
 6d. **Solana:** Does not use snapshot download the same way — Agave and Frankendancer sync from the cluster directly. Monitor sync progress (slot advancement) instead.
+
+6e. **Blockchain Snapshots on AWS:** A configuration with `blockchainSnapshots` restores a snapshot made by whatever client version the snapshot publisher runs. When the bump crosses a database format change (check the release notes), test it with `SNAPSHOT_PROVIDER="blockchain-snapshots"` and confirm the client opens the restored data. If it can't, remove the mapping for that configuration and say so in the CHANGELOG.
 
 ## STEP 7: SMOKE TEST / HEALTHCHECK
 

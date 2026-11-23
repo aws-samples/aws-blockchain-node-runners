@@ -83,6 +83,15 @@ case "${BC_NETWORK:-mainnet-beta}" in
 esac
 
 # Generate TOML configuration file
+# After a restore from Blockchain Snapshots on AWS (blockchain-snapshots.sh),
+# start from the restored archives instead of fetching a newer snapshot from
+# peers, until the first start completes. Frankendancer passes this to its
+# Agave side as --no-snapshot-fetch.
+SNAPSHOT_FETCH="true"
+if [ -f /data/data/ledger.snapshot-restored ] && [ ! -f /data/data/init-completed ]; then
+    SNAPSHOT_FETCH="false"
+fi
+
 CONFIG_DIR="/home/bcuser/config"
 CONFIG_FILE="${CONFIG_DIR}/frankendancer.toml"
 mkdir -p "$CONFIG_DIR"
@@ -114,6 +123,7 @@ ${GOSSIP_ENTRYPOINTS}
 [consensus]
     identity_path = "/home/bcuser/config/validator-keypair.json"
     expected_genesis_hash = "${EXPECTED_GENESIS_HASH}"
+    snapshot_fetch = ${SNAPSHOT_FETCH}
 ${KNOWN_VALIDATORS}
 
 [rpc]
