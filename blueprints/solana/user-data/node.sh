@@ -126,7 +126,8 @@ chown -R bcuser:bcuser /data
 chown -R bcuser:bcuser /accounts
 
 # Create symlink for convenience
-ln -sf /data/data/ledger /home/bcuser/ledger 2>/dev/null || true
+# -n: replace an existing link instead of creating one inside the ledger (re-runs)
+ln -sfn /data/data/ledger /home/bcuser/ledger 2>/dev/null || true
 
 # Copy configuration script to bcuser bin
 CONFIG_SCRIPT="/opt/blueprints/configurations/${CLIENT_CONFIG}"
