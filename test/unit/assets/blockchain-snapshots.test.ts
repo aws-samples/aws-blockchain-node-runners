@@ -9,7 +9,8 @@ import { describeWithBash, runBash } from './shell-test-helpers';
 /**
  * Behaviour tests for assets/common/blockchain-snapshots.sh. The script is
  * sourced with NODE_RUNNER_SOURCE_ONLY=1, aws/apt-get/git/runuser are stubbed
- * with functions that log their calls, and main is invoked directly.
+ * with functions that log their calls, and main is invoked directly. The
+ * node.service drop-in goes to a temporary path and systemctl is a no-op.
  */
 const SCRIPT = path.join(__dirname, '../../../assets/common/blockchain-snapshots.sh');
 const PINNED = fs.readFileSync(SCRIPT, 'utf-8').match(/^BLOCKCHAIN_SNAPSHOTS_COMMIT="([0-9a-f]{40})"$/m)![1];
@@ -17,11 +18,13 @@ const PINNED = fs.readFileSync(SCRIPT, 'utf-8').match(/^BLOCKCHAIN_SNAPSHOTS_COM
 describeWithBash('blockchain-snapshots.sh', () => {
     let tmp: string;
     let out: string;
+    let dropIn: string;
     const calls = () => fs.readFileSync(path.join(tmp, 'calls.log'), 'utf-8').split('\n').filter(Boolean);
 
     beforeEach(() => {
         tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'blockchain-snapshots-'));
         out = path.join(tmp, 'data/execution');
+        dropIn = path.join(tmp, 'node.service.d/blockchain-snapshots.conf');
         fs.mkdirSync(out, { recursive: true });
         fs.writeFileSync(path.join(tmp, 'calls.log'), '');
         fs.writeFileSync(path.join(tmp, 'cdk_environment'),
@@ -35,9 +38,10 @@ describeWithBash('blockchain-snapshots.sh', () => {
     function run(opts: { bucketOk?: boolean; toolOk?: boolean; head?: string } = {}) {
         const log = path.join(tmp, 'calls.log');
         return runBash(`
-export NODE_RUNNER_SOURCE_ONLY=1 CDK_ENV_FILE='${tmp}/cdk_environment' BLOCKCHAIN_SNAPSHOTS_TOOL_DIR='${tmp}/tool'
+export NODE_RUNNER_SOURCE_ONLY=1 CDK_ENV_FILE='${tmp}/cdk_environment' BLOCKCHAIN_SNAPSHOTS_TOOL_DIR='${tmp}/tool' NODE_SERVICE_DROPIN='${dropIn}'
 source '${SCRIPT}'
 c() { echo "$*" >> '${log}'; }
+systemctl() { :; }
 aws() { c "aws $*"; return ${opts.bucketOk === false ? 254 : 0}; }
 fuser() { return 1; }
 sleep() { :; }
@@ -69,14 +73,35 @@ main '${out}'
         expect(runLine).not.toContain('--force');
         expect(fs.readFileSync(`${out}.snapshot-restored`, 'utf-8')).toContain('"version":26469585');
         expect(fs.existsSync(`${out}.snapshot-in-progress`)).toBe(false);
+        // The restore finished, so node.service may start again
+        expect(fs.existsSync(dropIn)).toBe(false);
     });
 
-    it('stops before installing anything when the bucket is unreachable', () => {
+    it('stops before installing anything when the bucket is unreachable, and holds node.service', () => {
         const res = run({ bucketOk: false });
         expect(res.status).toBe(1);
         expect(res.stderr).toMatch(/cannot reach s3:\/\/blockchain-snapshots-us-east-1.*S3 gateway VPC endpoint/);
         expect(calls()).toHaveLength(1);
-        expect(fs.existsSync(`${out}.snapshot-in-progress`)).toBe(false);
+        // Marker and drop-in are in place before the first step that can fail
+        expect(fs.existsSync(`${out}.snapshot-in-progress`)).toBe(true);
+        expect(fs.readFileSync(dropIn, 'utf-8'))
+            .toContain(`[Unit]\nConditionPathExists=!${out}.snapshot-in-progress\n`);
+    });
+
+    it('restores on the next boot after an early failure, even if the node wrote data in between', () => {
+        // Instance-store node after a stop and start: node.service exists, the
+        // first attempt fails before the tool runs, and the client writes data
+        // before the reboot (the scenario the marker-first order prevents).
+        expect(run({ bucketOk: false }).status).toBe(1);
+        fs.mkdirSync(path.join(out, 'geth/chaindata'), { recursive: true });
+
+        const res = run();
+        expect(res.status).toBe(0);
+        expect(res.stdout).toContain('did not finish; deleting it and starting over');
+        expect(res.stdout).not.toContain('not restoring');
+        expect(fs.readdirSync(out)).toEqual([]);
+        expect(calls().some(l => l.startsWith('runuser'))).toBe(true);
+        expect(fs.existsSync(`${out}.snapshot-restored`)).toBe(true);
     });
 
     it('refuses a checkout that is not the pinned commit', () => {
@@ -90,6 +115,7 @@ main '${out}'
         expect(run({ toolOk: false }).status).toBe(1);
         expect(fs.existsSync(`${out}.snapshot-in-progress`)).toBe(true);
         expect(fs.existsSync(`${out}.snapshot-restored`)).toBe(false);
+        expect(fs.existsSync(dropIn)).toBe(true);
 
         fs.writeFileSync(path.join(out, 'partial'), '');
         expect(run().status).toBe(0);
@@ -105,6 +131,7 @@ main '${out}'
         expect(res.status).toBe(0);
         expect(res.stdout).toContain('already restored');
         expect(calls()).toEqual([]);
+        expect(fs.existsSync(dropIn)).toBe(false);
     });
 
     it('never overwrites data it did not restore', () => {
@@ -113,6 +140,8 @@ main '${out}'
         expect(res.status).toBe(0);
         expect(res.stdout).toContain('not restoring');
         expect(calls()).toEqual([]);
+        expect(fs.existsSync(`${out}.snapshot-in-progress`)).toBe(false);
+        expect(fs.existsSync(dropIn)).toBe(false);
     });
 
     it('fails when SNAPSHOT_ID is missing', () => {
@@ -120,6 +149,54 @@ main '${out}'
         const res = run();
         expect(res.status).toBe(1);
         expect(res.stderr).toContain('SNAPSHOT_ID and AWS_REGION must be set');
+    });
+});
+
+/**
+ * The restore step of each blueprint's node.sh, run on its own with the
+ * restore script stubbed: a failed restore must exit before node.sh writes or
+ * starts node.service (the bootstrap then retries on the next boot).
+ */
+const BLUEPRINTS = path.join(__dirname, '../../../blueprints');
+
+describeWithBash.each([
+    ['ethereum', 'CLIENT_CONFIG=geth-1.17.10-lighthouse-8.3.3-full.yml', '/data/execution/geth'],
+    ['solana', 'LEDGER=/data/data/ledger', '/data/data/ledger'],
+])('%s node.sh restore step', (protocol, setup, out) => {
+    const script = fs.readFileSync(path.join(BLUEPRINTS, protocol, 'user-data/node.sh'), 'utf-8');
+    const step = script.match(/^if \[ "\$SNAPSHOT_ENABLED" = "true" \] && \[ "\$\{?SNAPSHOT_PROVIDER[^\n]*\n[\s\S]*?^fi$/m)![0];
+    const functions = (script.match(/^[a-z_]+\(\) \{[\s\S]*?^\}$/gm) ?? []).join('\n');
+
+    function run(restoreStatus: number, provider = 'blockchain-snapshots') {
+        return runBash(`set -e
+SNAPSHOT_ENABLED=true SNAPSHOT_PROVIDER=${provider} ${setup}
+bash() { echo "restore $*"; return ${restoreStatus}; }
+${functions}
+${step}
+echo REACHED-NODE-SERVICE`);
+    }
+
+    it('runs before node.service is written', () => {
+        expect(script.indexOf(step)).toBeLessThan(script.indexOf('cat > /etc/systemd/system/node.service'));
+    });
+
+    it('exits non-zero, before node.service, when the restore fails', () => {
+        const res = run(1);
+        expect(res.status).not.toBe(0);
+        expect(res.stdout).toContain(`restore /opt/assets/common/blockchain-snapshots.sh ${out}`);
+        expect(res.stdout).not.toContain('REACHED-NODE-SERVICE');
+    });
+
+    it('continues to node.service when the restore succeeds', () => {
+        const res = run(0);
+        expect(res.status).toBe(0);
+        expect(res.stdout).toContain('REACHED-NODE-SERVICE');
+    });
+
+    it('does not restore with the blueprint provider', () => {
+        const res = run(1, 'blueprint');
+        expect(res.status).toBe(0);
+        expect(res.stdout).not.toContain('restore ');
     });
 });
 

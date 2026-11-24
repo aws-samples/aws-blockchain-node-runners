@@ -552,7 +552,7 @@ export class SingleNodeConstruct extends constructs.Construct {
                 },
                 {
                     id: "AwsSolutions-IAM5",
-                    reason: "Need read access to S3 bucket with assets and CloudFormation signal permissions",
+                    reason: "Need read access to S3 bucket with assets, CloudFormation signal permissions, and (with SNAPSHOT_PROVIDER=blockchain-snapshots) s3:GetObject on the objects of the Region's read-only snapshot bucket",
                 },
                 {
                     id: "AwsSolutions-IAM4",

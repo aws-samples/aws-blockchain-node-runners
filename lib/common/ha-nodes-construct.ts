@@ -733,7 +733,7 @@ export class HANodesConstruct extends constructs.Construct {
                 },
                 {
                     id: "AwsSolutions-IAM5",
-                    reason: "Need read access to S3 bucket with assets and ASG lifecycle hook permissions",
+                    reason: "Need read access to S3 bucket with assets, ASG lifecycle hook permissions, and (with SNAPSHOT_PROVIDER=blockchain-snapshots) s3:GetObject on the objects of the Region's read-only snapshot bucket",
                 },
                 {
                     id: "AwsSolutions-IAM4",

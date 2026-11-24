@@ -98,7 +98,7 @@ STACK_NAME_PREFIX="DEV"
 
 **Notes**:
 - Snapshots significantly reduce initial sync time
-- If `SNAPSHOT_ENABLED=true`, `SNAPSHOT_DOWNLOAD_URL` should be provided
+- If `SNAPSHOT_ENABLED=true` with `SNAPSHOT_PROVIDER="blueprint"` (the default), `SNAPSHOT_DOWNLOAD_URL` should be provided unless the blueprint has a default URL
 - **`SNAPSHOT_DOWNLOAD_URL` must use HTTPS.** The archive is downloaded and extracted as root at boot, so a plaintext HTTP source is rejected at synth. HTTPS provides transport integrity and authenticates the snapshot server.
 - Integrity verification depends on the provider: the BNB blueprint verifies the archive against the md5 published in 48Club's `data.json` (fails closed on mismatch); Base relies on HTTPS plus a completeness check (Base publishes no checksum); Solana snapshots are verified by the validator against its known validators and expected genesis hash. A checksum proves integrity (the bytes are intact), not that the snapshot represents the canonical chain — always use an official/trusted provider.
 - Default snapshot URL is defined in protocol's `package.json`

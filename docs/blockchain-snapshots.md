@@ -36,6 +36,8 @@ The mapping lives in each blueprint's `package.json`: see [Adding Snapshots to a
 
    S3 gateway endpoints have no charge. Associating one with a route table sends all Amazon S3 traffic in the Region from that subnet through the endpoint, for every workload in the subnet. Bucket policies that allow access by public IP address (`aws:SourceIp`) stop matching those requests.
 
+   Synthesis checks the endpoint's route tables, not its policy. If the endpoint has a custom policy, it must allow `s3:ListBucket` on `arn:aws:s3:::blockchain-snapshots-<region>` and `s3:GetObject` on `arn:aws:s3:::blockchain-snapshots-<region>/*`. Otherwise synthesis passes and the restore fails at boot with `cannot reach s3://blockchain-snapshots-<region>`. The default policy allows full access.
+
 To find your default VPC's route tables and create the endpoint:
 
 ```bash
@@ -60,7 +62,15 @@ aws ec2 create-vpc-endpoint --region $AWS_REGION --vpc-id $VPC_ID \
   --route-table-ids rtb-xxxxxxxx
 ```
 
-3. **Room for the extracted snapshot.** Size the data volume for the snapshot's extracted size plus growth, not its download size. The tool checks free space before it writes anything and fails if the volume is too small. The [live catalog](https://awslabs.github.io/blockchain-snapshots/) lists current sizes. `SNAPSHOT_STAGING_VOL_SIZE` must be `0`: the tool writes straight into the data directory.
+3. **Free space for the restore.** Before it writes anything, the tool checks the free space on the file system that holds the output directory and fails if there is too little. It needs the snapshot's `storage.required_bytes` from the catalog when listed. Otherwise the requirement depends on how the snapshot is delivered:
+
+   | Delivery | Snapshots | Free space needed |
+   |----------|-----------|-------------------|
+   | Seekable archive | `ethereum-mainnet-geth`, `ethereum-mainnet-nethermind`, `ethereum-mainnet-reth` | The extracted size |
+   | Streamed archive | `ethereum-hoodi-geth` | Twice the download size |
+   | Archive set | `solana-mainnet-agave` | 1.05 times the download size |
+
+   Size the data volume for that, plus the other data on the volume (for example the consensus client) and growth. The [live catalog](https://awslabs.github.io/blockchain-snapshots/) lists current sizes. `SNAPSHOT_STAGING_VOL_SIZE` must be `0`: the tool writes straight into the data directory.
 
 ## Configuration
 
@@ -85,11 +95,12 @@ The lookup result is cached in `cdk.context.json`, like the default VPC lookup. 
 
 **At first boot**, the blueprint's `node.sh` runs `assets/common/blockchain-snapshots.sh` before it starts the node:
 
-1. It checks that the Region's snapshot bucket is reachable, before installing or downloading anything. If it isn't, it logs an error that names the missing S3 gateway endpoint.
-2. It installs the tool's dependencies from Ubuntu packages (`git`, `python3-boto3`, `python3-zstandard`, `zstd`).
-3. It fetches the tool from `https://github.com/awslabs/blockchain-snapshots` at a pinned commit and refuses to run if the checked-out commit differs.
-4. It runs `dist/snapshot.sh` as `bcuser`, so the node user owns the data. The script resolves the latest snapshot, checks the bucket, artifact size and free space, and extracts it into the output directory.
-5. It logs the resolved snapshot (`<id> version <block or slot>, <bytes> bytes in <seconds>s`) and writes a marker next to the output directory.
+1. It writes the in-progress marker (see [Re-runs and Retries](#re-runs-and-retries)) and a `node.service` drop-in, `/etc/systemd/system/node.service.d/blockchain-snapshots.conf`, that keeps the node from starting while that marker exists.
+2. It checks that the Region's snapshot bucket is reachable, before installing or downloading anything. If it isn't, it logs an error that names the missing S3 gateway endpoint.
+3. It installs the tool's dependencies from Ubuntu packages (`git`, `python3-boto3`, `python3-zstandard`, `zstd`).
+4. It fetches the tool from `https://github.com/awslabs/blockchain-snapshots` at a pinned commit and refuses to run if the checked-out commit differs.
+5. It runs `dist/snapshot.sh` as `bcuser`, so the node user owns the data. The script resolves the latest snapshot, checks the bucket, artifact size and free space, and extracts it into the output directory.
+6. It logs the resolved snapshot (`<id> version <block or slot>, <bytes> bytes in <seconds>s`), replaces the in-progress marker with the restored marker, and removes the drop-in.
 
 On Solana, `node.sh` then prepares the archives for the validator's first start:
 
@@ -126,11 +137,13 @@ Markers next to the output directory make the restore safe to re-run:
 | Marker | Meaning |
 |--------|---------|
 | `<output-dir>.snapshot-restored` | Restore finished. Holds the tool's `--json` result. Later runs skip the restore. |
-| `<output-dir>.snapshot-in-progress` | A restore started and did not finish. The next run deletes the partial output and starts over. |
+| `<output-dir>.snapshot-in-progress` | A restore started and did not finish. Written before the first step that can fail. The next run deletes whatever the output directory holds and starts over. |
 
 If the output directory already contains data and neither marker exists (for example, a node that synced before you enabled snapshots), the restore is skipped and the data is never overwritten.
 
-If the restore fails, node setup stops instead of starting a sync from genesis, and the bootstrap retries on the next boot. Fix the cause (see [Troubleshooting](/docs/guides/troubleshooting#blockchain-snapshots-on-aws-restore-failed)), then reboot the instance. On instance-store volumes, the markers live on the data volume, so a stop and start, which wipes the volume, restores the snapshot again.
+If the restore fails, node setup stops instead of starting a sync from genesis, and the bootstrap retries on the next boot. The drop-in keeps `node.service` from starting in the meantime: after a failed setup the bootstrap tries to restart the previous `node.service`, and `systemctl status node.service` then shows the start was skipped because the in-progress marker exists. Fix the cause (see [Troubleshooting](/docs/guides/troubleshooting#blockchain-snapshots-on-aws-restore-failed)), then reboot the instance.
+
+On instance-store volumes, the markers live on the data volume, so a stop and start, which wipes the volume, restores the snapshot again. `node.service` already exists on such an instance, which is why the marker and drop-in are written before anything that can fail.
 
 ## Updating the Pinned Tool Version
 

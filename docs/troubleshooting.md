@@ -917,13 +917,30 @@ aws logs tail /aws/ec2/blockchain-nodes/cloud-init-output \
 
 | Message | Cause | Solution |
 |---------|-------|----------|
-| `cannot reach s3://blockchain-snapshots-<region>` | No S3 gateway endpoint on the instance's subnet route table (for example, removed after synthesis), or the instance role lacks access | Fix the endpoint, then reboot the instance |
+| `cannot reach s3://blockchain-snapshots-<region>` | No S3 gateway endpoint on the instance's subnet route table (for example, removed after synthesis), an endpoint policy that doesn't allow the snapshot bucket (synthesis checks route tables only), or the instance role lacks access | Fix the endpoint or its policy (see [Prerequisites](/docs/guides/blockchain-snapshots#prerequisites)), then reboot the instance |
 | `could not fetch commit ...` | The instance can't reach GitHub | Check outbound HTTPS from the subnet, then reboot |
 | `is not the pinned ...` | The fetched tool is not the pinned commit | Do not work around this: report it to the maintainers |
-| `not enough free space at ...: need ..., have ...` | The data volume is smaller than the extracted snapshot | Increase `DATA_VOL_1_SIZE` (or use a larger instance-store type) and redeploy |
+| `not enough free space at ...: need ..., have ...` | The data volume has less free space than the tool needs (see [Prerequisites](/docs/guides/blockchain-snapshots#prerequisites)) | See [Restore needs more free space](#restore-needs-more-free-space) below |
 | `catalog does not match` or `catalog snapshot size is stale` | A new snapshot was published during the restore | Reboot to retry |
 
-The bootstrap retries setup on every boot until it succeeds, and the restore starts over if it was interrupted (see [Re-runs and Retries](/docs/guides/blockchain-snapshots#re-runs-and-retries)). Reboot with `aws ec2 reboot-instances --instance-ids $INSTANCE_ID`.
+The bootstrap retries setup on every boot until it succeeds, and the restore starts over if it was interrupted (see [Re-runs and Retries](/docs/guides/blockchain-snapshots#re-runs-and-retries)). Until then, `node.service` doesn't start: a drop-in skips it while the restore is unfinished. Reboot with `aws ec2 reboot-instances --instance-ids $INSTANCE_ID`.
+
+#### Restore needs more free space
+
+The `need` value in the error is the free space the tool requires on the file system that holds the output directory.
+
+- **Single-node, EBS data volume.** Raise `DATA_VOL_1_SIZE` in `.env` and redeploy. The deploy grows the EBS volume in place, but not its file system, so grow it on the instance before you reboot (the device of a Nitro instance is an NVMe name, so look it up rather than assuming `/dev/xvdg`):
+  ```bash
+  aws ssm start-session --target $INSTANCE_ID --region $AWS_REGION
+  df -h /data                                  # size before
+  sudo resize2fs "$(findmnt -no SOURCE /data)"  # ext4
+  # OR
+  sudo xfs_growfs /data                        # xfs
+  df -h /data                                  # size after
+  sudo reboot
+  ```
+- **HA, EBS data volume.** Raise `DATA_VOL_1_SIZE` and redeploy. The Auto Scaling Group replaces the instances, and their new volumes get a file system of the new size.
+- **Instance store.** Choose an `INSTANCE_TYPE` with more instance storage and redeploy. The new instance-store volumes are formatted at their full size.
 
 ### Volume Not Mounting
 

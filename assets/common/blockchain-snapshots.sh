@@ -33,6 +33,14 @@
 # elsewhere (for example a node that synced before snapshots were enabled)
 # and is never overwritten.
 #
+# The in-progress marker is written before the first step that can fail, and
+# a node.service drop-in (ConditionPathExists=!<in-progress marker>) keeps the
+# node from starting until the restore finishes. Without both, a failed setup
+# on an existing instance (for example an instance-store node after a stop and
+# start) could start the client on the empty directory: the bootstrap restarts
+# node.service after a failed setup, and the next boot would then find data
+# without a marker and never restore.
+#
 # Exit codes: 0 restored or nothing to do; 1 restore failed.
 
 set -o pipefail
@@ -48,10 +56,31 @@ BLOCKCHAIN_SNAPSHOTS_COMMIT="7ebcf32ed8f343575cf31ca3f7e729d4d736b4e8"
 
 CDK_ENV_FILE="${CDK_ENV_FILE:-/etc/cdk_environment}"
 TOOL_DIR="${BLOCKCHAIN_SNAPSHOTS_TOOL_DIR:-/opt/blockchain-snapshots}"
+NODE_SERVICE_DROPIN="${NODE_SERVICE_DROPIN:-/etc/systemd/system/node.service.d/blockchain-snapshots.conf}"
 NODE_USER="bcuser"
 
 log() { echo "$SCRIPT_NAME $*"; }
 err() { echo "ERROR: $SCRIPT_NAME $*" >&2; }
+
+# Keep node.service from starting while $1 (the in-progress marker) exists.
+# A drop-in survives node.sh rewriting node.service, and a skipped condition
+# is not a failure, so the unit's Restart= does not loop on it.
+hold_node_service() {
+    local marker=$1
+    mkdir -p "$(dirname "$NODE_SERVICE_DROPIN")"
+    cat > "$NODE_SERVICE_DROPIN" <<EOF
+# Written by assets/common/blockchain-snapshots.sh: node.service does not
+# start until the Blockchain Snapshots on AWS restore finishes.
+[Unit]
+ConditionPathExists=!$marker
+EOF
+    systemctl daemon-reload
+}
+
+release_node_service() {
+    rm -f "$NODE_SERVICE_DROPIN"
+    systemctl daemon-reload
+}
 
 check_bucket_reachable() {
     local bucket="blockchain-snapshots-$AWS_REGION"
@@ -143,12 +172,16 @@ main() {
         return 0
     fi
 
+    # From here on, any failure leaves the marker, so the next run deletes
+    # whatever the output directory holds by then and restores again.
+    mkdir -p "$(dirname "$out")"
+    touch "$in_progress"
+    hold_node_service "$in_progress"
+
     check_bucket_reachable || return 1
     install_dependencies || { err "dependency installation failed"; return 1; }
     fetch_tool || return 1
 
-    mkdir -p "$(dirname "$out")"
-    touch "$in_progress"
     log "Restoring snapshot $SNAPSHOT_ID into $out (this can take a few hours for large snapshots)"
     local result
     result=$(mktemp)
@@ -162,6 +195,7 @@ main() {
     mv -f "$result" "$restored"
     chmod 644 "$restored"
     rm -f "$in_progress"
+    release_node_service
 }
 
 # NODE_RUNNER_SOURCE_ONLY=1 lets unit tests load the functions without running.
