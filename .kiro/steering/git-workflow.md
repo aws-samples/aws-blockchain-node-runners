@@ -39,7 +39,7 @@ Trunk-based development around a single integration branch.
 | `gh-pages` | **Legacy** Docusaurus deploy branch (pre-first-party-Pages). | No longer written — the site now deploys via the first-party Pages artifact model in `website-deploy.yaml`. Delete once the first-party deploy is verified. |
 | `feat/*`, `fix/*`, `docs/*`, `chore/*`, `ci/*` | Short-lived working branches for non-trivial work. | Branch from `main`, open a PR, delete after merge. |
 | `dependabot/*` | Automated dependency PRs. | Managed by Dependabot; merge or close, don't push to them. |
-| `chore/<protocol>-<client>-<version>` | Client version bumps prepared by the maintenance crew. | Pushed by Version Scout after approval; the maintainer opens the PR; squash-merge, delete after merge. |
+| `chore/<protocol>-<client>-<version>` | Client version bumps prepared by the maintenance crew. | Pushed to the bot's fork by Version Scout after approval, with a draft PR; the maintainer marks it ready; squash-merge, delete after merge. |
 
 - Community contributors work from **forks** and target `main`.
 - Keep working branches short-lived; rebase or merge `main` in to stay current.
@@ -124,7 +124,7 @@ every change now:
 | Agent instructions | `.kiro/agents/**`, `.kiro/skills/**`, `.kiro/prompts/**`, `docs/ageai-*.md` | **PR required, human review whoever opened it** — call out any change to `mcpServers`, `command`, `args`, `env` or `permissions` in an agent spec. |
 | Security-sensitive | IAM, security groups, secrets handling, auth, anything ASH/CodeQL would flag | **PR required, careful review** — even for the maintainer. |
 | Dependency bumps | `package*.json`, action SHAs | Via **Dependabot PRs** (weekly, grouped). The maintenance crew classifies them; the maintainer approves and squash-merges in the GitHub UI. |
-| Client version bumps | `blueprints/<protocol>/**` configs, `CHANGELOG.md` | Branch pushed by the crew's Version Scout after approval; the maintainer opens the PR; another collaborator approves. |
+| Client version bumps | `blueprints/<protocol>/**` configs, `CHANGELOG.md` | Branch pushed to the bot's fork by the crew's Version Scout after approval, with a draft PR; the maintainer marks it ready; another collaborator approves. |
 | New community blueprint | external contributor | **PR from a fork**; redirected to the Community Catalog per `CONTRIBUTING.md` unless adopted as built-in. |
 
 Rule of thumb: **everything goes through a PR; the tier decides how hard to

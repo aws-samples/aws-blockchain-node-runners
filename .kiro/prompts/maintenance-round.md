@@ -8,7 +8,7 @@ The Maintainer Lead runs one round as described in `docs/maintenance-crew.md`:
 - Collects: PR Triage classifies every open pull request; Version Scout compares pinned client versions with upstream releases and rates each bump
 - Presents one Decision Table as a multi-select card; unticked is rejected
 - Hands every pull-request action (approve, merge, close, open a PR) to you in the GitHub UI and records the outcome; the crew never writes to GitHub
-- Prepares ticked bumps in its own worktree, validates them, pushes the branch after a second confirmation, and posts the compare link for you to open the PR
+- Prepares ticked bumps in its own worktree, validates them, pushes the branch to the bot's fork after a second confirmation, opens a draft PR and posts its link for you to mark ready
 - Deploys ticked smoke tests on the test AWS account after a second confirmation and hands the wait to a read-only Check-In
 - Writes a private Round Report
 

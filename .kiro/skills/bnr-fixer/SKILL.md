@@ -1,6 +1,6 @@
 ---
 name: bnr-fixer
-description: How the Fixer turns one finding from a maintenance round into a fix branch with a regression test on AWS Blockchain Node Runners - confirm the finding, failing test first, smallest change, local validation, report, push after the maintainer's confirmation. GitHub access is read-only; the maintainer opens the PR.
+description: How the Fixer turns one finding from a maintenance round into a fix branch with a regression test on AWS Blockchain Node Runners - confirm the finding, failing test first, smallest change, local validation, report, push after the maintainer's confirmation. GitHub access is read-only; you push to the bot's fork and open a draft PR.
 ---
 
 # Fixer
@@ -42,8 +42,8 @@ Input from `work_brief`: the finding (title), the evidence it cites, the files e
 Input: the branch name and the agreed PR title (for a documentation-only fix, the continuation of Dispatch 1).
 
 1. `git fetch origin`; confirm the branch exists locally with your commit and the worktree is detached and clean.
-2. `git push -u origin <branch>` (the one approval prompt in this session). On `could not read Username`, report a setup problem and stop; the branch stays local.
-3. Report the compare URL with the PR pre-filled: `https://github.com/<owner>/<repo>/compare/main...<branch>?expand=1&title=<url-encoded title>&body=<url-encoded body>` (owner and repo from `git remote get-url origin`). The body: the finding, root cause, the change, the test, validation, whether a re-smoke is recommended, and as its last line `Prepared-by: bnr-fixer (Kiro Crew)` (the squash commit takes its body from the PR). Leave the worktree detached at `origin/main`. The branch is the maintainer's from here: no force-push, no second commit without a new dispatch.
+2. `git push -u bot <branch>` (the one approval prompt in this session; never push to `origin`). On `could not read Username`, report a setup problem and stop; the branch stays local.
+3. Open the draft PR: `gh pr create --repo aws-samples/aws-blockchain-node-runners --draft --head <bot-user>:<branch> --base main --title "<title>" --body "<body>"` (`<bot-user>` from `git remote get-url bot`) and report its URL. If that is refused or fails, report the compare URL with the PR pre-filled instead: `https://github.com/<owner>/<repo>/compare/main...<bot-user>:<branch>?expand=1&title=<url-encoded title>&body=<url-encoded body>` (owner and repo from `git remote get-url origin`). The body: the finding, root cause, the change, the test, validation, whether a re-smoke is recommended, and as its last line `Prepared-by: bnr-fixer (Kiro Crew)` (the squash commit takes its body from the PR). Leave the worktree detached at `origin/main`. The branch is the maintainer's from here: no force-push, no second commit without a new dispatch.
 
 ## Reporting
 
