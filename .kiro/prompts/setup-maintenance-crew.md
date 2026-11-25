@@ -23,7 +23,7 @@ Read the file `docs/ageai-setup-maintenance-crew-prompt.md` and follow the step-
 
 - Kiro Crew 0.11 or later running on this machine, with Kiro CLI installed
 - A clone of this repository (or your fork) under a directory Kiro Crew allows for dispatched sessions
-- A GitHub account for the crew's read-only token and branch pushes (your own is fine; the crew never approves or merges) and a test AWS account with a CLI profile
+- A GitHub account for the crew's read-only token and branch pushes (your own is fine for branch pushes; a bot account with its own fork lets the crew open draft PRs; the crew never approves or merges) and a test AWS account with a CLI profile
 - Read `docs/maintenance-crew.md` first for what the crew does and how approval is enforced
 
 ## Expected Outcome
