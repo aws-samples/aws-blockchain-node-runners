@@ -126,7 +126,8 @@ chown -R bcuser:bcuser /data
 chown -R bcuser:bcuser /accounts
 
 # Create symlink for convenience
-ln -sf /data/data/ledger /home/bcuser/ledger 2>/dev/null || true
+# -n: replace an existing link instead of creating one inside the ledger (re-runs)
+ln -sfn /data/data/ledger /home/bcuser/ledger 2>/dev/null || true
 
 # Restore from Blockchain Snapshots on AWS. The Solana snapshot is a set of
 # archives (full, incremental, genesis) that the validator unpacks itself, so

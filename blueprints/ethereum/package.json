@@ -21,7 +21,7 @@
         }
       },
       {
-        "name": "reth-2.10.1-lighthouse-8.3.3-archive.yml"
+        "name": "reth-2.11.0-lighthouse-8.3.3-archive.yml"
       },
       {
         "name": "reth-2.10.1-lighthouse-8.3.3-full.yml",
@@ -36,7 +36,7 @@
         "name": "erigon-3.8.2-prysm-7.3.2-archive.yml"
       },
       {
-        "name": "besu-26.11.1-teku-26.10.3-full.yml"
+        "name": "besu-26.11.2-teku-26.10.3-full.yml"
       },
       {
         "name": "nethermind-2.2.2-teku-26.10.3-full.yml",

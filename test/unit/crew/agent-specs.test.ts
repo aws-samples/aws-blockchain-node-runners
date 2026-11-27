@@ -106,6 +106,40 @@ const GITHUB_WRITE_TOOLS = [
 ];
 const GITHUB_WRITE_TOOL_RE = /^github\/(create|update|merge|push|delete|add|remove|assign|request|rerun|cancel|star|unstar|fork|reprioritize)_|_write$|_trigger$/;
 
+/** gh commands that only read. Only the Version Scout may run them without a prompt. */
+const GH_READ_COMMANDS = [
+    'gh release list --repo besu-eth/besu --limit 5',
+    'gh release view 26.11.2 --repo besu-eth/besu',
+    'gh repo view aws-samples/aws-blockchain-node-runners',
+];
+
+/** The only PR command an agent may run without a prompt: a draft into this repository, from the bot's fork. */
+const GH_DRAFT_PR_COMMAND =
+    'gh pr create --repo aws-samples/aws-blockchain-node-runners --draft --head crew-bot:chore/x --title t --body b';
+const GH_DRAFT_PR_ROLES = ['bnr-version-scout', 'bnr-fixer'];
+
+/** PR creations that must still prompt (not allowed) in every spec: not a draft, or another repository. */
+const GH_PR_CREATE_NEEDS_PROMPT = [
+    'gh pr create --repo aws-samples/aws-blockchain-node-runners --head crew-bot:chore/x --title t --body b',
+    'gh pr create --repo someone/else --draft --head crew-bot:chore/x --title t --body b',
+    'gh pr create --draft --repo aws-samples/aws-blockchain-node-runners',
+];
+
+/** gh commands that change state or reach the API directly. Every spec denies them. */
+const GH_WRITE_COMMANDS = [
+    'gh pr merge 1',
+    'gh pr review --approve 1',
+    'gh api -X POST repos/o/r/pulls/1/reviews',
+    'gh api repos/o/r/releases',
+    'gh issue comment 1 --body x',
+    'gh auth login',
+    'gh workflow run build.yml',
+    'gh secret set X',
+    'gh release create v1',
+    'gh release delete v1',
+    'gh repo delete o/r',
+];
+
 /** Commands no agent may run without a prompt (allow), whatever its role. */
 const NEVER_ALLOWED_COMMANDS = [
     'gh pr merge 1',
@@ -203,6 +237,37 @@ describe('maintenance crew agent specs: GitHub is read-only', () => {
     test('gh is denied everywhere', () => {
         for (const [, spec] of specs) {
             expect(shellRuleMatches(rules(spec, 'shell', 'deny'), 'gh pr merge 1')).toBe(true);
+        }
+    });
+
+    test('only the Version Scout may run gh without a prompt, and only to read releases and repositories', () => {
+        for (const [name, spec] of specs) {
+            const allowed = rules(spec, 'shell', 'allow');
+            const denied = rules(spec, 'shell', 'deny');
+            for (const command of GH_READ_COMMANDS) {
+                expect({ name, command, allowed: shellRuleMatches(allowed, command) })
+                    .toEqual({ name, command, allowed: name === 'bnr-version-scout' });
+            }
+            for (const command of GH_WRITE_COMMANDS) {
+                expect({ name, command, denied: shellRuleMatches(denied, command) }).toEqual({ name, command, denied: true });
+                expect({ name, command, allowed: shellRuleMatches(allowed, command) }).toEqual({ name, command, allowed: false });
+            }
+        }
+    });
+
+    test('only the Version Scout and the Fixer may open a draft PR into this repository without a prompt', () => {
+        for (const [name, spec] of specs) {
+            const allowed = rules(spec, 'shell', 'allow');
+            const denied = rules(spec, 'shell', 'deny');
+            expect({ name, allowed: shellRuleMatches(allowed, GH_DRAFT_PR_COMMAND) })
+                .toEqual({ name, allowed: GH_DRAFT_PR_ROLES.includes(name) });
+            expect({ name, denied: shellRuleMatches(denied, GH_DRAFT_PR_COMMAND) }).toEqual({ name, denied: !GH_DRAFT_PR_ROLES.includes(name) });
+            for (const command of GH_PR_CREATE_NEEDS_PROMPT) {
+                expect({ name, command, allowed: shellRuleMatches(allowed, command) }).toEqual({ name, command, allowed: false });
+                expect({ name, command, denied: shellRuleMatches(denied, command) }).toEqual({
+                    name, command, denied: !GH_DRAFT_PR_ROLES.includes(name),
+                });
+            }
         }
     });
 });
