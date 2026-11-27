@@ -16,8 +16,10 @@ import {
     CpuType,
     HAConfig,
     CFNandCDKUserDataConfig,
-    NoneValue
+    NoneValue,
+    SnapshotProvider,
 } from "../interfaces";
+import { assertS3GatewayEndpoint, grantBlockchainSnapshotsRead } from "./blockchain-snapshots";
 
 import {
     ConfigurationLoader,
@@ -148,6 +150,16 @@ export class HANodesConstruct extends constructs.Construct {
         // Use provided VPC or lookup default VPC
         this.vpc = providedVpc || ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
 
+        // First check for Blockchain Snapshots on AWS: the snapshot buckets
+        // are reachable only through an S3 gateway endpoint, which must serve
+        // every subnet the Auto Scaling Group can launch into.
+        const useBlockchainSnapshots = environment.SNAPSHOT_ENABLED
+            && environment.SNAPSHOT_PROVIDER === SnapshotProvider.BLOCKCHAIN_SNAPSHOTS;
+        if (useBlockchainSnapshots) {
+            assertS3GatewayEndpoint(this, this.vpc,
+                this.vpc.selectSubnets({ subnetType: ec2.SubnetType.PUBLIC }).subnets);
+        }
+
         // Create security groups
         this.albSecurityGroup = this.createAlbSecurityGroup(protocolConfig, haConfig);
         this.instanceSecurityGroup = this.createInstanceSecurityGroup(protocolConfig, haConfig);
@@ -166,6 +178,10 @@ export class HANodesConstruct extends constructs.Construct {
         const protocolAsset = assetManager.getProtocolAssets();
         if (protocolAsset) {
             protocolAsset.bucket.grantRead(this.instanceRole, protocolAsset.s3ObjectKey);
+        }
+
+        if (useBlockchainSnapshots) {
+            grantBlockchainSnapshotsRead(this.instanceRole, cdk.Stack.of(this).region);
         }
 
         // Add staging volume self-management permissions for HA mode.
@@ -717,7 +733,7 @@ export class HANodesConstruct extends constructs.Construct {
                 },
                 {
                     id: "AwsSolutions-IAM5",
-                    reason: "Need read access to S3 bucket with assets and ASG lifecycle hook permissions",
+                    reason: "Need read access to S3 bucket with assets, ASG lifecycle hook permissions, and (with SNAPSHOT_PROVIDER=blockchain-snapshots) s3:GetObject on the objects of the Region's read-only snapshot bucket",
                 },
                 {
                     id: "AwsSolutions-IAM4",

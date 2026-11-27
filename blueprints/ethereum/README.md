@@ -75,6 +75,7 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 |--------------|-----------|-----------|----------|
 | geth-&lt;version&gt;-lighthouse-&lt;version&gt;-full.yml | Geth | Lighthouse | General purpose, most tested |
 | reth-&lt;version&gt;-lighthouse-&lt;version&gt;-archive.yml | Reth | Lighthouse | High performance, fast sync |
+| reth-&lt;version&gt;-lighthouse-&lt;version&gt;-full.yml | Reth | Lighthouse | Reth full node, restorable from a Blockchain Snapshots on AWS snapshot |
 | erigon-&lt;version&gt;-caplin-archive.yml | Erigon | Caplin (built-in) | Lower storage, integrated consensus |
 | erigon-&lt;version&gt;-prysm-&lt;version&gt;-archive.yml | Erigon | Prysm | Client diversity with external CL |
 | besu-&lt;version&gt;-teku-&lt;version&gt;-full.yml | Besu | Teku | Enterprise deployments |
@@ -92,7 +93,7 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 | Mainnet (Archive) | Single Node | i8g.4xlarge | 16 | 128 GB | 3.75 TB NVMe |
 | Mainnet (Full HA) | HA (2 nodes) | r7g.2xlarge | 8 each | 64 GB each | 2.5 TB gp3 each |
 | Sepolia | Single Node | r7g.xlarge | 4 | 32 GB | 1.5 TB gp3 |
-| Hoodi | Single Node | r7g.xlarge | 4 | 32 GB | 200 GB gp3 |
+| Hoodi | Single Node | r7g.xlarge | 4 | 32 GB | 300 GB gp3 |
 
 *For cost estimates, use the [AWS Pricing Calculator](https://calculator.aws/) with your specific region and commitment level.
 
@@ -105,7 +106,7 @@ The Ethereum protocol supports multiple execution and consensus client combinati
 | Mainnet | Full | ~2 TB | ~50 GB/month | 2.5 TB | gp3 | 8,000 | 700 MB/s |
 | Mainnet | Archive | ~3 TB | ~100 GB/month | 3.75 TB | Instance Store (NVMe) | 250K+ | 10+ GB/s |
 | Sepolia | Full | ~920 GB (measured 2026-10; ~510 GB with post-Prague history) | not yet measured; expected to rise after Glamsterdam | 1.5 TB | gp3 | 3,000 | 250 MB/s |
-| Hoodi | Full | ~125 GB (measured 2026-10) | not yet measured | 200 GB | gp3 | 3,000 | 250 MB/s |
+| Hoodi | Full | ~125 GB (measured 2026-10) | not yet measured | 300 GB | gp3 | 3,000 | 250 MB/s |
 
 These sizes assume `ETH_CONSENSUS_SUPERNODE="false"`, the default. Supernode mode adds about 470–720 GB for blob data on any network (see [Supernode Mode](#supernode-mode-lighthouse--peerdas)): use about 4 TB for a mainnet full node, 1 TB for Hoodi and 2 TB for Sepolia.
 
@@ -370,7 +371,15 @@ Headers, state at recent blocks, and everything from the prune point onward keep
 
 ### Snapshot Support
 
-For Ethereum, **checkpoint sync** (above) is the recommended fast-sync method. Block snapshot download is also supported through the generic `SNAPSHOT_ENABLED` / `SNAPSHOT_DOWNLOAD_URL` settings — see the [Configuration Reference](/docs/guides/configuration-reference) for these variables.
+The consensus client always uses **checkpoint sync** (above). The execution client can restore from [Blockchain Snapshots on AWS](/docs/guides/blockchain-snapshots) instead of syncing from scratch, for these configurations:
+
+| Configuration | `BC_NETWORK` | Snapshot ID |
+|---------------|--------------|-------------|
+| geth-&lt;version&gt;-lighthouse-&lt;version&gt;-full.yml | `mainnet`, `hoodi` | `ethereum-mainnet-geth`, `ethereum-hoodi-geth` |
+| nethermind-&lt;version&gt;-teku-&lt;version&gt;-full.yml | `mainnet` | `ethereum-mainnet-nethermind` |
+| reth-&lt;version&gt;-lighthouse-&lt;version&gt;-full.yml | `mainnet` | `ethereum-mainnet-reth` |
+
+Set `SNAPSHOT_ENABLED="true"` and `SNAPSHOT_PROVIDER="blockchain-snapshots"` in `.env`. You need one of the snapshot Regions (`us-east-1`, `us-east-2`, `eu-west-1`, `ap-northeast-1`) and an S3 gateway VPC endpoint in the target VPC; synthesis fails without them. The snapshot is extracted into the execution client's database directory under `/data/execution` before the node starts. Other configurations and Sepolia have no snapshot. See the [Blockchain Snapshots on AWS guide](/docs/guides/blockchain-snapshots).
 
 ## Troubleshooting
 

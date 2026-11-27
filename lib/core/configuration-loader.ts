@@ -22,6 +22,8 @@ import {
   ENVIRONMENT_CONFIG_KEYS,
   PROTOCOL_CONFIG_KEYS,
   NoneValue,
+  SnapshotProvider,
+  BlockchainSnapshotsRegions,
 } from '../interfaces';
 
 /**
@@ -146,6 +148,13 @@ export class ConfigurationLoader implements IConfigurationLoader {
           `Protocol configuration validation failed:\n${protocolValidation.errors.map(e => `  - ${e}`).join('\n')}`
         );
       }
+    }
+
+    const snapshotValidation = this.resolveBlockchainSnapshot(protocolConfig, envConfig);
+    if (!snapshotValidation.isValid) {
+      throw new Error(
+        `Snapshot configuration validation failed:\n${snapshotValidation.errors.map(e => `  - ${e}`).join('\n')}`
+      );
     }
 
     return {
@@ -358,6 +367,25 @@ export class ConfigurationLoader implements IConfigurationLoader {
       }
     }
 
+    const providers = Object.values(SnapshotProvider) as string[];
+    if (config.SNAPSHOT_PROVIDER !== undefined && !providers.includes(config.SNAPSHOT_PROVIDER)) {
+      errors.push(`SNAPSHOT_PROVIDER must be one of: ${providers.join(', ')} (got '${config.SNAPSHOT_PROVIDER}')`);
+    }
+
+    if (config.SNAPSHOT_ENABLED && config.SNAPSHOT_PROVIDER === SnapshotProvider.BLOCKCHAIN_SNAPSHOTS) {
+      if (!BlockchainSnapshotsRegions.includes(config.AWS_REGION)) {
+        errors.push(
+          `SNAPSHOT_PROVIDER=blockchain-snapshots is not available in AWS_REGION '${config.AWS_REGION}'. ` +
+          `Snapshot Regions: ${BlockchainSnapshotsRegions.join(', ')}`
+        );
+      }
+      // The snapshot tool extracts straight into the data directory, so a
+      // staging volume would sit unused (and nothing would delete it).
+      if ((config.SNAPSHOT_STAGING_VOL_SIZE ?? 0) > 0) {
+        errors.push('SNAPSHOT_STAGING_VOL_SIZE must be 0 with SNAPSHOT_PROVIDER=blockchain-snapshots');
+      }
+    }
+
     // Stack Name Prefix validation
     if (config.STACK_NAME_PREFIX && config.STACK_NAME_PREFIX.trim() !== '') {
       const prefix = config.STACK_NAME_PREFIX.trim();
@@ -440,6 +468,35 @@ export class ConfigurationLoader implements IConfigurationLoader {
     }
 
     return { isValid: errors.length === 0, errors, warnings };
+  }
+
+  /**
+   * With SNAPSHOT_ENABLED=true and SNAPSHOT_PROVIDER=blockchain-snapshots, look
+   * up the snapshot ID for BC_NETWORK in the selected configuration's
+   * `blockchainSnapshots` mapping and store it in `env.SNAPSHOT_ID`.
+   */
+  resolveBlockchainSnapshot(protocol: ProtocolConfig, env: EnvironmentConfig): ValidationResult {
+    const errors: string[] = [];
+    if (!env.SNAPSHOT_ENABLED || env.SNAPSHOT_PROVIDER !== SnapshotProvider.BLOCKCHAIN_SNAPSHOTS) {
+      return { isValid: true, errors, warnings: [] };
+    }
+
+    const configName = env.CLIENT_CONFIG || protocol.defaultConfiguration;
+    const configuration = protocol.availableConfigurations.find(c => c.name === configName);
+    const snapshotId = configuration?.blockchainSnapshots?.[env.BC_NETWORK];
+    if (snapshotId) {
+      env.SNAPSHOT_ID = snapshotId;
+    } else {
+      const supported = protocol.availableConfigurations.flatMap(c =>
+        Object.keys(c.blockchainSnapshots || {}).map(network => `${c.name} on ${network}`));
+      errors.push(
+        `No Blockchain Snapshots on AWS snapshot for CLIENT_CONFIG '${configName}' on BC_NETWORK '${env.BC_NETWORK}'. ` +
+        (supported.length > 0
+          ? `Supported for ${protocol.BLOCKCHAIN_PROTOCOL}: ${supported.join(', ')}`
+          : `The ${protocol.BLOCKCHAIN_PROTOCOL} blueprint has no Blockchain Snapshots on AWS snapshots.`)
+      );
+    }
+    return { isValid: errors.length === 0, errors, warnings: [] };
   }
 
   /**
@@ -573,6 +630,8 @@ export class ConfigurationLoader implements IConfigurationLoader {
       SNAPSHOT_ENABLED: envVars.SNAPSHOT_ENABLED === "true",
       SNAPSHOT_DOWNLOAD_URL: envVars.SNAPSHOT_DOWNLOAD_URL || NoneValue,
       SNAPSHOT_STAGING_VOL_SIZE: envVars.SNAPSHOT_STAGING_VOL_SIZE ? parseInt(envVars.SNAPSHOT_STAGING_VOL_SIZE) : 0,
+      // Unknown values are kept as-is so validateConfiguration can report them
+      SNAPSHOT_PROVIDER: (envVars.SNAPSHOT_PROVIDER || SnapshotProvider.BLUEPRINT) as SnapshotProvider,
       TRAFFIC_SHAPING_ENABLED: envVars.TRAFFIC_SHAPING_ENABLED === "true",
       TRAFFIC_SHAPING_RATE_MBIT: envVars.TRAFFIC_SHAPING_RATE_MBIT ? parseInt(envVars.TRAFFIC_SHAPING_RATE_MBIT) : 40,
       TRAFFIC_SHAPING_CHECK_INTERVAL_SEC: envVars.TRAFFIC_SHAPING_CHECK_INTERVAL_SEC ? parseInt(envVars.TRAFFIC_SHAPING_CHECK_INTERVAL_SEC) : 60,
@@ -676,7 +735,7 @@ export class ConfigurationLoader implements IConfigurationLoader {
           !key.startsWith('AWS_') &&
           !key.startsWith('DATA_VOL_') &&
           !key.startsWith('HA_') &&
-          !['BLOCKCHAIN_PROTOCOL', 'DEPLOYMENT_MODE', 'INSTANCE_TYPE', 'CPU_TYPE', 'DATA_VOLUMES_COUNT', 'SNAPSHOT_ENABLED', 'SNAPSHOT_DOWNLOAD_URL', 'SNAPSHOT_STAGING_VOL_SIZE'].includes(key)) {
+          !['BLOCKCHAIN_PROTOCOL', 'DEPLOYMENT_MODE', 'INSTANCE_TYPE', 'CPU_TYPE', 'DATA_VOLUMES_COUNT', 'SNAPSHOT_ENABLED', 'SNAPSHOT_DOWNLOAD_URL', 'SNAPSHOT_STAGING_VOL_SIZE', 'SNAPSHOT_PROVIDER'].includes(key)) {
           protocolVars[key] = value;
         }
       });
@@ -841,6 +900,30 @@ export class ConfigurationLoader implements IConfigurationLoader {
           `Available: ${configNames.join(', ')}`
         );
       }
+    }
+
+    // blockchainSnapshots: BC_NETWORK -> snapshot ID. External blueprints are
+    // third-party packages and the ID is passed to snapshot.sh on the instance,
+    // so accept only lowercase catalog-style IDs.
+    if (Array.isArray(config.availableConfigurations)) {
+      const networks: string[] = Array.isArray(config.BC_NETWORKS) ? config.BC_NETWORKS : [];
+      config.availableConfigurations.forEach((c: any) => {
+        if (c.blockchainSnapshots === undefined) {
+          return;
+        }
+        if (typeof c.blockchainSnapshots !== 'object' || c.blockchainSnapshots === null || Array.isArray(c.blockchainSnapshots)) {
+          errors.push(`blockchainSnapshots of configuration '${c.name}' must be an object mapping BC_NETWORK to a snapshot ID`);
+          return;
+        }
+        Object.entries(c.blockchainSnapshots).forEach(([network, id]) => {
+          if (!networks.includes(network)) {
+            errors.push(`blockchainSnapshots of configuration '${c.name}' uses network '${network}', which is not in BC_NETWORKS`);
+          }
+          if (typeof id !== 'string' || !/^[a-z0-9]+(-[a-z0-9]+)+$/.test(id)) {
+            errors.push(`blockchainSnapshots of configuration '${c.name}' has an invalid snapshot ID for '${network}': ${JSON.stringify(id)}`);
+          }
+        });
+      });
     }
   }
 }

@@ -106,19 +106,27 @@ if [ ! -f /secrets/jwtsecret ]; then
     echo "JWT secret generated"
 fi
 
-# Download snapshot if enabled
-if [ "$SNAPSHOT_ENABLED" = "true" ] && [ -n "$SNAPSHOT_DOWNLOAD_URL" ]; then
-    if [ ! -f /data/snapshot_downloaded ]; then
-        echo "Downloading snapshot from $SNAPSHOT_DOWNLOAD_URL..."
-        # This is a placeholder - actual snapshot download would be implemented here
-        # wget -O /tmp/snapshot.tar.lz4 "$SNAPSHOT_DOWNLOAD_URL"
-        # lz4 -d /tmp/snapshot.tar.lz4 | tar -xf - -C /data/
-        # rm /tmp/snapshot.tar.lz4
-        touch /data/snapshot_downloaded
-        echo "Snapshot download completed"
-    else
-        echo "Snapshot already downloaded, skipping..."
-    fi
+# Restore the execution client's data from Blockchain Snapshots on AWS. The
+# snapshots are ethPandaOps mirrors whose root is the client's database
+# directory, which sits at a different depth under the data directory
+# (/data/execution) for each client:
+#   geth:       <datadir>/geth (chaindata/, nodes/, triedb/)
+#   nethermind: <datadir>/nethermind_db (<network>/)
+#   reth:       <datadir> (db/, static_files/, reth.toml)
+# The consensus client uses checkpoint sync and needs no snapshot. A failed
+# restore stops setup (set -e) instead of starting a sync from genesis; the
+# bootstrap retries on the next boot.
+if [ "$SNAPSHOT_ENABLED" = "true" ] && [ "$SNAPSHOT_PROVIDER" = "blockchain-snapshots" ]; then
+    case "$CLIENT_CONFIG" in
+        geth-*) SNAPSHOT_OUT=/data/execution/geth ;;
+        nethermind-*) SNAPSHOT_OUT=/data/execution/nethermind_db ;;
+        reth-*) SNAPSHOT_OUT=/data/execution ;;
+        *)
+            echo "ERROR: no Blockchain Snapshots on AWS data directory for CLIENT_CONFIG $CLIENT_CONFIG"
+            exit 1
+            ;;
+    esac
+    bash /opt/assets/common/blockchain-snapshots.sh "$SNAPSHOT_OUT"
 fi
 
 # Copy docker-compose configuration from protocol assets

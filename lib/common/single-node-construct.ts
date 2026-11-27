@@ -15,7 +15,9 @@ import {
     CpuType,
     CFNandCDKUserDataConfig,
     NoneValue,
+    SnapshotProvider,
 } from "../interfaces";
+import { assertS3GatewayEndpoint, grantBlockchainSnapshotsRead } from "./blockchain-snapshots";
 
 import { 
     UserDataManager,
@@ -116,11 +118,26 @@ export class SingleNodeConstruct extends constructs.Construct {
         // Use provided VPC or lookup default VPC
         this.vpc = providedVpc || ec2.Vpc.fromLookup(this, "vpc", { isDefault: true });
 
+        // First check for Blockchain Snapshots on AWS: the snapshot buckets
+        // are reachable only through an S3 gateway endpoint, which must serve
+        // the subnet the instance launches into.
+        const useBlockchainSnapshots = environment.SNAPSHOT_ENABLED
+            && environment.SNAPSHOT_PROVIDER === SnapshotProvider.BLOCKCHAIN_SNAPSHOTS;
+        if (useBlockchainSnapshots) {
+            assertS3GatewayEndpoint(this, this.vpc, this.vpc.selectSubnets({
+                subnetType: ec2.SubnetType.PUBLIC,
+                availabilityZones: [chosenAvailabilityZone],
+            }).subnets);
+        }
+
         // Create security group based on protocol required ports
         this.securityGroup = this.createSecurityGroup(protocolConfig);
 
         // Create IAM role with SSM and CloudWatch permissions
         this.instanceRole = this.createInstanceRole(environment);
+        if (useBlockchainSnapshots) {
+            grantBlockchainSnapshotsRead(this.instanceRole, cdk.Stack.of(this).region);
+        }
 
         // Determine machine image based on CPU type
         const userDataScriptFileName = path.basename(userDataScriptPath)
@@ -535,7 +552,7 @@ export class SingleNodeConstruct extends constructs.Construct {
                 },
                 {
                     id: "AwsSolutions-IAM5",
-                    reason: "Need read access to S3 bucket with assets and CloudFormation signal permissions",
+                    reason: "Need read access to S3 bucket with assets, CloudFormation signal permissions, and (with SNAPSHOT_PROVIDER=blockchain-snapshots) s3:GetObject on the objects of the Region's read-only snapshot bucket",
                 },
                 {
                     id: "AwsSolutions-IAM4",

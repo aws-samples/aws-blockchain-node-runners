@@ -17,6 +17,12 @@ import { DeploymentMode, CpuType } from './enums';
  */
 export interface Configuration {
   name: string;
+  /**
+   * Blockchain Snapshots on AWS IDs this configuration can restore from,
+   * keyed by BC_NETWORK (e.g. { "mainnet": "ethereum-mainnet-geth" }).
+   * Used when SNAPSHOT_PROVIDER=blockchain-snapshots.
+   */
+  blockchainSnapshots?: Record<string, string>;
 }
 
 /**

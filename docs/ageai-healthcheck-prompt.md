@@ -29,6 +29,7 @@ Perform a comprehensive healthcheck using AWS CLI commands to query CloudWatch L
 - Verify the service is running and not restarting repeatedly
 - For EVM-compatible chains (Ethereum): also filter by "execution" and "consensus"
 - For non-EVM chains (Solana, etc.): use "node.service" filter
+- With `SNAPSHOT_PROVIDER="blockchain-snapshots"`, node.service does not run until the snapshot restore finishes: on a first boot it does not exist yet, and on a re-run (for example an instance-store node after a stop and start) a drop-in skips its start while `<output-dir>.snapshot-in-progress` exists ("Condition check resulted in ... skipped" in the systemd log). If it is missing or skipped, check restore progress with `aws logs tail /aws/ec2/blockchain-nodes/cloud-init-output --log-stream-names $INSTANCE_ID --filter-pattern "blockchain-snapshots"`. Report "restoring snapshot" (in progress) while it logs progress without an `ERROR:` line; an `ERROR: [blockchain-snapshots]` line is a failure (see `docs/troubleshooting.md`)
 
 ## Synchronization Status
 

@@ -100,6 +100,7 @@ Once the user approves the recommendation:
    - If the sum exceeds available disk (common with instance-store volumes and multi-TB archives), set SNAPSHOT_STAGING_VOL_SIZE to ~1.1x the compressed archive size (in GiB)
    - If the sample .env already includes SNAPSHOT_STAGING_VOL_SIZE, keep that value
    - See `docs/snapshot-staging.md` for per-protocol sizing guidance
+   - With SNAPSHOT_PROVIDER="blockchain-snapshots", no staging volume is used (keep SNAPSHOT_STAGING_VOL_SIZE at 0). Confirm the region is one of the snapshot Regions and that the target VPC has an S3 gateway endpoint (see the Prerequisites in `docs/blockchain-snapshots.md`); synthesis fails without one
 5. Save as `.env` in repository root
 6. Show the user the key settings
 

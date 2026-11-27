@@ -73,11 +73,20 @@ case "${BC_NETWORK:-mainnet-beta}" in
         ;;
 esac
 
+# After a restore from Blockchain Snapshots on AWS (blockchain-snapshots.sh),
+# start from the restored archives instead of fetching a newer snapshot from
+# peers, until the first start completes.
+SNAPSHOT_FETCH_FLAG=""
+if [ -f /data/data/ledger.snapshot-restored ] && [ ! -f /data/data/init-completed ]; then
+    SNAPSHOT_FETCH_FLAG="--no-snapshot-fetch"
+fi
+
 exec /home/bcuser/bin/agave-validator \
     --ledger /data/data/ledger \
     --identity /home/bcuser/config/validator-keypair.json \
     ${KNOWN_VALIDATORS} \
     ${EXPECTED_GENESIS_HASH} \
+    ${SNAPSHOT_FETCH_FLAG} \
     ${ENTRY_POINTS} \
     --no-voting \
     --full-rpc-api \

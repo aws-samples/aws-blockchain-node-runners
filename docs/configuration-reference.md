@@ -94,16 +94,19 @@ STACK_NAME_PREFIX="DEV"
 | `SNAPSHOT_ENABLED` | No | Enable snapshot download | `true` | `true`, `false` |
 | `SNAPSHOT_DOWNLOAD_URL` | No | URL to download snapshot | `https://snapshots.example.com/latest.tar.gz` | Valid HTTPS URL |
 | `SNAPSHOT_STAGING_VOL_SIZE` | No | Temporary EBS gp3 staging volume size in GiB for snapshot download | `5000` | Integer, `0` = disabled |
+| `SNAPSHOT_PROVIDER` | No | Where the snapshot comes from when `SNAPSHOT_ENABLED=true` | `blockchain-snapshots` | `blueprint` (default), `blockchain-snapshots` |
 
 **Notes**:
 - Snapshots significantly reduce initial sync time
-- If `SNAPSHOT_ENABLED=true`, `SNAPSHOT_DOWNLOAD_URL` should be provided
+- If `SNAPSHOT_ENABLED=true` with `SNAPSHOT_PROVIDER="blueprint"` (the default), `SNAPSHOT_DOWNLOAD_URL` should be provided unless the blueprint has a default URL
 - **`SNAPSHOT_DOWNLOAD_URL` must use HTTPS.** The archive is downloaded and extracted as root at boot, so a plaintext HTTP source is rejected at synth. HTTPS provides transport integrity and authenticates the snapshot server.
 - Integrity verification depends on the provider: the BNB blueprint verifies the archive against the md5 published in 48Club's `data.json` (fails closed on mismatch); Base relies on HTTPS plus a completeness check (Base publishes no checksum); Solana snapshots are verified by the validator against its known validators and expected genesis hash. A checksum proves integrity (the bytes are intact), not that the snapshot represents the canonical chain — always use an official/trusted provider.
 - Default snapshot URL is defined in protocol's `package.json`
 - Snapshot must be compatible with the selected network
 - `SNAPSHOT_STAGING_VOL_SIZE` creates a temporary gp3 EBS volume to hold the compressed archive during download, preventing disk overflow when `compressed_size + extracted_size > available /data space`. Set to `0` or omit to use existing behavior (download directly to `/data`). Set to ~1.1x the compressed archive size when needed.
 - See [Snapshot Staging Guide](/docs/guides/snapshot-staging) for volume sizing guidance and cost analysis
+- `SNAPSHOT_PROVIDER="blueprint"` (the default) uses the blueprint's own snapshot download, configured with `SNAPSHOT_DOWNLOAD_URL` and `SNAPSHOT_STAGING_VOL_SIZE`.
+- `SNAPSHOT_PROVIDER="blockchain-snapshots"` restores from [Blockchain Snapshots on AWS](/docs/guides/blockchain-snapshots). The snapshot ID comes from the selected configuration's `blockchainSnapshots` mapping, so there is nothing else to set. Synthesis fails unless `AWS_REGION` is `us-east-1`, `us-east-2`, `eu-west-1` or `ap-northeast-1`, the configuration has a snapshot for `BC_NETWORK`, `SNAPSHOT_STAGING_VOL_SIZE` is `0`, and the target VPC has an S3 gateway endpoint on the instances' subnets. `SNAPSHOT_DOWNLOAD_URL` is ignored.
 
 **Example values per protocol**:
 ```bash
@@ -436,15 +439,20 @@ Blueprint packages follow the naming convention `aws-bnr-blueprint-<protocol>` (
 ```json
 [
   {
-    "name": "geth-lighthouse",
-    "version": "v1.14.12-v6.0.1"
+    "name": "geth-1.17.10-lighthouse-8.3.3-full.yml",
+    "blockchainSnapshots": {
+      "mainnet": "ethereum-mainnet-geth",
+      "hoodi": "ethereum-hoodi-geth"
+    }
   },
   {
-    "name": "reth-lighthouse",
-    "version": "v1.6.0-v6.0.1"
+    "name": "reth-2.10.1-lighthouse-8.3.3-archive.yml"
   }
 ]
 ```
+
+- `name`: file name in `configurations/`; it carries the client versions.
+- `blockchainSnapshots` (optional): `BC_NETWORK` to [Blockchain Snapshots on AWS](/docs/guides/blockchain-snapshots) snapshot ID, used with `SNAPSHOT_PROVIDER=blockchain-snapshots`. Keys must be in `BC_NETWORKS`; IDs are lowercase words joined by hyphens.
 
 #### snapshot
 
@@ -478,6 +486,7 @@ These variables are automatically injected by the CDK application and are not us
 | `LIFECYCLE_HOOK_NAME` | Lifecycle hook name (HA) | `NodeStartupHook` | CDK |
 | `COMMON_ASSETS_S3_PATH` | S3 path to common assets | `s3://bucket/common.zip` | AssetsManager |
 | `PROTOCOL_ASSETS_S3_PATH` | S3 path to protocol assets | `s3://bucket/protocol.zip` | AssetsManager |
+| `SNAPSHOT_ID` | Blockchain Snapshots on AWS snapshot ID, from the configuration's `blockchainSnapshots` mapping (empty unless `SNAPSHOT_PROVIDER=blockchain-snapshots`) | `ethereum-mainnet-geth` | ConfigurationLoader |
 
 **Notes**:
 - Stack name is automatically generated from `BLOCKCHAIN_PROTOCOL`, `BC_NETWORK`, and `CLIENT_CONFIG`
